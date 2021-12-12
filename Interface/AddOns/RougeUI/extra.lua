@@ -1,0 +1,313 @@
+local addonlist = {
+	["Shadowed Unit Frames"] = true, 
+	["PitBull Unit Frames 4.0"] = true, 
+	["X-Perl UnitFrames"] = true, 
+	["Z-Perl UnitFrames"] = true, 
+	["EasyFrames"] = true,
+	["ElvUI"] = true, 
+	["Uber UI Classic"] = true, 
+	["whoaThickFrames_BCC"] = true, 
+	["whoaUnitFrames_BCC"] = true, 
+	["AbyssUI"] = true, 
+	["KkthnxUI"] = true
+}
+
+-- Remove gap in buff timers & color the format
+local function TimeFormat(button, time)
+	local duration = _G[button:GetName().."Duration"]
+	local floor, fmod = math.floor, math.fmod
+        local h, m, s, text
+
+	if time <= 0 then
+	    text = ""
+        elseif time < 3600 and time > 60 then
+	    h       = floor(time/3600)
+            m       = floor(mod(time, 3600)/60 + 1)
+            s       = fmod(time, 60)
+            text    = duration:SetFormattedText("|cffffffff%d|rm", m)
+        elseif time < 60 then
+            m       = floor(time/60)
+            s       = fmod(time, 60)
+            text    = m == 0 and duration:SetFormattedText("|cffffffff%d|rs", s)
+        else
+            h       = floor(time/3600 + 1)
+            text    = duration:SetFormattedText("|cffffffff%d|rh", h)
+        end
+        return text
+end
+hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
+
+-- Hide Raid frame titles
+
+local function HideFrameTitles()
+	local complete1, complete2 = false, 0
+	if complete1 and (complete2 == 8) then
+		e:UnregisterEvent("GROUP_ROSTER_UPDATE")
+		return
+	end
+
+	if CompactPartyFrameTitle and not complete1 then
+		CompactPartyFrameTitle:Hide()
+		complete1 = true
+	end
+
+	for i = 1,8 do
+		if _G["CompactRaidGroup"..i.."Title"] then
+			if i > complete2 then
+				_G["CompactRaidGroup"..i.."Title"]:Hide()
+				complete2 = i
+			end
+		end
+	end
+end
+hooksecurefunc("CompactUnitFrameProfiles_ApplyCurrentSettings", HideFrameTitles)
+
+-- Class colored scoreboard
+hooksecurefunc("WorldStateScoreFrame_Update", function()
+	local inInstance, instanceType = IsInInstance()
+	if ( instanceType ~= "pvp" ) then return end
+	for i = 1, 22 do
+		local ScoreBoard = _G["WorldStateScoreButton"..i]
+
+        	if ScoreBoard and ScoreBoard.index then
+            		local _, _, _, _, _, _, _, _, _, filename = GetBattlefieldScore(ScoreBoard.index)
+            		local text = ScoreBoard.name.text:GetText()
+
+            		if text and filename then
+                		local color = GetClassColorObj(filename)
+                		ScoreBoard.name.text:SetText(color:WrapTextInColorCode(text))
+            		end
+        	end
+    end
+end)
+
+-- Some PvPIcon tweaks for BG/Arena/CP Classes
+
+local function PvPIcon()
+	
+	local _, class = UnitClass("player")
+	local inInstance, instanceType = IsInInstance()
+	if (class == 'ROGUE' or class == 'DRUID') then
+		if instanceType ~= "arena" then
+			for i,v in pairs({
+				PlayerPVPIcon,
+				FocusFrameTextureFramePVPIcon,
+				TargetFrameTextureFramePVPIcon
+			}) do	
+				v:SetAlpha(0.45)
+			end
+		end
+	end
+
+	if instanceType == "arena" then
+		for i,v in pairs({
+			PlayerPVPIcon,
+			FocusFrameTextureFramePVPIcon,
+			TargetFrameTextureFramePVPIcon
+		}) do
+			v:SetAlpha(0)
+		end
+	end
+end
+
+-- Fix crossfaction BG showing wrong PvP icon on PlayerFrame
+local function FixPvPFrame(frame)
+		if AuraUtil.FindAuraByName(GetSpellInfo(81748), "player") then
+				PlayerPVPIcon:SetTexture("Interface\\TargetingFrame\\UI-PVP-Alliance")
+		elseif AuraUtil.FindAuraByName(GetSpellInfo(81744), "player") then
+				PlayerPVPIcon:SetTexture("Interface\\TargetingFrame\\UI-PVP-Horde")
+		end
+end
+hooksecurefunc("PlayerFrame_UpdatePvPStatus", FixPvPFrame);
+
+-- Hide indicators and fancy glows
+
+hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
+hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
+hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
+
+hooksecurefunc("PlayerFrame_UpdateStatus", function()
+	if (IsResting("player") or UnitAffectingCombat("player")) then
+		for i,v in pairs({
+			PlayerStatusTexture,
+			PlayerStatusGlow,
+			PlayerRestGlow,
+			PlayerRestIcon,
+			PlayerAttackGlow,
+			PlayerAttackBackground
+		}) do 
+			v:Hide() 
+		end
+	end
+end)
+
+-- Remove server name from raid frames
+
+hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
+  local inInstance, instanceType = IsInInstance()
+  local name = frame.name;
+  local xName = GetUnitName(frame.unit, true);
+  if (instanceType == "pvp" or instanceType == "arena") then
+	if (xName) then
+   		local noRealm = gsub(xName, "%-[^|]+", "");
+		name:SetText(noRealm);
+	end
+  end
+end);
+
+-- Hide / Show mouseover raidframe
+
+local manager = CompactRaidFrameManager
+manager:SetAlpha(0)
+local function FindParent(frame, target)
+	if frame == target then
+		return true
+	elseif frame then
+		return FindParent(frame:GetParent(), target)
+	end
+end
+
+manager:HookScript("OnEnter", function(self)
+	self:SetAlpha(1)
+end)
+
+manager:HookScript("OnLeave", function(self)
+	if manager.collapsed and not FindParent(GetMouseFocus(), self) then
+		self:SetAlpha(0)
+	end
+end)
+
+manager.toggleButton:HookScript("OnClick", function()
+	if manager.collapsed then
+		manager:SetAlpha(0)
+	end
+end)
+
+manager.container:SetIgnoreParentAlpha(true)
+manager.containerResizeFrame:SetIgnoreParentAlpha(true)
+
+-- Class colored health and/or gradient
+
+function GradientColour(statusbar)
+    if (not statusbar or statusbar.disconnected) then 
+		return 
+	end
+ 
+    local min, max = statusbar:GetMinMaxValues();
+    if (max <= min) then 
+		return 
+	end
+ 
+    local value = statusbar:GetValue()
+    if ( (value < min) or (value > max) ) then 
+		return
+	end
+ 
+    value = (value - min) / (max - min);
+ 
+    local r, g
+    if(value > 0.5) then
+        r = (1.0 - value) * 2;
+        g = 1.0;
+    else
+        r = 1.0;
+        g = value * 2;
+    end
+    statusbar:SetStatusBarColor(r, g, 0.0);
+
+    return
+end
+
+local function colour(statusbar, unit)
+	if (UnitIsPlayer(unit) and UnitIsConnected(unit) and unit == statusbar.unit and UnitClass(unit)) then
+		if (ClassHP == true) then
+			local _, class, c
+			_, class = UnitClass(unit)
+			c = RAID_CLASS_COLORS[class]
+			if c then statusbar:SetStatusBarColor(c.r, c.g, c.b) end
+		elseif (GradientHP == true) then
+			GradientColour(statusbar)
+		end
+	end
+
+	if (not UnitPlayerControlled(unit) and GradientHP == true) then
+		GradientColour(statusbar)
+	end
+end
+
+	hooksecurefunc("UnitFrameHealthBar_Update", colour)
+	hooksecurefunc("HealthBar_OnValueChanged", function(self)
+		if not self:IsForbidden() then
+			colour(self, self.unit)
+		end
+	end)
+
+-- Transparent name background
+
+hooksecurefunc("TargetFrame_CheckFaction", function(self)
+    self.nameBackground:SetVertexColor(0/255, 0/255, 0/255, 0.5);
+end)
+
+-- Classification
+
+local function CheckClassification(self, forceNormalTexture)
+	for addons in pairs(addonlist) do
+		if IsAddOnLoaded(addons) then
+			return
+		end
+	end
+
+	local classification = UnitClassification(self.unit);
+
+	if (forceNormalTexture) then
+		self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+		self.borderTexture:SetVertexColor(.05, .05, .05)
+	elseif ( classification  == "worldboss" or classification  == "elite" ) then
+		self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
+		self.borderTexture:SetVertexColor(1, 1, 1)
+	elseif ( classification  == "rareelite" ) then
+		self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
+		self.borderTexture:SetVertexColor(1, 1, 1)
+	elseif ( classification  == "rare" ) then
+		self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
+		self.borderTexture:SetVertexColor(1, 1, 1)
+	else
+		self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+		forceNormalTexture = true;
+		self.borderTexture:SetVertexColor(.05, .05, .05)
+	end
+end
+
+hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
+
+-- Class portrait frames
+
+local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.tga"
+
+hooksecurefunc("UnitFramePortrait_Update",function(self)
+	if self.unit == "player" or self.unit == "pet" then
+		return
+	end
+	if self.portrait then
+		if UnitIsPlayer(self.unit) then
+			local _, class = UnitClass(self.unit)
+			if (class and UnitIsPlayer(self.unit) and Class_Portrait == true) then
+				self.portrait:SetTexture(CLASS_TEXTURE:format(class))
+			else
+				format(self.unit)
+			end
+		end
+	end
+end);
+
+local e = CreateFrame("Frame")
+e:RegisterEvent("PLAYER_ENTERING_WORLD")
+e:RegisterEvent("GROUP_ROSTER_UPDATE")
+e:SetScript("OnEvent", function(self, event)
+	if (event == "PLAYER_ENTERING_WORLD") then
+		PvPIcon()
+	end
+	if (event == "GROUP_ROSTER_UPDATE") then
+		HideFrameTitles()
+	end
+end)
