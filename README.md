@@ -4,20 +4,26 @@ This is my **_personal_** UI for TBC-Classic. It is heavily inspired on a few el
 
 # **Feature List:**
 
-- Blackened frames.
-- Hide's all glows (resting/combat) and spamming inc damage indicators on player/pet/group portrait.
-- Personal/Target (de)buffs can be re-sized + dispellable magic buffs can be highlighted on target/focus.
+- Dark frames (incl. nameplates).
+- Hide's all glows, spammy damage indicators and group/raid titles.
 - Smooth animated Health and Mana bars.
 - Sets the correct Player PvP icon when you get queued as Horde <> Alliance in a crossfaction battleground.
-- Combat Indicator on Target and Focus frame.
-- Added timers to target and focus castbars with a gradient effect + spelltext below.
-- The nameplate's hidden castbar text is always shown.
-- Fast keypresses can be enabled in settings (triggers spells on button down).
-- Removed server names to show on raid frames when in BG/Arena.
-- Class colored and/or gradient health bars can be enabled.
-- Class portraits can be enabled.
+- Removed server names showing on raid frames when in BG/Arena.
+- Class colored names on the PvP Scoreboard in battlegrounds.
+- Combat Indicator on target-/focus frame.
+- Added timers + gradient effect + changed spelltext position (modui style) to castbars.
+- Enabled nameplate's hidden castbar text.
 - Built-in energy ticker for druids and rogues.
-- PvP icons are faded by default for rogues and druids, because of CP overlap. In arena they are completely hidden for any class.
+- PvP icons are faded by default for rogues and druids, because of combo points overlapping. In arena they are completely hidden for any class.
+- Removed gap and re-colored the buff duration format.
+
+
+**Interface Options:**
+- Personal/Target (de)buffs can be re-sized.
+- Highlight dispellable magic buffs.
+- Fast keypress (like SnowFallKeyPress).
+- Class colored and/or gradient health bars.
+- Class portraits.
 - Statusbar numeric text is shown as the _current_ HP/Mana. The numeric display can be shortened to one decimal.
 
 # **Images:**
@@ -27,9 +33,9 @@ Animated Health and Mana (laggy gif)
 
 <img src="https://user-images.githubusercontent.com/94811434/142790521-636a4814-0ed5-423b-9361-2db0c91be807.gif" width=50% height=50%>
 
-Default UI without any other addons
+RougeUI with Masque + Blizzbuffsfacade (Retina skin) + Dominos
+<img src="https://user-images.githubusercontent.com/94811434/145716066-1c8d5ac7-6fa6-4780-b5f6-6fa5eddb82ea.png" width=100% height=100%>
 
-<img src="https://user-images.githubusercontent.com/94811434/142792705-1a67bb03-692e-4f9a-9ccc-7678a981e9f4.jpg" width=100% height=100%>
 
 
 # **BUGS:**
