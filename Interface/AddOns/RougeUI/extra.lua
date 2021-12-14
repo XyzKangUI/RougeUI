@@ -24,14 +24,14 @@ local function TimeFormat(button, time)
 	    h       = floor(time/3600)
             m       = floor(mod(time, 3600)/60 + 1)
             s       = fmod(time, 60)
-            text    = duration:SetFormattedText("|cffffffff%d|rm", m)
+            text    = duration:SetFormattedText("|r%d|rm", m)
         elseif time < 60 then
             m       = floor(time/60)
             s       = fmod(time, 60)
-            text    = m == 0 and duration:SetFormattedText("|cffffffff%d|rs", s)
+            text    = m == 0 and duration:SetFormattedText("|r%d|rs", s)
         else
             h       = floor(time/3600 + 1)
-            text    = duration:SetFormattedText("|cffffffff%d|rh", h)
+            text    = duration:SetFormattedText("|r%d|rh", h)
         end
         return text
 end
