@@ -81,7 +81,11 @@ local function SmoothBar(bar)
 end
 
 smoothframe:SetScript("OnEvent", function(self, event)
-	if not (RougeUI.smooth == true) then return end
+	if (RougeUI.smooth == false) then
+		smoothframe:UnregisterEvent("ADDON_LOADED")
+		smoothframe:SetScript("OnEvent", nil)
+		return 
+	end
 
 	if (event == "ADDON_LOADED") then
 		for k,v in pairs (barstosmooth) do

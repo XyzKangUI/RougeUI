@@ -78,9 +78,9 @@ FR:SetScript("OnEvent", function(self, event)
 			f:HookScript("OnUpdate", c_OnUpdate_Hook)
 			t:HookScript("OnUpdate", c_OnUpdate_Hook)
 		end
-		self:UnregisterAllEvents()
-		self:SetScript("OnEvent", nil)
 	end
+	FR:UnregisterAllEvents()
+	FR:SetScript("OnEvent", nil)
 end);
 
     --

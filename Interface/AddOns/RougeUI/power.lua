@@ -51,7 +51,7 @@ end
 local function OnEvent(self, event)
 	local _, class = UnitClass("player")
 	if not ((RougeUI.EnergyTicker == true) and class == "ROGUE" or class == "DRUID") then
-		self:UnregisterAllEvents()
+		self:UnregisterEvent("PLAYER_LOGIN")
 		self:SetScript("OnEvent", nil)
 		return
 	end
@@ -63,6 +63,8 @@ local function OnEvent(self, event)
         elseif event == ("PLAYER_REGEN_ENABLED") then
              	PlayerFrameManaBar.energy.spark:SetAlpha(0.3)
         end
+
+	self:UnregisterEvent("PLAYER_LOGIN")
 end
 
 local  e = CreateFrame("Frame")
