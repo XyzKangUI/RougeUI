@@ -2,10 +2,6 @@ SetCVar("ShowClassColorInFriendlyNameplate", 1)
 SetCVar("ShowClassColorInNameplate", 1)
 SetCVar("nameplateMaxDistance", 41)
 
-local events = {
-    'NAME_PLATE_UNIT_ADDED'
-}
-
 local function AddElements(plate)
 	if (string.find(plate.unit, "nameplate") and not plate:IsForbidden()) then
 		plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, 8)
@@ -36,7 +32,7 @@ local function CastBarText(plate)
 end
 
 local OnEvent = function(self, event, ...)
-    if event == 'NAME_PLATE_UNIT_ADDED' then
+    if (event == "NAME_PLATE_UNIT_ADDED") then
         local base = ...
         local namePlateFrameBase = C_NamePlate.GetNamePlateForUnit(base, issecure());
 
@@ -46,5 +42,5 @@ local OnEvent = function(self, event, ...)
 end
 
 local  e = CreateFrame'Frame'
-for _, v in pairs(events) do e:RegisterEvent(v) end
+e:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 e:SetScript('OnEvent', OnEvent)

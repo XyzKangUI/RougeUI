@@ -1,7 +1,8 @@
 local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 
-RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap }
+RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
+		FadeIcon, EnergyTicker, CombatIndicator }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -17,6 +18,12 @@ function f:ADDON_LOADED()
     if RougeUI.OtherBuffSize == nil then RougeUI.OtherBuffSize = 23; end
     if RougeUI.HighlightDispellable == nil then RougeUI.HighlightDispellable = false; end
     if RougeUI.TimerGap == nil then RougeUI.TimerGap = false; end
+    if RougeUI.ScoreBoard == nil then RougeUI.ScoreBoard = false; end
+    if RougeUI.HideTitles == nil then RougeUI.HideTitles = false; end
+    if RougeUI.FadeIcon == nil then RougeUI.FadeIcon = false; end
+    if RougeUI.HideGlows == nil then RougeUI.HideGlows = false; end
+    if RougeUI.EnergyTicker == nil then RougeUI.EnergyTicker = false; end
+    if RougeUI.CombatIndicator == nil then RougeUI.CombatIndicator = false; end
 
     Custom_TargetBuffSize();
     CusFonts();
@@ -52,7 +59,7 @@ function f:CreateGUI()
         local ClassPortraitButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         ClassPortraitButton:SetPoint("TOPLEFT", 10, -60)
         ClassPortraitButton.text = _G[name.."Text"]
-	ClassPortraitButton.text:SetText("Show Class Portrait on Target")
+	ClassPortraitButton.text:SetText("Enable class portraits")
 	ClassPortraitButton:SetChecked(RougeUI.Class_Portrait)
 	ClassPortraitButton:SetScript("OnClick", function() RougeUI.Class_Portrait = not RougeUI.Class_Portrait end)
 
@@ -61,16 +68,70 @@ function f:CreateGUI()
         local ClassHPButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         ClassHPButton:SetPoint("TOPLEFT", 10, -100)
         ClassHPButton.text = _G[name.."Text"]
-	ClassHPButton.text:SetText("Enable Class Colored Health bars")
+	ClassHPButton.text:SetText("Class Colored HP")
 	ClassHPButton:SetChecked(RougeUI.ClassHP)
 	ClassHPButton:SetScript("OnClick", function() RougeUI.ClassHP = not RougeUI.ClassHP end)
+
+        local name = "ScoreBoard"
+        local template = "UICheckButtonTemplate"
+        local ScoreBoardButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        ScoreBoardButton:SetPoint("TOPLEFT", 350, -60)
+        ScoreBoardButton.text = _G[name.."Text"]
+	ScoreBoardButton.text:SetText("Class Colored PvP Scoreboard")
+	ScoreBoardButton:SetChecked(RougeUI.ScoreBoard)
+	ScoreBoardButton:SetScript("OnClick", function() RougeUI.ScoreBoard = not RougeUI.ScoreBoard end)
+
+        local name = "HideTitles"
+        local template = "UICheckButtonTemplate"
+        local HideTitlesButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        HideTitlesButton:SetPoint("TOPLEFT", 350, -100)
+        HideTitlesButton.text = _G[name.."Text"]
+	HideTitlesButton.text:SetText("Hide Group/Raid titles, e.g. Group 1")
+	HideTitlesButton:SetChecked(RougeUI.HideTitles)
+	HideTitlesButton:SetScript("OnClick", function() RougeUI.HideTitles = not RougeUI.HideTitles end)
+
+        local name = "FadeIcon"
+        local template = "UICheckButtonTemplate"
+        local FadeIconButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        FadeIconButton:SetPoint("TOPLEFT", 350, -140)
+        FadeIconButton.text = _G[name.."Text"]
+	FadeIconButton.text:SetText("Fade PvP Icon")
+	FadeIconButton:SetChecked(RougeUI.FadeIcon)
+	FadeIconButton:SetScript("OnClick", function() RougeUI.FadeIcon = not RougeUI.FadeIcon end)
+
+        local name = "HideGlows"
+        local template = "UICheckButtonTemplate"
+        local HideGlowsButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        HideGlowsButton:SetPoint("TOPLEFT", 350, -180)
+        HideGlowsButton.text = _G[name.."Text"]
+	HideGlowsButton.text:SetText("Hide hit indicator + glows on Playerframe")
+	HideGlowsButton:SetChecked(RougeUI.HideGlows)
+	HideGlowsButton:SetScript("OnClick", function() RougeUI.HideGlows = not RougeUI.HideGlows end)
+
+        local name = "EnergyTicker"
+        local template = "UICheckButtonTemplate"
+        local EnergyTickerButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        EnergyTickerButton:SetPoint("TOPLEFT", 350, -220)
+        EnergyTickerButton.text = _G[name.."Text"]
+	EnergyTickerButton.text:SetText("Enable Energy ticker for Rogue/Druid")
+	EnergyTickerButton:SetChecked(RougeUI.EnergyTicker)
+	EnergyTickerButton:SetScript("OnClick", function() RougeUI.EnergyTicker = not RougeUI.EnergyTicker end)
+
+        local name = "CombatIndicator"
+        local template = "UICheckButtonTemplate"
+        local CombatIndicatorButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        CombatIndicatorButton:SetPoint("TOPLEFT", 350, -260)
+        CombatIndicatorButton.text = _G[name.."Text"]
+	CombatIndicatorButton.text:SetText("Enable Combat Indicator")
+	CombatIndicatorButton:SetChecked(RougeUI.CombatIndicator)
+	CombatIndicatorButton:SetScript("OnClick", function() RougeUI.CombatIndicator = not RougeUI.CombatIndicator end)
 
         local name = "GradientHP"
         local template = "UICheckButtonTemplate"
         local GradientHPButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         GradientHPButton:SetPoint("TOPLEFT", 10, -140)
         GradientHPButton.text = _G[name.."Text"]
-	GradientHPButton.text:SetText("Enable Gradient Effect on Health bars")
+	GradientHPButton.text:SetText("Gradient effect on HP")
 	GradientHPButton:SetChecked(RougeUI.GradientHP)
 	GradientHPButton:SetScript("OnClick", function() RougeUI.GradientHP = not RougeUI.GradientHP end)
 
@@ -79,7 +140,7 @@ function f:CreateGUI()
         local FastKeyPressButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         FastKeyPressButton:SetPoint("TOPLEFT", 10, -180)
         FastKeyPressButton.text = _G[name.."Text"]
-	FastKeyPressButton.text:SetText("Use spells when keys are pressed instead of released - Requires reload")
+	FastKeyPressButton.text:SetText("Cast spells on key down (SnowFallKey)")
 	FastKeyPressButton:SetChecked(RougeUI.FastKeyPress)
 	FastKeyPressButton:SetScript("OnClick", function() RougeUI.FastKeyPress = not RougeUI.FastKeyPress end)
 	FastKeyPressButton:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -96,7 +157,7 @@ function f:CreateGUI()
         local ShortNumericButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         ShortNumericButton:SetPoint("TOPLEFT", 10, -220)
         ShortNumericButton.text = _G[name.."Text"]
-	ShortNumericButton.text:SetText("Shorten the NUMERIC display values to one decimal - Requires reload")
+	ShortNumericButton.text:SetText("Shorten NUMERIC HP to one decimal")
 	ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
 	ShortNumericButton:SetScript("OnClick", function() RougeUI.ShortNumeric = not RougeUI.ShortNumeric end)
 
@@ -105,7 +166,7 @@ function f:CreateGUI()
         local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         HighlightDispellableButton:SetPoint("TOPLEFT", 10, -260)
         HighlightDispellableButton.text = _G[name.."Text"]
-	HighlightDispellableButton.text:SetText("Highlight dispellable magic buffs on enemy")
+	HighlightDispellableButton.text:SetText("Highlight enemy Magic buffs")
 	HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
 	HighlightDispellableButton:SetScript("OnClick", function() RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable end)
 
@@ -114,7 +175,7 @@ function f:CreateGUI()
         local TimerGapButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         TimerGapButton:SetPoint("TOPLEFT", 10, -300)
         TimerGapButton.text = _G[name.."Text"]
-	TimerGapButton.text:SetText("Remove space in (de)buff duration format")
+	TimerGapButton.text:SetText("Remove space gap in (de)buff timer")
 	TimerGapButton:SetChecked(RougeUI.TimerGap)
 	TimerGapButton:SetScript("OnClick", function() RougeUI.TimerGap = not RougeUI.TimerGap end)
 

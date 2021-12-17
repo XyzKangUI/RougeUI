@@ -52,20 +52,13 @@ CastingBarFrame.Border:SetPoint("TOP", 0, 26)
 CastingBarFrame.Flash:SetPoint("TOP", 0, 26)
 CastingBarFrame.BorderShield:SetPoint("TOP", 0, 26)
 
-if  CastingBarFrame.Text:GetText() == INTERRUPTED or CastingBarFrame.Text:GetText() == FAILED then
-	CastingBarFrame:SetStatusBarColor(1, 0, 0)
-end
-
-local format = string.format
-local max = math.max
-
 local function c_OnUpdate_Hook(self, elapsed)
 	    if not self.timer then return end
 	    if self.update and self.update < elapsed then
 	        if self.casting then
-	            self.timer:SetText(format("%.1f", max(self.maxValue - self.value, 0)))
+	            self.timer:SetText(string.format("%.1f", math.max(self.maxValue - self.value, 0)))
 	        elseif self.channeling then
-	            self.timer:SetText(format("%.1f", max(self.value, 0)))
+	            self.timer:SetText(string.format("%.1f", math.max(self.value, 0)))
 	        else
 	            self.timer:SetText("")
 	        end

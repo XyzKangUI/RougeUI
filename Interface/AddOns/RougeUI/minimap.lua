@@ -59,4 +59,5 @@ tracker:HookScript("OnClick", function()
 	tracker:SetAlpha(0)
 end)
 end
+	MM:UnregisterEvent("PLAYER_LOGIN")
 end);

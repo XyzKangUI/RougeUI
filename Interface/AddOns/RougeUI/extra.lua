@@ -14,7 +14,6 @@ local addonlist = {
 
 -- Remove gap in buff timers & color the format
 local function TimeFormat(button, time)
-	if not RougeUI.TimerGap then return end
 	local duration = _G[button:GetName().."Duration"]
 	local floor, fmod = math.floor, math.fmod
         local h, m, s, text
@@ -35,9 +34,6 @@ local function TimeFormat(button, time)
             text    = duration:SetFormattedText("|r%d|rh", h)
         end
         return text
-end
-if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
-	hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
 end
 
 -- Hide Raid frame titles
@@ -63,10 +59,9 @@ local function HideFrameTitles()
 		end
 	end
 end
-hooksecurefunc("CompactUnitFrameProfiles_ApplyCurrentSettings", HideFrameTitles)
 
 -- Class colored scoreboard
-hooksecurefunc("WorldStateScoreFrame_Update", function()
+local function ColorScoreBoard()
 	local inInstance, instanceType = IsInInstance()
 	if ( instanceType ~= "pvp" ) then return end
 	for i = 1, 22 do
@@ -82,15 +77,12 @@ hooksecurefunc("WorldStateScoreFrame_Update", function()
             		end
         	end
     end
-end)
+end
 
 -- Some PvPIcon tweaks for BG/Arena/CP Classes
 
 local function PvPIcon()
-	
-	local _, class = UnitClass("player")
 	local inInstance, instanceType = IsInInstance()
-	if (class == 'ROGUE' or class == 'DRUID') then
 		if instanceType ~= "arena" then
 			for i,v in pairs({
 				PlayerPVPIcon,
@@ -100,7 +92,6 @@ local function PvPIcon()
 				v:SetAlpha(0.45)
 			end
 		end
-	end
 
 	if instanceType == "arena" then
 		for i,v in pairs({
@@ -125,11 +116,7 @@ hooksecurefunc("PlayerFrame_UpdatePvPStatus", FixPvPFrame);
 
 -- Hide indicators and fancy glows
 
-hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
-hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
-hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
-
-hooksecurefunc("PlayerFrame_UpdateStatus", function()
+local function HideGlows()
 	if (IsResting("player") or UnitAffectingCombat("player")) then
 		for i,v in pairs({
 			PlayerStatusTexture,
@@ -142,7 +129,7 @@ hooksecurefunc("PlayerFrame_UpdateStatus", function()
 			v:Hide() 
 		end
 	end
-end)
+end
 
 -- Remove server name from raid frames
 
@@ -238,18 +225,18 @@ local function colour(statusbar, unit)
 	end
 end
 
-hooksecurefunc("UnitFrameHealthBar_Update", colour)
-hooksecurefunc("HealthBar_OnValueChanged", function(self)
-	if not self:IsForbidden() then
-		colour(self, self.unit)
-	end
-end)
 
 -- Transparent name background
 
 hooksecurefunc("TargetFrame_CheckFaction", function(self)
     self.nameBackground:SetVertexColor(0/255, 0/255, 0/255, 0.5);
 end)
+
+-- Fix Chain Color
+
+local function FixChain()
+	PlayerFrameTexture:SetVertexColor(1, 1, 1)
+end
 
 -- Classification
 
@@ -287,30 +274,73 @@ hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
 
 local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.tga"
 
-hooksecurefunc("UnitFramePortrait_Update",function(self)
+local function ClassPortrait(self)
 	if self.unit == "player" or self.unit == "pet" then
 		return
 	end
 	if self.portrait then
 		if UnitIsPlayer(self.unit) then
 			local _, class = UnitClass(self.unit)
-			if (class and UnitIsPlayer(self.unit) and RougeUI.Class_Portrait == true) then
+			if (class and UnitIsPlayer(self.unit)) then
 				self.portrait:SetTexture(CLASS_TEXTURE:format(class))
 			else
 				format(self.unit)
 			end
 		end
 	end
-end);
+end
+
+local events = {
+	"PLAYER_LOGIN",
+	"ADDON_LOADED",
+	"PLAYER_ENTERING_WORLD",
+	"GROUP_ROSTER_UPDATE"
+}
 
 local e = CreateFrame("Frame")
-e:RegisterEvent("PLAYER_ENTERING_WORLD")
-e:RegisterEvent("GROUP_ROSTER_UPDATE")
+for _, v in pairs(events) do e:RegisterEvent(v) end
 e:SetScript("OnEvent", function(self, event)
-	if (event == "PLAYER_ENTERING_WORLD") then
+	if ((event == "PLAYER_LOGIN") or (event == "ADDON_LOADED")) then
+		if (RougeUI.TimerGap == true) then
+			if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
+				hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
+			end
+		end
+		if (RougeUI.ClassHP or RougeUI.GradientHP) == true then
+			hooksecurefunc("UnitFrameHealthBar_Update", colour)
+			hooksecurefunc("HealthBar_OnValueChanged", function(self)
+				if not self:IsForbidden() then
+					colour(self, self.unit)
+				end
+			end)
+		end
+		if (RougeUI.Class_Portrait == true) then
+			hooksecurefunc("UnitFramePortrait_Update", ClassPortrait)
+		end
+		if (RougeUI.ScoreBoard == true) then
+			hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
+		end
+		if (RougeUI.HideGlows == true) then
+			hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
+			hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
+			hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
+			hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
+		end
+	end
+
+	if ((event == "PLAYER_ENTERING_WORLD") and RougeUI.FadeIcon == true) then
 		PvPIcon()
+	elseif (RougeUI.FadeIcon == false) then
+		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end
-	if (event == "GROUP_ROSTER_UPDATE") then
+
+	if ((event == "GROUP_ROSTER_UPDATE") and RougeUI.HideTitles == true) then
 		HideFrameTitles()
+		hooksecurefunc("CompactUnitFrameProfiles_ApplyCurrentSettings", HideFrameTitles)
+	elseif (RougeUI.HideTitles == false) then
+		self:UnregisterEvent("GROUP_ROSTER_UPDATE")
 	end
-end)
+
+	self:UnregisterEvent("ADDON_LOADED")
+	self:UnregisterEvent("PLAYER_LOGIN")
+end);

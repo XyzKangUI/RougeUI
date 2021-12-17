@@ -14,6 +14,10 @@ local function CreateCombatIndicatorForUnit(unit, frame)
 end
 
 local function FrameOnUpdate(self)
+	if (RougeUI.CombatIndicator == false) then
+		self:SetScript("OnUpdate", nil)
+		return
+	end
 		for _,ciFrame in pairs(self.ciFrames) do
 			if UnitAffectingCombat(ciFrame.unit) then 
 				ciFrame:Show() 

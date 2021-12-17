@@ -1,6 +1,3 @@
-local _, class = UnitClass("player")
-if not (class == "ROGUE" or class == "DRUID") then return end
-
 local events = {
         "PLAYER_LOGIN",
         "PLAYER_REGEN_DISABLED",
@@ -52,11 +49,18 @@ local function AddEnergy()
 end
 
 local function OnEvent(self, event)
-	if event == 'PLAYER_LOGIN' then
+	local _, class = UnitClass("player")
+	if not ((RougeUI.EnergyTicker == true) and class == "ROGUE" or class == "DRUID") then
+		for _, v in pairs(events) do self:UnregisterEvent(v) end
+		self:SetScript("OnEvent", nil)
+		return
+	end
+
+	if (event == "PLAYER_LOGIN") then
 		AddEnergy()
-        elseif event == 'PLAYER_REGEN_DISABLED' then
+        elseif event == ("PLAYER_REGEN_DISABLED") then
              	PlayerFrameManaBar.energy.spark:SetAlpha(1)
-        elseif event == 'PLAYER_REGEN_ENABLED' then
+        elseif event == ("PLAYER_REGEN_ENABLED") then
              	PlayerFrameManaBar.energy.spark:SetAlpha(0.3)
         end
 end

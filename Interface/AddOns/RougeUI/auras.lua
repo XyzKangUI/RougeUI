@@ -4,7 +4,6 @@ local NUM_TOT_AURA_ROWS = 2;
 local AURA_OFFSET = 3;
 
 function SetCustomBuffSize(value)
-
     local frames = {
         TargetFrame,
         FocusFrame
@@ -89,7 +88,6 @@ local function Target_Update(frame)
     local buffFrame, frameStealable, icon, debuffType, isStealable, _
     local selfName = frame:GetName()
     local isEnemy = UnitIsEnemy(PlayerFrame.unit, frame.unit)
-    if not RougeUI.HighlightDispellable then return end
 
     for i = 1, MAX_TARGET_BUFFS do
         _, icon, _, debuffType, _, _, _, isStealable = UnitBuff(frame.unit, i)
@@ -109,4 +107,16 @@ local function Target_Update(frame)
         end
     end
 end
-hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
+
+local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("ADDON_LOADED")
+f:SetScript("OnEvent", function(self, event)
+	if (RougeUI.HighlightDispellable == true) then
+		hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
+	elseif (RougeUI.HighlightDispellable == false) then
+		f:UnregisterEvent("PLAYER_LOGIN")
+		f:UnregisterEvent("ADDON_LOADED")
+		f:SetScript("OnEvent", nil)
+	end
+end);
