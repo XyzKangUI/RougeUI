@@ -25,7 +25,7 @@ This is my **_personal_** UI for TBC-Classic. It is heavily inspired on a few el
 
 # **Read Me:**
 
-Every option listed in the feature list can be **MANUALLY** enabled in Interface Options > AddOns > RougeUI-TBCC. The addon itself does not come pre-configured with any setting other than the darkened frames. After enabling an option you need to /reload in game or hit the "Save & Reload" button. The reason behind this implementation is because RougeUI has been made modular. This means that __the addon initially uses 0% of you CPU__. Some features in the addon will use some CPU usage, such as the Smooth Animated HP/Mana bars (__WORTH IT, RECOMMENDED!__). Some features will simply (get the blame) use CPU because they are either hooking into blizzard's function that is used a lot or are making use of the OnUpdate handler. It is what it is.
+Every option listed in the feature list can be **MANUALLY** enabled in Interface Options > AddOns > RougeUI-TBCC. The addon itself does not come pre-configured with any setting other than the darkened frames. After enabling/disabling an option (or more) you need to /reload in game or hit the "Save & Reload" button. The reason behind this implementation is because RougeUI has been made modular. This means that __the addon initially uses 0% of you CPU__ because only the enabled things truly get loaded. Some features in the addon will use some CPU usage, such as the Smooth Animated HP/Mana bars (__WORTH IT, RECOMMENDED!__). Some features will simply (get the blame) use CPU because they are either hooking into blizzard's function that is used a lot or are making use of the OnUpdate handler. It is what it is.
 
 # **Images:**
 
