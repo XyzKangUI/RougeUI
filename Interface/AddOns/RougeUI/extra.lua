@@ -14,6 +14,7 @@ local addonlist = {
 
 -- Remove gap in buff timers & color the format
 local function TimeFormat(button, time)
+	if not RougeUI.TimerGap then return end
 	local duration = _G[button:GetName().."Duration"]
 	local floor, fmod = math.floor, math.fmod
         local h, m, s, text
