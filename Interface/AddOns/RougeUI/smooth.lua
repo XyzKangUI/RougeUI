@@ -17,10 +17,11 @@ local barstosmooth = {
    PartyMemberFrame4ManaBar = "party4",
  }
 
-	local smoothframe = CreateFrame("Frame")
-	smoothing = {}
+local smoothframe = CreateFrame("Frame")
+smoothframe:RegisterEvent("ADDON_LOADED")
+smoothing = {}
 
-	local min, max = math.min, math.max
+local min, max = math.min, math.max
 
 local function AnimationTick()
 		local limit = 30/GetFramerate()
@@ -42,51 +43,57 @@ local function AnimationTick()
 end
 
 local function SmoothSetValue(self, value)
-   self.finalValue = value
-   if self.unitType then
-      local guid = UnitGUID(self.unitType)
-      if value == self:GetValue() or not guid or guid ~= self.lastGuid then
-         smoothing[self] = nil
-         self:SetValue_(value)
-      else
-         smoothing[self] = value
-      end
-      self.lastGuid = guid
-   else
-     local _, max = self:GetMinMaxValues()
-     if value == self:GetValue() or self._max and self._max ~= max then
-         smoothing[self] = nil
-         self:SetValue_(value)
-     else
-         smoothing[self] = value
-     end
-     self._max = max
-   end
+	self.finalValue = value
+	if self.unitType then
+      		local guid = UnitGUID(self.unitType)
+      		if value == self:GetValue() or not guid or guid ~= self.lastGuid then
+         		smoothing[self] = nil
+         		self:SetValue_(value)
+      		else
+         		smoothing[self] = value
+		end
+		self.lastGuid = guid
+	else
+		local _, max = self:GetMinMaxValues()
+		if value == self:GetValue() or self._max and self._max ~= max then
+			smoothing[self] = nil
+			self:SetValue_(value)
+		else
+			smoothing[self] = value
+		end
+		self._max = max
+	end
 end
 
-	for bar, value in pairs(smoothing) do
-		if bar.SetValue_ then bar.SetValue = SmoothSetValue end
+for bar, value in pairs(smoothing) do
+	if bar.SetValue_ then bar.SetValue = SmoothSetValue end
+end
+
+local function SmoothBar(bar)
+	if not bar.SetValue_ then
+		bar.SetValue_ = bar.SetValue
+		bar.SetValue  = SmoothSetValue
 	end
 
-	local function SmoothBar(bar)
-		if not bar.SetValue_ then
-			bar.SetValue_ = bar.SetValue
-            		bar.SetValue  = SmoothSetValue
-		end
+	if not smoothframe:GetScript("OnUpdate") then
+		smoothframe:SetScript("OnUpdate", AnimationTick)
+	end
+end
 
-		if not smoothframe:GetScript("OnUpdate") then
-			smoothframe:SetScript("OnUpdate", AnimationTick)
+smoothframe:SetScript("OnEvent", function(self, event)
+	if not (RougeUI.smooth == true) then return end
+
+	if (event == "ADDON_LOADED") then
+		for k,v in pairs (barstosmooth) do
+			if _G[k] then
+				SmoothBar(_G[k])
+				_G[k]:SetScript("OnHide", function() _G[k].lastGuid = nil; _G[k].max_ = nil end)
+				if v ~= "" then
+					_G[k].unitType = v
+				end
+			end
 		end
 	end
-
-   for k,v in pairs (barstosmooth) do
-      if _G[k] then
-         SmoothBar(_G[k])
-	_G[k]:SetScript("OnHide", function() _G[k].lastGuid = nil; _G[k].max_ = nil end)
-         if v ~= "" then
-            _G[k].unitType = v
-         end
-      end
-   end
-
-    smoothframe:RegisterEvent("ADDON_LOADED")
+	smoothframe:UnregisterEvent("ADDON_LOADED")
+	smoothframe:SetScript("OnEvent", nil)
+end);

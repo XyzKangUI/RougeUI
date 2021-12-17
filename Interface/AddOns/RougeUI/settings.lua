@@ -2,7 +2,7 @@ local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer }
+		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -25,6 +25,7 @@ function f:ADDON_LOADED()
     if RougeUI.EnergyTicker == nil then RougeUI.EnergyTicker = false; end
     if RougeUI.CombatIndicator == nil then RougeUI.CombatIndicator = false; end
     if RougeUI.CastTimer == nil then RougeUI.CastTimer = false; end
+    if RougeUI.smooth == nil then RougeUI.smooth = false; end
 
     Custom_TargetBuffSize();
     CusFonts();
@@ -135,6 +136,15 @@ function f:CreateGUI()
 	CastTimerButton.text:SetText("Enable timer on target/focus castbar")
 	CastTimerButton:SetChecked(RougeUI.CastTimer)
 	CastTimerButton:SetScript("OnClick", function() RougeUI.CastTimer = not RougeUI.CastTimer end)
+
+        local name = "SmoothFrame"
+        local template = "UICheckButtonTemplate"
+        local SmoothFrameButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        SmoothFrameButton:SetPoint("TOPLEFT", 350, -340)
+        SmoothFrameButton.text = _G[name.."Text"]
+	SmoothFrameButton.text:SetText("Smooth animated health/mana bars")
+	SmoothFrameButton:SetChecked(RougeUI.smooth)
+	SmoothFrameButton:SetScript("OnClick", function() RougeUI.smooth = not RougeUI.smooth end)
 
         local name = "GradientHP"
         local template = "UICheckButtonTemplate"

@@ -129,4 +129,12 @@ local function CTextStatusBar_UpdateTextString(textStatusBar)
 	end
 end
 
-hooksecurefunc("TextStatusBar_UpdateTextString", CTextStatusBar_UpdateTextString)
+local CF = CreateFrame("Frame")
+CF:RegisterEvent("PLAYER_LOGIN")
+CF:RegisterEvent("ADDON_LOADED")
+CF:SetScript("OnEvent", function(self, event)
+	if RougeUI.smooth == false then return end
+	if (event == "PLAYER_LOGIN" or event == "ADDON_LOADED") then
+		hooksecurefunc("TextStatusBar_UpdateTextString", CTextStatusBar_UpdateTextString)
+	end
+end);
