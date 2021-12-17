@@ -35,6 +35,18 @@ function f:CreateGUI()
         title:SetPoint("TOPLEFT",12,-15);
         title:SetText(Title);
 
+	local Reload = CreateFrame("Button", nil, Panel, "UIPanelButtonTemplate")
+	Reload:SetPoint("BOTTOMRIGHT", -10, 10)
+	Reload:SetWidth(100)
+	Reload:SetHeight(25)
+	Reload:SetText("Save & Reload")
+	Reload:SetScript(
+		"OnClick",
+		function(self, button, down)
+			ReloadUI()
+		end
+	)
+
         local name = "ClassPortraitButton"
         local template = "UICheckButtonTemplate"
         local ClassPortraitButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
@@ -67,7 +79,7 @@ function f:CreateGUI()
         local FastKeyPressButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         FastKeyPressButton:SetPoint("TOPLEFT", 10, -180)
         FastKeyPressButton.text = _G[name.."Text"]
-	FastKeyPressButton.text:SetText("Use spells when keys are pressed instead of released - Requires /reload")
+	FastKeyPressButton.text:SetText("Use spells when keys are pressed instead of released - Requires reload")
 	FastKeyPressButton:SetChecked(RougeUI.FastKeyPress)
 	FastKeyPressButton:SetScript("OnClick", function() RougeUI.FastKeyPress = not RougeUI.FastKeyPress end)
 	FastKeyPressButton:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -84,7 +96,7 @@ function f:CreateGUI()
         local ShortNumericButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         ShortNumericButton:SetPoint("TOPLEFT", 10, -220)
         ShortNumericButton.text = _G[name.."Text"]
-	ShortNumericButton.text:SetText("Shorten the NUMERIC display values to one decimal - Requires /reload")
+	ShortNumericButton.text:SetText("Shorten the NUMERIC display values to one decimal - Requires reload")
 	ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
 	ShortNumericButton:SetScript("OnClick", function() RougeUI.ShortNumeric = not RougeUI.ShortNumeric end)
 
@@ -96,6 +108,15 @@ function f:CreateGUI()
 	HighlightDispellableButton.text:SetText("Highlight dispellable magic buffs on enemy")
 	HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
 	HighlightDispellableButton:SetScript("OnClick", function() RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable end)
+
+        local name = "TimerGap"
+        local template = "UICheckButtonTemplate"
+        local TimerGapButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        TimerGapButton:SetPoint("TOPLEFT", 10, -300)
+        TimerGapButton.text = _G[name.."Text"]
+	TimerGapButton.text:SetText("Remove space in (de)buff duration format")
+	TimerGapButton:SetChecked(RougeUI.TimerGap)
+	TimerGapButton:SetScript("OnClick", function() RougeUI.TimerGap = not RougeUI.TimerGap end)
 
         local name = "FontSizeSlider"
         local template = "OptionsSliderTemplate"
