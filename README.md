@@ -5,7 +5,7 @@ This is my **_personal_** UI for TBC-Classic. It is heavily inspired on a few el
 # **Feature List:**
 
 - Dark frames (incl. nameplates).
-- Hide's all glows, spammy damage indicators and group/raid titles.
+- Hide all glows, spammy damage indicators and group/raid titles.
 - Smooth animated Health and Mana bars.
 - Sets the correct Player PvP icon when you get queued as Horde <> Alliance in a crossfaction battleground.
 - Removed server names showing on raid frames when in BG/Arena.
@@ -14,17 +14,18 @@ This is my **_personal_** UI for TBC-Classic. It is heavily inspired on a few el
 - Added timers + gradient effect + changed spelltext position (modui style) to castbars.
 - Enabled nameplate's hidden castbar text.
 - Built-in energy ticker for druids and rogues.
-- PvP icons are faded by default for rogues and druids, because of combo points overlapping. In arena they are completely hidden for any class.
+- Faded PvP Icons. Useful for combo point classes because they overlap.
 - Removed gap and re-colored the buff duration format.
-
-
-**Interface Options:**
 - Personal/Target (de)buffs can be re-sized.
 - Highlight dispellable magic buffs.
-- Fast keypress (like SnowFallKeyPress).
+- Fast key actions (like SnowFallKeyPress).
 - Class colored and/or gradient health bars.
 - Class portraits.
 - Statusbar numeric text is shown as the _current_ HP/Mana. The numeric display can be shortened to one decimal.
+
+# **Read Me:**
+
+Every option listed in the feature list can be **MANUALLY** enabled in Interface Options > AddOns > RougeUI-TBCC. The addon itself does not come pre-configured with any setting other than the darkened frames. After enabling an option you need to /reload in game or hit the "Save & Reload" button. The reason behind this implementation is because RougeUI has been made modular. This means that __the addon initially uses 0% of you CPU__. Some features in the addon will use some CPU usage, such as the Smooth Animated HP/Mana bars (__WORTH IT, RECOMMENDED!__). Some features will simply (get the blame) use CPU because they are either hooking into blizzard's function that is used a lot or are making use of the OnUpdate handler. It is what it is.
 
 # **Images:**
 
@@ -34,7 +35,13 @@ Animated Health and Mana (laggy gif)
 <img src="https://user-images.githubusercontent.com/94811434/142790521-636a4814-0ed5-423b-9361-2db0c91be807.gif" width=50% height=50%>
 
 RougeUI with Masque + Blizzbuffsfacade (Retina skin) + Dominos
+
 <img src="https://user-images.githubusercontent.com/94811434/145716066-1c8d5ac7-6fa6-4780-b5f6-6fa5eddb82ea.png" width=100% height=100%>
+
+Initial CPU Usage:
+
+<img src="https://user-images.githubusercontent.com/94811434/146589205-c86ded89-d997-464f-a4e0-af249555c1af.png" width=75% height=75%>
+
 
 
 
