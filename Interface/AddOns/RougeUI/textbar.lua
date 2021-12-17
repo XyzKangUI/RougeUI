@@ -137,4 +137,6 @@ CF:SetScript("OnEvent", function(self, event)
 	if (event == "PLAYER_LOGIN" or event == "ADDON_LOADED") then
 		hooksecurefunc("TextStatusBar_UpdateTextString", CTextStatusBar_UpdateTextString)
 	end
+	self:UnregisterAllEvents()
+	self:SetScript("OnEvent", nil)
 end);
