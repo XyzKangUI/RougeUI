@@ -2,7 +2,7 @@ local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator }
+		FadeIcon, EnergyTicker, CombatIndicator, CastTimer }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -24,6 +24,7 @@ function f:ADDON_LOADED()
     if RougeUI.HideGlows == nil then RougeUI.HideGlows = false; end
     if RougeUI.EnergyTicker == nil then RougeUI.EnergyTicker = false; end
     if RougeUI.CombatIndicator == nil then RougeUI.CombatIndicator = false; end
+    if RougeUI.CastTimer == nil then RougeUI.CastTimer = false; end
 
     Custom_TargetBuffSize();
     CusFonts();
@@ -125,6 +126,15 @@ function f:CreateGUI()
 	CombatIndicatorButton.text:SetText("Enable Combat Indicator")
 	CombatIndicatorButton:SetChecked(RougeUI.CombatIndicator)
 	CombatIndicatorButton:SetScript("OnClick", function() RougeUI.CombatIndicator = not RougeUI.CombatIndicator end)
+
+        local name = "CastTimer"
+        local template = "UICheckButtonTemplate"
+        local CastTimerButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        CastTimerButton:SetPoint("TOPLEFT", 350, -300)
+        CastTimerButton.text = _G[name.."Text"]
+	CastTimerButton.text:SetText("Enable timer on target/focus castbar")
+	CastTimerButton:SetChecked(RougeUI.CastTimer)
+	CastTimerButton:SetScript("OnClick", function() RougeUI.CastTimer = not RougeUI.CastTimer end)
 
         local name = "GradientHP"
         local template = "UICheckButtonTemplate"

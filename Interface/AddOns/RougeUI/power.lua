@@ -51,7 +51,7 @@ end
 local function OnEvent(self, event)
 	local _, class = UnitClass("player")
 	if not ((RougeUI.EnergyTicker == true) and class == "ROGUE" or class == "DRUID") then
-		for _, v in pairs(events) do self:UnregisterEvent(v) end
+		self:UnregisterAllEvents()
 		self:SetScript("OnEvent", nil)
 		return
 	end

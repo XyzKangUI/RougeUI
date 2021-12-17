@@ -69,7 +69,18 @@ local function c_OnUpdate_Hook(self, elapsed)
 	GradientColour(self)
 end
 
-f:HookScript("OnUpdate", c_OnUpdate_Hook)
-t:HookScript("OnUpdate", c_OnUpdate_Hook)
+local FR = CreateFrame("Frame")
+FR:RegisterEvent("PLAYER_LOGIN")
+FR:RegisterEvent("ADDON_LOADED")
+FR:SetScript("OnEvent", function(self, event)
+	if ((event == "PLAYER_LOGIN") or (event == "ADDON_LOADED")) then
+		if (RougeUI.CastTimer == true) then
+			f:HookScript("OnUpdate", c_OnUpdate_Hook)
+			t:HookScript("OnUpdate", c_OnUpdate_Hook)
+		end
+		self:UnregisterAllEvents()
+		self:SetScript("OnEvent", nil)
+	end
+end);
 
     --

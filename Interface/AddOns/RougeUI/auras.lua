@@ -114,9 +114,7 @@ f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(self, event)
 	if (RougeUI.HighlightDispellable == true) then
 		hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
-	elseif (RougeUI.HighlightDispellable == false) then
-		f:UnregisterEvent("PLAYER_LOGIN")
-		f:UnregisterEvent("ADDON_LOADED")
-		f:SetScript("OnEvent", nil)
 	end
+	f:UnregisterAllEvents()
+	f:SetScript("OnEvent", nil)
 end);
