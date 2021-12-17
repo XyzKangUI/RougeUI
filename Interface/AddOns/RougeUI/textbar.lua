@@ -1,47 +1,47 @@
 local FontType = "Fonts\\FRIZQT__.ttf";
 
 function CusFonts()
-    PlayerFrameHealthBar.TextString:SetFont(FontType, FontSize, "OUTLINE")
-    PlayerFrameHealthBar.LeftText:SetFont(FontType, FontSize, "OUTLINE")
-    PlayerFrameHealthBar.RightText:SetFont(FontType, FontSize, "OUTLINE")
+    PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    PlayerFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
 
-    PlayerFrameManaBar.TextString:SetFont(FontType, FontSize, "OUTLINE")
-    PlayerFrameManaBar.LeftText:SetFont(FontType, FontSize, "OUTLINE")
-    PlayerFrameManaBar.RightText:SetFont(FontType, FontSize, "OUTLINE")
+    PlayerFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    PlayerFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    PlayerFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
 
-    PetFrameHealthBar.TextString:SetFont(FontType, FontSize - 2, "OUTLINE")
-    PetFrameHealthBar.LeftText:SetFont(FontType, FontSize - 2, "OUTLINE")
-    PetFrameHealthBar.RightText:SetFont(FontType, FontSize - 2, "OUTLINE")
+    PetFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
+    PetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
+    PetFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
 
-    PetFrameManaBar.TextString:SetFont(FontType, FontSize - 2, "OUTLINE")
-    PetFrameManaBar.LeftText:SetFont(FontType, FontSize - 2, "OUTLINE")
-    PetFrameManaBar.RightText:SetFont(FontType, FontSize - 2, "OUTLINE")
+    PetFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
+    PetFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
+    PetFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
 
-    TargetFrameHealthBar.TextString:SetFont(FontType, FontSize, "OUTLINE")
-    TargetFrameHealthBar.LeftText:SetFont(FontType, FontSize, "OUTLINE")
-    TargetFrameHealthBar.RightText:SetFont(FontType, FontSize, "OUTLINE")
+    TargetFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    TargetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    TargetFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
 
-    TargetFrameManaBar.TextString:SetFont(FontType, FontSize, "OUTLINE")
-    TargetFrameManaBar.LeftText:SetFont(FontType, FontSize, "OUTLINE")
-    TargetFrameManaBar.RightText:SetFont(FontType, FontSize, "OUTLINE")
+    TargetFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    TargetFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    TargetFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
 
-    FocusFrameHealthBar.TextString:SetFont(FontType, FontSize, "OUTLINE")
-    FocusFrameHealthBar.LeftText:SetFont(FontType, FontSize, "OUTLINE")
-    FocusFrameHealthBar.RightText:SetFont(FontType, FontSize, "OUTLINE")
+    FocusFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    FocusFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    FocusFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
 
-    FocusFrameManaBar.TextString:SetFont(FontType, FontSize, "OUTLINE")
-    FocusFrameManaBar.LeftText:SetFont(FontType, FontSize, "OUTLINE")
-    FocusFrameManaBar.RightText:SetFont(FontType, FontSize, "OUTLINE")
+    FocusFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    FocusFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    FocusFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
 end
 
 local function true_format(value)
-	if (ShortNumeric == true) then
+	if (RougeUI.ShortNumeric == true) then
 		if value > 1e7 then return (math.floor(value /1e6))..'m'
 		elseif value > 1e6 then return (math.floor((value /1e6)*10)/10)..'m'
  		elseif value > 1e4 then return (math.floor(value/1e3))..'k'
 		elseif value > 1e3 then return (math.floor((value /1e3)*10)/10)..'k'
 		else return value end
-	elseif (ShortNumeric == false) then
+	elseif (RougeUI.ShortNumeric == false) then
 		return value
 	end
 end

@@ -11,8 +11,8 @@ function SetCustomBuffSize(value)
     }
 
     for _, frame in pairs(frames) do
-	local LARGE_AURA_SIZE = SelfSize 
-	local SMALL_AURA_SIZE = OtherBuffSize
+	local LARGE_AURA_SIZE = RougeUI.SelfSize 
+	local SMALL_AURA_SIZE = RougeUI.OtherBuffSize
 
         local buffSize = DEFAULT_BUFF_SIZE
         local frameName
@@ -42,8 +42,8 @@ function SetCustomBuffSize(value)
 end
 
 local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
-	local LARGE_AURA_SIZE = SelfSize
-	local SMALL_AURA_SIZE = OtherBuffSize
+	local LARGE_AURA_SIZE = RougeUI.SelfSize
+	local SMALL_AURA_SIZE = RougeUI.OtherBuffSize
         local size
         local offsetY = AURA_OFFSET
         local offsetX = AURA_OFFSET
@@ -89,7 +89,7 @@ local function Target_Update(frame)
     local buffFrame, frameStealable, icon, debuffType, isStealable, _
     local selfName = frame:GetName()
     local isEnemy = UnitIsEnemy(PlayerFrame.unit, frame.unit)
-    if not HighlightDispellable then return end
+    if not RougeUI.HighlightDispellable then return end
 
     for i = 1, MAX_TARGET_BUFFS do
         _, icon, _, debuffType, _, _, _, isStealable = UnitBuff(frame.unit, i)
@@ -99,20 +99,14 @@ local function Target_Update(frame)
             frameStealable = _G[frameName .. 'Stealable']
             if (isEnemy and debuffType == 'Magic') then
 		local buffSize
-		buffSize = OtherBuffSize
+		buffSize = RougeUI.OtherBuffSize
                 buffFrame:SetHeight(buffSize)
                 buffFrame:SetWidth(buffSize)
-                frameStealable:Show()
                 frameStealable:SetHeight(buffSize * 1.4)
                 frameStealable:SetWidth(buffSize * 1.4)
+                frameStealable:Show()
             end
         end
     end
 end
-
 hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
-
--- spellbar
-
-
-

@@ -35,7 +35,9 @@ local function TimeFormat(button, time)
         end
         return text
 end
-hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
+if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
+	hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
+end
 
 -- Hide Raid frame titles
 
@@ -220,27 +222,27 @@ end
 
 local function colour(statusbar, unit)
 	if (UnitIsPlayer(unit) and UnitIsConnected(unit) and unit == statusbar.unit and UnitClass(unit)) then
-		if (ClassHP == true) then
+		if (RougeUI.ClassHP == true) then
 			local _, class, c
 			_, class = UnitClass(unit)
 			c = RAID_CLASS_COLORS[class]
 			if c then statusbar:SetStatusBarColor(c.r, c.g, c.b) end
-		elseif (GradientHP == true) then
+		elseif (RougeUI.GradientHP == true) then
 			GradientColour(statusbar)
 		end
 	end
 
-	if (not UnitPlayerControlled(unit) and GradientHP == true) then
+	if (not UnitPlayerControlled(unit) and RougeUI.GradientHP == true) then
 		GradientColour(statusbar)
 	end
 end
 
-	hooksecurefunc("UnitFrameHealthBar_Update", colour)
-	hooksecurefunc("HealthBar_OnValueChanged", function(self)
-		if not self:IsForbidden() then
-			colour(self, self.unit)
-		end
-	end)
+hooksecurefunc("UnitFrameHealthBar_Update", colour)
+hooksecurefunc("HealthBar_OnValueChanged", function(self)
+	if not self:IsForbidden() then
+		colour(self, self.unit)
+	end
+end)
 
 -- Transparent name background
 
@@ -291,7 +293,7 @@ hooksecurefunc("UnitFramePortrait_Update",function(self)
 	if self.portrait then
 		if UnitIsPlayer(self.unit) then
 			local _, class = UnitClass(self.unit)
-			if (class and UnitIsPlayer(self.unit) and Class_Portrait == true) then
+			if (class and UnitIsPlayer(self.unit) and RougeUI.Class_Portrait == true) then
 				self.portrait:SetTexture(CLASS_TEXTURE:format(class))
 			else
 				format(self.unit)
