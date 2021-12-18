@@ -34,9 +34,6 @@ Smooth Animated Health and Mana (lagging .gif)
 
 <img src="https://user-images.githubusercontent.com/94811434/142790521-636a4814-0ed5-423b-9361-2db0c91be807.gif" width=50% height=50%>
 
-RougeUI with Masque + Blizzbuffsfacade (Retina skin) + Dominos
-
-<img src="https://user-images.githubusercontent.com/94811434/145716066-1c8d5ac7-6fa6-4780-b5f6-6fa5eddb82ea.png" width=100% height=100%>
 
 Initial CPU Usage:
 
