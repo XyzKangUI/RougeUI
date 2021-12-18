@@ -29,7 +29,7 @@ Every option listed in the feature list can be **MANUALLY** enabled in Interface
 
 # **Images:**
 
-Animated Health and Mana (laggy gif)
+Smooth Animated Health and Mana (lagging .gif)
 
 
 <img src="https://user-images.githubusercontent.com/94811434/142790521-636a4814-0ed5-423b-9361-2db0c91be807.gif" width=50% height=50%>
