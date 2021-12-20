@@ -12,6 +12,10 @@ local addonlist = {
 	["KkthnxUI"] = true
 }
 
+-- Hide MultiGroupFrame icons showing as Party(+BG) leader
+local mg = PlayerPlayTime:GetParent().MultiGroupFrame
+hooksecurefunc(mg, "Show", mg.Hide)
+
 -- Remove gap in buff timers & color the format
 local function TimeFormat(button, time)
 	local duration = _G[button:GetName().."Duration"]
