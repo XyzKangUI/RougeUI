@@ -21,6 +21,15 @@ local smoothframe = CreateFrame("Frame")
 smoothframe:RegisterEvent("ADDON_LOADED")
 smoothing = {}
 
+local function isPlate(frame)
+	local name = frame:GetName()
+	if name and name:find("NamePlate") then
+		return true
+	end
+
+	return false
+end
+
 local min, max = math.min, math.max
 
 local function AnimationTick()
@@ -76,14 +85,25 @@ local function SmoothBar(bar)
 	end
 
 	if not smoothframe:GetScript("OnUpdate") then
-		smoothframe:SetScript("OnUpdate", AnimationTick)
+		smoothframe:SetScript("OnUpdate", function()
+        			local frames = {WorldFrame:GetChildren()}
+        			for _, plate in ipairs(frames) do
+            				if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
+                				local v = plate:GetChildren()
+                				if  v.healthBar then
+                    					SmoothBar(v.healthBar)
+                				end
+            				end
+        			end
+        	AnimationTick()
+    		end)
 	end
 end
 
 smoothframe:SetScript("OnEvent", function(self, event)
 	if (RougeUI.smooth == false) then
-		smoothframe:UnregisterEvent("ADDON_LOADED")
-		smoothframe:SetScript("OnEvent", nil)
+		self:UnregisterEvent("ADDON_LOADED")
+		self:SetScript("OnEvent", nil)
 		return 
 	end
 
@@ -98,6 +118,6 @@ smoothframe:SetScript("OnEvent", function(self, event)
 			end
 		end
 	end
-	smoothframe:UnregisterEvent("ADDON_LOADED")
-	smoothframe:SetScript("OnEvent", nil)
+	self:UnregisterEvent("ADDON_LOADED")
+	self:SetScript("OnEvent", nil)
 end);
