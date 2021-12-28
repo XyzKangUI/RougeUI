@@ -4,12 +4,13 @@ local events = {
         "PLAYER_REGEN_ENABLED"
 }
 
-local last_tick  = GetTime()
+local last_tick = 0
 local last_value = 0
+local ONUPDATE_INTERVAL = 0.02
+local last_update = 0
 
 local function SetEnergyValue(self, value)
         local x         = self:GetWidth()
-        local type      = UnitPowerType("player")
 	local position = ((x * value) / 2.02)
 
 	if (position < x) then
@@ -18,19 +19,24 @@ local function SetEnergyValue(self, value)
 	end
 end
 
-local function UpdateEnergy(self, unit)
-        local energy = UnitPower("player", 3)
-        local time  = GetTime()
-    	local v = time - last_tick
+local function UpdateEnergy(self, elapsed)
+	local energy = UnitPower("player", 3)
 	local maxenergy = UnitPowerMax("player", 3)
+	last_update = last_update + elapsed
+	last_tick = last_tick + elapsed
 
-	if (((energy == last_value + 20 or energy == last_value + 21 or energy == last_value + 40 or energy == last_value + 41) and energy ~= maxenergy) or (time >= last_tick + 2.02)) then
-    		last_tick = time
+	if last_update < ONUPDATE_INTERVAL then
+		return
 	end
 
-    	SetEnergyValue(self:GetParent(), v)
+	if (((energy == last_value + 20 or energy == last_value + 21 or energy == last_value + 40 or energy == last_value + 41) and energy ~= maxenergy) or (last_tick >= 2.02)) then
+    		last_tick = 0
+	end
+
+    	SetEnergyValue(self:GetParent(), last_tick)
 
     	last_value = energy
+	last_update = 0
 end
 
 local function AddEnergy()
