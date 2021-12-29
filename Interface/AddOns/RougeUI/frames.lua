@@ -362,7 +362,7 @@ end
 
 	-- Social Frame
 	local a, b, c, d, e, f, g, _, i, j, k, l, n, o, p, q, r, _, _ = FriendsFrame:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r, FriendsFrameInset:GetRegions(), WhoFrameListInset:GetRegions()}) do
+	for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r, FriendsFrameInset:GetRegions()}) do
 		v:SetVertexColor(0.35, 0.35, 0.35)
 	end
 
