@@ -45,33 +45,7 @@ Framecolor:SetScript("OnEvent", function(self, event, addon)
 	  		ReputationWatchBar.StatusBar.XPBarTexture1,
 	  		ReputationWatchBar.StatusBar.XPBarTexture2,
 	  		ReputationWatchBar.StatusBar.XPBarTexture3,
-			LootFrameBg,
-			LootFrameRightBorder,
-			LootFrameLeftBorder,
-			LootFrameTopBorder,
-			LootFrameBottomBorder,
-			LootFrameTopRightCorner,
-			LootFrameTopLeftCorner,
-			LootFrameBotRightCorner,
-			LootFrameBotLeftCorner,
-			LootFrameInsetInsetTopRightCorner,
-			LootFrameInsetInsetTopLeftCorner,
-			LootFrameInsetInsetBotRightCorner,
-			LootFrameInsetInsetBotLeftCorner,
-			LootFrameInsetInsetRightBorder,
-      			LootFrameInsetInsetLeftBorder,
-      			LootFrameInsetInsetTopBorder,
-      			LootFrameInsetInsetBottomBorder,
-	  		LootFramePortraitFrame,
-			MerchantFrameTopBorder,
-			MerchantFrameBtnCornerRight,
-			MerchantFrameBtnCornerLeft,
-			MerchantFrameBottomRightBorder,
-			MerchantFrameBottomLeftBorder,
-			MerchantFrameButtonBottomBorder,
-			MerchantFrameBg,
 			MinimapBorder,
-			CastingBarFrame.Border,
        			MirrorTimer1Border,
        			MirrorTimer2Border,
         		MirrorTimer3Border,
@@ -88,14 +62,6 @@ Framecolor:SetScript("OnEvent", function(self, event, addon)
 		end
 
 CHAT_FONT_HEIGHTS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
-
-local a, b, c, d, _, e = BankFrame:GetRegions()
-for _, v in pairs({a, b, c, d, e
-
-}) do
-   v:SetVertexColor(0.35, 0.35, 0.35)
-
-end
 
 for i, v in pairs({
 	MainMenuBarLeftEndCap,
@@ -178,6 +144,22 @@ for i, v in pairs({
 	StaticPopup4.TopEdge,
 	StaticPopup4.TopLeftCorner,
 	StaticPopup4.TopRightCorner,
+	DropDownList1MenuBackdrop.BottomEdge,
+	DropDownList1MenuBackdrop.BottomLeftCorner,
+	DropDownList1MenuBackdrop.BottomRightCorner,
+	DropDownList1MenuBackdrop.LeftEdge,
+	DropDownList1MenuBackdrop.RightEdge,
+	DropDownList1MenuBackdrop.TopEdge,
+	DropDownList1MenuBackdrop.TopLeftCorner,
+	DropDownList1MenuBackdrop.TopRightCorner,
+	DropDownList2MenuBackdrop.BottomEdge,
+	DropDownList2MenuBackdrop.BottomLeftCorner,
+	DropDownList2MenuBackdrop.BottomRightCorner,
+	DropDownList2MenuBackdrop.LeftEdge,
+	DropDownList2MenuBackdrop.RightEdge,
+	DropDownList2MenuBackdrop.TopEdge,
+	DropDownList2MenuBackdrop.TopLeftCorner,
+	DropDownList2MenuBackdrop.TopRightCorner,
 	ContainerFrame1BackgroundTop,
 	ContainerFrame1BackgroundMiddle1,
 	ContainerFrame1BackgroundBottom,
@@ -210,173 +192,31 @@ for i, v in pairs({
 	ContainerFrame10BackgroundBottom,
 	ContainerFrame11BackgroundTop,
 	ContainerFrame11BackgroundMiddle1,
-	ContainerFrame11BackgroundBottom
-}) do
-   v:SetVertexColor(0.4, 0.4, 0.4)
-end
-
-for i,v in pairs({
-      LootFrameInsetBg,
-      LootFrameTitleBg,
-      MerchantFrameTitleBg
-
-}) do
-   v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-for i,v in pairs ({
-	MainMenuBarLeftEndCap,
-	MainMenuBarRightEndCap,
-	StanceBarLeft,
-	StanceBarMiddle,
-	StanceBarRight
-}) do
-   v:SetVertexColor(.35, .35, .35)
-end
-
-local a, b, c, d, _, e = PaperDollFrame:GetRegions()
-for _, v in pairs({a, b, c, d, e
-
-})do
-   v:SetVertexColor(0.35, 0.35, 0.35)
-
-end
-
-local a, b, c, d = SkillFrame:GetRegions()
-for _, v in pairs({a, b, c ,d
-
-}) do
-     v:SetVertexColor(0.35, 0.35, 0.35)
-end
-for _, v in pairs({ReputationDetailCorner, ReputationDetailDivider
-
-}) do
-     v:SetVertexColor(0.35, 0.35, 0.35)
-end
---Reputation Frame
-local a, b, c, d = ReputationFrame:GetRegions()
-for _, v in pairs({a, b, c, d
-
-}) do
-     v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e = PVPFrame:GetRegions()
-for _, v in pairs({a, b, c, d, e
-
-}) do
-   v:SetVertexColor(.7, .7, .7)
-end
-
-local _, a, b, c, d, _, _, _, e, f, g, h, j, k = MerchantFrame:GetRegions()
-for _, v in pairs({a, b, c ,d, e, f, g, h, j, k
-
-}) do
-   v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-for i,v in pairs({
-      MerchantFramePortrait
-
-}) do
-   v:SetVertexColor(1, 1, 1)
-end
-
-local a, b, c, d, _, e = PetPaperDollFrame:GetRegions()
-for _, v in pairs({a, b, c, d, e
-
-})do
-   v:SetVertexColor(0.35, 0.35, 0.35)
-
-end
-
---Character Tabs
-
-local a, b, c, d, e, f, g, h = CharacterFrameTab1:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e, f, g, h = CharacterFrameTab2:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e, f, g, h = CharacterFrameTab3:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e, f, g, h = CharacterFrameTab4:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-
-local a, b, c, d, e, f, g, h = CharacterFrameTab5:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e = PVPFrame:GetRegions()
-for _, v in pairs({a, b, c, d, e 
-
-}) do
-   v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
--- Social Frame
-local a, b, c, d, e, f, g, _, i, j, k, l, n, o, p, q, r, _, _ = FriendsFrame:GetRegions()
-for _, v in pairs({
-	a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r,
-	FriendsFrameInset:GetRegions(),
-	WhoFrameListInset:GetRegions()
-}) do
-	v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-for i,v in pairs({
-	BankPortraitTexture,
-	BankFrameTitleText,
-	MerchantFramePortrait,
-	WhoFrameTotals
-}) do
-   v:SetVertexColor(1, 1, 1)
-end
-
-FriendsFrameInsetInsetBottomBorder:SetVertexColor(0.35, 0.35, 0.35)
-WhoFrameEditBoxInset:GetRegions():SetVertexColor(0.35, 0.35, 0.35)
-WhoFrameDropDownLeft:SetVertexColor(0.5, 0.5, 0.5)
-WhoFrameDropDownMiddle:SetVertexColor(0.5, 0.5, 0.5)
-WhoFrameDropDownRight:SetVertexColor(0.5, 0.5, 0.5)
-
-local a, b, c, d, e, f, g, h, i = WhoFrameEditBoxInset:GetRegions()
-for _, v in pairs({a, b, c, d, e, f, g, h, i}) do
-	v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e, f, g, h = FriendsFrameTab1:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e, f, g, h = FriendsFrameTab2:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e, f, g, h = FriendsFrameTab3:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-local a, b, c, d, e, f, g, h = FriendsFrameTab4:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
-end
-
-
-for i, v in pairs({
+	ContainerFrame11BackgroundBottom,
+	MerchantFrameInsetInsetBottomBorder,
+	TradeFrameBg,
+	TradeFrameBottomBorder,
+	TradeFrameButtonBottomBorder,
+	TradeFrameLeftBorder,
+	TradeFrameRightBorder,
+	TradeFrameTitleBg,
+	TradeFrameTopBorder,
+	TradeFrameTopRightCorner,
+	TradeRecipientLeftBorder,
+	TradeFrameBtnCornerLeft,
+	TradeFrameBtnCornerRight,
+	TradeRecipientBG,
+	TradeFramePortraitFrame,
+	TradeRecipientPortraitFrame,
+	TradeRecipientBotLeftCorner,
+	PVPReadyDialog.BottomEdge,
+	PVPReadyDialog.BottomLeftCorner,
+	PVPReadyDialog.BottomRightCorner,
+	PVPReadyDialog.LeftEdge,
+	PVPReadyDialog.RightEdge,
+	PVPReadyDialog.TopEdge,
+	PVPReadyDialog.TopLeftCorner,
+	PVPReadyDialog.TopRightCorner,
 	MailFrameBg,
     	MailFrameBotLeftCorner,
 	MailFrameBotRightCorner,
@@ -393,20 +233,192 @@ for i, v in pairs({
 	MailFrameTopRightCorner,
 	MailFrameInsetInsetBottomBorder,
 	MailFrameInsetInsetBotLeftCorner,
-	MailFrameInsetInsetBotRightCorner
+	MailFrameInsetInsetBotRightCorner,
+	LootFrameBg,
+	LootFrameRightBorder,
+	LootFrameLeftBorder,
+	LootFrameTopBorder,
+	LootFrameBottomBorder,
+	LootFrameTopRightCorner,
+	LootFrameTopLeftCorner,
+	LootFrameBotRightCorner,
+	LootFrameBotLeftCorner,
+	LootFrameInsetInsetTopRightCorner,
+	LootFrameInsetInsetTopLeftCorner,
+	LootFrameInsetInsetBotRightCorner,
+	LootFrameInsetInsetBotLeftCorner,
+	LootFrameInsetInsetRightBorder,
+	LootFrameInsetInsetLeftBorder,
+	LootFrameInsetInsetTopBorder,
+	LootFrameInsetInsetBottomBorder,
+	LootFramePortraitFrame,
+	MerchantFrameTitleBg,
+	MerchantFrameTopBorder,
+	MerchantFrameBtnCornerRight,
+	MerchantFrameBtnCornerLeft,
+	MerchantFrameBottomRightBorder,
+	MerchantFrameBottomLeftBorder,
+	MerchantFrameButtonBottomBorder,
+	MerchantFrameBg
 }) do
-   v:SetVertexColor(0.35, 0.35, 0.35)
+   v:SetVertexColor(0.4, 0.4, 0.4)
 end
 
-local a, b, c, d, e, f, g, h = MailFrameTab1:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+for i,v in pairs({
+	BankPortraitTexture,
+	BankFrameTitleText,
+	MerchantFramePortrait,
+	WhoFrameTotals
+}) do
+   v:SetVertexColor(1, 1, 1)
 end
 
-local a, b, c, d, e, f, g, h = MailFrameTab2:GetRegions()
+	-- BankFrame
+	local a, b, c, d, _, e = BankFrame:GetRegions()
+	for _, v in pairs({a, b, c, d, e}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- MerchantFrame
+	local a, b, c, d, e, f, g, h = MerchantFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(0.35, 0.35, 0.35)
-end
+	end
+
+	local a, b, c, d, e, f, g, h = MerchantFrameTab2:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local _, a, b, c, d, _, _, _, e, f, g, h, j, k = MerchantFrame:GetRegions()
+	for _, v in pairs({a, b, c ,d, e, f, g, h, j, k}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- Paperdoll
+
+	local a, b, c, d, _, e = PaperDollFrame:GetRegions()
+	for _, v in pairs({a, b, c, d, e}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, _, e = PetPaperDollFrame:GetRegions()
+	for _, v in pairs({a, b, c, d, e}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- Skill
+
+	local a, b, c, d = SkillFrame:GetRegions()
+	for _, v in pairs({a, b, c ,d}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	--Reputation Frame
+
+	local a, b, c, d = ReputationFrame:GetRegions()
+	for _, v in pairs({a, b, c, d}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	for _, v in pairs({ReputationDetailCorner, ReputationDetailDivider}) do
+     		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- PvPFrame
+
+	local a, b, c, d, e = PVPFrame:GetRegions()
+	for _, v in pairs({a, b, c, d, e }) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- Character Tabs
+
+	local a, b, c, d, e, f, g, h = CharacterFrameTab1:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = CharacterFrameTab2:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = CharacterFrameTab3:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = CharacterFrameTab4:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+
+	local a, b, c, d, e, f, g, h = CharacterFrameTab5:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- Social Frame
+	local a, b, c, d, e, f, g, _, i, j, k, l, n, o, p, q, r, _, _ = FriendsFrame:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r, FriendsFrameInset:GetRegions(), WhoFrameListInset:GetRegions()}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	FriendsFrameInsetInsetBottomBorder:SetVertexColor(0.35, 0.35, 0.35)
+	WhoFrameEditBoxInset:GetRegions():SetVertexColor(0.35, 0.35, 0.35)
+	WhoFrameDropDownLeft:SetVertexColor(0.5, 0.5, 0.5)
+	WhoFrameDropDownMiddle:SetVertexColor(0.5, 0.5, 0.5)
+	WhoFrameDropDownRight:SetVertexColor(0.5, 0.5, 0.5)
+
+	local a, b, c, d, e, f, g, h, i = WhoFrameEditBoxInset:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f, g, h, i}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = FriendsFrameTab1:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = FriendsFrameTab2:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = FriendsFrameTab3:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = FriendsFrameTab4:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- GuildFrame
+
+	local a, b, c, d, e, f = GuildFrame:GetRegions()
+	for _, v in pairs({e, f}) do
+		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	-- MailFrame
+
+	local a, b, c, d, e, f, g, h = MailFrameTab1:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	local a, b, c, d, e, f, g, h = MailFrameTab2:GetRegions()
+	for _, v in pairs({a, b, c, d, e, f}) do
+  		v:SetVertexColor(0.35, 0.35, 0.35)
+	end
+
+	ChatFrame1EditBoxLeft:SetVertexColor(0.1, 0.1, 0.1)
+	ChatFrame1EditBoxMid:SetVertexColor(0.1, 0.1, 0.1)
+	ChatFrame1EditBoxRight:SetVertexColor(0.1, 0.1, 0.1)
 
 	GameTooltip:SetBackdropBorderColor(.05, .05, .05)
 	GameTooltip.SetBackdropBorderColor = function() end
