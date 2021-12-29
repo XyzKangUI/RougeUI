@@ -9,7 +9,8 @@ local addonlist = {
 	["whoaThickFrames_BCC"] = true, 
 	["whoaUnitFrames_BCC"] = true, 
 	["AbyssUI"] = true, 
-	["KkthnxUI"] = true
+	["KkthnxUI"] = true,
+	["TextureScript"] = true
 }
 
 -- Hide MultiGroupFrame icons showing as Party(+BG) leader
@@ -42,25 +43,17 @@ end
 
 -- Hide Raid frame titles
 
-local function HideFrameTitles()
-	local complete1, complete2 = false, 0
-	if complete1 and (complete2 == 8) then
-		e:UnregisterEvent("GROUP_ROSTER_UPDATE")
-		return
+local function HideFrameTitles(groupIndex)
+	local frame 
+
+	if not groupIndex then
+		frame = _G["CompactPartyFrameTitle"]
+	else
+		frame = _G["CompactRaidGroup"..groupIndex.."Title"]
 	end
 
-	if CompactPartyFrameTitle and not complete1 then
-		CompactPartyFrameTitle:Hide()
-		complete1 = true
-	end
-
-	for i = 1,8 do
-		if _G["CompactRaidGroup"..i.."Title"] then
-			if i > complete2 then
-				_G["CompactRaidGroup"..i.."Title"]:Hide()
-				complete2 = i
-			end
-		end
+	if frame then
+		frame:Hide()
 	end
 end
 
@@ -297,8 +290,7 @@ end
 local events = {
 	"PLAYER_LOGIN",
 	"ADDON_LOADED",
-	"PLAYER_ENTERING_WORLD",
-	"GROUP_ROSTER_UPDATE"
+	"PLAYER_ENTERING_WORLD"
 }
 
 local e = CreateFrame("Frame")
@@ -330,19 +322,16 @@ e:SetScript("OnEvent", function(self, event)
 			hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
 			hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
 		end
+		if (RougeUI.HideTitles == true) then
+			hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
+			hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
+		end
 	end
 
 	if ((event == "PLAYER_ENTERING_WORLD") and RougeUI.FadeIcon == true) then
 		PvPIcon()
 	elseif (RougeUI.FadeIcon == false) then
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-	end
-
-	if ((event == "GROUP_ROSTER_UPDATE") and RougeUI.HideTitles == true) then
-		HideFrameTitles()
-		hooksecurefunc("CompactUnitFrameProfiles_ApplyCurrentSettings", HideFrameTitles)
-	elseif (RougeUI.HideTitles == false) then
-		self:UnregisterEvent("GROUP_ROSTER_UPDATE")
 	end
 
 	self:UnregisterEvent("ADDON_LOADED")
