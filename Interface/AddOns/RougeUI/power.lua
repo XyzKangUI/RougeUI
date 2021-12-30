@@ -1,7 +1,8 @@
 local events = {
         "PLAYER_LOGIN",
         "PLAYER_REGEN_DISABLED",
-        "PLAYER_REGEN_ENABLED"
+        "PLAYER_REGEN_ENABLED",
+	"UPDATE_SHAPESHIFT_FORM"
 }
 
 local last_tick = 0
@@ -40,12 +41,12 @@ local function UpdateEnergy(self, elapsed)
 end
 
 local function AddEnergy()
-        PlayerFrameManaBar.energy = CreateFrame('Statusbar', 'PlayerFrameManaBar_energy', PlayerFrameManaBar)
-        PlayerFrameManaBar.energy.spark = PlayerFrameManaBar.energy:CreateTexture(nil, 'OVERLAY')
+        PlayerFrameManaBar.energy = CreateFrame("Statusbar", nil, PlayerFrameManaBar)
+        PlayerFrameManaBar.energy.spark = PlayerFrameManaBar.energy:CreateTexture(nil, "OVERLAY")
         PlayerFrameManaBar.energy.spark:SetTexture[[Interface\CastingBar\UI-CastingBar-Spark]]
         PlayerFrameManaBar.energy.spark:SetSize(32, 32)
-        PlayerFrameManaBar.energy.spark:SetPoint('CENTER', PlayerFrameManaBar, 0, 0)
-        PlayerFrameManaBar.energy.spark:SetBlendMode'ADD'
+        PlayerFrameManaBar.energy.spark:SetPoint("CENTER", PlayerFrameManaBar, 0, 0)
+        PlayerFrameManaBar.energy.spark:SetBlendMode("ADD")
         PlayerFrameManaBar.energy.spark:SetAlpha(.4)
 
         PlayerFrameManaBar.energy:RegisterEvent("UNIT_POWER_UPDATE")
@@ -57,19 +58,28 @@ end
 local function OnEvent(self, event)
 	local _, class = UnitClass("player")
 	if not ((RougeUI.EnergyTicker == true) and class == "ROGUE" or class == "DRUID") then
-		self:UnregisterEvent("PLAYER_LOGIN")
+		self:UnregisterAllEvents()
 		self:SetScript("OnEvent", nil)
 		return
 	end
 
 	if (event == "PLAYER_LOGIN") then
 		AddEnergy()
-        elseif event == ("PLAYER_REGEN_DISABLED") then
+        elseif (event == "PLAYER_REGEN_DISABLED") then
              	PlayerFrameManaBar.energy.spark:SetAlpha(1)
-        elseif event == ("PLAYER_REGEN_ENABLED") then
-             	PlayerFrameManaBar.energy.spark:SetAlpha(0.3)
+        elseif (event == "PLAYER_REGEN_ENABLED") then
+             	PlayerFrameManaBar.energy.spark:SetAlpha(.1)
+	elseif ((event == "UPDATE_SHAPESHIFT_FORM") and class == "DRUID") then
+		if (UnitPowerType("player") ~= 3) then
+			PlayerFrameManaBar.energy.spark:SetAlpha(0)
+		else
+			PlayerFrameManaBar.energy.spark:SetAlpha(1)
+		end
         end
 
+	if (class ~= "DRUID") then
+		self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
+	end
 	self:UnregisterEvent("PLAYER_LOGIN")
 end
 
