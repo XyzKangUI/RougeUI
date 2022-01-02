@@ -53,7 +53,7 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             if (largeAuraList[i]) then
                 size = LARGE_AURA_SIZE
                 offsetY = AURA_OFFSET
-                offsetX = AURA_OFFSET
+--                offsetX = AURA_OFFSET
             else
                 size = SMALL_AURA_SIZE
             end
@@ -84,18 +84,58 @@ function Custom_TargetBuffSize()
     hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
 end
 
+-- Track Max rank & important spells. This way can easily filter thrash buffs without checking tooltip.
+local Whitelist = {
+	[16188] = true, -- Nature's Swiftness
+	[17116] = true, -- Nature's Swiftness
+	[12043] = true, -- Presence of Mind
+	[12042] = true, -- Arcane Power
+	[12472] = true, -- Icy Veins
+	[31884] = true, -- Avenging Wrath
+	[25218] = true, -- Power Word: Shield
+	[27134] = true, -- Ice Barrier
+	[6346] = true, -- Fear Ward
+	[22812] = true, -- Barkskin
+	[30458] = true, -- Nigh Invulnerability Belt
+	[18708] = true, -- Fel Domination
+	[20729] = true, -- Blessing of Sacrifice
+	[27148] = true, -- BoS
+	[1044] = true, -- Blessing of Freedom
+	[10278] = true, -- Blessing of Protection
+	[29166] = true, -- Innervate
+	[2825] = true, -- Bloodlust
+	[32182] = true, -- Heroism
+	[25431] = true, -- Inner Fire
+	[14751] = true, -- Inner Focus
+	[26990] = true, -- Mark of the Wild
+	[26991] = true, -- Gift of the Wild
+	[25392] = true, -- Prayer of Fortitude
+	[25389] = true, -- Power Word: Fortitude
+	[25433] = true, -- Shadow Protection
+	[39374] = true, -- Prayer of Shadow Protection
+	[25312] = true, -- Divine Spirit
+	[32999] = true, -- Prayer of Spirit
+	[10060] = true, -- Power Infusion
+	[33206] = true, -- Pain Supression
+	[27009] = true, -- Nature's Grasp
+	[3045] = true, -- Rapid Fire
+	[2651] = true, -- Elune's Grace
+	[2893] = true, -- Abolish Poison
+	[26982] = true -- Rejuvenation
+};
+
 local function Target_Update(frame)
     local buffFrame, frameStealable, icon, debuffType, isStealable, _
     local selfName = frame:GetName()
     local isEnemy = UnitIsEnemy(PlayerFrame.unit, frame.unit)
 
     for i = 1, MAX_TARGET_BUFFS do
-        _, icon, _, debuffType, _, _, _, isStealable = UnitBuff(frame.unit, i)
+        _, icon, _, debuffType, _, _, _, isStealable, _, spellId = UnitBuff(frame.unit, i)
         if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
             local frameName = selfName .. 'Buff' .. i
             buffFrame = _G[frameName]
             frameStealable = _G[frameName .. 'Stealable']
-            if (isEnemy and debuffType == 'Magic') then
+            if (isEnemy and debuffType == 'Magic' and Whitelist[spellId]) then
 		local buffSize
 		buffSize = RougeUI.OtherBuffSize
                 buffFrame:SetHeight(buffSize)
