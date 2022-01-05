@@ -114,17 +114,15 @@ hooksecurefunc("PlayerFrame_UpdatePvPStatus", FixPvPFrame);
 -- Hide indicators and fancy glows
 
 local function HideGlows()
-	if (IsResting("player") or UnitAffectingCombat("player")) then
-		for i,v in pairs({
-			PlayerStatusTexture,
-			PlayerStatusGlow,
-			PlayerRestGlow,
-			PlayerRestIcon,
-			PlayerAttackGlow,
-			PlayerAttackBackground
-		}) do 
-			v:Hide() 
-		end
+	for i,v in pairs({
+		PlayerStatusTexture,
+		PlayerStatusGlow,
+		PlayerRestGlow,
+		PlayerRestIcon,
+		PlayerAttackGlow,
+		PlayerAttackBackground
+	}) do 
+		v:Hide() 
 	end
 end
 
