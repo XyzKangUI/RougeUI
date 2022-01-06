@@ -2,7 +2,7 @@ local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth }
+		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -146,6 +146,15 @@ function f:CreateGUI()
 	SmoothFrameButton:SetChecked(RougeUI.smooth)
 	SmoothFrameButton:SetScript("OnClick", function() RougeUI.smooth = not RougeUI.smooth end)
 
+        local name = "PimpFrame"
+        local template = "UICheckButtonTemplate"
+        local PimpFrameButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        PimpFrameButton:SetPoint("TOPLEFT", 350, -380)
+        PimpFrameButton.text = _G[name.."Text"]
+	PimpFrameButton.text:SetText("Enable Violet Colored Energy/Mana Bar")
+	PimpFrameButton:SetChecked(RougeUI.pimp)
+	PimpFrameButton:SetScript("OnClick", function() RougeUI.pimp = not RougeUI.pimp end)
+
         local name = "GradientHP"
         local template = "UICheckButtonTemplate"
         local GradientHPButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
@@ -265,6 +274,7 @@ function f:CreateGUI()
 	    SetCustomBuffSize(value)
         end
     end)
+
     end
     return Panel
 end
