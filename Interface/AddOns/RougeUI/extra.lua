@@ -220,6 +220,18 @@ local function colour(statusbar, unit)
 	end
 end
 
+local function manabarcolor(statusbar, unit)
+	if UnitIsPlayer("player") then
+		PlayerFrameManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
+		PlayerFrameManaBar.lockColor = true
+		if (UnitIsUnit("targettarget", "player")) then
+			TargetFrameToTManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
+		end
+		if (UnitIsUnit("target", "player")) then
+			TargetFrameManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
+		end
+	end
+end
 
 -- Transparent name background
 
@@ -324,6 +336,9 @@ e:SetScript("OnEvent", function(self, event)
 			hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
 			hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
 		end
+		if (RougeUI.pimp == true) then
+			hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
+		end	
 	end
 
 	if ((event == "PLAYER_ENTERING_WORLD") and RougeUI.FadeIcon == true) then
