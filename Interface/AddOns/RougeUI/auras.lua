@@ -104,15 +104,6 @@ local Whitelist = {
 	[33206] = true, -- Pain Supression
 	[27009] = true, -- Nature's Grasp
 	[3045] = true, -- Rapid Fire
---	[25431] = true, -- Inner Fire - max rank
---	[26990] = true, -- Mark of the Wild - max rank
---	[26991] = true, -- Gift of the Wild - max rank
---	[25392] = true, -- Prayer of Fortitude - max rank
---	[25389] = true, -- Power Word: Fortitude - max rank
---	[25433] = true, -- Shadow Protection - max rank
---	[39374] = true, -- Prayer of Shadow Protection - max rank
---	[25312] = true, -- Divine Spirit - max rank
---	[32999] = true -- Prayer of Spirit - max rank
 	[2651] = true -- Elune's Grace
 };
 
@@ -133,7 +124,7 @@ local Smash = {
 
 
 local function Target_Update(frame)
-    local buffFrame, frameStealable, icon, debuffType, isStealable, _
+    local buffFrame, frameStealable, icon, debuffType, isStealable, spellId, _
     local selfName = frame:GetName()
     local isEnemy = UnitIsEnemy(PlayerFrame.unit, frame.unit)
 
@@ -143,26 +134,49 @@ local function Target_Update(frame)
             local frameName = selfName .. 'Buff' .. i
             buffFrame = _G[frameName]
             frameStealable = _G[frameName .. 'Stealable']
-            if (isEnemy and (Whitelist[spellId] or Important[spellId] or Smash[spellId])) then
+	if (isEnemy and isStealable and (Whitelist[spellId] or Important[spellId] or Smash[spellId])) then
 		local buffSize
 		buffSize = RougeUI.OtherBuffSize
                 buffFrame:SetHeight(buffSize)
-                buffFrame:SetWidth(buffSize)
+		buffFrame:SetWidth(buffSize)
                 frameStealable:SetHeight(buffSize * 1.4)
                 frameStealable:SetWidth(buffSize * 1.4)
-		if (Whitelist[spellId]) then
-                	frameStealable:Show()
-            	elseif (Important[spellId]) then
+		if Important[spellId] then
 			frameStealable:SetVertexColor(1, 0, 0)
-                	frameStealable:Show()
-		elseif (Smash[spellId]) then
+		elseif Smash[spellId] then
 			frameStealable:SetVertexColor(0, 1, 0)
-                	frameStealable:Show()
 		end
-            end
-        end
+                frameStealable:Show()
+	else
+		frameStealable:Hide()
+	end
+	end
     end
 end
+
+local function AdjustSpellBar(self)
+	local parentFrame = self:GetParent()
+	if ( parentFrame.haveToT ) then
+		if ( parentFrame.buffsOnTop or parentFrame.auraRows <= 1 ) then
+			parentFrame.spellbar:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -21 )
+		else
+			parentFrame.spellbar:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15)
+		end
+	elseif ( parentFrame.haveElite ) then
+		if ( parentFrame.buffsOnTop or parentFrame.auraRows <= 1 ) then
+			parentFrame.spellbar:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -5 )
+		else
+			parentFrame.spellbar:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15)
+		end
+	else
+		if ( (not parentFrame.buffsOnTop) and parentFrame.auraRows > 0 ) then
+			parentFrame.spellbar:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15)
+		else
+			parentFrame.spellbar:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, 7 )
+		end
+	end
+end
+hooksecurefunc("Target_Spellbar_AdjustPosition", AdjustSpellBar)
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
