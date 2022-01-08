@@ -104,10 +104,7 @@ local Whitelist = {
 	[33206] = true, -- Pain Supression
 	[27009] = true, -- Nature's Grasp
 	[3045] = true, -- Rapid Fire
-	[2651] = true -- Elune's Grace
-};
-
-local Important = {
+	[2651] = true, -- Elune's Grace
 	[6346] = true, -- Fear Ward
 	[20729] = true, -- Blessing of Sacrifice
 	[27148] = true, -- Blessing of Sacrifice
@@ -118,10 +115,6 @@ local Important = {
 	[1020] = true -- Divine Shield
 };
 
-local Smash = {
-	[30457] = true -- Complete Vulnerability
-};
-
 
 local function Target_Update(frame)
     local buffFrame, frameStealable, icon, debuffType, isStealable, spellId, _
@@ -130,26 +123,21 @@ local function Target_Update(frame)
 
     for i = 1, MAX_TARGET_BUFFS do
         _, icon, _, debuffType, _, _, _, isStealable, _, spellId = UnitBuff(frame.unit, i)
-        if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
-            local frameName = selfName .. 'Buff' .. i
-            buffFrame = _G[frameName]
-            frameStealable = _G[frameName .. 'Stealable']
-	if (isEnemy and isStealable and (Whitelist[spellId] or Important[spellId] or Smash[spellId])) then
-		local buffSize
-		buffSize = RougeUI.OtherBuffSize
-                buffFrame:SetHeight(buffSize)
-		buffFrame:SetWidth(buffSize)
-                frameStealable:SetHeight(buffSize * 1.4)
-                frameStealable:SetWidth(buffSize * 1.4)
-		if Important[spellId] then
-			frameStealable:SetVertexColor(1, 0, 0)
-		elseif Smash[spellId] then
-			frameStealable:SetVertexColor(0, 1, 0)
+	if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
+		local frameName = selfName .. 'Buff' .. i
+		buffFrame = _G[frameName]
+		frameStealable = _G[frameName .. 'Stealable']
+		if (isEnemy and debuffType == "Magic" and isStealable and Whitelist[spellId]) then
+			local buffSize
+			buffSize = RougeUI.OtherBuffSize
+                	buffFrame:SetHeight(buffSize)
+			buffFrame:SetWidth(buffSize)
+                	frameStealable:Show()
+			frameStealable:SetHeight(buffSize * 1.4)
+                	frameStealable:SetWidth(buffSize * 1.4)
+		else
+			frameStealable:Hide()
 		end
-                frameStealable:Show()
-	else
-		frameStealable:Hide()
-	end
 	end
     end
 end
