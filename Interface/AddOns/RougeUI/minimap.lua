@@ -5,7 +5,6 @@ if not (IsAddOnLoaded("SexyMap")) then
 	for _, v in pairs ({
 		MinimapBorderTop,
 		MinimapToggleButton,
-		MiniMapWorldMapButton,
 		MinimapZoomIn,
 		GameTimeFrame,
 		MinimapZoomOut,
@@ -61,3 +60,5 @@ end)
 end
 	MM:UnregisterEvent("PLAYER_LOGIN")
 end);
+
+hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)
