@@ -2,7 +2,7 @@ local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp }
+		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -49,12 +49,9 @@ function f:CreateGUI()
 	Reload:SetWidth(100)
 	Reload:SetHeight(25)
 	Reload:SetText("Save & Reload")
-	Reload:SetScript(
-		"OnClick",
-		function(self, button, down)
-			ReloadUI()
-		end
-	)
+	Reload:SetScript("OnClick", function(self, button, down)
+		ReloadUI()
+	end)
 
         local name = "ClassPortraitButton"
         local template = "UICheckButtonTemplate"
@@ -154,6 +151,15 @@ function f:CreateGUI()
 	PimpFrameButton.text:SetText("Enable Violet Colored Energy/Mana Bar")
 	PimpFrameButton:SetChecked(RougeUI.pimp)
 	PimpFrameButton:SetScript("OnClick", function() RougeUI.pimp = not RougeUI.pimp end)
+
+        local name = "RetabBind"
+        local template = "UICheckButtonTemplate"
+        local RetabBind = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
+        RetabBind:SetPoint("TOPLEFT", 350, -420)
+        RetabBind.text = _G[name.."Text"]
+	RetabBind.text:SetText("RETabBinder")
+	RetabBind:SetChecked(RougeUI.retab)
+	RetabBind:SetScript("OnClick", function() RougeUI.retab = not RougeUI.retab end)
 
         local name = "GradientHP"
         local template = "UICheckButtonTemplate"

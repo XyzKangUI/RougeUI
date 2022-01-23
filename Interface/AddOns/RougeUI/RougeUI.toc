@@ -12,6 +12,7 @@ textbar.lua
 minimap.lua
 power.lua
 combat.lua
-nameplate.lua
 castbar.lua
 auras.lua
+nameplate.lua
+retab.lua
