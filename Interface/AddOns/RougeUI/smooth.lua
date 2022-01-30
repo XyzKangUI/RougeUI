@@ -19,7 +19,8 @@ local barstosmooth = {
 
 local smoothframe = CreateFrame("Frame")
 smoothframe:RegisterEvent("ADDON_LOADED")
-smoothing = {}
+
+local smoothing = {}
 
 local function isPlate(frame)
 	local name = frame:GetName()
@@ -33,7 +34,7 @@ end
 local min, max = math.min, math.max
 
 local function AnimationTick()
-		local limit = 30/GetFramerate()
+		local limit = 40/GetFramerate()
 		for bar, value in pairs(smoothing) do
 			local cur = bar:GetValue()
 			local new = cur + min((value - cur) /3, max(value - cur, limit))
@@ -42,11 +43,10 @@ local function AnimationTick()
 				new = value 
 			end
 
+			bar:SetValue_(math.floor(new))
 			if cur == value or math.abs(new - value) < 2 then
 				bar:SetValue_(value)
 				smoothing[bar] = nil
-			else
-				bar:SetValue_(math.floor(new))
 			end
 		end
 end
