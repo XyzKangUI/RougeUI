@@ -168,11 +168,10 @@ hooksecurefunc("Target_Spellbar_AdjustPosition", AdjustSpellBar)
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
-f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(self, event)
-	if (RougeUI.HighlightDispellable == true) then
+	if event == "PLAYER_LOGIN" and RougeUI.HighlightDispellable == true then
 		hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
 	end
-	f:UnregisterAllEvents()
-	f:SetScript("OnEvent", nil)
+	self:UnregisterEvent("PLAYER_LOGIN")
+	self:SetScript("OnEvent", nil)
 end);
