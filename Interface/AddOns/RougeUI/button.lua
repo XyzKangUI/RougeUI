@@ -226,6 +226,8 @@ local function applySkin(b)
 		local re, gr, bl = bo:GetVertexColor()
 		SkinColor(b, re*1.5, gr*1.5, bl*1.5)
 		bo:SetAlpha(0)
+		b.duration:ClearAllPoints()
+		b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
 		return
 	end
 
