@@ -57,9 +57,3 @@ A lot of the code is kanged, ergo credits should be given where they are due:
 * Lorti/Chordsy/Syiana for some of the copypasta. 
 * Shanghi for his tbc 2.4.3 smooth animated bars fix.
 * The rest not mentioned here :D
-
-**Notes:**
-
-The addon does not theme your buffs/debuffs or change them such as Lorti and ModUI do. I suggest using any of the following addons:
-- Masque required: https://www.curseforge.com/wow/addons/blizzbuffsfacade
-- Raven: https://www.curseforge.com/wow/addons/raven
