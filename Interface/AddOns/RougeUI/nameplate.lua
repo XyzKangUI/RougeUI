@@ -5,6 +5,9 @@ SetCVar("nameplateMaxDistance", 41)
 local function AddElements(plate)
 	if (string.find(plate.unit, "nameplate") and not plate:IsForbidden()) then
 		plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, 8)
+		local sh = plate.selectionHighlight -- kang from evolvee
+		sh:SetPoint("TOPLEFT", sh:GetParent(), "TOPLEFT", 1, -1)
+		sh:SetPoint("BOTTOMRIGHT", sh:GetParent(), "BOTTOMRIGHT", -1, 1)
 		plate.name:SetFont(STANDARD_TEXT_FONT, 8)
 		plate.name:ClearAllPoints()
      		plate.name:SetPoint('BOTTOMRIGHT', plate, 'TOPRIGHT', -6, -13)
