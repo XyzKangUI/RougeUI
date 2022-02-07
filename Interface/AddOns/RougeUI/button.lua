@@ -204,11 +204,11 @@ end
 
 for i = 1, NUM_TEMP_ENCHANT_FRAMES do
         local bu = _G["TempEnchant"..i]
-	local ic = _G["TempEnchant"..i.."Icon"]
+--	local ic = _G["TempEnchant"..i.."Icon"]
         local bo = _G["TempEnchant"..i.."Border"]
 	local du = _G["TempEnchant"..i.."Duration"]
         bu:SetNormalTexture("")
-	ic:SetTexCoord(.1, .9, .1, .9)
+--	ic:SetTexCoord(.1, .9, .1, .9)
         bo:SetTexture("")
         addBorder(bu, 1)
 	SkinColor(bu, 1, 0, 1)
