@@ -216,14 +216,19 @@ end
 
 local function applySkin(b)
 	local name = b:GetName()
-	local border = _G[name.."Border"]
-	if border then
-		local re, gr, bl = border:GetVertexColor()
-		b:SkinColor(re*.7, gr*.7, bl*.7)
+
+	if name:match("Debuff") then return end
+
+        local d = _G[name.."Border"]
+        if d then
+            local r, g, b = d:GetVertexColor()
+            SkinColor(d, r*1.5, g*1.5, b*1.5)
+            d:SetAlpha(0)
         end
+
 	b:SetNormalTexture("")
 	addBorder(b, .25)
-	SkinColor(b, .05, .05, .05)
+	SkinColor(b, .25, .25, .25)
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
 	b.styled = true
