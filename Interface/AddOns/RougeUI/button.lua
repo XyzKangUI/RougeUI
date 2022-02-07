@@ -272,7 +272,8 @@ local function TargetButton_Update(self)
 				_G["TargetFrameDebuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
 				bu.skin = true
 			end
-			local re, gr, bl = _G["TargetFrameDebuff"..i.."Border"]:GetVertexColor()					bu:SkinColor(re, gr, bl)
+			local re, gr, bl = _G["TargetFrameDebuff"..i.."Border"]:GetVertexColor()
+			bu:SkinColor(re, gr, bl)
 		else
 			break
 		end
@@ -286,7 +287,8 @@ local function TargetButton_Update(self)
 				_G["FocusFrameDebuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
 				bu.skin = true
 			end
-			local re, gr, bl = _G["FocusFrameDebuff"..i.."Border"]:GetVertexColor()						bu:SkinColor(re, gr, bl)
+			local re, gr, bl = _G["FocusFrameDebuff"..i.."Border"]:GetVertexColor()
+			bu:SkinColor(re, gr, bl)
 		else
 			break
 		end
