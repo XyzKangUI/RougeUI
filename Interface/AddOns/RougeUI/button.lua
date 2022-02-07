@@ -3,14 +3,6 @@
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
 
-local function SkinColor(self, r, g, b, a)
-	local  t = self.borderTextures
-        if not t then return end
-	for  _, tex in pairs(t) do
-        	tex:SetVertexColor(r or 1, g or 1, b or 1, a or 1)
-        end
-end
-
 local r, g, b = .35, .35, .35
 local sections = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
 local buttons = {
@@ -38,6 +30,15 @@ local slots = {
 	"Trinket0", "Trinket1",
 	"Back", "MainHand", "SecondaryHand", "Ranged", "Tabard",
 }
+
+
+local function SkinColor(self, r, g, b, a)
+	local  t = self.borderTextures
+        if not t then return end
+	for  _, tex in pairs(t) do
+        	tex:SetVertexColor(r or 1, g or 1, b or 1, a or 1)
+        end
+end
 
 local function GetBorderColor(self)
 	return self.borderTextures and self.borderTextures.TOPLEFT:GetVertexColor()
@@ -203,9 +204,11 @@ end
 
 for i = 1, NUM_TEMP_ENCHANT_FRAMES do
         local bu = _G["TempEnchant"..i]
+	local ic = _G["TempEnchant"..i.."Icon"]
         local bo = _G["TempEnchant"..i.."Border"]
 	local du = _G["TempEnchant"..i.."Duration"]
         bu:SetNormalTexture("")
+	ic:SetTexCoord(.1, .9, .1, .9)
         bo:SetTexture("")
         addBorder(bu, 1)
 	SkinColor(bu, 1, 0, 1)
@@ -216,19 +219,26 @@ end
 
 local function applySkin(b)
 	local name = b:GetName()
+	local bo = _G[name.."Border"]
+	local ic = _G[name.."Icon"]
 
-	if name:match("Debuff") then return end
+	if name:match("Debuff") then
+		ic:SetTexCoord(.1, .9, .1, .9)
+		ic:SetDrawLayer("BACKGROUND",-8)
+		return
+	end
 
-        local d = _G[name.."Border"]
-        if d then
-            local r, g, b = d:GetVertexColor()
-            SkinColor(d, r*1.5, g*1.5, b*1.5)
-            d:SetAlpha(0)
+        if bo then
+		local r, g, b = bo:GetVertexColor()
+		SkinColor(bo, r*1.5, g*1.5, b*1.5)
+		bo:SetAlpha(0)
         end
 
 	b:SetNormalTexture("")
+	ic:SetTexCoord(.1, .9, .1, .9)
 	addBorder(b, .25)
 	SkinColor(b, .25, .25, .25)
+
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
 	b.styled = true
