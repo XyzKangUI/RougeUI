@@ -156,7 +156,7 @@ local function init()
 		addBorder(bu)
 		bu:SkinColor(r, g, b)
 		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
-		ic:SetTexCoord(.1, .9, .1, .9)
+		-- ic:SetTexCoord(.1, .9, .1, .9)
 	end
 
 	for i = 0, 3 do -- Bagicons
@@ -168,11 +168,11 @@ local function init()
 	for i = 1,12 do  -- Bagslots
 		for k = 1, MAX_CONTAINER_ITEMS do
 			local bu = _G["ContainerFrame"..i.."Item"..k]
-			local ic = _G["ContainerFrame"..i.."Item"..k.."IconTexture"]
+			-- local ic = _G["ContainerFrame"..i.."Item"..k.."IconTexture"]
             		addBorder(bu)
             		bu:SkinColor(r, g, b)
             		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
-            		ic:SetTexCoord(.1, .9, .1, .9)
+            		-- ic:SetTexCoord(.1, .9, .1, .9)
             		bu.bg = bu:CreateTexture(nil, "BACKGROUND")
             		bu.bg:SetAllPoints()
             		bu.bg:SetTexture[[Interface\Buttons\UI-Slot-Background]]
@@ -187,7 +187,7 @@ local function init()
 		addBorder(bu)
 		bu:SkinColor(r, g, b)
 		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
-		ic:SetTexCoord(.1, .9, .1, .9)
+		-- ic:SetTexCoord(.1, .9, .1, .9)
 		bu.bg = bu:CreateTexture(nil, "BACKGROUND")
 		bu.bg:SetAllPoints()
 		bu.bg:SetTexture[[Interface\Buttons\UI-Slot-Background]]
@@ -204,11 +204,9 @@ end
 
 for i = 1, NUM_TEMP_ENCHANT_FRAMES do
         local bu = _G["TempEnchant"..i]
---	local ic = _G["TempEnchant"..i.."Icon"]
         local bo = _G["TempEnchant"..i.."Border"]
 	local du = _G["TempEnchant"..i.."Duration"]
         bu:SetNormalTexture("")
---	ic:SetTexCoord(.1, .9, .1, .9)
         bo:SetTexture("")
         addBorder(bu, 1)
 	SkinColor(bu, 1, 0, 1)
@@ -223,8 +221,11 @@ local function applySkin(b)
 	local ic = _G[name.."Icon"]
 
 	if name:match("Debuff") then
+		addBorder(b, 0)
 		ic:SetTexCoord(.1, .9, .1, .9)
-		ic:SetDrawLayer("BACKGROUND",-8)
+		local re, gr, bl = bo:GetVertexColor()
+		SkinColor(b, re*1.5, gr*1.5, bl*1.5)
+		bo:SetAlpha(0)
 		return
 	end
 
