@@ -10,7 +10,6 @@ smooth.lua
 extra.lua
 textbar.lua
 minimap.lua
-masque.lua
 power.lua
 combat.lua
 castbar.lua
