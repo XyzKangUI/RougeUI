@@ -104,7 +104,7 @@ local function styleActionButton(bu)
 	addBorder(bu, 1)
 	bu:SkinColor(r, g, b)
 
-	if not dominos or bartender4 then
+	if not bartender4 then
 		ho:ClearAllPoints()
 		ho:SetPoint("TOPRIGHT", bu, 1, -3)
 	end
