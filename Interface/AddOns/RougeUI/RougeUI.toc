@@ -10,9 +10,11 @@ smooth.lua
 extra.lua
 textbar.lua
 minimap.lua
+masque.lua
 power.lua
 combat.lua
 castbar.lua
-auras.lua
 nameplate.lua
+auras.lua
 retab.lua
+button.lua
