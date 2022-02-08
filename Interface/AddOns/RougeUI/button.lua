@@ -96,7 +96,6 @@ end
 local function styleActionButton(bu)
 	if not bu or (bu and bu.rabs_styled) then return end
 
-	local action = bu.action
 	local name = bu:GetName()
 	local ho = _G[name.."HotKey"]
 	local nt = _G[name.."NormalTexture"]
