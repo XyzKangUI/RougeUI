@@ -299,14 +299,13 @@ end
 
 local events = {
 	"PLAYER_LOGIN",
-	"ADDON_LOADED",
 	"PLAYER_ENTERING_WORLD"
 }
 
 local e = CreateFrame("Frame")
 for _, v in pairs(events) do e:RegisterEvent(v) end
 e:SetScript("OnEvent", function(self, event)
-	if ((event == "PLAYER_LOGIN") or (event == "ADDON_LOADED")) then
+	if event == "PLAYER_LOGIN" then
 		if (RougeUI.TimerGap == true) then
 			if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
 				hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
@@ -347,6 +346,5 @@ e:SetScript("OnEvent", function(self, event)
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end
 
-	self:UnregisterEvent("ADDON_LOADED")
 	self:UnregisterEvent("PLAYER_LOGIN")
 end);
