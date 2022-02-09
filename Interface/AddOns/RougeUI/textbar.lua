@@ -132,14 +132,9 @@ end
 local CF = CreateFrame("Frame")
 CF:RegisterEvent("PLAYER_LOGIN")
 CF:SetScript("OnEvent", function(self, event)
-	if RougeUI.smooth == false then
-		self:UnregisterAllEvents()
-		self:SetScript("OnEvent", nil)
-		return 
-	end
-	if event == "PLAYER_LOGIN" then
+	if event == "PLAYER_LOGIN" and RougeUI.smooth == true then
 		hooksecurefunc("TextStatusBar_UpdateTextString", CTextStatusBar_UpdateTextString)
 	end
-	self:UnregisterAllEvents()
+	self:UnregisterEvent("PLAYER_LOGIN")
 	self:SetScript("OnEvent", nil)
 end);
