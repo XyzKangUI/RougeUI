@@ -113,12 +113,6 @@ local function styleActionButton(bu)
 	bu.rabs_styled = true
 end
 
-hooksecurefunc("ActionButton_UpdateState", function(self)
-	local normalTexture = self.NormalTexture
-	if not normalTexture or bartender4 then return end
-	normalTexture:Hide()
-end)
-
 local function init()
 	for i = 1, NUM_ACTIONBAR_BUTTONS do
 		styleActionButton(_G["ActionButton"..i])
@@ -144,8 +138,16 @@ local function init()
 		end
 	end
 
+	if not bartender4 then
+		hooksecurefunc("ActionButton_UpdateState", function(self)
+			local normalTexture = self.NormalTexture
+			if not normalTexture then return end
+			normalTexture:Hide()
+		end)
+	end
+
 	for _, v in pairs(buttons) do
-		addBorder(v)
+		addBorder(v, 1)
 		v:SkinColor(r, g, b)
 	end
 
@@ -207,7 +209,7 @@ for i = 1, NUM_TEMP_ENCHANT_FRAMES do
 	local du = _G["TempEnchant"..i.."Duration"]
         bu:SetNormalTexture("")
         bo:SetTexture("")
-        addBorder(bu, .1)
+	addBorder(bu, .1)
 	SkinColor(bu, 1, 0, 1)
         du:SetJustifyH("CENTER")
         du:ClearAllPoints() 
