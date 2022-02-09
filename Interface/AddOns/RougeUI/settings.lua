@@ -130,7 +130,7 @@ function f:CreateGUI()
         local CastTimerButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
         CastTimerButton:SetPoint("TOPLEFT", 350, -300)
         CastTimerButton.text = _G[name.."Text"]
-	CastTimerButton.text:SetText("Enable timer on target/focus castbar")
+	CastTimerButton.text:SetText("Enable modUI castbar style with timer")
 	CastTimerButton:SetChecked(RougeUI.CastTimer)
 	CastTimerButton:SetScript("OnClick", function() RougeUI.CastTimer = not RougeUI.CastTimer end)
 
