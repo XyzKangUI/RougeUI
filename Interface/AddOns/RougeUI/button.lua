@@ -3,7 +3,7 @@
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
 
-local r, g, b = .35, .35, .35
+local r, g, b = .05, .05, .05
 local sections = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
 local buttons = {
 	_G["MainMenuBarBackpackButton"],
@@ -109,7 +109,7 @@ local function styleActionButton(bu)
 	end
 
 	if fbg then fbg:Hide() end
-	
+
 	bu.rabs_styled = true
 end
 
@@ -138,17 +138,15 @@ local function init()
 		end
 	end
 
-
-
-	for _, v in pairs(buttons) do
-		addBorder(v)
-		v:SkinColor(r, g, b)
-	end
-
 	if bartender4 then
 		for i = 1, 120 do
 			styleActionButton(_G["BT4Button"..i])
 		end
+	end
+
+	for _, v in pairs(buttons) do
+		addBorder(v)
+		v:SkinColor(r, g, b)
 	end
 
 	for _, v in pairs(slots) do
