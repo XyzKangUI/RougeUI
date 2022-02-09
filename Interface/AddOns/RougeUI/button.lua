@@ -372,6 +372,7 @@ local e3 = CreateFrame("Frame")
 e3:RegisterEvent("ADDON_LOADED")
 e3:SetScript("OnEvent", function(self, event, addon)
 	init()
+	self:UnregisterEvent("ADDON_LOADED")
 end)
 
     --
