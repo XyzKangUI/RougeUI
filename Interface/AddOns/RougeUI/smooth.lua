@@ -101,13 +101,7 @@ local function SmoothBar(bar)
 end
 
 smoothframe:SetScript("OnEvent", function(self, event)
-	if (RougeUI.smooth == false) then
-		self:UnregisterEvent("ADDON_LOADED")
-		self:SetScript("OnEvent", nil)
-		return 
-	end
-
-	if (event == "ADDON_LOADED") then
+	if event == "ADDON_LOADED" and RougeUI.smooth == true then
 		for k,v in pairs (barstosmooth) do
 			if _G[k] then
 				SmoothBar(_G[k])
