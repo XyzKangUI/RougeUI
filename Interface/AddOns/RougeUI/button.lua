@@ -207,7 +207,7 @@ for i = 1, NUM_TEMP_ENCHANT_FRAMES do
 	local du = _G["TempEnchant"..i.."Duration"]
         bu:SetNormalTexture("")
         bo:SetTexture("")
-        addBorder(bu, 1)
+        addBorder(bu, .1)
 	SkinColor(bu, 1, 0, 1)
         du:SetJustifyH("CENTER")
         du:ClearAllPoints() 
