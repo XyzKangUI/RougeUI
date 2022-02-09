@@ -369,10 +369,10 @@ e2:SetScript("OnEvent", UpdateBag)
 e2:RegisterEvent("BAG_UPDATE")
 
 local e3 = CreateFrame("Frame")
-e3:RegisterEvent("ADDON_LOADED")
-e3:SetScript("OnEvent", function(self, event, addon)
+e3:RegisterEvent("PLAYER_LOGIN")
+e3:SetScript("OnEvent", function(self, event)
 	init()
-	self:UnregisterEvent("ADDON_LOADED")
+	self:UnregisterEvent("PLAYER_LOGIN")
 end)
 
     --
