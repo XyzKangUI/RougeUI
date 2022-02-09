@@ -5,6 +5,7 @@ This is my **_personal_** UI for TBC-Classic. It is heavily inspired on a few el
 # **Feature List:**
 
 - Dark frames (incl. nameplates).
+- ModUI's border style on actionbar and aura's (dark).
 - Hide all glows, spammy damage indicators and group/raid titles.
 - Smooth animated Health and Mana bars.
 - Sets the correct Player PvP icon when you get queued as Horde <> Alliance in a crossfaction battleground.
@@ -53,7 +54,6 @@ A lot of the code is kanged, ergo credits should be given where they are due:
 * Knall: for fixing the nameplate castbar hook C overflow and the combat indicator.
 * Modernist for making the best addon hands down and inspiring me to bring over a few features from his 1.12 UI; energy ticker; spellbars; nameplates; smooth animated statusbars.
 * Usoltev for the auras code.
-* SchakaPvPUI (modded version as seen in Sbkzor's vids) for the inspiration.
 * Lorti/Chordsy/Syiana for some of the copypasta. 
-* Shanghi for his tbc 2.4.3 smooth animated bars fix.
+* Shanghi/ModUI for smoothened animation bars.
 * The rest not mentioned here :D
