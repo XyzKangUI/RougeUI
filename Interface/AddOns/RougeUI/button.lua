@@ -101,7 +101,7 @@ local function styleActionButton(bu)
 	local fbg = _G[name.."FloatingBG"]
 
 	addBorder(bu, 1)
-	bu:SkinColor(r, g, b)
+	SkinColor(bu, r, g, b)
 
 	if not bartender4 then
 		ho:ClearAllPoints()
@@ -148,30 +148,30 @@ local function init()
 
 	for _, v in pairs(buttons) do
 		addBorder(v, 1)
-		v:SkinColor(r, g, b)
+		SkinColor(v, r, g, b)
 	end
 
 	for _, v in pairs(slots) do
 		local bu = _G["Character"..v.."Slot"]
 		local ic = _G["Character"..v.."SlotIconTexture"]
-		addBorder(bu)
-		bu:SkinColor(r, g, b)
+		addBorder(bu, 0)
+		SkinColor(bu, r, g, b)
 		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
 		-- ic:SetTexCoord(.1, .9, .1, .9)
 	end
 
 	for i = 0, 3 do -- Bagicons
 		local bu = _G["CharacterBag"..i.."Slot"]
-        	addBorder(bu)
-        	bu:SkinColor(r, g, b)
+        	addBorder(bu, 0)
+        	SkinColor(bu, r, g, b)
 	end
 
 	for i = 1,12 do  -- Bagslots
 		for k = 1, MAX_CONTAINER_ITEMS do
 			local bu = _G["ContainerFrame"..i.."Item"..k]
 			-- local ic = _G["ContainerFrame"..i.."Item"..k.."IconTexture"]
-            		addBorder(bu)
-            		bu:SkinColor(r, g, b)
+            		addBorder(bu, 0)
+            		SkinColor(bu, r, g, b)
             		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
             		-- ic:SetTexCoord(.1, .9, .1, .9)
             		bu.bg = bu:CreateTexture(nil, "BACKGROUND")
@@ -185,8 +185,8 @@ local function init()
 	for i = 1, 28 do
 		local bu = _G["BankFrameItem"..i]
 		local ic = _G["BankFrameItem"..i.."IconTexture"]
-		addBorder(bu)
-		bu:SkinColor(r, g, b)
+		addBorder(bu, 0)
+		SkinColor(bu, r, g, b)
 		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
 		-- ic:SetTexCoord(.1, .9, .1, .9)
 		bu.bg = bu:CreateTexture(nil, "BACKGROUND")
@@ -199,7 +199,7 @@ local function init()
 	local tf = CreateFrame("Frame", nil, _G[TargetFrameSpellBar:GetName()])
 	tf:SetAllPoints(_G[TargetFrameSpellBar:GetName().."Icon"])
 	addBorder(tf, 0)
-	tf:SkinColor(r, g, b)
+	SkinColor(tf, r, g, b)
 
 end
 
@@ -263,7 +263,7 @@ local function TargetButton_Update(self)
 				_G["TargetFrameBuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
 				bu.skin = true
 			end
-			bu:SkinColor(r, g, b)
+			SkinColor(bu, r, g, b)
 		else
 			break
 		end
@@ -277,7 +277,7 @@ local function TargetButton_Update(self)
 				_G["FocusFrameBuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
 				bu.skin = true
 			end
-			bu:SkinColor(r, g, b)
+			SkinColor(bu, r, g, b)
 		else
 			break
 		end
@@ -292,7 +292,7 @@ local function TargetButton_Update(self)
 				bu.skin = true
 			end
 			local re, gr, bl = _G["TargetFrameDebuff"..i.."Border"]:GetVertexColor()
-			bu:SkinColor(re, gr, bl)
+			SkinColor(bu, re, gr, bl)
 		else
 			break
 		end
@@ -307,7 +307,7 @@ local function TargetButton_Update(self)
 				bu.skin = true
 			end
 			local re, gr, bl = _G["FocusFrameDebuff"..i.."Border"]:GetVertexColor()
-			bu:SkinColor(re, gr, bl)
+			SkinColor(bu, re, gr, bl)
 		else
 			break
 		end
@@ -321,9 +321,9 @@ local function UpdatePaperDoll()
 		local q = GetInventoryItemQuality("player", i)
 		if q and q > 1 then
 			local re, gr, bl = GetItemQualityColor(q)
-			bu:SkinColor(re*1.4, gr*1.4, bl*1.4)
+			SkinColor(bu, re*1.4, gr*1.4, bl*1.4)
 		else
-			bu:SkinColor(r, g, b)
+			SkinColor(bu, r, g, b)
 		end
 	end
 end
@@ -334,21 +334,23 @@ local function UpdateBag()
 		local f = _G[n]
 		local id = f:GetID()
 		for i = 1, MAX_CONTAINER_ITEMS do
-			local bu   = _G[n.."Item"..i]
+			local bu = _G[n.."Item"..i]
 			local link = GetContainerItemLink(id, bu:GetID())
 
-			bu:SkinColor(r, g, b)
+			if bu then
+				SkinColor(bu, r, g, b)
+			end
 
 			if  bu and bu:IsShown() and link then
 				local _, _, istring  = string.find(link, "|H(.+)|h")
 				local n, _, q, _, _, type = GetItemInfo(istring)
 				if n and strfind(n, "Mark of Honor") then
-					bu:SkinColor(.98, .95, 0)
+					SkinColor(bu, .98, .95, 0)
 				elseif  type == "Quest" then
-					bu:SkinColor(1, .33, 0)
+					SkinColor(bu, 1, .33, 0)
 				elseif q and q > 1 then
 					local re, gr, bl = GetItemQualityColor(q)
-					bu:SkinColor(re*1.4, gr*1.4, bl*1.4)
+					SkinColor(bu, re*1.4, gr*1.4, bl*1.4)
 				end
 			end
 		end
