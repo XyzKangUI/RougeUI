@@ -98,7 +98,6 @@ local function styleActionButton(bu)
 
 	local name = bu:GetName()
 	local ho = _G[name.."HotKey"]
-	local nt = _G[name.."NormalTexture"]
 	local fbg = _G[name.."FloatingBG"]
 
 	addBorder(bu, 1)
@@ -109,15 +108,16 @@ local function styleActionButton(bu)
 		ho:SetPoint("TOPRIGHT", bu, 1, -3)
 	end
 
-	if not nt then
-		nt = bu:GetNormalTexture()
-	end
-
-	nt:Hide()
 	if fbg then fbg:Hide() end
-
+	
 	bu.rabs_styled = true
 end
+
+hooksecurefunc("ActionButton_UpdateState", function(self)
+	local normalTexture = self.NormalTexture
+	if not normalTexture or bartender4 then return end
+	normalTexture:Hide()
+end)
 
 local function init()
 	for i = 1, NUM_ACTIONBAR_BUTTONS do
@@ -138,15 +138,17 @@ local function init()
 		end
 	end
 
-	if bartender4 then
-		for i = 1, 120 do
-			styleActionButton(_G["BT4Button"..i])
-		end
-	end
+
 
 	for _, v in pairs(buttons) do
 		addBorder(v)
 		v:SkinColor(r, g, b)
+	end
+
+	if bartender4 then
+		for i = 1, 120 do
+			styleActionButton(_G["BT4Button"..i])
+		end
 	end
 
 	for _, v in pairs(slots) do
@@ -239,7 +241,7 @@ local function applySkin(b)
 	b:SetNormalTexture("")
 	ic:SetTexCoord(.1, .9, .1, .9)
 	addBorder(b, .25)
-	SkinColor(b, .25, .25, .25)
+	SkinColor(b, .05, .05, .05)
 
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
