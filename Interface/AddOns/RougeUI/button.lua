@@ -285,7 +285,7 @@ local function TargetButton_Update(self)
 				bu.skin = true
 			end
 			local re, gr, bl = _G["FocusFrameDebuff"..i.."Border"]:GetVertexColor()
-			SkinColor(bu, re, gr, bl)
+			SkinColor(bu, re*1.7, gr*1.7, bl*1.7)
 		else
 			break
 		end
