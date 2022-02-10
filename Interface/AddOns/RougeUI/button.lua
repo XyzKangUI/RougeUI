@@ -5,23 +5,6 @@ local bartender4 = IsAddOnLoaded("Bartender4")
 
 local r, g, b = .05, .05, .05
 local sections = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
-local buttons = {
-	_G["MainMenuBarBackpackButton"],
-	GameTooltip,
-	ItemRefTooltip,
-	ItemRefShoppingTooltip1,
-	ItemRefShoppingTooltip2,
-	ShoppingTooltip1,
-	ShoppingTooltip2,
-	WorldMapTooltip,
-	WorldMapCompareTooltip1,
-	WorldMapCompareTooltip2,
-	ChatMenu,
-	VoiceMacroMenu,
-	LanguageMenu,
-	DropDownList1,	
-	DropDownList2,
-}
 
 local slots = {
 	[0] = "Ammo", "Head", "Neck", "Shoulder",
@@ -144,11 +127,6 @@ local function init()
 			if not normalTexture then return end
 			normalTexture:Hide()
 		end)
-	end
-
-	for _, v in pairs(buttons) do
-		addBorder(v, 1)
-		SkinColor(v, r, g, b)
 	end
 
 	for _, v in pairs(slots) do
