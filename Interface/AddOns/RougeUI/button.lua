@@ -6,20 +6,6 @@ local bartender4 = IsAddOnLoaded("Bartender4")
 local r, g, b = .05, .05, .05
 local sections = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
 
-local backdrop = {
-	bgFile = nil,
-	edgeFile = "Interface\\AddOns\\RougeUI\\textures\\outer_shadow",
-	tile = false,
-	tileSize = 32,
-	edgeSize = 6,
-    	insets = {
-      		left = 6,
-      		right = 6,
-      		top = 6,
-      		bottom = 6,
-    	},
-}
-
 local slots = {
 	[0] = "Ammo", "Head", "Neck", "Shoulder",
 	"Shirt", "Chest", "Waist", "Legs", "Feet",
@@ -229,16 +215,8 @@ local function applySkin(b)
 
 	b:SetNormalTexture("")
 	ic:SetTexCoord(.1, .9, .1, .9)
-	--addBorder(b, 0)
+	addBorder(b, .25)
 	SkinColor(b, .05, .05, .05)
-
-		local back = CreateFrame("Frame", nil, b, BackdropTemplateMixin and "BackdropTemplate")
-      		back:SetPoint("TOPLEFT", b, "TOPLEFT", -5, 5)
-      		back:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", 5, -5)
-      		back:SetFrameLevel(b:GetFrameLevel() - 1)
-      		back:SetBackdrop(backdrop)
-      		back:SetBackdropBorderColor(0.05, 0.05, 0.05)
-      		b.bg = back
 
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
