@@ -6,6 +6,20 @@ local bartender4 = IsAddOnLoaded("Bartender4")
 local r, g, b = .05, .05, .05
 local sections = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
 
+local backdrop = {
+	bgFile = nil,
+	edgeFile = "Interface\\AddOns\\RougeUI\\textures\\outer_shadow",
+	tile = false,
+	tileSize = 32,
+	edgeSize = 6,
+    	insets = {
+      		left = 6,
+      		right = 6,
+      		top = 6,
+      		bottom = 6,
+    	},
+}
+
 local slots = {
 	[0] = "Ammo", "Head", "Neck", "Shoulder",
 	"Shirt", "Chest", "Waist", "Legs", "Feet",
@@ -82,10 +96,15 @@ local function styleActionButton(bu)
 	local name = bu:GetName()
 	local ho = _G[name.."HotKey"]
 	local fbg = _G[name.."FloatingBG"]
+	local ic = _G[name.."Icon"]
+	local nt = _G[name.."NormalTexture"]
 
-	addBorder(bu, 1)
+	addBorder(bu, .1)
 	SkinColor(bu, r, g, b)
 
+	ic:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+	nt:SetAlpha(0)
+			
 	if not bartender4 then
 		ho:ClearAllPoints()
 		ho:SetPoint("TOPRIGHT", bu, 1, -3)
@@ -119,14 +138,6 @@ local function init()
 		for i = 1, 120 do
 			styleActionButton(_G["BT4Button"..i])
 		end
-	end
-
-	if not bartender4 then
-		hooksecurefunc("ActionButton_UpdateState", function(self)
-			local normalTexture = self.NormalTexture
-			if not normalTexture then return end
-			normalTexture:Hide()
-		end)
 	end
 
 	for _, v in pairs(slots) do
@@ -218,8 +229,16 @@ local function applySkin(b)
 
 	b:SetNormalTexture("")
 	ic:SetTexCoord(.1, .9, .1, .9)
-	addBorder(b, .25)
+	--addBorder(b, 0)
 	SkinColor(b, .05, .05, .05)
+
+		local back = CreateFrame("Frame", nil, b, BackdropTemplateMixin and "BackdropTemplate")
+      		back:SetPoint("TOPLEFT", b, "TOPLEFT", -5, 5)
+      		back:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", 5, -5)
+      		back:SetFrameLevel(b:GetFrameLevel() - 1)
+      		back:SetBackdrop(backdrop)
+      		back:SetBackdropBorderColor(0.05, 0.05, 0.05)
+      		b.bg = back
 
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
