@@ -210,7 +210,7 @@ local function applySkin(b)
 	b:SetNormalTexture("")
 	ic:SetTexCoord(.1, .9, .1, .9)
 	addBorder(b, .1)
-	SkinColor(b, .2, .2, .2)
+	SkinColor(b, .05, .05, .05)
 
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
