@@ -200,23 +200,17 @@ local function applySkin(b)
 		addBorder(b, 0)
 		ic:SetTexCoord(.1, .9, .1, .9)
 		local re, gr, bl = bo:GetVertexColor()
-		SkinColor(b, re*1.5, gr*1.5, bl*1.5)
+		SkinColor(b, re*1.7, gr*1.7, bl*1.7)
 		bo:SetAlpha(0)
 		b.duration:ClearAllPoints()
 		b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
 		return
 	end
 
-        if bo then
-		local r, g, b = bo:GetVertexColor()
-		SkinColor(bo, r*1.5, g*1.5, b*1.5)
-		bo:SetAlpha(0)
-        end
-
 	b:SetNormalTexture("")
 	ic:SetTexCoord(.1, .9, .1, .9)
-	addBorder(b, .25)
-	SkinColor(b, .05, .05, .05)
+	addBorder(b, .1)
+	SkinColor(b, .2, .2, .2)
 
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
