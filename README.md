@@ -1,7 +1,6 @@
 # RougeUI
 
-This is my **_personal_** UI for TBC-Classic. It is heavily inspired on a few elements from ModUI, LortiUI (black textures only) and SchakaPvPUI.
-
+This is my **_personal_** UI for TBC-Classic. It is heavily inspired by ModUI. 
 # **Feature List:**
 
 - Dark frames (incl. nameplates).
