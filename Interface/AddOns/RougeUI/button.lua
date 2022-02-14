@@ -222,68 +222,6 @@ hooksecurefunc("AuraButton_Update", function(self, index)
 	if button and not button.styled then applySkin(button) end
 end)
 
-local function TargetButton_Update(self)
-	if self:IsForbidden() then return end
-	for i = 1, MAX_TARGET_BUFFS do
-		local bu = _G["TargetFrameBuff"..i]
-		if bu then
-			if not bu.skin then
-				addBorder(bu, 0)
-				_G["TargetFrameBuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
-				bu.skin = true
-			end
-			SkinColor(bu, r, g, b)
-		else
-			break
-		end
-	end
-
-	for i = 1, MAX_TARGET_BUFFS do
-		local bu = _G["FocusFrameBuff"..i]
-		if bu then
-			if not bu.skin then
-				addBorder(bu, 0)
-				_G["FocusFrameBuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
-				bu.skin = true
-			end
-			SkinColor(bu, r, g, b)
-		else
-			break
-		end
-	end
-
-	for i = 1, MAX_TARGET_DEBUFFS do
-		local bu = _G["TargetFrameDebuff"..i]
-		if bu then
-			if not bu.skin then
-				addBorder(bu, 0)
-				_G["TargetFrameDebuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
-				bu.skin = true
-			end
-			local re, gr, bl = _G["TargetFrameDebuff"..i.."Border"]:GetVertexColor()
-			SkinColor(bu, re*1.7, gr*1.7, bl*1.7)
-		else
-			break
-		end
-	end
-
-	for i = 1, MAX_TARGET_DEBUFFS do
-		local bu = _G["FocusFrameDebuff"..i]
-		if bu then
-			if not bu.skin then
-				addBorder(bu, 0)
-				_G["FocusFrameDebuff"..i.."Icon"]:SetTexCoord(.1, .9, .1, .9)
-				bu.skin = true
-			end
-			local re, gr, bl = _G["FocusFrameDebuff"..i.."Border"]:GetVertexColor()
-			SkinColor(bu, re*1.7, gr*1.7, bl*1.7)
-		else
-			break
-		end
-	end
-end
-hooksecurefunc("TargetFrame_UpdateAuras", TargetButton_Update);
-
 local function UpdatePaperDoll()
 	for i, v in pairs(slots) do
 		local bu = _G["Character"..v.."Slot"]
