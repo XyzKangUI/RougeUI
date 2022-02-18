@@ -73,7 +73,7 @@ local function ColorScoreBoard()
                 		ScoreBoard.name.text:SetText(color:WrapTextInColorCode(text))
             		end
         	end
-    end
+	end
 end
 
 -- Some PvPIcon tweaks for BG/Arena/CP Classes
@@ -222,8 +222,8 @@ end
 
 local function manabarcolor(statusbar, unit)
 	if UnitIsPlayer("player") then
-		PlayerFrameManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
 		PlayerFrameManaBar.lockColor = true
+		PlayerFrameManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
 		if (UnitIsUnit("targettarget", "player")) then
 			TargetFrameToTManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
 		end
@@ -269,9 +269,13 @@ local function CheckClassification(self, forceNormalTexture)
 		self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
 		self.borderTexture:SetVertexColor(1, 1, 1)
 	else
-		self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+		if self.unit  == "focus" then
+			self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\FocusFrame")
+		else
+			self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+			self.borderTexture:SetVertexColor(.05, .05, .05)
+		end
 		forceNormalTexture = true;
-		self.borderTexture:SetVertexColor(.05, .05, .05)
 	end
 end
 
