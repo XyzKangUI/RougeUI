@@ -1,5 +1,7 @@
 local UnitAffectingCombat = UnitAffectingCombat
 local pairs = pairs
+local interval = 0.2
+local lastupdate = 0
 
 local function CreateCombatIndicatorForUnit(unit, frame)
 	local ciFrame = CreateFrame("Frame", nil, frame)
@@ -13,11 +15,14 @@ local function CreateCombatIndicatorForUnit(unit, frame)
     	return ciFrame
 end
 
-local function FrameOnUpdate(self)
+local function FrameOnUpdate(self, elapsed)
 	if (RougeUI.CombatIndicator == false) then
 		self:SetScript("OnUpdate", nil)
 		return
 	end
+	lastupdate = lastupdate + elapsed
+	if lastupdate >= interval then
+		lastupdate = 0
 		for _,ciFrame in pairs(self.ciFrames) do
 			if UnitAffectingCombat(ciFrame.unit) then 
 				ciFrame:Show() 
@@ -25,6 +30,7 @@ local function FrameOnUpdate(self)
 				ciFrame:Hide() 
 			end 
 		end
+	end
 end
 
 
