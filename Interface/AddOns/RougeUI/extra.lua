@@ -291,15 +291,12 @@ local function ClassPortrait(self)
 	end
 	if self.portrait then
 		if UnitIsPlayer(self.unit) then
-			local _, t = UnitClass(self.unit)
-			if t then
-				self.portrait:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-Classes-Circles")
-				self.portrait:SetTexCoord(unpack(CLASS_ICON_TCOORDS[t]))
+			local _, class = UnitClass(self.unit)
+			if (class and UnitIsPlayer(self.unit)) then
+				self.portrait:SetTexture(CLASS_TEXTURE:format(class))
 			else
-				self.portrait:SetTexCoord(0,1,0,1)
+				format(self.unit)
 			end
-		else
-			self.portrait:SetTexCoord(0,1,0,1)
 		end
 	end
 end
