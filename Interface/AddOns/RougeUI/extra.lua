@@ -269,7 +269,7 @@ local function CheckClassification(self, forceNormalTexture)
 		self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
 		self.borderTexture:SetVertexColor(1, 1, 1)
 	else
-		if self.unit  == "focus" then
+		if RougeUI.rfocus and self.unit == "focus" then
 			self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\FocusFrame")
 		else
 			self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
@@ -291,12 +291,15 @@ local function ClassPortrait(self)
 	end
 	if self.portrait then
 		if UnitIsPlayer(self.unit) then
-			local _, class = UnitClass(self.unit)
-			if (class and UnitIsPlayer(self.unit)) then
-				self.portrait:SetTexture(CLASS_TEXTURE:format(class))
+			local _, t = UnitClass(self.unit)
+			if t then
+				self.portrait:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-Classes-Circles")
+				self.portrait:SetTexCoord(unpack(CLASS_ICON_TCOORDS[t]))
 			else
-				format(self.unit)
+				self.portrait:SetTexCoord(0,1,0,1)
 			end
+		else
+			self.portrait:SetTexCoord(0,1,0,1)
 		end
 	end
 end

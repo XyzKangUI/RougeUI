@@ -2,7 +2,7 @@ local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab }
+		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -26,17 +26,20 @@ function f:ADDON_LOADED()
     if RougeUI.CombatIndicator == nil then RougeUI.CombatIndicator = false; end
     if RougeUI.CastTimer == nil then RougeUI.CastTimer = false; end
     if RougeUI.smooth == nil then RougeUI.smooth = false; end
+    if RougeUI.pimp == nil then RougeUI.pimp = false; end
+    if RougeUI.retab == nil then RougeUI.retab = false; end
+    if RougeUI.rfocus == nil then RougeUI.rfocus = false; end
 
     Custom_TargetBuffSize();
     CusFonts();
 
-    if not f.optionsPanel then
-        f.optionsPanel = f:CreateGUI()
+    if not f.options then
+        f.options = f:CreateGUI()
     end
 end
 
 function f:CreateGUI()
-    local Panel=CreateFrame("Frame"); do
+    	local Panel=CreateFrame("Frame", "$parentRougeUI_Config", InterfaceOptionsPanelContainer) do
         Panel.name=Title;
         InterfaceOptions_AddCategory(Panel);--	Panel Registration
 
@@ -44,7 +47,31 @@ function f:CreateGUI()
         title:SetPoint("TOPLEFT",12,-15);
         title:SetText(Title);
 
-	local Reload = CreateFrame("Button", nil, Panel, "UIPanelButtonTemplate")
+	local Filler = Panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	Filler:SetPoint("TOP", 0, -50)
+	Filler:SetText("Welcome to RougeUI."..
+	" Don't forget to check for new updates on GitHub")
+	
+	Panel.childPanel1 = CreateFrame("Frame", "$parentConfigChild_UnitFrame", Panel)
+	Panel.childPanel1.name = "UnitFrame"
+	Panel.childPanel1.parent = Panel.name
+	InterfaceOptions_AddCategory(Panel.childPanel1)
+
+	Panel.childPanel2 = CreateFrame("Frame", "$parentConfigChild_Misc", Panel)
+	Panel.childPanel2.name = "Misc"
+	Panel.childPanel2.parent = Panel.name
+	InterfaceOptions_AddCategory(Panel.childPanel2)
+
+	local Reload = CreateFrame("Button", nil, Panel.childPanel1, "UIPanelButtonTemplate")
+	Reload:SetPoint("BOTTOMRIGHT", -10, 10)
+	Reload:SetWidth(100)
+	Reload:SetHeight(25)
+	Reload:SetText("Save & Reload")
+	Reload:SetScript("OnClick", function(self, button, down)
+		ReloadUI()
+	end)
+
+	local Reload = CreateFrame("Button", nil, Panel.childPanel2, "UIPanelButtonTemplate")
 	Reload:SetPoint("BOTTOMRIGHT", -10, 10)
 	Reload:SetWidth(100)
 	Reload:SetHeight(25)
@@ -55,8 +82,8 @@ function f:CreateGUI()
 
         local name = "ClassPortraitButton"
         local template = "UICheckButtonTemplate"
-        local ClassPortraitButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        ClassPortraitButton:SetPoint("TOPLEFT", 10, -60)
+        local ClassPortraitButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        ClassPortraitButton:SetPoint("TOPLEFT", 10, -40)
         ClassPortraitButton.text = _G[name.."Text"]
 	ClassPortraitButton.text:SetText("Enable class portraits")
 	ClassPortraitButton:SetChecked(RougeUI.Class_Portrait)
@@ -64,8 +91,8 @@ function f:CreateGUI()
 
         local name = "ClassHP"
         local template = "UICheckButtonTemplate"
-        local ClassHPButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        ClassHPButton:SetPoint("TOPLEFT", 10, -100)
+        local ClassHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        ClassHPButton:SetPoint("TOPLEFT", 10, -80)
         ClassHPButton.text = _G[name.."Text"]
 	ClassHPButton.text:SetText("Class Colored HP")
 	ClassHPButton:SetChecked(RougeUI.ClassHP)
@@ -73,8 +100,8 @@ function f:CreateGUI()
 
         local name = "ScoreBoard"
         local template = "UICheckButtonTemplate"
-        local ScoreBoardButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        ScoreBoardButton:SetPoint("TOPLEFT", 350, -60)
+        local ScoreBoardButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        ScoreBoardButton:SetPoint("TOPLEFT", 10, -120)
         ScoreBoardButton.text = _G[name.."Text"]
 	ScoreBoardButton.text:SetText("Class Colored PvP Scoreboard")
 	ScoreBoardButton:SetChecked(RougeUI.ScoreBoard)
@@ -82,8 +109,8 @@ function f:CreateGUI()
 
         local name = "HideTitles"
         local template = "UICheckButtonTemplate"
-        local HideTitlesButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        HideTitlesButton:SetPoint("TOPLEFT", 350, -100)
+        local HideTitlesButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        HideTitlesButton:SetPoint("TOPLEFT", 10, -240)
         HideTitlesButton.text = _G[name.."Text"]
 	HideTitlesButton.text:SetText("Hide Group/Raid titles, e.g. Group 1")
 	HideTitlesButton:SetChecked(RougeUI.HideTitles)
@@ -91,8 +118,8 @@ function f:CreateGUI()
 
         local name = "FadeIcon"
         local template = "UICheckButtonTemplate"
-        local FadeIconButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        FadeIconButton:SetPoint("TOPLEFT", 350, -140)
+        local FadeIconButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        FadeIconButton:SetPoint("TOPLEFT", 350, -40)
         FadeIconButton.text = _G[name.."Text"]
 	FadeIconButton.text:SetText("Fade PvP Icon")
 	FadeIconButton:SetChecked(RougeUI.FadeIcon)
@@ -100,8 +127,8 @@ function f:CreateGUI()
 
         local name = "HideGlows"
         local template = "UICheckButtonTemplate"
-        local HideGlowsButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        HideGlowsButton:SetPoint("TOPLEFT", 350, -180)
+        local HideGlowsButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        HideGlowsButton:SetPoint("TOPLEFT", 350, -80)
         HideGlowsButton.text = _G[name.."Text"]
 	HideGlowsButton.text:SetText("Hide hit indicator + glows on Playerframe")
 	HideGlowsButton:SetChecked(RougeUI.HideGlows)
@@ -109,8 +136,8 @@ function f:CreateGUI()
 
         local name = "EnergyTicker"
         local template = "UICheckButtonTemplate"
-        local EnergyTickerButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        EnergyTickerButton:SetPoint("TOPLEFT", 350, -220)
+        local EnergyTickerButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        EnergyTickerButton:SetPoint("TOPLEFT", 350, -120)
         EnergyTickerButton.text = _G[name.."Text"]
 	EnergyTickerButton.text:SetText("Enable Energy ticker for Rogue/Druid")
 	EnergyTickerButton:SetChecked(RougeUI.EnergyTicker)
@@ -118,8 +145,8 @@ function f:CreateGUI()
 
         local name = "CombatIndicator"
         local template = "UICheckButtonTemplate"
-        local CombatIndicatorButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        CombatIndicatorButton:SetPoint("TOPLEFT", 350, -260)
+        local CombatIndicatorButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        CombatIndicatorButton:SetPoint("TOPLEFT", 10, -160)
         CombatIndicatorButton.text = _G[name.."Text"]
 	CombatIndicatorButton.text:SetText("Enable Combat Indicator")
 	CombatIndicatorButton:SetChecked(RougeUI.CombatIndicator)
@@ -127,8 +154,8 @@ function f:CreateGUI()
 
         local name = "CastTimer"
         local template = "UICheckButtonTemplate"
-        local CastTimerButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        CastTimerButton:SetPoint("TOPLEFT", 350, -300)
+        local CastTimerButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        CastTimerButton:SetPoint("TOPLEFT", 10, -200)
         CastTimerButton.text = _G[name.."Text"]
 	CastTimerButton.text:SetText("Enable modUI castbar style with timer")
 	CastTimerButton:SetChecked(RougeUI.CastTimer)
@@ -136,8 +163,8 @@ function f:CreateGUI()
 
         local name = "SmoothFrame"
         local template = "UICheckButtonTemplate"
-        local SmoothFrameButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        SmoothFrameButton:SetPoint("TOPLEFT", 350, -340)
+        local SmoothFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        SmoothFrameButton:SetPoint("TOPLEFT", 350, -160)
         SmoothFrameButton.text = _G[name.."Text"]
 	SmoothFrameButton.text:SetText("Smooth animated health/mana bars")
 	SmoothFrameButton:SetChecked(RougeUI.smooth)
@@ -145,8 +172,8 @@ function f:CreateGUI()
 
         local name = "PimpFrame"
         local template = "UICheckButtonTemplate"
-        local PimpFrameButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        PimpFrameButton:SetPoint("TOPLEFT", 350, -380)
+        local PimpFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        PimpFrameButton:SetPoint("TOPLEFT", 350, -200)
         PimpFrameButton.text = _G[name.."Text"]
 	PimpFrameButton.text:SetText("Enable Violet Colored Energy/Mana Bar")
 	PimpFrameButton:SetChecked(RougeUI.pimp)
@@ -154,17 +181,26 @@ function f:CreateGUI()
 
         local name = "RetabBind"
         local template = "UICheckButtonTemplate"
-        local RetabBind = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        RetabBind:SetPoint("TOPLEFT", 350, -420)
+        local RetabBind = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        RetabBind:SetPoint("TOPLEFT", 10, -280)
         RetabBind.text = _G[name.."Text"]
 	RetabBind.text:SetText("RETabBinder")
 	RetabBind:SetChecked(RougeUI.retab)
 	RetabBind:SetScript("OnClick", function() RougeUI.retab = not RougeUI.retab end)
 
+        local name = "RedFocus"
+        local template = "UICheckButtonTemplate"
+        local RedFocus = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        RedFocus:SetPoint("TOPLEFT", 350, -240)
+        RedFocus.text = _G[name.."Text"]
+	RedFocus.text:SetText("Add red line to focusframe")
+	RedFocus:SetChecked(RougeUI.rfocus)
+	RedFocus:SetScript("OnClick", function() RougeUI.rfocus = not RougeUI.rfocus end)
+
         local name = "GradientHP"
         local template = "UICheckButtonTemplate"
-        local GradientHPButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        GradientHPButton:SetPoint("TOPLEFT", 10, -140)
+        local GradientHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        GradientHPButton:SetPoint("TOPLEFT", 10, -120)
         GradientHPButton.text = _G[name.."Text"]
 	GradientHPButton.text:SetText("Gradient effect on HP")
 	GradientHPButton:SetChecked(RougeUI.GradientHP)
@@ -172,8 +208,8 @@ function f:CreateGUI()
 
         local name = "FastKeyPress"
         local template = "UICheckButtonTemplate"
-        local FastKeyPressButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        FastKeyPressButton:SetPoint("TOPLEFT", 10, -180)
+        local FastKeyPressButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        FastKeyPressButton:SetPoint("TOPLEFT", 10, -40)
         FastKeyPressButton.text = _G[name.."Text"]
 	FastKeyPressButton.text:SetText("Cast spells on key down (SnowFallKey)")
 	FastKeyPressButton:SetChecked(RougeUI.FastKeyPress)
@@ -189,8 +225,8 @@ function f:CreateGUI()
 
         local name = "ShortNumeric"
         local template = "UICheckButtonTemplate"
-        local ShortNumericButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        ShortNumericButton:SetPoint("TOPLEFT", 10, -220)
+        local ShortNumericButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        ShortNumericButton:SetPoint("TOPLEFT", 10, -160)
         ShortNumericButton.text = _G[name.."Text"]
 	ShortNumericButton.text:SetText("Shorten NUMERIC HP to one decimal")
 	ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
@@ -198,8 +234,8 @@ function f:CreateGUI()
 
         local name = "HighlightDispellable"
         local template = "UICheckButtonTemplate"
-        local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        HighlightDispellableButton:SetPoint("TOPLEFT", 10, -260)
+        local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        HighlightDispellableButton:SetPoint("TOPLEFT", 10, -200)
         HighlightDispellableButton.text = _G[name.."Text"]
 	HighlightDispellableButton.text:SetText("Highlight enemy Magic buffs")
 	HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
@@ -207,8 +243,8 @@ function f:CreateGUI()
 
         local name = "TimerGap"
         local template = "UICheckButtonTemplate"
-        local TimerGapButton = CreateFrame("CheckButton", name, Panel, "UICheckButtonTemplate")
-        TimerGapButton:SetPoint("TOPLEFT", 10, -300)
+        local TimerGapButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        TimerGapButton:SetPoint("TOPLEFT", 10, -80)
         TimerGapButton.text = _G[name.."Text"]
 	TimerGapButton.text:SetText("Remove space gap in (de)buff timer")
 	TimerGapButton:SetChecked(RougeUI.TimerGap)
@@ -216,7 +252,7 @@ function f:CreateGUI()
 
         local name = "FontSizeSlider"
         local template = "OptionsSliderTemplate"
-        local FontSizeSlider = CreateFrame("Slider", name, Panel, template)
+        local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, template)
         FontSizeSlider:SetPoint("TOPLEFT",20, -360)
         FontSizeSlider.textLow = _G[name.."Low"]
         FontSizeSlider.textHigh = _G[name.."High"]
@@ -237,7 +273,7 @@ function f:CreateGUI()
 
        local names = "TargetPlayerBuffSizeSlider"
         local template = "OptionsSliderTemplate"
-        local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel, template)
+        local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel1, template)
         TargetPlayerBuffSizeSlider:SetPoint("TOPLEFT", 20, -420)
         TargetPlayerBuffSizeSlider.textLow = _G[names.."Low"]
         TargetPlayerBuffSizeSlider.textHigh = _G[names.."High"]
@@ -260,7 +296,7 @@ function f:CreateGUI()
 
         local names = "TargetBuffSizeSlider"
         local template = "OptionsSliderTemplate"
-        local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel, template)
+        local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel1, template)
         TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -480)
         TargetBuffSizeSlider.textLow = _G[names.."Low"]
         TargetBuffSizeSlider.textHigh = _G[names.."High"]
