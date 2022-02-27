@@ -57,7 +57,11 @@ end
 
 local function OnEvent(self, event)
 	local _, class = UnitClass("player")
-	if (RougeUI.EnergyTicker == false and (class ~= "ROGUE" or class ~= "DRUID")) then
+	if not (class == "ROGUE" or class == "DRUID") then
+		RougeUI.EnergyTicker = false
+	end
+
+	if RougeUI.EnergyTicker == false then
 		self:UnregisterAllEvents()
 		self:SetScript("OnEvent", nil)
 		return
