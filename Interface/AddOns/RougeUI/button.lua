@@ -264,11 +264,19 @@ local e = CreateFrame("Frame")
 e:SetParent(CharacterFrame)
 e:RegisterEvent("UNIT_INVENTORY_CHANGED")
 e:SetScript("OnShow", function(self, event)
-	if RougeUI.skinbuttons == false then self:UnregisterEvent("UNIT_INVENTORY_CHANGED") return end
+	if RougeUI.skinbuttons == false then 
+		self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+		self:Setscript("OnShow", nil)
+		return 
+	end
 	UpdatePaperDoll()
 end)
 e:SetScript("OnEvent", function(self, event)
-	if RougeUI.skinbuttons == false then self:UnregisterEvent("UNIT_INVENTORY_CHANGED") return end
+	if RougeUI.skinbuttons == false then 
+		self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+		self:SetScript("OnEvent", nil)
+		return 
+	end
 	UpdatePaperDoll()
 end)
 
@@ -276,7 +284,11 @@ local e2 = CreateFrame("Frame")
 e2:SetParent(ContainerFrame1)
 e2:RegisterEvent("BAG_UPDATE")
 e2:SetScript("OnEvent", function(self, event)
-	if RougeUI.skinbuttons == false then self:UnregisterEvent("BAG_UPDATE") return end
+	if RougeUI.skinbuttons == false then 
+		self:UnregisterEvent("BAG_UPDATE")
+		self:SetScript("OnEvent", nil)
+		return 
+	end
 	UpdateBag()
 	hooksecurefunc("ContainerFrame_OnShow", UpdateBag)
 end)
@@ -284,14 +296,17 @@ end)
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event)
-	if RougeUI.skinbuttons == false then self:UnregisterEvent("PLAYER_LOGIN") return end
-	init()
-	hooksecurefunc("AuraButton_Update", function(self, index)
-		local button = _G[self..index]
-		if button and not button.styled then applySkin(button) end
-	end)
-	self:UnregisterEvent("PLAYER_LOGIN")
-	self:SetScript("OnEvent", nil)
+	if event == "PLAYER_LOGIN" then
+		if RougeUI.skinbuttons == true then
+			init()
+			hooksecurefunc("AuraButton_Update", function(self, index)
+				local button = _G[self..index]
+				if button and not button.styled then applySkin(button) end
+			end)
+		end
+		self:UnregisterEvent("PLAYER_LOGIN")
+		self:SetScript("OnEvent", nil)
+	end
 end)
 
     --
