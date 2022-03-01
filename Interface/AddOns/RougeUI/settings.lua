@@ -2,7 +2,7 @@ local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus }
+		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus, skinbuttons }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -29,6 +29,7 @@ function f:ADDON_LOADED()
     if RougeUI.pimp == nil then RougeUI.pimp = false; end
     if RougeUI.retab == nil then RougeUI.retab = false; end
     if RougeUI.rfocus == nil then RougeUI.rfocus = false; end
+    if RougeUI.skinbuttons == nil then RougeUI.skinbuttons = false; end
 
     Custom_TargetBuffSize();
     CusFonts();
@@ -187,6 +188,15 @@ function f:CreateGUI()
 	RetabBind.text:SetText("RETabBinder")
 	RetabBind:SetChecked(RougeUI.retab)
 	RetabBind:SetScript("OnClick", function() RougeUI.retab = not RougeUI.retab end)
+
+        local name = "Skinbuttons"
+        local template = "UICheckButtonTemplate"
+        local Skinbuttons = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        Skinbuttons:SetPoint("TOPLEFT", 10, -320)
+        Skinbuttons.text = _G[name.."Text"]
+	Skinbuttons.text:SetText("Apply border theme to actionbar, buffs etc")
+	Skinbuttons:SetChecked(RougeUI.skinbuttons)
+	Skinbuttons:SetScript("OnClick", function() RougeUI.skinbuttons = not RougeUI.skinbuttons end)
 
         local name = "RedFocus"
         local template = "UICheckButtonTemplate"

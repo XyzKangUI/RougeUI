@@ -2,6 +2,7 @@
 
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
+if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then return end
 
 local r, g, b = .05, .05, .05
 local sections = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
@@ -102,6 +103,13 @@ local function styleActionButton(bu)
 end
 
 local function init()
+	for i,v in pairs(slots) do
+		local bu =  _G["Character"..v.."Slot"]
+		addBorder(bu, 1)
+		SkinColor(bu, .7, .7, .7)
+		bu:SetNormalTexture("")
+	end
+
 	for i = 1, NUM_ACTIONBAR_BUTTONS do
 		styleActionButton(_G["ActionButton"..i])
 		styleActionButton(_G["MultiBarRightButton"..i])
@@ -176,19 +184,18 @@ local function init()
 	addBorder(tf, 0)
 	SkinColor(tf, r, g, b)
 
-end
-
-for i = 1, NUM_TEMP_ENCHANT_FRAMES do
-        local bu = _G["TempEnchant"..i]
-        local bo = _G["TempEnchant"..i.."Border"]
-	local du = _G["TempEnchant"..i.."Duration"]
-        bu:SetNormalTexture("")
-        bo:SetTexture("")
-	addBorder(bu, .1)
-	SkinColor(bu, 1, 0, 1)
-        du:SetJustifyH("CENTER")
-        du:ClearAllPoints() 
-	du:SetPoint("CENTER", bu, "BOTTOM", 0, -8)
+	for i = 1, NUM_TEMP_ENCHANT_FRAMES  do
+		local bu = _G["TempEnchant"..i]
+		local bo = _G["TempEnchant"..i.."Border"]
+		local du = _G["TempEnchant"..i.."Duration"]
+		bu:SetNormalTexture("")
+		bo:SetTexture("")
+		addBorder(bu, .5)
+		SkinColor(bu, 1, 0, 1)
+		du:SetJustifyH("CENTER")
+		du:ClearAllPoints() 
+		du:SetPoint("CENTER", bu, "BOTTOM", 0, -7.5)
+	end
 end
 
 local function applySkin(b)
@@ -197,10 +204,10 @@ local function applySkin(b)
 	local ic = _G[name.."Icon"]
 
 	if name:match("Debuff") then
-		addBorder(b, 0)
-		ic:SetTexCoord(.1, .9, .1, .9)
+		addBorder(b, .1)
+		ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 		local re, gr, bl = bo:GetVertexColor()
-		SkinColor(b, re*1.7, gr*1.7, bl*1.7)
+		SkinColor(b, re*1.5, gr*1.5, bl*1.5)
 		bo:SetAlpha(0)
 		b.duration:ClearAllPoints()
 		b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
@@ -208,19 +215,14 @@ local function applySkin(b)
 	end
 
 	b:SetNormalTexture("")
-	ic:SetTexCoord(.1, .9, .1, .9)
+	ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	addBorder(b, .1)
 	SkinColor(b, .05, .05, .05)
 
 	b.duration:ClearAllPoints()
-	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
+	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -7.5)
 	b.styled = true
 end
-
-hooksecurefunc("AuraButton_Update", function(self, index)
-	local button = _G[self..index]
-	if button and not button.styled then applySkin(button) end
-end)
 
 local function UpdatePaperDoll()
 	for i, v in pairs(slots) do
@@ -264,24 +266,38 @@ local function UpdateBag()
 	end
 end
 
-hooksecurefunc("ContainerFrame_OnShow", UpdateBag)
-
 local e = CreateFrame("Frame")
 e:SetParent(CharacterFrame)
-e:SetScript("OnShow", UpdatePaperDoll)
-e:SetScript("OnEvent", UpdatePaperDoll)
 e:RegisterEvent("UNIT_INVENTORY_CHANGED")
+e:SetScript("OnShow", function(self, event)
+	if RougeUI.skinbuttons == false then self:UnregisterEvent("UNIT_INVENTORY_CHANGED") return end
+	UpdatePaperDoll()
+end)
+e:SetScript("OnEvent", function(self, event)
+	if RougeUI.skinbuttons == false then self:UnregisterEvent("UNIT_INVENTORY_CHANGED") return end
+	UpdatePaperDoll()
+end)
 
 local e2 = CreateFrame("Frame")
 e2:SetParent(ContainerFrame1)
-e2:SetScript("OnEvent", UpdateBag)
 e2:RegisterEvent("BAG_UPDATE")
+e2:SetScript("OnEvent", function(self, event)
+	if RougeUI.skinbuttons == false then self:UnregisterEvent("BAG_UPDATE") return end
+	UpdateBag()
+	hooksecurefunc("ContainerFrame_OnShow", UpdateBag)
+end)
 
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event)
+	if RougeUI.skinbuttons == false then self:UnregisterEvent("PLAYER_LOGIN") return end
 	init()
+	hooksecurefunc("AuraButton_Update", function(self, index)
+		local button = _G[self..index]
+		if button and not button.styled then applySkin(button) end
+	end)
 	self:UnregisterEvent("PLAYER_LOGIN")
+	self:SetScript("OnEvent", nil)
 end)
 
     --
