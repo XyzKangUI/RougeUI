@@ -266,7 +266,7 @@ e:RegisterEvent("UNIT_INVENTORY_CHANGED")
 e:SetScript("OnShow", function(self, event)
 	if RougeUI.skinbuttons == false then 
 		self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-		self:Setscript("OnShow", nil)
+		self:SetScript("OnShow", nil)
 		return 
 	end
 	UpdatePaperDoll()
