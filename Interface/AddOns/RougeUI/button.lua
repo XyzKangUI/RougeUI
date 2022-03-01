@@ -204,13 +204,7 @@ local function applySkin(b)
 	local ic = _G[name.."Icon"]
 
 	if name:match("Debuff") then
-		addBorder(b, .1)
 		ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-		local re, gr, bl = bo:GetVertexColor()
-		SkinColor(b, re*1.5, gr*1.5, bl*1.5)
-		bo:SetAlpha(0)
-		b.duration:ClearAllPoints()
-		b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -8)
 		return
 	end
 
