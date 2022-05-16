@@ -65,18 +65,26 @@ local function AddEnergy()
 	end
 end
 
-local eventRegistered = { SPELL_PERIODIC_ENERGIZE = true, SPELL_ENERGIZE = true }
+local eventRegistered = { SPELL_PERIODIC_ENERGIZE = true, SPELL_ENERGIZE = true, SPELL_CAST_SUCCESS = true }
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo;
 local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME;
 local function RealTick()
-  local _, eventType, _, _, _, _, _, _, _, destFlags = CombatLogGetCurrentEventInfo()
+  local _, eventType, _, _, _, sourceFlags, _, _, _, destFlags, _, spellID = CombatLogGetCurrentEventInfo()
   if not (eventRegistered[eventType]) then return end
 
   local isDestPlayer = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_ME)
+  local isSourcePlayer = CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_ME)
 
   if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE") then
     if isDestPlayer then
       externalManaGainTimestamp = GetTime()
+    end
+    return
+  end
+
+  if eventType == "SPELL_CAST_SUCCESS" then
+    if isSourcePlayer and spellID == 13750 then
+      last_tick = GetTime()
     end
     return
   end
