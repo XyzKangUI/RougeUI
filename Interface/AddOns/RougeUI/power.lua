@@ -99,7 +99,7 @@ local OnEvent = function(self, event, ...)
   elseif event == "PLAYER_REGEN_DISABLED" then
     PlayerFrameManaBar.energy.spark:SetAlpha(1)
   elseif event == "PLAYER_REGEN_ENABLED" then
-    PlayerFrameManaBar.energy.spark:SetAlpha(.1)
+    PlayerFrameManaBar.energy.spark:SetAlpha(.4)
   elseif event == "UPDATE_SHAPESHIFT_FORM" and class == "DRUID" then
     if (UnitPowerType("player") ~= 3) then
       PlayerFrameManaBar.energy.spark:SetAlpha(0)
