@@ -21,7 +21,7 @@ local function SetEnergyValue(self, value)
 	end
 end
 
-local function OnUpdate(self, unit)
+local function OnUpdate(self)
   local time = GetTime()
   local v = time - last_tick
 
