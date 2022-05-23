@@ -279,7 +279,7 @@ local function CheckClassification(self, forceNormalTexture)
 	end
 end
 
---hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
+hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
 
 -- Class portrait frames
 

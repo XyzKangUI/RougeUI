@@ -3,7 +3,7 @@ local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 local floor = math.floor
 
 local function RoundNumbers(val, valStep)
-	return floor(val/valStep*valStep)
+	return floor(val/valStep)*valStep
 end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
@@ -207,7 +207,6 @@ function f:CreateGUI()
 		local template = "OptionsSliderTemplate"
 		local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel2, template)
 		ColorValueSlider:SetMinMaxValues(0, 1)
-		ColorValueSlider:SetValueStep(0.05)
 		ColorValueSlider:SetPoint("TOPLEFT",20, -390)
 		ColorValueSlider.text = _G[name.."Text"]
 		ColorValueSlider.textLow = _G[name.."Low"]
@@ -217,6 +216,7 @@ function f:CreateGUI()
 		ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
 		ColorValueSlider:SetValue(RougeUI.Colval)
 		ColorValueSlider.text:SetText("Change brightness of UI: "..ColorValueSlider:GetValue(Colval))
+		ColorValueSlider:SetValueStep(0.05)
 		ColorValueSlider:SetObeyStepOnDrag(true);
 		ColorValueSlider:SetScript("OnValueChanged", function(self,value)
 			ColorValueSlider.text:SetText("Change brightness of UI: "..RoundNumbers(RougeUI.Colval, 0.05))
