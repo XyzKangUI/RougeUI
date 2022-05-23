@@ -21,22 +21,22 @@ hooksecurefunc(mg, "Show", mg.Hide)
 local function TimeFormat(button, time)
 	local duration = _G[button:GetName().."Duration"]
 	local floor, fmod = math.floor, math.fmod
-        local h, m, s, text
+	local h, m, s, text
 
 	if time <= 0 then
 	    text = ""
         elseif time < 3600 and time > 60 then
-	    h       = floor(time/3600)
-            m       = floor(mod(time, 3600)/60 + 1)
-            s       = fmod(time, 60)
-            text    = duration:SetFormattedText("|r%d|rm", m)
+			h = floor(time/3600)
+			m = floor(mod(time, 3600)/60 + 1)
+            s = fmod(time, 60)
+            text = duration:SetFormattedText("|r%d|rm", m)
         elseif time < 60 then
-            m       = floor(time/60)
-            s       = fmod(time, 60)
-            text    = m == 0 and duration:SetFormattedText("|r%d|rs", s)
+            m = floor(time/60)
+            s = fmod(time, 60)
+            text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
         else
-            h       = floor(time/3600 + 1)
-            text    = duration:SetFormattedText("|r%d|rh", h)
+            h = floor(time/3600 + 1)
+            text = duration:SetFormattedText("|r%d|rh", h)
         end
         return text
 end
@@ -258,7 +258,7 @@ local function CheckClassification(self, forceNormalTexture)
 
 	if (forceNormalTexture) then
 		self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
-		self.borderTexture:SetVertexColor(.05, .05, .05)
+		self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	elseif ( classification  == "worldboss" or classification  == "elite" ) then
 		self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
 		self.borderTexture:SetVertexColor(1, 1, 1)
@@ -273,13 +273,13 @@ local function CheckClassification(self, forceNormalTexture)
 			self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\FocusFrame")
 		else
 			self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
-			self.borderTexture:SetVertexColor(.05, .05, .05)
+			self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
 		forceNormalTexture = true;
 	end
 end
 
-hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
+--hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
 
 -- Class portrait frames
 
@@ -330,12 +330,12 @@ e:SetScript("OnEvent", function(self, event)
 			hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
 		end
 		if (RougeUI.HideGlows == true) then
-			hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
 			hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
 			hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
 			hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
 		end
 		if (RougeUI.HideTitles == true) then
+			hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
 			hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
 			hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
 		end

@@ -1,7 +1,4 @@
-local Framecolor = CreateFrame("Frame")
-Framecolor:RegisterEvent("ADDON_LOADED")
-Framecolor:SetScript("OnEvent", function(self, event, addon)
-	if (addon == "RougeUI") then
+local function FrameColour()
 		for i,v in pairs({
 			PlayerFrameTexture,
 			PlayerFrameAlternateManaBarBorder,
@@ -22,8 +19,8 @@ Framecolor:SetScript("OnEvent", function(self, event, addon)
 			PartyMemberFrame2PetFrameTexture,
 			PartyMemberFrame3PetFrameTexture,
 			PartyMemberFrame4PetFrameTexture,
-    			SlidingActionBarTexture0,
-    			SlidingActionBarTexture1,
+			SlidingActionBarTexture0,
+			SlidingActionBarTexture1,
 			MainMenuBarTexture0,
 			MainMenuBarTexture1,
 			MainMenuBarTexture2,
@@ -46,9 +43,9 @@ Framecolor:SetScript("OnEvent", function(self, event, addon)
 	  		ReputationWatchBar.StatusBar.XPBarTexture2,
 	  		ReputationWatchBar.StatusBar.XPBarTexture3,
 			MinimapBorder,
-       			MirrorTimer1Border,
-       			MirrorTimer2Border,
-        		MirrorTimer3Border,
+			MirrorTimer1Border,
+			MirrorTimer2Border,
+			MirrorTimer3Border,
 			MiniMapTrackingBorder,
 			MiniMapLFGFrameBorder,
 			MiniMapBattlefieldBorder,
@@ -58,16 +55,16 @@ Framecolor:SetScript("OnEvent", function(self, event, addon)
 			TargetFrameSpellBar.Border,
 			FocusFrameSpellBar.Border,
 			}) do
-				v:SetVertexColor(0.05, 0.05, 0.05)
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
 
 CHAT_FONT_HEIGHTS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
 for i, v in pairs({
 	MainMenuBarLeftEndCap,
-    	MainMenuBarRightEndCap,
-    	StanceBarLeft,
-    	StanceBarMiddle,
+	MainMenuBarRightEndCap,
+	StanceBarLeft,
+	StanceBarMiddle,
 	StanceBarRight,
 	GameMenuFrameHeader,
 	GameMenuFrame.BottomEdge,
@@ -218,7 +215,7 @@ for i, v in pairs({
 	PVPReadyDialog.TopLeftCorner,
 	PVPReadyDialog.TopRightCorner,
 	MailFrameBg,
-    	MailFrameBotLeftCorner,
+	MailFrameBotLeftCorner,
 	MailFrameBotRightCorner,
 	MailFrameBottomBorder,
 	MailFrameBtnCornerLeft,
@@ -261,7 +258,7 @@ for i, v in pairs({
 	MerchantFrameButtonBottomBorder,
 	MerchantFrameBg
 }) do
-   v:SetVertexColor(0.4, 0.4, 0.4)
+   v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 end
 
 for i,v in pairs({
@@ -276,154 +273,167 @@ end
 	-- BankFrame
 	local a, b, c, d, _, e = BankFrame:GetRegions()
 	for _, v in pairs({a, b, c, d, e}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- MerchantFrame
 	local a, b, c, d, e, f, g, h = MerchantFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = MerchantFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local _, a, b, c, d, _, _, _, e, f, g, h, j, k = MerchantFrame:GetRegions()
 	for _, v in pairs({a, b, c ,d, e, f, g, h, j, k}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- Paperdoll
 
 	local a, b, c, d, _, e = PaperDollFrame:GetRegions()
 	for _, v in pairs({a, b, c, d, e}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, _, e = PetPaperDollFrame:GetRegions()
 	for _, v in pairs({a, b, c, d, e}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- Skill
 
 	local a, b, c, d = SkillFrame:GetRegions()
 	for _, v in pairs({a, b, c ,d}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	--Reputation Frame
 
 	local a, b, c, d = ReputationFrame:GetRegions()
 	for _, v in pairs({a, b, c, d}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	for _, v in pairs({ReputationDetailCorner, ReputationDetailDivider}) do
-     		v:SetVertexColor(0.35, 0.35, 0.35)
+     		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- PvPFrame
 
 	local a, b, c, d, e = PVPFrame:GetRegions()
 	for _, v in pairs({a, b, c, d, e }) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- Character Tabs
 
 	local a, b, c, d, e, f, g, h = CharacterFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = CharacterFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = CharacterFrameTab3:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = CharacterFrameTab4:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 
 	local a, b, c, d, e, f, g, h = CharacterFrameTab5:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- Social Frame
 	local a, b, c, d, e, f, g, _, i, j, k, l, n, o, p, q, r, _, _ = FriendsFrame:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r, FriendsFrameInset:GetRegions()}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	FriendsFrameInsetInsetBottomBorder:SetVertexColor(0.35, 0.35, 0.35)
-	WhoFrameEditBoxInset:GetRegions():SetVertexColor(0.35, 0.35, 0.35)
-	WhoFrameDropDownLeft:SetVertexColor(0.5, 0.5, 0.5)
-	WhoFrameDropDownMiddle:SetVertexColor(0.5, 0.5, 0.5)
-	WhoFrameDropDownRight:SetVertexColor(0.5, 0.5, 0.5)
+	FriendsFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	WhoFrameEditBoxInset:GetRegions():SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	WhoFrameDropDownLeft:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	WhoFrameDropDownMiddle:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	WhoFrameDropDownRight:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
 	local a, b, c, d, e, f, g, h, i = WhoFrameEditBoxInset:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f, g, h, i}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = FriendsFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = FriendsFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = FriendsFrameTab3:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = FriendsFrameTab4:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- GuildFrame
 
 	local a, b, c, d, e, f = GuildFrame:GetRegions()
 	for _, v in pairs({e, f}) do
-		v:SetVertexColor(0.35, 0.35, 0.35)
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- MailFrame
 
 	local a, b, c, d, e, f, g, h = MailFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	local a, b, c, d, e, f, g, h = MailFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
-  		v:SetVertexColor(0.35, 0.35, 0.35)
+  		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	ChatFrame1EditBoxLeft:SetVertexColor(0.1, 0.1, 0.1)
-	ChatFrame1EditBoxMid:SetVertexColor(0.1, 0.1, 0.1)
-	ChatFrame1EditBoxRight:SetVertexColor(0.1, 0.1, 0.1)
+	ChatFrame1EditBoxLeft:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	ChatFrame1EditBoxMid:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	ChatFrame1EditBoxRight:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
-	GameTooltip:SetBackdropBorderColor(.05, .05, .05)
+	GameTooltip:SetBackdropBorderColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	GameTooltip.SetBackdropBorderColor = function() end
+end
 
-	self:UnregisterEvent("ADDON_LOADED")
-	Framecolor:SetScript("OnEvent", nil)
+local Framecolor = CreateFrame("Frame")
+
+Framecolor:RegisterEvent("ADDON_LOADED")
+Framecolor:SetScript("OnEvent", function(self, event, addon)
+	if event == "ADDON_LOADED" and addon == "RougeUI" then
+		FrameColour()
+		self:UnregisterEvent("ADDON_LOADED")
+		self:SetScript("OnEvent", nil)
 	end
 end)
+
+
+function ChangeFrameColors()
+	FrameColour()
+end
+	
