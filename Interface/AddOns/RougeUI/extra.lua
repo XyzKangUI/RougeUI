@@ -26,8 +26,8 @@ local function TimeFormat(button, time)
 	if time <= 0 then
 	    text = ""
         elseif time < 3600 and time > 60 then
-			h = floor(time/3600)
-			m = floor(mod(time, 3600)/60 + 1)
+	    h = floor(time/3600)
+	    m = floor(mod(time, 3600)/60 + 1)
             s = fmod(time, 60)
             text = duration:SetFormattedText("|r%d|rm", m)
         elseif time < 60 then
@@ -253,6 +253,8 @@ local function CheckClassification(self, forceNormalTexture)
 			return
 		end
 	end
+	
+	if RougeUI.Colval > 0.16 then return end
 
 	local classification = UnitClassification(self.unit);
 
