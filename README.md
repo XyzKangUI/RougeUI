@@ -3,7 +3,7 @@
 This is my **_personal_** UI for TBC-Classic. It is heavily inspired by ModUI. 
 # **Feature List:**
 
-- Dark frames (incl. nameplates).
+- All frames can manually be darkened under "Misc" options by using the slider (incl. nameplates).
 - ModUI's border style on actionbar and aura's (dark).
 - Hide all glows, spammy damage indicators and group/raid titles.
 - Smooth animated Health and Mana bars.
