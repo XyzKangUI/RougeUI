@@ -4,7 +4,6 @@ local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
 if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then return end
 
-local r, g, b = .05, .05, .05
 local sections = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT", "TOP", "BOTTOM", "LEFT", "RIGHT"}
 
 local slots = {
@@ -87,7 +86,7 @@ local function styleActionButton(bu)
 	local nt = _G[name.."NormalTexture"]
 
 	addBorder(bu, .1)
-	SkinColor(bu, r, g, b)
+	SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
 	ic:SetTexCoord(0.05, 0.95, 0.05, 0.95)
 	nt:SetAlpha(0)
@@ -106,7 +105,7 @@ local function init()
 	for i,v in pairs(slots) do
 		local bu =  _G["Character"..v.."Slot"]
 		addBorder(bu, 1)
-		SkinColor(bu, .7, .7, .7)
+		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		bu:SetNormalTexture("")
 	end
 
@@ -134,27 +133,30 @@ local function init()
 		end
 	end
 
+	addBorder(MainMenuBarBackpackButton, 1)
+	SkinColor(MainMenuBarBackpackButton, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+
 	for _, v in pairs(slots) do
 		local bu = _G["Character"..v.."Slot"]
 		local ic = _G["Character"..v.."SlotIconTexture"]
 		addBorder(bu, 0)
-		SkinColor(bu, r, g, b)
+		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
 		-- ic:SetTexCoord(.1, .9, .1, .9)
 	end
 
 	for i = 0, 3 do -- Bagicons
 		local bu = _G["CharacterBag"..i.."Slot"]
-        	addBorder(bu, 0)
-        	SkinColor(bu, r, g, b)
+        	addBorder(bu, 1)
+        	SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	for i = 1,12 do  -- Bagslots
 		for k = 1, MAX_CONTAINER_ITEMS do
 			local bu = _G["ContainerFrame"..i.."Item"..k]
 			-- local ic = _G["ContainerFrame"..i.."Item"..k.."IconTexture"]
-            		addBorder(bu, 0)
-            		SkinColor(bu, r, g, b)
+            		addBorder(bu, 1)
+            		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
             		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
             		-- ic:SetTexCoord(.1, .9, .1, .9)
             		bu.bg = bu:CreateTexture(nil, "BACKGROUND")
@@ -169,7 +171,7 @@ local function init()
 		local bu = _G["BankFrameItem"..i]
 		local ic = _G["BankFrameItem"..i.."IconTexture"]
 		addBorder(bu, 0)
-		SkinColor(bu, r, g, b)
+		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
 		-- ic:SetTexCoord(.1, .9, .1, .9)
 		bu.bg = bu:CreateTexture(nil, "BACKGROUND")
@@ -182,7 +184,7 @@ local function init()
 	local tf = CreateFrame("Frame", nil, _G[TargetFrameSpellBar:GetName()])
 	tf:SetAllPoints(_G[TargetFrameSpellBar:GetName().."Icon"])
 	addBorder(tf, 0)
-	SkinColor(tf, r, g, b)
+	SkinColor(tf, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
 	for i = 1, NUM_TEMP_ENCHANT_FRAMES  do
 		local bu = _G["TempEnchant"..i]
@@ -211,7 +213,7 @@ local function applySkin(b)
 	b:SetNormalTexture("")
 	ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	addBorder(b, .1)
-	SkinColor(b, .05, .05, .05)
+	SkinColor(b, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -7.5)
@@ -226,7 +228,7 @@ local function UpdatePaperDoll()
 			local re, gr, bl = GetItemQualityColor(q)
 			SkinColor(bu, re*1.4, gr*1.4, bl*1.4)
 		else
-			SkinColor(bu, r, g, b)
+			SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
 	end
 end
@@ -241,7 +243,7 @@ local function UpdateBag()
 			local link = GetContainerItemLink(id, bu:GetID())
 
 			if bu then
-				SkinColor(bu, r, g, b)
+				SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 			end
 
 			if  bu and bu:IsShown() and link then
