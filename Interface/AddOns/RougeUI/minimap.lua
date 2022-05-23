@@ -12,7 +12,7 @@ if not (IsAddOnLoaded("SexyMap")) then
 	}) do
 		v:Hide()
 	end
-select(1, TimeManagerClockButton:GetRegions()):SetVertexColor(.04, .04, .04)
+select(1, TimeManagerClockButton:GetRegions()):SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
 Minimap:EnableMouseWheel(true)
 Minimap:SetScript('OnMouseWheel', function(self, delta)
