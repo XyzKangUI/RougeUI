@@ -10,6 +10,7 @@ local function FrameColour()
 			TargetFrameTextureFrameTexture,
 			TargetFrameToTTextureFrameTexture,
 			FocusFrameToTTextureFrameTexture,
+			FocusFrameTextureFrameTexture,
 			PetFrameTexture,
 			PartyMemberFrame1Texture,
 			PartyMemberFrame2Texture,
