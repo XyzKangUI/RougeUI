@@ -49,7 +49,6 @@ local function AnimationTick()
 		if cur == value or mabs(new - value) < 2 then
 			bar:SetValue_(value)
 			smoothing[bar] = nil
-		else
 		end
 	end
 end
