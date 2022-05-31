@@ -17,10 +17,10 @@ local slots = {
 
 local function SkinColor(self, r, g, b, a)
 	local  t = self.borderTextures
-        if not t then return end
+	if not t then return end
 	for  _, tex in pairs(t) do
-        	tex:SetVertexColor(r or 1, g or 1, b or 1, a or 1)
-        end
+		tex:SetVertexColor(r or 1, g or 1, b or 1, a or 1)
+	end
 end
 
 local function GetBorderColor(self)
@@ -90,7 +90,7 @@ local function styleActionButton(bu)
 
 	ic:SetTexCoord(0.05, 0.95, 0.05, 0.95)
 	nt:SetAlpha(0)
-			
+
 	if not bartender4 then
 		ho:ClearAllPoints()
 		ho:SetPoint("TOPRIGHT", bu, 1, -3)
@@ -138,32 +138,27 @@ local function init()
 
 	for _, v in pairs(slots) do
 		local bu = _G["Character"..v.."Slot"]
-		local ic = _G["Character"..v.."SlotIconTexture"]
 		addBorder(bu, 0)
 		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
-		-- ic:SetTexCoord(.1, .9, .1, .9)
 	end
 
 	for i = 0, 3 do -- Bagicons
 		local bu = _G["CharacterBag"..i.."Slot"]
-        	addBorder(bu, 1)
-        	SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		addBorder(bu, 1)
+		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	for i = 1,12 do  -- Bagslots
 		for k = 1, MAX_CONTAINER_ITEMS do
 			local bu = _G["ContainerFrame"..i.."Item"..k]
-			-- local ic = _G["ContainerFrame"..i.."Item"..k.."IconTexture"]
-            		addBorder(bu, 1)
-            		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-            		if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
-            		-- ic:SetTexCoord(.1, .9, .1, .9)
-            		bu.bg = bu:CreateTexture(nil, "BACKGROUND")
-            		bu.bg:SetAllPoints()
-            		bu.bg:SetTexture[[Interface\Buttons\UI-Slot-Background]]
-            		bu.bg:SetTexCoord(.075, .6, .075, .6)
-            		bu.bg:SetAlpha(.4)
+			addBorder(bu, 1)
+			SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			if bu:GetNormalTexture() then bu:GetNormalTexture():SetTexture("") end
+			bu.bg = bu:CreateTexture(nil, "BACKGROUND")
+			bu.bg:SetAllPoints()
+			bu.bg:SetTexture[[Interface\Buttons\UI-Slot-Background]]
+			bu.bg:SetTexCoord(.075, .6, .075, .6)
+			bu.bg:SetAlpha(.4)
 		end
 	end
 
@@ -195,14 +190,13 @@ local function init()
 		addBorder(bu, .5)
 		SkinColor(bu, 1, 0, 1)
 		du:SetJustifyH("CENTER")
-		du:ClearAllPoints() 
+		du:ClearAllPoints()
 		du:SetPoint("CENTER", bu, "BOTTOM", 0, -7.5)
 	end
 end
 
 local function applySkin(b)
 	local name = b:GetName()
-	local bo = _G[name.."Border"]
 	local ic = _G[name.."Icon"]
 
 	if name:match("Debuff") then
@@ -212,7 +206,6 @@ local function applySkin(b)
 
 	b:SetNormalTexture("")
 	ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-	--ic:SetDrawLayer("BACKGROUND",-8)
 	addBorder(b, .1)
 	SkinColor(b, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
@@ -234,35 +227,6 @@ local function UpdatePaperDoll()
 			SkinColor(bu, re*1.4, gr*1.4, bl*1.4)
 		else
 			SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-		end
-	end
-end
-
-local function UpdateBag()
-	for i = 1, 12 do
-		local n = "ContainerFrame"..i
-		local f = _G[n]
-		local id = f:GetID()
-		for i = 1, MAX_CONTAINER_ITEMS do
-			local bu = _G[n.."Item"..i]
-			local link = GetContainerItemLink(id, bu:GetID())
-
-			if bu then
-				SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-			end
-
-			if  bu and bu:IsShown() and link then
-				local _, _, istring  = string.find(link, "|H(.+)|h")
-				local n, _, q, _, _, type = GetItemInfo(istring)
-				if n and strfind(n, "Mark of Honor") then
-					SkinColor(bu, .98, .95, 0)
-				elseif  type == "Quest" then
-					SkinColor(bu, 1, .33, 0)
-				elseif q and q > 1 then
-					local re, gr, bl = GetItemQualityColor(q)
-					SkinColor(bu, re*1.4, gr*1.4, bl*1.4)
-				end
-			end
 		end
 	end
 end
@@ -291,28 +255,13 @@ e:SetScript("OnEvent", function(self, event)
 	end
 end)
 
-local e2 = CreateFrame("Frame")
-e2:SetParent(ContainerFrame1)
-e2:RegisterEvent("BAG_UPDATE")
-e2:SetScript("OnEvent", function(self, event)
-	if RougeUI.skinbuttons == false then
-		self:UnregisterEvent("BAG_UPDATE")
-		self:SetScript("OnEvent", nil)
-		return
-	elseif RougeUI.skinbuttons == true then
-		hooksecurefunc("ContainerFrame_OnShow", UpdateBag)
-	end
-	if event == "BAG_UPDATE" then
-		UpdateBag()
-	end
-end)
-
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_LOGIN" then
 		if RougeUI.skinbuttons == true then
 			init()
+			UpdatePaperDoll()
 			hooksecurefunc("AuraButton_Update", function(self, index)
 				local button = _G[self..index]
 				if button and not button.styled then applySkin(button) end
@@ -323,4 +272,4 @@ e3:SetScript("OnEvent", function(self, event)
 	end
 end)
 
-    --
+--
