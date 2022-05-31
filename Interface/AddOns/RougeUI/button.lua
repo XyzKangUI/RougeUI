@@ -102,7 +102,7 @@ local function styleActionButton(bu)
 end
 
 local function init()
-	for i,v in pairs(slots) do
+	for _,v in pairs(slots) do
 		local bu =  _G["Character"..v.."Slot"]
 		addBorder(bu, 1)
 		SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
@@ -212,7 +212,7 @@ local function applySkin(b)
 
 	b:SetNormalTexture("")
 	ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-	ic:SetDrawLayer("BACKGROUND",-8)
+	--ic:SetDrawLayer("BACKGROUND",-8)
 	addBorder(b, .1)
 	SkinColor(b, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
@@ -271,33 +271,40 @@ local e = CreateFrame("Frame")
 e:SetParent(CharacterFrame)
 e:RegisterEvent("UNIT_INVENTORY_CHANGED")
 e:SetScript("OnShow", function(self, event)
-	if RougeUI.skinbuttons == false then 
+	if RougeUI.skinbuttons == false then
 		self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
 		self:SetScript("OnShow", nil)
-		return 
+		return
 	end
-	UpdatePaperDoll()
+	if event == "UNIT_INVENTORY_CHANGED" then
+		UpdatePaperDoll()
+	end
 end)
 e:SetScript("OnEvent", function(self, event)
-	if RougeUI.skinbuttons == false then 
+	if RougeUI.skinbuttons == false then
 		self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
 		self:SetScript("OnEvent", nil)
-		return 
+		return
 	end
-	UpdatePaperDoll()
+	if event == "UNIT_INVENTORY_CHANGED" then
+		UpdatePaperDoll()
+	end
 end)
 
 local e2 = CreateFrame("Frame")
 e2:SetParent(ContainerFrame1)
 e2:RegisterEvent("BAG_UPDATE")
 e2:SetScript("OnEvent", function(self, event)
-	if RougeUI.skinbuttons == false then 
+	if RougeUI.skinbuttons == false then
 		self:UnregisterEvent("BAG_UPDATE")
 		self:SetScript("OnEvent", nil)
-		return 
+		return
+	elseif RougeUI.skinbuttons == true then
+		hooksecurefunc("ContainerFrame_OnShow", UpdateBag)
 	end
-	UpdateBag()
-	hooksecurefunc("ContainerFrame_OnShow", UpdateBag)
+	if event == "BAG_UPDATE" then
+		UpdateBag()
+	end
 end)
 
 local e3 = CreateFrame("Frame")
