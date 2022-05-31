@@ -212,12 +212,17 @@ local function applySkin(b)
 
 	b:SetNormalTexture("")
 	ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+	ic:SetDrawLayer("BACKGROUND",-8)
 	addBorder(b, .1)
 	SkinColor(b, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
 	b.duration:ClearAllPoints()
 	b.duration:SetPoint("CENTER", b, "BOTTOM", 0, -7.5)
 	b.styled = true
+
+	b.count:SetFont(STANDARD_TEXT_FONT, 11, "THINOUTLINE")
+	b.count:ClearAllPoints()
+	b.count:SetPoint("TOPRIGHT", 0, -1)
 end
 
 local function UpdatePaperDoll()
