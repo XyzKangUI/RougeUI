@@ -93,7 +93,7 @@ local function styleActionButton(bu)
 
 	if not bartender4 then
 		ho:ClearAllPoints()
-		ho:SetPoint("TOPRIGHT", bu, 1, -3)
+		ho:SetPoint("TOPRIGHT", bu, 1, -2)
 	end
 
 	if fbg then fbg:Hide() end
