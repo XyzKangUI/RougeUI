@@ -3,6 +3,8 @@ local floor = math.floor
 local mabs = math.abs
 local min, max = math.min, math.max
 local UnitGUID = UnitGUID
+local ONUPDATE_INTERVAL = 0.01
+local TimeSinceLastUpdate = 0
 
 local barstosmooth = {
 	PlayerFrameHealthBar = "player",
@@ -83,19 +85,23 @@ local function SmoothBar(bar)
 	end
 
 	if not smoothframe:GetScript("OnUpdate") then
-		smoothframe:SetScript("OnUpdate", function()
-			local frames = {WorldFrame:GetChildren()}
-			for _, plate in ipairs(frames) do
-				if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
-					local v = plate:GetChildren()
-					if  v.healthBar then
-						SmoothBar(v.healthBar)
+		smoothframe:SetScript("OnUpdate", function(self, elapsed)
+			TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
+			if TimeSinceLastUpdate >= ONUPDATE_INTERVAL then
+				TimeSinceLastUpdate = 0
+				local frames = {WorldFrame:GetChildren()}
+				for _, plate in ipairs(frames) do
+					if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
+						local v = plate:GetChildren()
+						if  v.healthBar then
+							SmoothBar(v.healthBar)
+						end
 					end
 				end
+				AnimationTick()
 			end
-			AnimationTick()
-		end)
-	end
+			end)
+		end
 end
 
 smoothframe:SetScript("OnEvent", function(self, event)

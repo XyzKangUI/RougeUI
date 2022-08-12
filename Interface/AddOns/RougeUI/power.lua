@@ -10,6 +10,8 @@ local events = {
 local last_tick = GetTime()
 local last_value = 0
 local externalManaGainTimestamp = 0
+local TimeSinceLastUpdate = 0
+local ONUPDATE_INTERVAL = 0.01
 
 local function SetEnergyValue(self, value)
   local x = self:GetWidth()
@@ -21,15 +23,20 @@ local function SetEnergyValue(self, value)
 	end
 end
 
-local function OnUpdate(self)
+local function OnUpdate(self, elapsed)
   local time = GetTime()
   local v = time - last_tick
+  TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
 
-  if time >= last_tick + 2.02 then
-    last_tick = time
+  if TimeSinceLastUpdate >= ONUPDATE_INTERVAL then
+    TimeSinceLastUpdate = 0
+
+    if time >= last_tick + 2.02 then
+      last_tick = time
+    end
+
+    SetEnergyValue(self:GetParent(), v)
   end
-
-  SetEnergyValue(self:GetParent(), v)
 end
 
 local function UpdateEnergy()
