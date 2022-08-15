@@ -55,12 +55,10 @@ local function MoveFrames(self, event, ...)
 end
 
 local function MoveBuffs(buttonName, index)
-		if RougeUI.move == true then
-			BuffFrame:ClearAllPoints()
-			BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -245, -113)
-			BuffFrame:SetScale(1.15)
-			TemporaryEnchantFrame:SetScale(1.15)
-		end
+	BuffFrame:ClearAllPoints()
+	BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -245, -113)
+	BuffFrame:SetScale(1.15)
+	TemporaryEnchantFrame:SetScale(1.15)
 end
 
 local function SpellQueueFix()
@@ -85,13 +83,14 @@ local function SpellQueueFix()
 	end
 end
 
-hooksecurefunc("UIParent_UpdateTopFramePositions", MoveBuffs)
-
 f:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_LOGIN" then
 		MoveFrames()
 		SetCustomVars()
 		self:UnregisterEvent("PLAYER_LOGIN")
+		if RougeUI.move == true then
+			hooksecurefunc("UIParent_UpdateTopFramePositions", MoveBuffs)
+		end
 	elseif event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
 		SpellQueueFix()
 	end
