@@ -83,29 +83,22 @@ local function SmoothBar(bar)
 		bar.SetValue_ = bar.SetValue
 		bar.SetValue = SmoothSetValue
 	end
-
-	if not smoothframe:GetScript("OnUpdate") then
-		smoothframe:SetScript("OnUpdate", function(self, elapsed)
-			TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
-			if TimeSinceLastUpdate >= ONUPDATE_INTERVAL then
-				TimeSinceLastUpdate = 0
-				local frames = {WorldFrame:GetChildren()}
-				for _, plate in ipairs(frames) do
-					if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
-						local v = plate:GetChildren()
-						if  v.healthBar then
-							SmoothBar(v.healthBar)
-						end
-					end
-				end
-				AnimationTick()
-			end
-			end)
-		end
 end
 
-smoothframe:SetScript("OnEvent", function(self, event)
-	if event == "ADDON_LOADED" and RougeUI.smooth == true then
+local function onUpdate(self, elapsed)
+	TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
+	if TimeSinceLastUpdate >= ONUPDATE_INTERVAL then
+		TimeSinceLastUpdate = 0
+		local frames = {WorldFrame:GetChildren()}
+		for _, plate in ipairs(frames) do
+			if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
+				local v = plate:GetChildren()
+				if  v.healthBar then
+					SmoothBar(v.healthBar)
+				end
+			end
+		end
+
 		for k,v in pairs (barstosmooth) do
 			if _G[k] then
 				SmoothBar(_G[k])
@@ -115,6 +108,13 @@ smoothframe:SetScript("OnEvent", function(self, event)
 				end
 			end
 		end
+		AnimationTick()
+	end
+end
+
+smoothframe:SetScript("OnEvent", function(self, event)
+	if event == "ADDON_LOADED" and RougeUI.smooth == true then
+		smoothframe:HookScript("OnUpdate", onUpdate)
 	end
 	self:UnregisterEvent("ADDON_LOADED")
 	self:SetScript("OnEvent", nil)
