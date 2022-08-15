@@ -33,8 +33,8 @@ end
 -- Modification of Knall's genius pet script. Ty <3
 local function HidePlates(plate, unit)
     local _, _, _, _, _, npcId = str_split("-", UnitGUID(unit))
-	-- snake trap
-    if npcId == "19833" or npcId == "19921" then
+	-- treants, snake trap
+    if npcId == "1964" or npcId == "19833" or npcId == "19921" then
         plate.UnitFrame:Hide()
     else
         plate.UnitFrame:Show()
