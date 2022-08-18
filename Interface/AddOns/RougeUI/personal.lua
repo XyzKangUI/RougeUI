@@ -61,28 +61,6 @@ local function MoveBuffs(buttonName, index)
 	TemporaryEnchantFrame:SetScale(1.15)
 end
 
-local function SpellQueueFix()
-	local _, _, latencyHome, latencyWorld = GetNetStats();
-	local _, class = UnitClass("player")
-	local value
-
-	if (latencyHome or latencyWorld) == 0 then C_Timer.After(40, SpellQueueFix) return end
-
-	if latencyHome >= latencyWorld then
-		currentLatency = latencyHome
-	elseif latencyWorld > latencyHome then
-		currentLatency = latencyWorld
-	end
-
-	if class == "ROGUE" then
-		value = 200 + currentLatency
-		ConsoleExec("SpellQueueWindow "..value)
-	elseif class ~= "ROGUE" then
-		value = 250 + currentLatency
-		ConsoleExec("SpellQueueWindow "..value)
-	end
-end
-
 f:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_LOGIN" then
 		MoveFrames()
@@ -91,8 +69,6 @@ f:SetScript("OnEvent", function(self, event)
 		if RougeUI.move == true then
 			hooksecurefunc("UIParent_UpdateTopFramePositions", MoveBuffs)
 		end
-	elseif event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
-		SpellQueueFix()
 	end
 end)
 

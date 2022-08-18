@@ -299,9 +299,32 @@ local function ClassPortrait(self)
 	end
 end
 
+local function SpellQueueFix()
+	local _, _, latencyHome, latencyWorld = GetNetStats();
+	local _, class = UnitClass("player")
+	local value
+
+	if (latencyHome or latencyWorld) == 0 then C_Timer.After(40, SpellQueueFix) return end
+
+	if latencyHome >= latencyWorld then
+		currentLatency = latencyHome
+	elseif latencyWorld > latencyHome then
+		currentLatency = latencyWorld
+	end
+
+	if class == "ROGUE" then
+		value = 200 + currentLatency
+		ConsoleExec("SpellQueueWindow "..value)
+	elseif class ~= "ROGUE" then
+		value = 250 + currentLatency
+		ConsoleExec("SpellQueueWindow "..value)
+	end
+end
+
 local events = {
 	"PLAYER_LOGIN",
-	"PLAYER_ENTERING_WORLD"
+	"PLAYER_ENTERING_WORLD",
+	"ZONE_CHANGED_NEW_AREA"
 }
 
 local e = CreateFrame("Frame")
@@ -349,6 +372,12 @@ e:SetScript("OnEvent", function(self, event)
 		PvPIcon()
 	elseif (RougeUI.FadeIcon == false) then
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	end
+
+	if ((event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA") and RougeUI.SQFix == true) then
+		SpellQueueFix()
+	elseif RougeUI.SQFix == false then
+		self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
 	end
 
 	self:UnregisterEvent("PLAYER_LOGIN")

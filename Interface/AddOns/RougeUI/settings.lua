@@ -7,7 +7,7 @@ local function RoundNumbers(val, valStep)
 end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus, skinbuttons, Colval }
+		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus, skinbuttons, Colval, ArenaNumbers, SQFix }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -36,6 +36,9 @@ function f:ADDON_LOADED()
     if RougeUI.rfocus == nil then RougeUI.rfocus = false; end
     if RougeUI.skinbuttons == nil then RougeUI.skinbuttons = false; end
     if RougeUI.Colval == nil then RougeUI.Colval = 1; end
+    if RougeUI.ArenaNumbers == nil then RougeUI.ArenaNumbers = false; end
+    if RougeUI.SQFix == nil then RougeUI.SQFix = false; end
+
 
     Custom_TargetBuffSize();
     CusFonts();
@@ -223,6 +226,24 @@ function f:CreateGUI()
 			RougeUI.Colval = ColorValueSlider:GetValue()
 			ChangeFrameColors()
 		end)
+
+		local name = "ArenaNumbers"
+		local template = "UICheckButtonTemplate"
+		local ArenaNumbersButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+		ArenaNumbersButton:SetPoint("TOPLEFT", 350, -40)
+		ArenaNumbersButton.text = _G[name.."Text"]
+		ArenaNumbersButton.text:SetText("Show arena number on nameplate")
+		ArenaNumbersButton:SetChecked(RougeUI.ArenaNumbers)
+		ArenaNumbersButton:SetScript("OnClick", function() RougeUI.ArenaNumbers = not RougeUI.ArenaNumbers end)
+
+		local name = "SpellQueueWindow"
+		local template = "UICheckButtonTemplate"
+		local SQFixButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+		SQFixButton:SetPoint("TOPLEFT", 350, -80)
+		SQFixButton.text = _G[name.."Text"]
+		SQFixButton.text:SetText("Auto-adjust SpellQueue Window")
+		SQFixButton:SetChecked(RougeUI.SQFix)
+		SQFixButton:SetScript("OnClick", function() RougeUI.SQFix = not RougeUI.SQFix end)
 
 		local name = "RedFocus"
 		local template = "UICheckButtonTemplate"
