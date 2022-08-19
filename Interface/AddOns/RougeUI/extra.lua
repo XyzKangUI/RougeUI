@@ -230,6 +230,12 @@ local function manabarcolor(statusbar, unit)
 		if (UnitIsUnit("target", "player")) then
 			TargetFrameManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
 		end
+		if (UnitIsUnit("focus", "player")) then
+			FocusFrameManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
+		end
+		if (UnitIsUnit("focus-target", "player")) then
+			FocusFrameToTManaBar:SetStatusBarColor(127/255, 0/255, 255/255)
+		end
 	end
 end
 
