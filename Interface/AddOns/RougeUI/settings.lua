@@ -7,7 +7,7 @@ local function RoundNumbers(val, valStep)
 end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus, skinbuttons, Colval, ArenaNumbers, SQFix }
+		FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus, skinbuttons, Colval, ArenaNumbers, SQFix }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -27,7 +27,6 @@ function f:ADDON_LOADED()
     if RougeUI.HideTitles == nil then RougeUI.HideTitles = false; end
     if RougeUI.FadeIcon == nil then RougeUI.FadeIcon = false; end
     if RougeUI.HideGlows == nil then RougeUI.HideGlows = false; end
-    if RougeUI.EnergyTicker == nil then RougeUI.EnergyTicker = false; end
     if RougeUI.CombatIndicator == nil then RougeUI.CombatIndicator = false; end
     if RougeUI.CastTimer == nil then RougeUI.CastTimer = false; end
     if RougeUI.smooth == nil then RougeUI.smooth = false; end
@@ -143,15 +142,6 @@ function f:CreateGUI()
 		HideGlowsButton:SetChecked(RougeUI.HideGlows)
 		HideGlowsButton:SetScript("OnClick", function() RougeUI.HideGlows = not RougeUI.HideGlows end)
 
-		local name = "EnergyTicker"
-		local template = "UICheckButtonTemplate"
-		local EnergyTickerButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		EnergyTickerButton:SetPoint("TOPLEFT", 350, -120)
-		EnergyTickerButton.text = _G[name.."Text"]
-		EnergyTickerButton.text:SetText("Enable Energy ticker for Rogue/Druid")
-		EnergyTickerButton:SetChecked(RougeUI.EnergyTicker)
-		EnergyTickerButton:SetScript("OnClick", function() RougeUI.EnergyTicker = not RougeUI.EnergyTicker end)
-
 		local name = "CombatIndicator"
 		local template = "UICheckButtonTemplate"
 		local CombatIndicatorButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
@@ -173,7 +163,7 @@ function f:CreateGUI()
 		local name = "SmoothFrame"
 		local template = "UICheckButtonTemplate"
 		local SmoothFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		SmoothFrameButton:SetPoint("TOPLEFT", 350, -160)
+		SmoothFrameButton:SetPoint("TOPLEFT", 350, -120)
 		SmoothFrameButton.text = _G[name.."Text"]
 		SmoothFrameButton.text:SetText("Smooth animated health/mana bars")
 		SmoothFrameButton:SetChecked(RougeUI.smooth)
@@ -182,7 +172,7 @@ function f:CreateGUI()
 		local name = "PimpFrame"
 		local template = "UICheckButtonTemplate"
 		local PimpFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		PimpFrameButton:SetPoint("TOPLEFT", 350, -200)
+		PimpFrameButton:SetPoint("TOPLEFT", 350, -160)
 		PimpFrameButton.text = _G[name.."Text"]
 		PimpFrameButton.text:SetText("Enable Violet Colored Energy/Mana Bar")
 		PimpFrameButton:SetChecked(RougeUI.pimp)
@@ -248,7 +238,7 @@ function f:CreateGUI()
 		local name = "RedFocus"
 		local template = "UICheckButtonTemplate"
 		local RedFocus = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		RedFocus:SetPoint("TOPLEFT", 350, -240)
+		RedFocus:SetPoint("TOPLEFT", 350, -200)
 		RedFocus.text = _G[name.."Text"]
 		RedFocus.text:SetText("Add red line to focusframe")
 		RedFocus:SetChecked(RougeUI.rfocus)

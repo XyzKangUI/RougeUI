@@ -1,6 +1,6 @@
-## Interface: 20503
+## Interface: 30400
 ## Title: |cff009cffRougeUI-TBCC|r
-## Version: 2.5
+## Version: 3
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
@@ -9,11 +9,10 @@ frames.lua
 smooth.lua
 extra.lua
 textbar.lua
-minimap.lua
-power.lua
 combat.lua
 castbar.lua
 nameplate.lua
 auras.lua
 retab.lua
+minimap.lua
 button.lua

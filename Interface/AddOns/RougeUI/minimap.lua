@@ -8,7 +8,8 @@ if not (IsAddOnLoaded("SexyMap")) then
 		MinimapZoomIn,
 		GameTimeFrame,
 		MinimapZoomOut,
-		MinimapNorthTag
+		MinimapNorthTag,
+		MiniMapTracking
 	}) do
 		v:Hide()
 	end
@@ -32,33 +33,16 @@ MinimapZoneText:SetPoint('TOP', Minimap, -2, 17)
 GameTimeFrame:UnregisterAllEvents()
 GameTimeFrame.Show = kill
 
---------- Show MiniMapTracking on mouseover
+Minimap:SetScript("OnMouseUp", function(self, btn) 
+   if btn == "RightButton" then 
+      ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, "MiniMapTracking", 0, -5)
+   else 
+      Minimap_OnClick(self) 
+   end 
+end)
 
-local tracker = MiniMapTracking
-tracker:SetAlpha(0)
-local function FindParent(frame, target)
-	if frame == target then
-		return true
-	elseif frame then
-		return FindParent(frame:GetParent(), target)
-	end
+MM:UnregisterEvent("PLAYER_LOGIN")
 end
-
-tracker:HookScript("OnEnter", function(self)
-	self:SetAlpha(1)
 end)
-
-tracker:HookScript("OnLeave", function(self)
-	if not FindParent(GetMouseFocus(), self) then
-		self:SetAlpha(0)
-	end
-end)
-
-tracker:HookScript("OnClick", function()
-	tracker:SetAlpha(0)
-end)
-end
-	MM:UnregisterEvent("PLAYER_LOGIN")
-end);
 
 hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)

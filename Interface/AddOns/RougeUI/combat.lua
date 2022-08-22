@@ -1,6 +1,6 @@
 local UnitAffectingCombat = UnitAffectingCombat
 local pairs = pairs
-local interval = 0.2
+local interval = 0.05
 local lastupdate = 0
 
 local function CreateCombatIndicatorForUnit(unit, frame)
