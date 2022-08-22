@@ -84,38 +84,6 @@ function Custom_TargetBuffSize()
     hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
 end
 
-local Whitelist = {
-	[16188] = true, -- Nature's Swiftness
-	[17116] = true, -- Nature's Swiftness
-	[12043] = true, -- Presence of Mind
-	[12042] = true, -- Arcane Power
-	[12472] = true, -- Icy Veins
-	[31884] = true, -- Avenging Wrath
-	[25218] = true, -- Power Word: Shield
-	[27273] = true, -- Sacrifice
-	[27134] = true, -- Ice Barrier
-	[22812] = true, -- Barkskin
-	[1044] = true, -- Blessing of Freedom
-	[29166] = true, -- Innervate
-	[2825] = true, -- Bloodlust
-	[32182] = true, -- Heroism
-	[14751] = true, -- Inner Focus
-	[10060] = true, -- Power Infusion
-	[33206] = true, -- Pain Supression
-	[27009] = true, -- Nature's Grasp
-	[3045] = true, -- Rapid Fire
-	[2651] = true, -- Elune's Grace
-	[6346] = true, -- Fear Ward
-	[20729] = true, -- Blessing of Sacrifice
-	[27148] = true, -- Blessing of Sacrifice
-	[10278] = true, -- Blessing of Protection
-	[30458] = true, -- Nigh Invulnerability Belt
-	[18708] = true, -- Fel Domination
-	[45438] = true, -- Ice Block
-	[1020] = true -- Divine Shield
-};
-
-
 local function Target_Update(frame)
     local buffFrame, frameStealable, icon, debuffType, isStealable, spellId, _
     local selfName = frame:GetName()
@@ -127,7 +95,7 @@ local function Target_Update(frame)
 		local frameName = selfName .. 'Buff' .. i
 		buffFrame = _G[frameName]
 		frameStealable = _G[frameName .. 'Stealable']
-		if (isEnemy and debuffType == "Magic" and isStealable and Whitelist[spellId]) then
+		if (isEnemy and debuffType == "Magic" and isStealable) then
 			local buffSize
 			buffSize = RougeUI.OtherBuffSize
                 	buffFrame:SetHeight(buffSize)

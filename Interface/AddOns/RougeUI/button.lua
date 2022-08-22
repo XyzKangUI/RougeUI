@@ -200,12 +200,12 @@ local function applySkin(b)
 	local ic = _G[name.."Icon"]
 
 	if name:match("Debuff") then
-		ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+		--ic:SetTexCoord(0.04, 0.96, 0.04, 0.96)
 		return
 	end
 
 	b:SetNormalTexture("")
-	ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+	ic:SetTexCoord(0.05, 0.95, 0.05, 0.95)
 	addBorder(b, .1)
 	SkinColor(b, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 

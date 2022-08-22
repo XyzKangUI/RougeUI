@@ -22,7 +22,7 @@ local barstosmooth = {
 	PartyMemberFrame3HealthBar = "party3",
 	PartyMemberFrame3ManaBar = "party3",
 	PartyMemberFrame4HealthBar = "party4",
-	PartyMemberFrame4ManaBar = "party4",
+	PartyMemberFrame4ManaBar = "party4"
 }
 
 local smoothframe = CreateFrame("Frame")

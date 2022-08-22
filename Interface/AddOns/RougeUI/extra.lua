@@ -287,7 +287,7 @@ end
 
 -- Class portrait frames
 
-local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.tga"
+local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.blp"
 
 local function ClassPortrait(self)
 	if self.unit == "player" or self.unit == "pet" then

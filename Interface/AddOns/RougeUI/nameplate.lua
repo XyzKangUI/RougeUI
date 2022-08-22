@@ -3,7 +3,6 @@ local UnitGUID = UnitGUID
 local hookedFrames = {}
 local U = UnitIsUnit
 local select = select
-local arenaframes
 
 local function NameToArenaNumber(plate)
 	if plate:IsForbidden() then return end
