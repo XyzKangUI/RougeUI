@@ -295,13 +295,20 @@ end
 
 	-- Paperdoll
 
-	local a, b, c, d, _, e = PaperDollFrame:GetRegions()
-	for _, v in pairs({a, b, c, d, e}) do
+	local a, b, c, d = PetPaperDollFrameCompanionFrame:GetRegions()
+	for _, v in pairs({a, c}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, _, e = PetPaperDollFrame:GetRegions()
-	for _, v in pairs({a, b, c, d, e}) do
+	local _, b, c, d, e, f = PetPaperDollFrame:GetRegions()
+	for _, v in pairs({b, c, d, e}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+	-- TokenFrame
+
+	local a, b, c, d = TokenFrame:GetRegions()
+	for _, v in pairs({a, b, c, d}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
@@ -325,8 +332,8 @@ end
 
 	-- PvPFrame
 
-	local a, b, c, d, e = PVPFrame:GetRegions()
-	for _, v in pairs({a, b, c, d, e }) do
+	local _, _, c, d, e, f, g, h = PVPFrame:GetRegions()
+	for _, v in pairs({c, d, e, f, g, h }) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 

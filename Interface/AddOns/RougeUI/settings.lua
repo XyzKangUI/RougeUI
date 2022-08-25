@@ -7,7 +7,7 @@ local function RoundNumbers(val, valStep)
 end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus, skinbuttons, Colval, ArenaNumbers, SQFix }
+		FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline }
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -32,7 +32,7 @@ function f:ADDON_LOADED()
     if RougeUI.smooth == nil then RougeUI.smooth = false; end
     if RougeUI.pimp == nil then RougeUI.pimp = false; end
     if RougeUI.retab == nil then RougeUI.retab = false; end
-    if RougeUI.rfocus == nil then RougeUI.rfocus = false; end
+    if RougeUI.classoutline == nil then RougeUI.classoutline = false; end
     if RougeUI.skinbuttons == nil then RougeUI.skinbuttons = false; end
     if RougeUI.Colval == nil then RougeUI.Colval = 1; end
     if RougeUI.ArenaNumbers == nil then RougeUI.ArenaNumbers = false; end
@@ -235,14 +235,14 @@ function f:CreateGUI()
 		SQFixButton:SetChecked(RougeUI.SQFix)
 		SQFixButton:SetScript("OnClick", function() RougeUI.SQFix = not RougeUI.SQFix end)
 
-		local name = "RedFocus"
+		local name = "ClassOutlines"
 		local template = "UICheckButtonTemplate"
-		local RedFocus = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		RedFocus:SetPoint("TOPLEFT", 350, -200)
-		RedFocus.text = _G[name.."Text"]
-		RedFocus.text:SetText("Add red line to focusframe")
-		RedFocus:SetChecked(RougeUI.rfocus)
-		RedFocus:SetScript("OnClick", function() RougeUI.rfocus = not RougeUI.rfocus end)
+		local ClassOutlines = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+		ClassOutlines:SetPoint("TOPLEFT", 350, -200)
+		ClassOutlines.text = _G[name.."Text"]
+		ClassOutlines.text:SetText("Add class colored outline to frames")
+		ClassOutlines:SetChecked(RougeUI.classoutline)
+		ClassOutlines:SetScript("OnClick", function() RougeUI.classoutline = not RougeUI.classoutline end)
 
 		local name = "GradientHP"
 		local template = "UICheckButtonTemplate"

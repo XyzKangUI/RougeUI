@@ -275,12 +275,8 @@ local function CheckClassification(self, forceNormalTexture)
 		self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
 		self.borderTexture:SetVertexColor(1, 1, 1)
 	else
-		if RougeUI.rfocus and self.unit == "focus" then
-			self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\FocusFrame")
-		else
-			self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
-			self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-		end
+		self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+		self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		forceNormalTexture = true;
 	end
 end

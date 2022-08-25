@@ -16,3 +16,4 @@ auras.lua
 retab.lua
 minimap.lua
 button.lua
+outlines.lua
