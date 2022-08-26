@@ -1,72 +1,44 @@
 local CL = {}
+CL.NF = {}
 
 local classcolors = {
-	["focus"] = "Interface\\AddOns\\RougeUI\\textures\\target\\FocusFrame",
-	["ROGUE"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Rogue",
-	["PRIEST"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Priest",
-	["WARRIOR"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Warrior",
-	["PALADIN"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Paladin",
-	["DEATHKNIGHT"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Deathknight",
-	["HUNTER"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Hunter",
-	["DRUID"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Druid",
-	["MAGE"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Mage",
-	["SHAMAN"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Shaman",
-	["WARLOCK"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Warlock",
+    ["ROGUE"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Rogue",
+    ["PRIEST"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Priest",
+    ["WARRIOR"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Warrior",
+    ["PALADIN"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Paladin",
+    ["DEATHKNIGHT"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Deathknight",
+    ["HUNTER"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Hunter",
+    ["DRUID"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Druid",
+    ["MAGE"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Mage",
+    ["SHAMAN"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Shaman",
+    ["WARLOCK"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Warlock",
 }
 
+function CL:CreateClassOutlines(unit, frame)
+  if not self.NF[unit] then
+    self.NF[unit] = CreateFrame("Frame", nil, frame)
+    self.NF[unit]:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", -10, 6)
+    self.NF[unit]:SetSize(124, 62)
+    self.NF[unit]:SetScale(frame:GetScale() * 2)
+    self.NF[unit].texture = self.NF[unit]:CreateTexture(nil, "BORDER")
+    self.NF[unit].texture:SetAllPoints(self.NF[unit])
+    self.NF[unit]:Hide()
+  end
 
-function CL:CreateTargetOutlines(unit)
-	if not self.TT then
-		self.TT = CreateFrame("Frame", nil, TargetFrame)
-		self.TT:SetPoint("CENTER", TargetFramePortrait, "BOTTOMLEFT", -10, 6)
-		self.TT:SetSize(124, 64)
-		self.TT:SetScale(2)
-		self.TT.texture = self.TT:CreateTexture(nil, "BORDER")
-		self.TT.texture:SetAllPoints(self.TT)
-		self.TT:Hide()
-		--return self.TT
-	end
+    if not UnitIsPlayer(unit) then
+        self.NF[unit]:Hide()
+        return
+    end
 
-	if not UnitIsPlayer(unit) then
-		self.TT:Hide()
-		return
-	end
-
-	local _, class = UnitClass(unit)
-	self.TT.texture:SetTexture(classcolors[class])
-	self.TT:Show()
-end
-
-function CL:CreateFocusOutlines(unit)
-	if not self.FT then
-		self.FT = CreateFrame("Frame", nil, FocusFrame)
-		self.FT:SetPoint("CENTER", FocusFramePortrait, "BOTTOMLEFT", -10, 6)
-		self.FT:SetSize(124, 62)
-		self.FT:SetScale(2)
-		self.FT.texture = self.FT:CreateTexture(nil, "BORDER")
-		self.FT.texture:SetAllPoints(self.FT)
-		self.FT:Hide()
-		--return self.FT
-	end
-
-	if not UnitIsPlayer(unit) then
-		self.FT:Hide()
-		return
-	end
-
-	local _, class = UnitClass(unit)
-	self.FT.texture:SetTexture(classcolors[class])
-	self.FT:Show()
-
+    local _, class = UnitClass(unit)
+    self.NF[unit].texture:SetTexture(classcolors[class])
+    self.NF[unit]:Show()
 end
 
 function CL:hookfunc()
 	if self.portrait then
-		if self.unit == "focus" then
-			CL:CreateFocusOutlines(self.unit)
-		end
-		if self.unit == "target" then
-			CL:CreateTargetOutlines(self.unit)
+		if self.unit == "focus" or self.unit == "target" then
+			CL:CreateClassOutlines(self.unit, self)
 		end
 	end
 end
@@ -83,5 +55,3 @@ eventframe:SetScript("OnEvent", function(self, event, ...)
 	end
 	self:UnregisterEvent("ADDON_LOADED")
 end)
-
-
