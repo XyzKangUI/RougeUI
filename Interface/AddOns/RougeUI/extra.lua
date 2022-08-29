@@ -10,7 +10,10 @@ local addonlist = {
 	["whoaUnitFrames_BCC"] = true, 
 	["AbyssUI"] = true, 
 	["KkthnxUI"] = true,
-	["TextureScript"] = true
+	["TextureScript"] = true,
+	["DarkModeUI"] = true,
+	["SUI"] = true,
+	["RiizUI"] = true
 }
 
 -- Hide MultiGroupFrame icons showing as Party(+BG) leader

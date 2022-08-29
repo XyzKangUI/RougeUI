@@ -55,6 +55,12 @@ local function FrameColour()
 			CastingBarFrame.Border,
 			TargetFrameSpellBar.Border,
 			FocusFrameSpellBar.Border,
+			Rune1BorderTexture,
+			Rune2BorderTexture,
+			Rune3BorderTexture,
+			Rune4BorderTexture,
+			Rune5BorderTexture,
+			Rune6BorderTexture,
 			}) do
 				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
@@ -270,6 +276,12 @@ for i,v in pairs({
 }) do
    v:SetVertexColor(1, 1, 1)
 end
+
+	-- TotemFrame
+	for i = 1, MAX_TOTEMS do
+		local _, totem = _G["TotemFrameTotem"..i]:GetChildren()
+		totem:GetRegions():SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
 
 	-- BankFrame
 	local a, b, c, d, _, e = BankFrame:GetRegions()

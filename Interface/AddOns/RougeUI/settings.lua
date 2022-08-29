@@ -1,6 +1,7 @@
 local Name, ns = ...;
 local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
 local floor = math.floor
+local format = format
 
 local function RoundNumbers(val, valStep)
 	return floor(val/valStep)*valStep
@@ -87,6 +88,14 @@ function f:CreateGUI()
 		Reload:SetScript("OnClick", function(self, button, down)
 			ReloadUI()
 		end)
+
+		function SlashCmdList.RougeUI()
+			InterfaceOptionsFrame_OpenToCategory(Panel)
+			InterfaceOptionsFrame_OpenToCategory(Panel)
+		end
+		SLASH_RougeUI1 = "/rui"
+
+		print("|cffFFF468RougeUI|cffffffff loaded. Open options with: |cffFFF468/rui")
 
 		local name = "ClassPortraitButton"
 		local template = "UICheckButtonTemplate"
@@ -208,7 +217,7 @@ function f:CreateGUI()
 		ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
 		ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
 		ColorValueSlider:SetValue(RougeUI.Colval)
-		ColorValueSlider.text:SetText("Change brightness of UI: "..ColorValueSlider:GetValue(Colval))
+		ColorValueSlider.text:SetText("Change brightness of UI: ".. format("%.2f", ColorValueSlider:GetValue(Colval)))
 		ColorValueSlider:SetValueStep(0.05)
 		ColorValueSlider:SetObeyStepOnDrag(true);
 		ColorValueSlider:SetScript("OnValueChanged", function(self,value)
@@ -325,12 +334,12 @@ function f:CreateGUI()
 		TargetPlayerBuffSizeSlider.textLow = _G[names.."Low"]
 		TargetPlayerBuffSizeSlider.textHigh = _G[names.."High"]
 		TargetPlayerBuffSizeSlider.text = _G[names.."Text"]
-		TargetPlayerBuffSizeSlider:SetMinMaxValues(8, 32)
+		TargetPlayerBuffSizeSlider:SetMinMaxValues(8, 36)
 		TargetPlayerBuffSizeSlider.minValue, TargetPlayerBuffSizeSlider.maxValue = TargetPlayerBuffSizeSlider:GetMinMaxValues()
 		TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
 		TargetPlayerBuffSizeSlider.textHigh:SetText(TargetPlayerBuffSizeSlider.maxValue)
 		TargetPlayerBuffSizeSlider:SetValue(RougeUI.SelfSize)
-		TargetPlayerBuffSizeSlider.text:SetText("Personal (De)buff Size: "..TargetPlayerBuffSizeSlider:GetValue(SelfSize));
+		TargetPlayerBuffSizeSlider.text:SetText("Personal (De)buff Size: ".. format("%.f",TargetPlayerBuffSizeSlider:GetValue(SelfSize)));
 		TargetPlayerBuffSizeSlider:SetValueStep(1)
 		TargetPlayerBuffSizeSlider:SetObeyStepOnDrag(true);
 		TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(self, value)
@@ -345,7 +354,7 @@ function f:CreateGUI()
 		local template = "OptionsSliderTemplate"
 		local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel1, template)
 		TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -480)
-		TargetBuffSizeSlider:SetMinMaxValues(8, 32)
+		TargetBuffSizeSlider:SetMinMaxValues(8, 36)
 		TargetBuffSizeSlider:SetValueStep(1)
 		TargetBuffSizeSlider.textLow = _G[names.."Low"]
 		TargetBuffSizeSlider.textHigh = _G[names.."High"]
@@ -354,7 +363,7 @@ function f:CreateGUI()
 		TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
 		TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
 		TargetBuffSizeSlider:SetValue(RougeUI.OtherBuffSize)
-		TargetBuffSizeSlider.text:SetText("Target Buff Size: "..TargetBuffSizeSlider:GetValue(OtherBuffSize));
+		TargetBuffSizeSlider.text:SetText("Target Buff Size: ".. format("%.f", TargetBuffSizeSlider:GetValue(OtherBuffSize)));
 		TargetBuffSizeSlider:SetObeyStepOnDrag(true);
 		TargetBuffSizeSlider:SetScript("OnValueChanged", function(self, value)
 			if RougeUI.OtherBuffSize ~= value then

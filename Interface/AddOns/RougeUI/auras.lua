@@ -68,7 +68,7 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             if (rowWidth > maxRowWidth) then
                 updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
                 rowWidth = size
---		frame.auraRows = frame.auraRows + 1;
+--		    frame.auraRows = frame.auraRows + 1;
                 firstBuffOnRow = i
                 offsetY = AURA_OFFSET
 		if ( frame.auraRows > NUM_TOT_AURA_ROWS ) then
@@ -96,8 +96,7 @@ local function Target_Update(frame)
 		buffFrame = _G[frameName]
 		frameStealable = _G[frameName .. 'Stealable']
 		if (isEnemy and debuffType == "Magic" and isStealable) then
-			local buffSize
-			buffSize = RougeUI.OtherBuffSize
+			local buffSize = RougeUI.OtherBuffSize
                 	buffFrame:SetHeight(buffSize)
 			buffFrame:SetWidth(buffSize)
                 	frameStealable:Show()
@@ -132,7 +131,7 @@ local function AdjustSpellBar(self)
 		end
 	end
 end
-hooksecurefunc("Target_Spellbar_AdjustPosition", AdjustSpellBar)
+--hooksecurefunc("Target_Spellbar_AdjustPosition", AdjustSpellBar)
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
