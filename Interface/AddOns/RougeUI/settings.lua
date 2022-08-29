@@ -293,7 +293,7 @@ function f:CreateGUI()
 		local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
 		HighlightDispellableButton:SetPoint("TOPLEFT", 10, -200)
 		HighlightDispellableButton.text = _G[name.."Text"]
-		HighlightDispellableButton.text:SetText("Highlight enemy Magic buffs")
+		HighlightDispellableButton.text:SetText("Highlight enemy's important Magic/Enrage buffs")
 		HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
 		HighlightDispellableButton:SetScript("OnClick", function() RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable end)
 
