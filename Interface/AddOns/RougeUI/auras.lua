@@ -165,14 +165,14 @@ local function Target_Update(frame)
 			buffFrame = _G[frameName]
 			frameStealable = _G[frameName .. "Stealable"]
 
-			if isEnemy and (Whitelist[spellId] and isStealable ) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821  then
+			if isEnemy and (Whitelist[spellId] and isStealable ) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 then
 				buffFrame:SetHeight(buffSize)
 				buffFrame:SetWidth(buffSize)
 				frameStealable:Show()
 				frameStealable:SetHeight(buffSize * 1.4)
 				frameStealable:SetWidth(buffSize * 1.4)
 				if Whitelist[spellId] and isStealable then
-					frameStealable:SetVertexColor(153/255, 1, 51/255) -- Green	
+					frameStealable:SetVertexColor(0, 0, 1) -- Blue	
 				elseif (class == 4 or class == 3) and (isEnemy and Enraged[spellId]) then
 					frameStealable:SetVertexColor(1, 0, 0) -- Red
 				elseif spellId == 31821 then -- Highlight Aura mastery
