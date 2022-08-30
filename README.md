@@ -1,27 +1,28 @@
 # RougeUI
 
-This is my **_personal_** UI for TBC-Classic. It is heavily inspired by ModUI. 
+This is my **_personal_** UI for Wotlk-Classic. It is heavily inspired by ModUI. 
 # **Feature List:**
 
 - All frames can manually be darkened under "Misc" options by using the slider (incl. nameplates).
-- ModUI's border style on actionbar and aura's (dark).
-- Hide all glows, spammy damage indicators and group/raid titles.
-- Smooth animated Health and Mana bars.
-- Sets the correct Player PvP icon when you get queued as Horde <> Alliance in a crossfaction battleground.
-- Removed server names showing on raid frames when in BG/Arena.
-- Class colored names on the PvP Scoreboard in battlegrounds.
-- Combat Indicator on target-/focus frame.
-- Added timers + gradient effect + changed spelltext position (modui style) to castbars.
-- Enabled nameplate's hidden castbar text.
-- Built-in energy ticker for druids and rogues.
-- Faded PvP Icons. Useful for combo point classes because they overlap.
-- Removed gap and re-colored the buff duration format.
 - Personal/Target (de)buffs can be re-sized.
-- Highlight dispellable magic buffs.
-- Fast key actions (like SnowFallKeyPress).
-- Class colored and/or gradient health bars.
-- Class portraits.
+- Activate spells on pressing keys down (like SnowFallKeyPress).
+- ModUI's border style.
+- ModUI castbar style
+- Smooth animated Health and Mana bars.
 - Statusbar numeric text is shown as the _current_ HP/Mana. The numeric display can be shortened to one decimal.
+- Combat Indicator on target-/focus frame.
+- Fade PvP Icons
+- Sets the correct Player PvP icon when you get queued as Horde <> Alliance in a crossfaction battleground.
+- Hide all glows, spammy damage indicators and group/raid titles.
+- Removed server names on raidframes and nameplates.
+- Force enabled nameplate's hidden castbar text.
+- Hidden nameplates to reduce clutter: feral spirit, treants, risen ghoul, army of the dead, snake trap, mirror image 
+- The duration timer gap can be removed from buffs
+- Highlight dispellable magic (blue) & enrage buffs (red). Only [important](https://github.com/XyzKangUI/RougeUI/blob/wotlk/Interface/AddOns/RougeUI/auras.lua#L121/) magic buffs are highlighted and also aura mastery (yellow) + lichborne (pink).
+- Class colored names on the PvP Scoreboard (BG's).
+- Class colored and/or gradient health bars.
+- Class portraits (unique custom textures).
+- Class portrait outlines
 
 # **Read Me:**
 
@@ -49,8 +50,8 @@ I have been using this addon for 2 years. There are no bugs or errors. If you do
 # **Credits:**
 
 A lot of the code is kanged, ergo credits should be given where they are due: 
-* Swagkhalifa: help with smooth animated bars + gradient castbar effect.
-* Knall: for fixing the nameplate castbar hook C overflow and the combat indicator.
+* Swagkhalifa: help with smooth animated nameplate bars + as bonus gave gradient castbar effect.
+* Knall: for the always continuous help
 * Modernist for making the best addon hands down and inspiring me to bring over a few features from his 1.12 UI; energy ticker; spellbars; nameplates; smooth animated statusbars.
 * Usoltev for the auras code.
 * Lorti/Chordsy/Syiana for some of the copypasta. 
