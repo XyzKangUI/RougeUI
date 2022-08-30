@@ -1,5 +1,5 @@
 ## Interface: 30400
-## Title: |cff009cffRougeUI-TBCC|r
+## Title: |cff009cffRougeUI-WOTLKC|r
 ## Version: 3
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
