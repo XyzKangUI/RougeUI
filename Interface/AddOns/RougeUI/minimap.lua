@@ -6,7 +6,6 @@ if not (IsAddOnLoaded("SexyMap")) then
 		MinimapBorderTop,
 		MinimapToggleButton,
 		MinimapZoomIn,
-		GameTimeFrame,
 		MinimapZoomOut,
 		MinimapNorthTag,
 		MiniMapTracking
@@ -24,14 +23,38 @@ Minimap:SetScript('OnMouseWheel', function(self, delta)
 	end
 end)
 
+-- GameTimeFrame
+local calendar = GameTimeFrame
+calendar:SetAlpha(0)
+local function FindParent(frame, target)
+	if frame == target then
+		return true
+	elseif frame then
+		return FindParent(frame:GetParent(), target)
+	end
+end
+
+calendar:HookScript("OnEnter", function(self)
+	self:SetAlpha(1)
+end)
+
+calendar:HookScript("OnLeave", function(self)
+	if not FindParent(GetMouseFocus(), self) then
+		self:SetAlpha(0)
+	end
+end)
+
+calendar:HookScript("OnClick", function()
+	calendar:SetAlpha(0)
+end)
+
 MiniMapMailFrame:ClearAllPoints() 
 MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
 
 MinimapZoneText:ClearAllPoints()
 MinimapZoneText:SetPoint('TOP', Minimap, -2, 17)
 
-GameTimeFrame:UnregisterAllEvents()
-GameTimeFrame.Show = kill
+-- TrackingFrame
 
 Minimap:SetScript("OnMouseUp", function(self, btn) 
    if btn == "RightButton" then 
