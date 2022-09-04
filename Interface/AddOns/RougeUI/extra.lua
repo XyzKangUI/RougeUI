@@ -286,13 +286,36 @@ end
 
 -- Class portrait frames
 
+local lastTargetToTGuid = nil
+local lastFocusToTGuid = nil
+local CP = {}
+
+function CP:CreateToTPortraits()
+	if not self.TargetToTPortrait then
+		self.TargetToTPortrait = TargetFrameToT:CreateTexture(nil, "ARTWORK")
+		self.TargetToTPortrait:SetSize(TargetFrameToT.portrait:GetSize())
+		for i=1, TargetFrameToT.portrait:GetNumPoints() do
+			self.TargetToTPortrait:SetPoint(TargetFrameToT.portrait:GetPoint(i))
+		end
+	end
+
+	if not self.FocusToTPortrait then
+		self.FocusToTPortrait = FocusFrameToT:CreateTexture(nil, "ARTWORK")
+		self.FocusToTPortrait:SetSize(FocusFrameToT.portrait:GetSize())
+		for i=1, FocusFrameToT.portrait:GetNumPoints() do
+			self.FocusToTPortrait:SetPoint(FocusFrameToT.portrait:GetPoint(i))
+		end
+	end
+end
+
 local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.blp"
 
 local function ClassPortrait(self)
 	if self.unit == "player" or self.unit == "pet" then
 		return
 	end
-	if self.portrait then
+
+	if self.portrait and not (self.unit == "targettarget" or self.unit == "focus-target") then
 		if UnitIsPlayer(self.unit) then
 			local _, class = UnitClass(self.unit)
 			if (class and UnitIsPlayer(self.unit)) then
@@ -301,6 +324,38 @@ local function ClassPortrait(self)
 				format(self.unit)
 			end
 		end
+	end
+
+	if UnitExists("targettarget") ~= nil then
+		if UnitGUID("targettarget") ~= lastTargetToTGuid then
+			lastTargetToTGuid = UnitGUID("targettarget")
+			if UnitIsPlayer("targettarget") then
+				local _, class = UnitClass("targettarget")
+				CP.TargetToTPortrait:SetTexture(CLASS_TEXTURE:format(class))
+				CP.TargetToTPortrait:Show()
+			else
+				CP.TargetToTPortrait:Hide()
+			end
+		end
+	else
+		CP.TargetToTPortrait:Hide()
+		lastTargetToTGuid = nil
+	end
+
+	if UnitExists("focus-target") ~= nil then
+		if UnitGUID("focus-target") ~= lastFocusToTGuid then
+			lastFocusToTGuid = UnitGUID("focus-target")
+			if UnitIsPlayer("focus-target") then
+				local _, class = UnitClass("focus-target")
+				CP.FocusToTPortrait:SetTexture(CLASS_TEXTURE:format(class))
+				CP.FocusToTPortrait:Show()
+			else
+				CP.FocusToTPortrait:Hide()
+			end
+		end
+	else
+		CP.FocusToTPortrait:Hide()
+		lastFocusToTGuid = nil
 	end
 end
 
@@ -353,6 +408,7 @@ e:SetScript("OnEvent", function(self, event)
 			end)
 		end
 		if (RougeUI.Class_Portrait == true) then
+			CP:CreateToTPortraits()
 			hooksecurefunc("UnitFramePortrait_Update", ClassPortrait)
 		end
 		if (RougeUI.ScoreBoard == true) then
