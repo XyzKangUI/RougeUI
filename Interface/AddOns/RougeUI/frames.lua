@@ -1,5 +1,7 @@
+local pairs = pairs
+
 local function FrameColour()
-		for i,v in pairs({
+		for _,v in pairs({
 			PlayerFrameTexture,
 			PlayerFrameAlternateManaBarBorder,
 			PlayerFrameAlternateManaBarLeftBorder,
@@ -61,6 +63,30 @@ local function FrameColour()
 			Rune4BorderTexture,
 			Rune5BorderTexture,
 			Rune6BorderTexture,
+			ArenaEnemyFrame1Texture,
+			ArenaEnemyFrame2Texture,
+			ArenaEnemyFrame3Texture, 
+			ArenaEnemyFrame4Texture,
+			ArenaEnemyFrame5Texture,
+			ArenaEnemyFrame1SpecBorder,
+			ArenaEnemyFrame2SpecBorder,
+			ArenaEnemyFrame3SpecBorder,
+			ArenaEnemyFrame4SpecBorder,
+			ArenaEnemyFrame5SpecBorder,
+			ArenaEnemyFrame1PetFrameTexture,
+			ArenaEnemyFrame2PetFrameTexture,
+			ArenaEnemyFrame3PetFrameTexture,
+			ArenaEnemyFrame4PetFrameTexture, 
+			ArenaEnemyFrame5PetFrameTexture,
+			ArenaPrepFrame1Texture,
+			ArenaPrepFrame2Texture,
+			ArenaPrepFrame3Texture,
+			ArenaPrepFrame4Texture,
+			ArenaPrepFrame5Texture,
+			ArenaPrepFrame1SpecBorder,
+			ArenaPrepFrame2SpecBorder,
+			ArenaPrepFrame3SpecBorder,
+			ArenaPrepFrame4SpecBorder,
 			}) do
 				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
@@ -100,17 +126,18 @@ for i, v in pairs({
 	VideoOptionsFrame.TopEdge,
 	VideoOptionsFrame.TopLeftCorner,
 	VideoOptionsFrame.TopRightCorner,
-	AddonList.BotLeftCorner,
-	AddonList.BotRightCorner,
-	AddonList.BottomBorder,
-	AddonList.LeftBorder,
-	AddonList.RightBorder,
-	AddonList.TopBorder,
-	AddonList.TopLeftCorner,
-	AddonList.TopRightCorner,
+	AddonListBotLeftCorner,
+	AddonListBotRightCorner,
+	AddonListBottomBorder,
+	AddonListLeftBorder,
+	AddonListRightBorder,
+	AddonListTopBorder,
+	AddonListTopLeftCorner,
+	AddonListTopRightCorner,
 	AddonListBtnCornerLeft,
 	AddonListBtnCornerRight,
 	AddonListBg,
+	AddonListTitleBg,
 	ExhaustionTickNormal,
 	AddonListEnableAllButton_RightSeparator,
 	AddonListDisableAllButton_RightSeparator,
@@ -197,6 +224,9 @@ for i, v in pairs({
 	ContainerFrame11BackgroundTop,
 	ContainerFrame11BackgroundMiddle1,
 	ContainerFrame11BackgroundBottom,
+	ContainerFrame12BackgroundTop,
+	ContainerFrame12BackgroundMiddle1,
+	ContainerFrame12BackgroundBottom,
 	MerchantFrameInsetInsetBottomBorder,
 	TradeFrameBg,
 	TradeFrameBottomBorder,
@@ -268,15 +298,6 @@ for i, v in pairs({
    v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 end
 
-for i,v in pairs({
-	BankPortraitTexture,
-	BankFrameTitleText,
-	MerchantFramePortrait,
-	WhoFrameTotals
-}) do
-   v:SetVertexColor(1, 1, 1)
-end
-
 	-- TotemFrame
 	for i = 1, MAX_TOTEMS do
 		local _, totem = _G["TotemFrameTotem"..i]:GetChildren()
@@ -284,7 +305,7 @@ end
 	end
 
 	-- BankFrame
-	local a, b, c, d, _, e = BankFrame:GetRegions()
+	local a, b, c, d, e = BankFrame:GetRegions()
 	for _, v in pairs({a, b, c, d, e}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
@@ -307,12 +328,17 @@ end
 
 	-- Paperdoll
 
-	local a, b, c, d = PetPaperDollFrameCompanionFrame:GetRegions()
+	local a, b, c, d, _, e = PaperDollFrame:GetRegions()
+	for _, v in pairs({a, b, c, d, e})do
+   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+	local a, _, c = PetPaperDollFrameCompanionFrame:GetRegions()
 	for _, v in pairs({a, c}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local _, b, c, d, e, f = PetPaperDollFrame:GetRegions()
+	local _, b, c, d, e = PetPaperDollFrame:GetRegions()
 	for _, v in pairs({b, c, d, e}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
@@ -322,6 +348,11 @@ end
 	local a, b, c, d = TokenFrame:GetRegions()
 	for _, v in pairs({a, b, c, d}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+	for i = 1, 20 do
+		local vertex = _G["TokenFrameContainerButton"..i.."Stripe"]
+		vertex:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- Skill
@@ -371,7 +402,6 @@ end
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-
 	local a, b, c, d, e, f, g, h = CharacterFrameTab5:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
@@ -379,7 +409,11 @@ end
 
 	-- Social Frame
 	local a, b, c, d, e, f, g, _, i, j, k, l, n, o, p, q, r, _, _ = FriendsFrame:GetRegions()
-	for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r, FriendsFrameInset:GetRegions()}) do
+	for _, v in pairs({
+		a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r,
+		FriendsFrameInset:GetRegions(),
+		WhoFrameListInset:GetRegions()
+	}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
@@ -433,6 +467,21 @@ end
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
+	for i = 1, MAX_SKILLLINE_TABS  do
+		local vertex = _G["SpellBookSkillLineTab"..i]:GetRegions()
+		vertex:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+	-- Should remain untouched
+	for _,v in pairs({
+		BankPortraitTexture,
+		BankFrameTitleText,
+		WhoFrameTotals,
+		MerchantFramePortrait
+	}) do
+		v:SetVertexColor(1, 1, 1)
+	end
+
 	ChatFrame1EditBoxLeft:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	ChatFrame1EditBoxMid:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	ChatFrame1EditBoxRight:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
@@ -441,19 +490,388 @@ end
 	GameTooltip.SetBackdropBorderColor = function() end
 end
 
+local function NewVariables()
+
+	-- Rep bar
+	for i = 1, 15 do
+		local FrameBG = _G["ReputationBar"..i.."Background"]
+		FrameBG:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+	-- SpellBookFrame
+	local _, a, b, c, d = SpellBookFrame:GetRegions()
+	for _, v in pairs({a, b, c, d}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+
+	if not SpellBookFrame.Material then
+		SpellBookFrame.Material = SpellBookFrame:CreateTexture(nil, "OVERLAY", nil, 7)
+		SpellBookFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
+		SpellBookFrame.Material:SetWidth(547)
+		SpellBookFrame.Material:SetHeight(541)
+		SpellBookFrame.Material:SetPoint("TOPLEFT", SpellBookFrame, 22, -74)
+		SpellBookFrame.Material:SetVertexColor(.9, .9, .9)
+	end
+
+	-- QuestLogFrame
+
+	local _, b, c, _, d = QuestLogFrame:GetRegions()
+	for _, v in pairs({ b, c, d}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+	if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["EnhanceQuestLog"] == "On" then
+		QuestLogFrame.Material = QuestLogFrame:CreateTexture(nil, "OVERLAY", nil, 7)
+		QuestLogFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
+		QuestLogFrame.Material:SetWidth(531)
+		QuestLogFrame.Material:SetHeight(625)
+		QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
+		QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
+	else
+		QuestLogFrame.Material = QuestLogFrame:CreateTexture(nil, "OVERLAY", nil, 7)
+		QuestLogFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
+		QuestLogFrame.Material:SetWidth(531)
+		QuestLogFrame.Material:SetHeight(511)
+		QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
+		QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
+	end
+
+	for _, v in pairs({
+		GossipFrameGreetingPanel,
+		QuestFrameRewardPanel,
+		QuestFrameDetailPanel,
+		QuestFrameProgressPanel,
+		QuestFrameGreetingPanel,
+	}) do
+		for _, j in pairs({v:GetRegions()}) do
+			j:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+
+		if not v.Material then 
+			v.Material = v:CreateTexture(nil, "OVERLAY", nil, 7)
+			v.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
+			v.Material:SetWidth(514)
+			v.Material:SetHeight(522)
+			v.Material:SetPoint("TOPLEFT", v, 22, -74)
+			v.Material:SetVertexColor(.9, .9, .9)
+		end
+
+		if  v == GossipFrameGreetingPanel or v == QuestFrameGreetingPanel then
+			v.Corner = v:CreateTexture(nil, "OVERLAY", nil, 7)
+			v.Corner:SetTexture("Interface\\QuestFrame\\UI-Quest-BotLeftPatch")
+			v.Corner:SetSize(132, 64)
+			v.Corner:SetPoint("BOTTOMLEFT", v, 21, 68)
+			v.Corner:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+        	end
+	end
+
+	-- Wardrobe
+	local _, a, b, c, d = DressUpFrame:GetRegions()
+	for _, v in pairs({a, b, c, d, e}) do
+       	v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+    	end
+
+	-- Worldmap
+    	local a, b, c, d, e ,f, g, h, i, j, k, l = WorldMapFrame.BorderFrame:GetRegions()
+    	for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l}) do
+		v:SetVertexColor(.5, .5, .5)
+    	end
+
+	-- Readycheck
+	local _, a = ReadyCheckListenerFrame:GetRegions()
+	a:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+
+    	-- Scoreboard
+    	local a, b, c, d, e, f, _, _, _, _ ,_, l = WorldStateScoreFrame:GetRegions()
+    	for _, v in pairs({a, b, c, d, e, f, l}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+    	end
+
+	-- Taxiframe
+	local _, a, b, c, d = TaxiFrame:GetRegions()
+	for _, v in pairs({a, b, c, d}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+	end
+
+	-- TabardFrame
+    	local _, a, b, c, d = TabardFrame:GetRegions()
+    	for _, v in pairs({a, b, c, d, e}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+    	end
+
+	-- PetStable
+	for _,  v in pairs({PetStableFrame:GetRegions()}) do
+		if v:GetObjectType() == "Texture" and v ~= PetStableFramePortrait then
+			v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+	end
+end
+
+local function BlizzFrames(addon)
+	-- GlyphFrame
+	if addon == "Blizzard_GlyphUI" then
+		local a, _, c, d, e ,f, g, h, i = GlyphFrame:GetRegions()
+		for _, v in pairs({a, c, d, e ,f, g, h, i})do
+			if RougeUI.Colval <= 0.5 then
+				v:SetVertexColor(.5, .5, .5)
+			else
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+	end
+
+	-- CalendarFrame
+	if addon == "Blizzard_Calendar" then
+		local vectors = {CalendarFrame:GetRegions()}
+		for i = 1, 13 do
+			vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+	end
+
+	if addon == "Blizzard_BindingUI" then
+		-- KeyBindingFrame
+		local vectors = {KeyBindingFrame:GetRegions()}
+		for i = 1, 1 do
+			vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+
+
+		for i = 1, 10 do
+			local vectors = {KeyBindingFrame.header:GetRegions()}
+			vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+
+		for _, v in pairs({
+			KeyBindingFrame.BottomEdge,
+			KeyBindingFrame.TopEdge,
+			KeyBindingFrame.LeftEdge,
+			KeyBindingFrame.RightEdge,
+			KeyBindingFrame.BottomLeftCorner,
+			KeyBindingFrame.TopLeftCorner,
+			KeyBindingFrame.BottomRightCorner,
+			KeyBindingFrame.TopRightCorner,
+			KeyBindingFrameBottomBorder,
+			KeyBindingFrameTopBorder,
+			KeyBindingFrameRightBorder,
+			KeyBindingFrameLeftBorder,
+			KeyBindingFrameBottomLeftCorner,
+			KeyBindingFrameBottomRightCorner,
+			KeyBindingFrameTopLeftCorner,
+			KeyBindingFrameTopRightCorner,
+		}) do
+			v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+	end
+
+		if addon == "Blizzard_TimeManager" then
+			for _, v in pairs({StopwatchFrame:GetRegions()})do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+
+			local a, b, c = StopwatchTabFrame:GetRegions()
+			for _, v in pairs({a, b, c})do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+
+			local a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r =  TimeManagerFrame:GetRegions()
+			for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r})do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+
+		--RECOLOR Achievement
+
+		if addon == "Blizzard_AchievementUI" then
+			local a, b, c, d, e, f, g, h, i, j, k, l, m, n, o = AchievementFrame:GetRegions()
+			for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, m, n, o}) do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+
+		-- Barber
+		if addon == "Blizzard_BarbershopUI" then
+			local a, b, c = BarberShopFrame:GetRegions()
+			for _, v in pairs({a, b, c}) do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+
+		-- Talentframe
+
+		if addon == "Blizzard_TalentUI" then
+			local vectors = {PlayerTalentFrame:GetRegions()}
+			for i = 2, 6 do
+				vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+
+			local vectors = {PlayerTalentFramePointsBar:GetRegions()}
+			for i = 1, 4 do
+				vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+
+			PlayerSpecTab1Background:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			PlayerSpecTab2Background:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+
+			for _, v in pairs({
+				PlayerTalentFrameScrollFrameBackgroundTop,
+				PlayerTalentFrameScrollFrameBackgroundBottom,
+				PlayerTalentFrameTab1LeftDisabled,
+				PlayerTalentFrameTab1MiddleDisabled,
+				PlayerTalentFrameTab1RightDisabled,
+				PlayerTalentFrameTab2LeftDisabled,
+				PlayerTalentFrameTab2MiddleDisabled,
+				PlayerTalentFrameTab2RightDisabled,
+				PlayerTalentFrameTab3LeftDisabled,
+				PlayerTalentFrameTab3MiddleDisabled,
+				PlayerTalentFrameTab3RightDisabled,
+				PlayerTalentFrameTab4LeftDisabled,
+				PlayerTalentFrameTab4MiddleDisabled,
+				PlayerTalentFrameTab4RightDisabled,
+			}) do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+
+		-- Tradeskill
+		if addon == "Blizzard_TradeSkillUI" then
+			local _, b, c, d, e, f, _, h, i = TradeSkillFrame:GetRegions()
+			for _, v in pairs({b, c, d, e, f, h, i}) do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+
+		-- ClassTrainerFrame
+		if addon == "Blizzard_TrainerUI" then
+			local _, a, b, c, d, _, e, f, g, h = ClassTrainerFrame:GetRegions()
+
+			for _, v in pairs({ a, b, c, d, e, f, g, h})do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+
+		-- InspectFrame/InspectTalentFrame/InspectPVPFrame
+
+		if addon == "Blizzard_InspectUI" then
+			for _, v in pairs({
+				InspectTalentFramePointsBarBorderLeft,
+				InspectTalentFramePointsBarBorderMiddle,
+				InspectTalentFramePointsBarBorderRight,
+				InspectTalentFramePointsBarBackground,
+				InspectFrameTab1LeftDisabled,
+				InspectFrameTab1MiddleDisabled,
+				InspectFrameTab1RightDisabled,
+				InspectFrameTab2LeftDisabled,
+				InspectFrameTab2MiddleDisabled,
+				InspectFrameTab2RightDisabled,
+				InspectFrameTab3LeftDisabled,
+				InspectFrameTab3MiddleDisabled,
+				InspectFrameTab3RightDisabled,
+				InspectTalentFrameTab1Left,
+				InspectTalentFrameTab1Right,
+				InspectTalentFrameTab1Middle,
+				InspectTalentFrameTab1LeftDisabled,
+				InspectTalentFrameTab1MiddleDisabled,
+				InspectTalentFrameTab1RightDisabled,
+				InspectTalentFrameTab2Left,
+				InspectTalentFrameTab2Right,
+				InspectTalentFrameTab2Middle,
+				InspectTalentFrameTab2LeftDisabled,
+				InspectTalentFrameTab2MiddleDisabled,
+				InspectTalentFrameTab2RightDisabled,
+				InspectTalentFrameTab3Left,
+				InspectTalentFrameTab3Right,
+				InspectTalentFrameTab3Middle,
+				InspectTalentFrameTab3LeftDisabled,
+				InspectTalentFrameTab3MiddleDisabled,
+				InspectTalentFrameTab3RightDisabled,
+			}) do
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+			local vectors = {InspectPaperDollFrame:GetRegions()}
+			for i = 1, 4 do
+				vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+
+			local vectors = {InspectPVPFrame:GetRegions()}
+			for i = 1, 5 do
+				vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+
+			local vectors = {InspectTalentFrame:GetRegions()}
+			for i = 1, 5 do
+				vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+
+			local vectors = {InspectTalentFrameScrollFrame:GetRegions()}
+			for i = 1, 2 do
+				vectors[i]:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+			end
+		end
+
+	-- Dungeon finder
+	if addon == "Blizzard_LookingForGroupUI" then
+		local a, b, c, d = LFGListingFrame:GetRegions()
+		for _, v in pairs({a, b, c}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+
+		local a, b, c, d, e = LFGBrowseFrame:GetRegions()
+		for _, v in pairs({a, b, c, d}) do
+		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+	end
+
+	-- Macro's
+	if addon == "Blizzard_MacroUI" then
+		local a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r = MacroFrame:GetRegions()
+		for _, v in pairs({a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r})do
+			v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+		
+		for _, v in pairs({
+			MacroFrameTab1Left,
+			MacroFrameTab1Right,
+			MacroFrameTab1Middle,
+			MacroFrameTab1LeftDisabled,
+			MacroFrameTab1MiddleDisabled,
+			MacroFrameTab1RightDisabled,
+			MacroFrameTab2Left,
+			MacroFrameTab2Right,
+			MacroFrameTab2Middle,
+			MacroFrameTab2LeftDisabled,
+			MacroFrameTab2MiddleDisabled,
+			MacroFrameTab2RightDisabled,
+		}) do
+			v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+		end
+	end
+end
+
 local Framecolor = CreateFrame("Frame")
 
 Framecolor:RegisterEvent("ADDON_LOADED")
 Framecolor:SetScript("OnEvent", function(self, event, addon)
 	if event == "ADDON_LOADED" and addon == "RougeUI" then
 		FrameColour()
+		NewVariables()
 		self:UnregisterEvent("ADDON_LOADED")
 		self:SetScript("OnEvent", nil)
 	end
 end)
 
+local Blizz = CreateFrame("Frame")
+Blizz:RegisterEvent("ADDON_LOADED")
+Blizz:SetScript("OnEvent", function(self, event, addon)
+	if event == "ADDON_LOADED" then
+		BlizzFrames(addon)
+	end
+end)
+	
 
-function ChangeFrameColors()
+function RougeUIF:ChangeFrameColors()
 	FrameColour()
+	NewVariables()
+	BlizzFrames()
 end
 	

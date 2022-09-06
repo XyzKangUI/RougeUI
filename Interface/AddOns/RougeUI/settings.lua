@@ -8,7 +8,9 @@ local function RoundNumbers(val, valStep)
 end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline }
+		FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp }
+
+RougeUIF = {}
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
@@ -38,10 +40,12 @@ function f:ADDON_LOADED()
     if RougeUI.Colval == nil then RougeUI.Colval = 1; end
     if RougeUI.ArenaNumbers == nil then RougeUI.ArenaNumbers = false; end
     if RougeUI.SQFix == nil then RougeUI.SQFix = false; end
+    if RougeUI.HideAggro == nil then RougeUI.HideAggro = false; end
+    if RougeUI.unithp == nil then RougeUI.unithp = false; end
 
 
-    Custom_TargetBuffSize();
-    CusFonts();
+    RougeUIF:Custom_TargetBuffSize();
+    RougeUIF:CusFonts();
 
     if not f.options then
         f.options = f:CreateGUI()
@@ -223,7 +227,7 @@ function f:CreateGUI()
 		ColorValueSlider:SetScript("OnValueChanged", function(self,value)
 			ColorValueSlider.text:SetText("Change brightness of UI: "..RoundNumbers(RougeUI.Colval, 0.05))
 			RougeUI.Colval = ColorValueSlider:GetValue()
-			ChangeFrameColors()
+			RougeUIF:ChangeFrameColors()
 		end)
 
 		local name = "ArenaNumbers"
@@ -244,6 +248,15 @@ function f:CreateGUI()
 		SQFixButton:SetChecked(RougeUI.SQFix)
 		SQFixButton:SetScript("OnClick", function() RougeUI.SQFix = not RougeUI.SQFix end)
 
+		local name = "AggroHighlight"
+		local template = "UICheckButtonTemplate"
+		local AggroHighlightButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+		AggroHighlightButton:SetPoint("TOPLEFT", 350, -120)
+		AggroHighlightButton.text = _G[name.."Text"]
+		AggroHighlightButton.text:SetText("Hide Aggro Highlight on Default Raid Frames")
+		AggroHighlightButton:SetChecked(RougeUI.HideAggro)
+		AggroHighlightButton:SetScript("OnClick", function() RougeUI.HideAggro = not RougeUI.HideAggro end)
+
 		local name = "ClassOutlines"
 		local template = "UICheckButtonTemplate"
 		local ClassOutlines = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
@@ -261,6 +274,15 @@ function f:CreateGUI()
 		GradientHPButton.text:SetText("Gradient effect on HP")
 		GradientHPButton:SetChecked(RougeUI.GradientHP)
 		GradientHPButton:SetScript("OnClick", function() RougeUI.GradientHP = not RougeUI.GradientHP end)
+
+		local name = "UnitHP"
+		local template = "UICheckButtonTemplate"
+		local UnitHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+		UnitHPButton:SetPoint("TOPLEFT", 10, -160)
+		UnitHPButton.text = _G[name.."Text"]
+		UnitHPButton.text:SetText("Color HP by friendly/enemy/neutral role")
+		UnitHPButton:SetChecked(RougeUI.unithp)
+		UnitHPButton:SetScript("OnClick", function() RougeUI.unithp = not RougeUI.unithp end)
 
 		local name = "FastKeyPress"
 		local template = "UICheckButtonTemplate"
@@ -282,7 +304,7 @@ function f:CreateGUI()
 		local name = "ShortNumeric"
 		local template = "UICheckButtonTemplate"
 		local ShortNumericButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		ShortNumericButton:SetPoint("TOPLEFT", 10, -160)
+		ShortNumericButton:SetPoint("TOPLEFT", 10, -200)
 		ShortNumericButton.text = _G[name.."Text"]
 		ShortNumericButton.text:SetText("Shorten NUMERIC HP to one decimal")
 		ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
@@ -291,7 +313,7 @@ function f:CreateGUI()
 		local name = "HighlightDispellable"
 		local template = "UICheckButtonTemplate"
 		local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		HighlightDispellableButton:SetPoint("TOPLEFT", 10, -200)
+		HighlightDispellableButton:SetPoint("TOPLEFT", 10, -240)
 		HighlightDispellableButton.text = _G[name.."Text"]
 		HighlightDispellableButton.text:SetText("Highlight enemy's important Magic/Enrage buffs")
 		HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
@@ -324,7 +346,7 @@ function f:CreateGUI()
 		FontSizeSlider:SetScript("OnValueChanged", function(self,event,arg1)
 			FontSizeSlider.text:SetText("Healthbar Font Size: "..FontSizeSlider:GetValue(RougeUI.FontSize))
 			RougeUI.FontSize = FontSizeSlider:GetValue()
-			CusFonts()
+			RougeUIF:CusFonts()
 		end)
 
 		local names = "TargetPlayerBuffSizeSlider"
@@ -346,7 +368,7 @@ function f:CreateGUI()
 			if RougeUI.SelfSize ~= value then
 				RougeUI.SelfSize = TargetPlayerBuffSizeSlider:GetValue();
 				TargetPlayerBuffSizeSliderText:SetText("Personal (De)buff Size: "..RoundNumbers(RougeUI.SelfSize, 1))
-				SetCustomBuffSize(value)
+				RougeUIF:SetCustomBuffSize(value)
 			end
 		end)
 
@@ -369,7 +391,7 @@ function f:CreateGUI()
 			if RougeUI.OtherBuffSize ~= value then
 				RougeUI.OtherBuffSize = TargetBuffSizeSlider:GetValue();
 				TargetBuffSizeSliderText:SetText("Target Buff Size: "..RoundNumbers(RougeUI.OtherBuffSize, 1))
-				SetCustomBuffSize(value)
+				RougeUIF:SetCustomBuffSize(value)
 			end
 		end)
 

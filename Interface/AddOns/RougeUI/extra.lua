@@ -1,3 +1,13 @@
+local hooksecurefunc = hooksecurefunc
+local pairs = pairs
+local IsAddOnLoaded = IsAddOnLoaded
+local GetNetStats = GetNetStats
+local IsInInstance = IsInInstance
+local UnitClass, UnitExists, UnitGUID, UnitCanAttack = UnitClass, UnitExists, UnitGUID, UnitCanAttack
+local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitIsEnemy = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitIsEnemy
+local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled
+
+
 local addonlist = {
 	["Shadowed Unit Frames"] = true, 
 	["PitBull Unit Frames 4.0"] = true, 
@@ -83,23 +93,15 @@ end
 
 local function PvPIcon()
 	local inInstance, instanceType = IsInInstance()
-		if instanceType ~= "arena" then
-			for i,v in pairs({
-				PlayerPVPIcon,
-				FocusFrameTextureFramePVPIcon,
-				TargetFrameTextureFramePVPIcon
-			}) do	
-				v:SetAlpha(0.45)
-			end
-		end
-
-	if instanceType == "arena" then
-		for i,v in pairs({
-			PlayerPVPIcon,
-			FocusFrameTextureFramePVPIcon,
-			TargetFrameTextureFramePVPIcon
-		}) do
+	for i,v in pairs({
+		PlayerPVPIcon,
+		FocusFrameTextureFramePVPIcon,
+		TargetFrameTextureFramePVPIcon
+	}) do	
+		if instanceType == "arena" then
 			v:SetAlpha(0)
+		else
+			v:SetAlpha(0.45)
 		end
 	end
 end
@@ -125,7 +127,7 @@ local function HideGlows()
 		PlayerAttackGlow,
 		PlayerAttackBackground
 	}) do 
-		v:Hide() 
+		v:Hide()
 	end
 end
 
@@ -207,19 +209,29 @@ function GradientColour(statusbar)
 end
 
 local function colour(statusbar, unit)
-	if (UnitIsPlayer(unit) and UnitIsConnected(unit) and unit == statusbar.unit and UnitClass(unit)) then
-		if (RougeUI.ClassHP == true) then
-			local _, class, c
-			_, class = UnitClass(unit)
-			c = RAID_CLASS_COLORS[class]
-			if c then statusbar:SetStatusBarColor(c.r, c.g, c.b) end
-		elseif (RougeUI.GradientHP == true) then
-			GradientColour(statusbar)
-		end
-	end
+	if not statusbar then return end
 
-	if (not UnitPlayerControlled(unit) and RougeUI.GradientHP == true) then
-		GradientColour(statusbar)
+	if unit then
+		if UnitIsConnected(unit) and unit == statusbar.unit then
+			if UnitIsPlayer(unit) and UnitClass(unit) and RougeUI.ClassHP then
+				local _, class = UnitClass(unit)
+				local c = RAID_CLASS_COLORS[class]
+				if c then statusbar:SetStatusBarColor(c.r, c.g, c.b) end
+			elseif (RougeUI.GradientHP and UnitCanAttack("player", unit)) or not RougeUI.ClassHP then
+				GradientColour(statusbar)
+			elseif (not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
+				statusbar:SetStatusBarColor(.5, .5, .5)
+			elseif RougeUI.unithp then
+				local red, green = UnitSelectionColor(unit)
+				if red == 0 then
+					statusbar:SetStatusBarColor(0, 1, 0)
+				elseif green == 0 then
+					statusbar:SetStatusBarColor(1, 0, 0)
+				else
+					statusbar:SetStatusBarColor(1, 1, 0)
+				end
+			end
+		end
 	end
 end
 
@@ -257,11 +269,6 @@ end
 -- Classification
 
 local function CheckClassification(self, forceNormalTexture)
-	for addons in pairs(addonlist) do
-		if IsAddOnLoaded(addons) then
-			return
-		end
-	end
 
 	local classification = UnitClassification(self.unit);
 
@@ -284,6 +291,15 @@ local function CheckClassification(self, forceNormalTexture)
 	end
 end
 
+-- Fix Portrait gaps
+
+local function OnLoad()
+	TargetFrameToTPortrait:ClearAllPoints()
+	TargetFrameToTPortrait:SetPoint("LEFT", TargetFrameToT, "LEFT", 5, 0)
+	FocusFrameToTPortrait:ClearAllPoints()
+	FocusFrameToTPortrait:SetPoint("LEFT", FocusFrameToT, "LEFT", 5, 0)
+end
+
 -- Class portrait frames
 
 local lastTargetToTGuid = nil
@@ -297,6 +313,8 @@ function CP:CreateToTPortraits()
 		for i=1, TargetFrameToT.portrait:GetNumPoints() do
 			self.TargetToTPortrait:SetPoint(TargetFrameToT.portrait:GetPoint(i))
 		end
+		self.TargetToTPortrait:ClearAllPoints()
+		self.TargetToTPortrait:SetPoint("LEFT", TargetFrameToT, "LEFT", 5, 0)
 	end
 
 	if not self.FocusToTPortrait then
@@ -305,6 +323,8 @@ function CP:CreateToTPortraits()
 		for i=1, FocusFrameToT.portrait:GetNumPoints() do
 			self.FocusToTPortrait:SetPoint(FocusFrameToT.portrait:GetPoint(i))
 		end
+		self.FocusToTPortrait:ClearAllPoints()
+		self.FocusToTPortrait:SetPoint("LEFT", TargetFrameToT, "LEFT", 5, 0)
 	end
 end
 
@@ -391,15 +411,14 @@ local e = CreateFrame("Frame")
 for _, v in pairs(events) do e:RegisterEvent(v) end
 e:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_LOGIN" then
-		if (RougeUI.TimerGap == true) then
+
+		if RougeUI.TimerGap then
 			if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
 				hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
 			end
 		end
-		if RougeUI.Colval < 0.16 then
-			hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
-		end
-		if (RougeUI.ClassHP or RougeUI.GradientHP) == true then
+
+		if (RougeUI.ClassHP or RougeUI.GradientHP or RougeUI.unithp) then
 			hooksecurefunc("UnitFrameHealthBar_Update", colour)
 			hooksecurefunc("HealthBar_OnValueChanged", function(self)
 				if not self:IsForbidden() then
@@ -407,26 +426,47 @@ e:SetScript("OnEvent", function(self, event)
 				end
 			end)
 		end
-		if (RougeUI.Class_Portrait == true) then
+		if RougeUI.Class_Portrait then
 			CP:CreateToTPortraits()
 			hooksecurefunc("UnitFramePortrait_Update", ClassPortrait)
 		end
-		if (RougeUI.ScoreBoard == true) then
+		if RougeUI.ScoreBoard then
 			hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
 		end
-		if (RougeUI.HideGlows == true) then
+		if RougeUI.HideGlows then
 			hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
 			hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
 			hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
 		end
-		if (RougeUI.HideTitles == true) then
+		if RougeUI.HideTitles then
 			hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
 			hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
 			hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
 		end
-		if (RougeUI.pimp == true) then
+		if RougeUI.pimp then
 			hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
-		end	
+		end
+		if RougeUI.HideAggro then
+			hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
+				if self.aggroHighlight then
+					self.aggroHighlight:Hide()
+					return
+				end
+			end)
+		end
+
+		for addons in pairs(addonlist) do
+			if IsAddOnLoaded(addons) then
+				self:UnregisterEvent("PLAYER_LOGIN")
+				return
+			end
+		end
+
+		OnLoad()
+
+		if RougeUI.Colval < 0.16 then
+			hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
+		end
 	end
 
 	if ((event == "PLAYER_ENTERING_WORLD") and RougeUI.FadeIcon == true) then

@@ -15,14 +15,6 @@ local barstosmooth = {
 	TargetFrameManaBar = "target",
 	FocusFrameHealthBar = "focus",
 	FocusFrameManaBar = "focus",
-	PartyMemberFrame1HealthBar = "party1",
-	PartyMemberFrame1ManaBar = "party1",
-	PartyMemberFrame2HealthBar = "party2",
-	PartyMemberFrame2ManaBar = "party2",
-	PartyMemberFrame3HealthBar = "party3",
-	PartyMemberFrame3ManaBar = "party3",
-	PartyMemberFrame4HealthBar = "party4",
-	PartyMemberFrame4ManaBar = "party4"
 }
 
 local smoothframe = CreateFrame("Frame")
@@ -89,6 +81,7 @@ local function onUpdate(self, elapsed)
 	TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
 	if TimeSinceLastUpdate >= ONUPDATE_INTERVAL then
 		TimeSinceLastUpdate = 0
+
 		local frames = {WorldFrame:GetChildren()}
 		for _, plate in ipairs(frames) do
 			if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
@@ -99,22 +92,29 @@ local function onUpdate(self, elapsed)
 			end
 		end
 
-		for k,v in pairs (barstosmooth) do
-			if _G[k] then
-				SmoothBar(_G[k])
-				_G[k]:SetScript("OnHide", function() _G[k].lastGuid = nil; _G[k].max_ = nil end)
-				if v ~= "" then
-					_G[k].unitType = v
-				end
+		AnimationTick()
+	end
+end
+
+local function init()
+	for k,v in pairs (barstosmooth) do
+		if _G[k] then
+			SmoothBar(_G[k])
+			_G[k]:HookScript("OnHide", function()
+				_G[k].lastGuid = nil;
+				_G[k].max_ = nil
+			end)
+			if v ~= "" then
+				_G[k].unitType = v
 			end
 		end
-		AnimationTick()
 	end
 end
 
 smoothframe:SetScript("OnEvent", function(self, event)
 	if event == "ADDON_LOADED" and RougeUI.smooth == true then
 		smoothframe:HookScript("OnUpdate", onUpdate)
+		init()
 	end
 	self:UnregisterEvent("ADDON_LOADED")
 	self:SetScript("OnEvent", nil)

@@ -1,6 +1,6 @@
 local FontType = "Fonts\\FRIZQT__.ttf";
 
-function CusFonts()
+function RougeUIF:CusFonts()
     PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
     PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
     PlayerFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
@@ -46,22 +46,10 @@ local function true_format(value)
 	end
 end
 
-PetFrameHealthBar.useSimpleValue = true
-PetFrameManaBar.useSimpleValue = true
-PlayerFrameHealthBar.useSimpleValue = true
-PlayerFrameManaBar.useSimpleValue = true
-TargetFrameHealthBar.useSimpleValue = true
-TargetFrameManaBar.useSimpleValue = true
-FocusFrameHealthBar.useSimpleValue = true
-FocusFrameManaBar.useSimpleValue = true
-for i=1,4 do
-   _G["PartyMemberFrame"..i.."HealthBar"].useSimpleValue = true
-   _G["PartyMemberFrame"..i.."ManaBar"].useSimpleValue = true
-end
+local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
+	local value = statusFrame.finalValue or statusFrame:GetValue();
 
-local function New_TextStatusBar_UpdateTextString(statusFrame, textString, value, valueMin, valueMax)
-
-	if (statusFrame.LeftText and statusFrame.RightText) then
+	if( statusFrame.LeftText and statusFrame.RightText ) then
 		statusFrame.LeftText:SetText("");
 		statusFrame.RightText:SetText("");
 		statusFrame.LeftText:Hide();
@@ -71,8 +59,6 @@ local function New_TextStatusBar_UpdateTextString(statusFrame, textString, value
 	local textDisplay = GetCVar("statusTextDisplay")
 
 		if ((tonumber(valueMax) ~= valueMax or valueMax > 0 ) and not (statusFrame.pauseUpdates)) then
-			if (textDisplay == "NONE") then return end
-
 			if textDisplay == "NUMERIC" and ( value and valueMax > 0) then
 				statusFrame.isZero = nil;
 				textString:Show();
@@ -82,15 +68,15 @@ local function New_TextStatusBar_UpdateTextString(statusFrame, textString, value
 					textString:SetText(true_format(value))
 				end
 			elseif ( textDisplay == "BOTH" ) and ( value and valueMax > 0) then
-				local percent = math.ceil((value / valueMax) * 100) .. "%";
-				local display = value
-				if (statusFrame) then
-					statusFrame.LeftText:SetText(percent)
-					statusFrame.LeftText:Show();
-					statusFrame.RightText:SetText(display)
+				if ( statusFrame.LeftText and statusFrame.RightText ) then
+					if (not statusFrame.powerToken or statusFrame.powerToken == "MANA") then
+						statusFrame.LeftText:SetText(math.ceil((value / valueMax) * 100) .. "%");
+						statusFrame.LeftText:Show();
+					end
+					statusFrame.RightText:SetText(value)
 					statusFrame.RightText:Show();
-					textString:Hide();
 				end
+					textString:Hide();
 			elseif textDisplay == "PERCENT" and ( value and valueMax > 0) then
 				local percent = math.ceil((value / valueMax) * 100) .. "%";
 				textString:SetText(percent)
@@ -117,23 +103,11 @@ local function New_TextStatusBar_UpdateTextString(statusFrame, textString, value
 	end
 end
 
-local function CTextStatusBar_UpdateTextString(textStatusBar)
-	if not textStatusBar then textStatusBar = this end
-	local textString = textStatusBar.TextString;
-	if (textString) then
-		if textStatusBar.useSimpleValue then
-			local value = textStatusBar.finalValue or textStatusBar:GetValue();
-			local valueMin, valueMax = textStatusBar:GetMinMaxValues();
-			New_TextStatusBar_UpdateTextString(textStatusBar, textString, value, valueMin, valueMax);
-		end
-	end
-end
-
 local CF = CreateFrame("Frame")
 CF:RegisterEvent("PLAYER_LOGIN")
 CF:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_LOGIN" and (RougeUI.smooth or RougeUI.ShortNumeric) then
-		hooksecurefunc("TextStatusBar_UpdateTextString", CTextStatusBar_UpdateTextString)
+		hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
 	end
 	self:UnregisterEvent("PLAYER_LOGIN")
 	self:SetScript("OnEvent", nil)

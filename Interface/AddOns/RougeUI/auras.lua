@@ -3,7 +3,7 @@ local AURA_ROW_WIDTH = 122;
 local NUM_TOT_AURA_ROWS = 2;
 local AURA_OFFSET = 3;
 
-function SetCustomBuffSize(value)
+function RougeUIF:SetCustomBuffSize(value)
     local frames = {
         TargetFrame,
         FocusFrame
@@ -80,7 +80,7 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
         end
 end
 
-function Custom_TargetBuffSize()
+function RougeUIF:Custom_TargetBuffSize()
     hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
 end
 
@@ -119,36 +119,36 @@ local Enraged = {
 }
 
 local Whitelist = {
-	[16188] = true, -- Nature's Swiftness
-	[17116] = true, -- Nature's Swiftness
-	[12043] = true, -- Presence of Mind
-	[12042] = true, -- Arcane Power
-	[12472] = true, -- Icy Veins
-	[31884] = true, -- Avenging Wrath
-	[48066] = true, -- Power Word: Shield
-	[47986] = true, -- Sacrifice
-	[43039] = true, -- Ice Barrier
-	[22812] = true, -- Barkskin
-	[1044] = true, -- Hand of Freedom
-	[29166] = true, -- Innervate
-	[2825] = true, -- Bloodlust
-	[32182] = true, -- Heroism
-	[10060] = true, -- Power Infusion
-	[33206] = true, -- Pain Supression
-	[53312] = true, -- Nature's Grasp
-	[6346] = true, -- Fear Ward
-	[6940] = true, -- Hand of Sacrifice
-	[10278] = true, -- Blessing of Protection
-	[18708] = true, -- Fel Domination
-	[45438] = true, -- Ice Block
-	[642] = true, -- Divine Shield
-	[53601] = true, -- Sacred Shield
-	[54428] = true, -- Divine Plea
-	[66115] = true, -- Hand of Freedom
-	[498] = true, -- Divine Protection
-	[53563] = true, -- Beacon of Light
-	[63560] = true, -- Ghoul Frenzy
-	[31842] = true, -- Divine illumination
+	[GetSpellInfo(16188)] = true, -- Nature's Swiftness
+	[GetSpellInfo(17116)] = true, -- Nature's Swiftness
+	[GetSpellInfo(12043)] = true, -- Presence of Mind
+	[GetSpellInfo(12042)] = true, -- Arcane Power
+	[GetSpellInfo(12472)] = true, -- Icy Veins
+	[GetSpellInfo(31884)] = true, -- Avenging Wrath
+	[GetSpellInfo(48066)] = true, -- Power Word: Shield
+	[GetSpellInfo(47986)] = true, -- Sacrifice
+	[GetSpellInfo(43039)] = true, -- Ice Barrier
+	[GetSpellInfo(22812)] = true, -- Barkskin
+	[GetSpellInfo(1044)] = true, -- Hand of Freedom
+	[GetSpellInfo(29166)] = true, -- Innervate
+	[GetSpellInfo(2825)] = true, -- Bloodlust
+	[GetSpellInfo(32182)] = true, -- Heroism
+	[GetSpellInfo(10060)] = true, -- Power Infusion
+	[GetSpellInfo(33206)] = true, -- Pain Supression
+	[GetSpellInfo(53312)] = true, -- Nature's Grasp
+	[GetSpellInfo(6346)] = true, -- Fear Ward
+	[GetSpellInfo(6940)] = true, -- Hand of Sacrifice
+	[GetSpellInfo(10278)] = true, -- Blessing of Protection
+	[GetSpellInfo(18708)] = true, -- Fel Domination
+	[GetSpellInfo(45438)] = true, -- Ice Block
+	[GetSpellInfo(642)] = true, -- Divine Shield
+	[GetSpellInfo(53601)] = true, -- Sacred Shield
+	[GetSpellInfo(54428)] = true, -- Divine Plea
+	[GetSpellInfo(66115)] = true, -- Hand of Freedom
+	[GetSpellInfo(498)] = true, -- Divine Protection
+	[GetSpellInfo(53563)] = true, -- Beacon of Light
+	[GetSpellInfo(63560)] = true, -- Ghoul Frenzy
+	[GetSpellInfo(31842)] = true, -- Divine illumination
 };
 
 local function Target_Update(frame)
@@ -156,23 +156,23 @@ local function Target_Update(frame)
 	local selfName = frame:GetName()
 	local isEnemy = UnitIsEnemy(PlayerFrame.unit, frame.unit)
 	local _, _, class = UnitClass("player")
-	local buffSize = RougeUI.OtherBuffSize
 
 	for i = 1, MAX_TARGET_BUFFS do
-		 _, icon, _, debuffType, _, _, _, isStealable, _, spellId = UnitBuff(frame.unit, i)
+		 name, icon, _, debuffType, _, _, _, isStealable, _, spellId = UnitBuff(frame.unit, i)
 		if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
 			local frameName = selfName .. "Buff" .. i
 			buffFrame = _G[frameName]
 			frameStealable = _G[frameName .. "Stealable"]
 
-			if isEnemy and (Whitelist[spellId] and isStealable ) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 then
+			if isEnemy and (Whitelist[name] and isStealable ) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 then
+				local buffSize = RougeUI.OtherBuffSize
 				buffFrame:SetHeight(buffSize)
 				buffFrame:SetWidth(buffSize)
 				frameStealable:Show()
-				frameStealable:SetHeight(buffSize * 1.4)
-				frameStealable:SetWidth(buffSize * 1.4)
-				if Whitelist[spellId] and isStealable then
-					frameStealable:SetVertexColor(0, 0, 1) -- Blue	
+				frameStealable:SetHeight(buffSize * 1.3)
+				frameStealable:SetWidth(buffSize * 1.3)
+				if Whitelist[name] and isStealable then
+					frameStealable:SetVertexColor(1, 1, 1) -- White	
 				elseif (class == 4 or class == 3) and (isEnemy and Enraged[spellId]) then
 					frameStealable:SetVertexColor(1, 0, 0) -- Red
 				elseif spellId == 31821 then -- Highlight Aura mastery
@@ -189,7 +189,6 @@ local function Target_Update(frame)
 		end
     	end
 end
-
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
