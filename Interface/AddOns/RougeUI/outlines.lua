@@ -17,9 +17,9 @@ local classcolors = {
 function CL:CreateClassOutlines(unit, frame)
   if not self.NF[unit] then
     self.NF[unit] = CreateFrame("Frame", nil, frame)
-    self.NF[unit]:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", -10, 6)
-    self.NF[unit]:SetSize(124, 64)
-    self.NF[unit]:SetScale(2)
+    self.NF[unit]:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", 32, 32)
+    self.NF[unit]:SetSize(62,62)
+    self.NF[unit]:SetScale(1)
     self.NF[unit].texture = self.NF[unit]:CreateTexture(nil, "BORDER")
     self.NF[unit].texture:SetAllPoints(self.NF[unit])
     self.NF[unit]:Hide()

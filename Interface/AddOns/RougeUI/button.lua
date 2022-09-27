@@ -88,7 +88,7 @@ local function styleActionButton(bu)
 	addBorder(bu, .1)
 	SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
-	ic:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+	ic:SetTexCoord(.03, .97, .03, .97)
 	nt:SetAlpha(0)
 
 	if not bartender4 then

@@ -63,7 +63,7 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
 				statusFrame.isZero = nil;
 				textString:Show();
 				if ( value > 1e5 ) then
-					textString:SetFormattedText("%s || %.0f%%",true_format(value),100*value/valueMax);
+					textString:SetFormattedText("%s || %.0f%%",true_format(value), 100 * value / valueMax);
 				else
 					textString:SetText(true_format(value))
 				end
