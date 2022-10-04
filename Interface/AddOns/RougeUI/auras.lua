@@ -277,6 +277,12 @@ end
 
 local largeBuffList = {};
 local largeDebuffList = {};
+local PLAYER_UNITS = {
+	player = true,
+	vehicle = true,
+	pet = true,
+};
+
 local function ShouldAuraBeLarge(caster)
     if not caster then
         return false;
