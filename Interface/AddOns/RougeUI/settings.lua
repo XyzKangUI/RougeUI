@@ -9,7 +9,7 @@ end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG}
+            ClassBG, AutoReady, EnemyTicks}
 
 RougeUIF = {}
 
@@ -108,6 +108,12 @@ function f:ADDON_LOADED()
     end
     if RougeUI.ClassBG == nil then
         RougeUI.ClassBG = false;
+    end
+    if RougeUI.AutoReady == nil then
+        RougeUI.AutoReady = false;
+    end
+    if RougeUI.EnemyTicks == nil then
+        RougeUI.EnemyTicks = false;
     end
 
     RougeUIF:Custom_TargetBuffSize();
@@ -474,6 +480,26 @@ function f:CreateGUI()
         SQFixButton:SetChecked(RougeUI.SQFix)
         SQFixButton:SetScript("OnClick", function()
             RougeUI.SQFix = not RougeUI.SQFix
+        end)
+
+        local name = "AutoReady"
+        local AutoReadyButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        AutoReadyButton:SetPoint("TOPLEFT", 350, -120)
+        AutoReadyButton.text = _G[name .. "Text"]
+        AutoReadyButton.text:SetText("Automatically accept a ready check")
+        AutoReadyButton:SetChecked(RougeUI.AutoReady)
+        AutoReadyButton:SetScript("OnClick", function()
+            RougeUI.AutoReady = not RougeUI.AutoReady
+        end)
+
+        local name = "EnemyTicks"
+        local EnemyTicksButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        EnemyTicksButton:SetPoint("TOPLEFT", 350, -160)
+        EnemyTicksButton.text = _G[name .. "Text"]
+        EnemyTicksButton.text:SetText("Enable target mana/energy tick tracker")
+        EnemyTicksButton:SetChecked(RougeUI.EnemyTicks)
+        EnemyTicksButton:SetScript("OnClick", function()
+            RougeUI.EnemyTicks = not RougeUI.EnemyTicks
         end)
 
         --childPanel3

@@ -515,6 +515,11 @@ e:SetScript("OnEvent", function(self, event)
             TargetFrameNameBackground:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
         end
 
+	  if RougeUI.AutoReady then
+            ReadyCheckFrame:HookScript("OnShow", function(self) ReadyCheckFrameYesButton:Click() end)
+            QueueReadyCheckPopup:HookScript("OnShow", function(self) QueueReadyCheckPopup.YesButton:Click() end)
+        end
+
         for addons in pairs(addonlist) do
             if IsAddOnLoaded(addons) then
                 self:UnregisterEvent("PLAYER_LOGIN")

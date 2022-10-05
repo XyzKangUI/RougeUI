@@ -16,4 +16,5 @@ auras.lua
 retab.lua
 minimap.lua
 button.lua
+energy.lua
 outlines.lua
