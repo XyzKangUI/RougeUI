@@ -9,7 +9,7 @@ end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG, AutoReady, EnemyTicks}
+            ClassBG, AutoReady, EnemyTicks, ThickFrames}
 
 RougeUIF = {}
 
@@ -114,6 +114,9 @@ function f:ADDON_LOADED()
     end
     if RougeUI.EnemyTicks == nil then
         RougeUI.EnemyTicks = false;
+    end
+    if RougeUI.ThickFrames == nil then
+        RougeUI.ThickFrames = false;
     end
 
     RougeUIF:Custom_TargetBuffSize();
@@ -305,8 +308,23 @@ function f:CreateGUI()
         ClassBG.text = _G[name .. "Text"]
         ClassBG.text:SetText("Class colored name background")
         ClassBG:SetChecked(RougeUI.ClassBG)
-        ClassBG:SetScript("OnClick", function()
-            RougeUI.ClassBG = not RougeUI.ClassBG
+        ClassBG:SetScript("OnClick", function(self)
+            if RougeUI.ThickFrames then
+                UIErrorsFrame:AddMessage("This cannot be enabled with big frames", 1, 0, 0)
+                self:SetChecked(nil)
+            else
+                RougeUI.ClassBG = self:GetChecked()
+            end
+        end)
+
+        local name = "ThickFrame"
+        local ThickFrame = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        ThickFrame:SetPoint("TOPLEFT", 10, -280)
+        ThickFrame.text = _G[name .. "Text"]
+        ThickFrame.text:SetText("Enable Big Frames")
+        ThickFrame:SetChecked(RougeUI.ThickFrames)
+        ThickFrame:SetScript("OnClick", function()
+            RougeUI.ThickFrames = not RougeUI.ThickFrames
         end)
 
         local name = "FontSizeSlider"
@@ -376,7 +394,7 @@ function f:CreateGUI()
         local name = "ColorValueSlider"
         local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
         ColorValueSlider:SetMinMaxValues(0, 1)
-        ColorValueSlider:SetPoint("TOPLEFT", 350, -350)
+        ColorValueSlider:SetPoint("TOPLEFT", 350, -360)
         ColorValueSlider.text = _G[name .. "Text"]
         ColorValueSlider.textLow = _G[name .. "Low"]
         ColorValueSlider.textHigh = _G[name .. "High"]
