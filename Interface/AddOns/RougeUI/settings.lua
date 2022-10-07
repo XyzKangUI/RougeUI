@@ -325,6 +325,7 @@ function f:CreateGUI()
         ThickFrame:SetChecked(RougeUI.ThickFrames)
         ThickFrame:SetScript("OnClick", function()
             RougeUI.ThickFrames = not RougeUI.ThickFrames
+		RougeUI.ClassBG = false
         end)
 
         local name = "FontSizeSlider"
@@ -421,12 +422,14 @@ function f:CreateGUI()
         FastKeyPressButton:SetScript("OnClick", function()
             RougeUI.FastKeyPress = not RougeUI.FastKeyPress
         end)
-        FastKeyPressButton:RegisterEvent("PLAYER_ENTERING_WORLD")
+        FastKeyPressButton:RegisterEvent("PLAYER_LOGIN")
         FastKeyPressButton:SetScript("OnEvent", function(self, event, ...)
             if (event == "PLAYER_LOGIN") and RougeUI.FastKeyPress == true then
-                SetCVar('ActionButtonUseKeyDown', 1)
+                SetCVar("ActionButtonUseKeyDown", 1)
+                self:UnregisterEvent("PLAYER_LOGIN")
+                self:SetScript("OnEvent", nil)
             else
-                SetCVar('ActionButtonUseKeyDown', 0)
+                SetCVar("ActionButtonUseKeyDown", 0)
             end
         end)
 
