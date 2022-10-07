@@ -9,8 +9,8 @@ The addon settings have 3 categories, where you can manually enable the followin
 
 <ins>UnitFrames:<ins>
 
-- Class color Outline on Target- and FocusFrame
-- Class color Player-/Target-/FocusFrame name background
+- Class colored outline on Target- and FocusFrame
+- Class colored Player-/Target-/FocusFrame name background
 - Smooth animated HP and Mana bars
 - GhettoFrames (Big/Thick Frames)
 - Buffs and Debuffs on Target-/FocusFrame can be re-sized (BuffSizer?)
@@ -18,12 +18,15 @@ The addon settings have 3 categories, where you can manually enable the followin
 - Highlight enemy Magic & **Enrage** buffs (unique for this addon; only a few spells are being highlighted that I find 'important'.)
 - ModUI's borders on icons
 - Faded PvP Icon
-- A violet colored manabar
+- Violet colored manabar
 - Class Portraits with custom icons without compromising performance
 - Colored Health Bars:
-  a. Class Color
-  b. Gradient Color
-  c. Colored by unit's status; yellow (neutral), red (hostile), green (friendly)
+  
+      a. Class Color
+
+      b. Gradient Color
+
+      c. Colored by unit's status; yellow (neutral), red (hostile), green (friendly)
 
 <ins>Tweaks<ins>
 
@@ -43,18 +46,18 @@ The addon settings have 3 categories, where you can manually enable the followin
 - Hide the PlayerFrame + PetFrame hit indicator
 - Hide Group and Party titles
 - Hide the new aggro highlight on Blizzard's default raid frames
-- Hide Macro / Hotkey text
+- Hide Macro or Hotkey text
 
 <ins>Features enabled by default (cannot be disabled)<ins>
 
 - Transparent name background
 - Fix proper faction icon in Battlegrounds. I.e. Horde playing as Alliance in a BG will have the alliance PvP icon showing on his PlayerFrame.
 - Removed server names from raid frames & nameplates
-- Calendar (minimap) & RaidFrame menu show by hovering over the area
+- Calendar (minimap) & RaidFrame menu are shown when hovering over the area
 
 # **Read Me:**
 
-All options listed above can be enabled **MANUALLY**. I did not pre-configure any setting in the addon. After enabling one or multiple options you will have to reload. The addon initially is very lightweight as seen in the screenshot below. The only feature that uses some load is the "smooth animated hp and mana bar", although it is neglectable. Also this is my personal UI, therefore I will not reply to requests.
+All options listed above can be enabled **MANUALLY**. I did not pre-configure any setting in the addon. After enabling one or multiple options you will have to reload. The addon is in principle very Light weight. The only feature that uses some load is the "smooth animated hp and mana bar", although it is neglectable. Lastly, this is my personal UI and therefore I will not reply to requests.
 
 # **Images:**
 
