@@ -120,7 +120,7 @@ local function FixPvPFrame(frame)
         PlayerPVPIcon:SetTexture("Interface\\TargetingFrame\\UI-PVP-Horde")
     end
 end
-hooksecurefunc("PlayerFrame_UpdatePvPStatus", FixPvPFrame);
+hooksecurefunc("PlayerFrame_UpdatePvPStatus", FixPvPFrame)
 
 -- Hide indicators and fancy glows
 
@@ -141,15 +141,15 @@ end
 
 hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
     local inInstance, instanceType = IsInInstance()
-    local name = frame.name;
-    local xName = GetUnitName(frame.unit, true);
+    local name = frame.name
+    local xName = GetUnitName(frame.unit, true)
     if (instanceType == "pvp" or instanceType == "arena") then
         if (xName) then
-            local noRealm = gsub(xName, "%-[^|]+", "");
-            name:SetText(noRealm);
+            local noRealm = gsub(xName, "%-[^|]+", "")
+            name:SetText(noRealm)
         end
     end
-end);
+end)
 
 -- Hide / Show mouseover raidframe
 
@@ -189,7 +189,7 @@ function RougeUIF:GradientColour(statusbar)
         return
     end
 
-    local min, max = statusbar:GetMinMaxValues();
+    local min, max = statusbar:GetMinMaxValues()
     if (max <= min) then
         return
     end
@@ -199,17 +199,17 @@ function RougeUIF:GradientColour(statusbar)
         return
     end
 
-    value = (value - min) / (max - min);
+    value = (value - min) / (max - min)
 
     local r, g
     if (value > 0.5) then
-        r = (1.0 - value) * 2;
-        g = 1.0;
+        r = (1.0 - value) * 2
+        g = 1.0
     else
-        r = 1.0;
-        g = value * 2;
+        r = 1.0
+        g = value * 2
     end
-    statusbar:SetStatusBarColor(r, g, 0.0);
+    statusbar:SetStatusBarColor(r, g, 0.0)
 
     return
 end
@@ -274,7 +274,7 @@ end
 
 local function CheckClassification(self, forceNormalTexture)
 
-    local classification = UnitClassification(self.unit);
+    local classification = UnitClassification(self.unit)
 
     if (forceNormalTexture) then
         self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
@@ -313,12 +313,12 @@ local function CheckClassification(self, forceNormalTexture)
             self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
         end
         self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-        forceNormalTexture = true;
+        forceNormalTexture = true
     end
 
     if RougeUI.ThickFrames then
-        self.highLevelTexture:SetPoint("CENTER", self.levelText, "CENTER", 0, 0);
-        self.nameBackground:Hide();
+        self.highLevelTexture:SetPoint("CENTER", self.levelText, "CENTER", 0, 0)
+        self.nameBackground:Hide()
         self.name:ClearAllPoints()
         self.name:SetPoint("CENTER", self, "CENTER", -50, 35)
         self.name:SetFont("Fonts/FRIZQT__.TTF", 10, "OUTLINE")
@@ -326,31 +326,39 @@ local function CheckClassification(self, forceNormalTexture)
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", -50, 14)
         self.healthbar:SetHeight(27)
-        self.healthbar.LeftText:ClearAllPoints();
-        self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0);
-        self.healthbar.RightText:ClearAllPoints();
-        self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -5, 0);
-        self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0);
+        self.healthbar.LeftText:ClearAllPoints()
+        self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        self.healthbar.RightText:ClearAllPoints()
+        self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
 
         self.deadText:ClearAllPoints()
         self.deadText:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
 
-        self.manabar.LeftText:ClearAllPoints();
-        self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0);
-        self.manabar.RightText:ClearAllPoints();
-        self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -5, 0);
-        self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0);
         self.manabar:ClearAllPoints()
         self.manabar:SetPoint("CENTER", self, "CENTER", -50, -7)
-        self.manabar:SetSize(119, 13);
+
+        self.manabar.LeftText:ClearAllPoints()
+        self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
+        self.manabar.RightText:ClearAllPoints()
+        self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+        self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
+
+        if GetCVar("threatShowNumeric") == "1" then
+            TargetFrameNumericalThreat:SetScale(0.9)
+            TargetFrameNumericalThreat:ClearAllPoints()
+            TargetFrameNumericalThreat:SetPoint("CENTER", TargetFrame, "CENTER", 44, 50)
+            FocusFrameNumericalThreat:ClearAllPoints()
+            FocusFrameNumericalThreat:SetPoint("CENTER", FocusFrame, "CENTER", 44, 48)
+        end
 
         if (forceNormalTexture) then
-            self.haveElite = nil;
-            self.Background:SetSize(119, 42);
-            self.Background:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 7, 35);
+            self.haveElite = nil
+            self.Background:SetSize(119, 42)
+            self.Background:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 7, 35)
         else
-            self.haveElite = true;
-            self.Background:SetSize(119, 42);
+            self.haveElite = true
+            self.Background:SetSize(119, 42)
         end
     end
 end
@@ -444,7 +452,7 @@ local function ClassPortrait(self)
 end
 
 local function SpellQueueFix()
-    local _, _, latencyHome, latencyWorld = GetNetStats();
+    local _, _, latencyHome, latencyWorld = GetNetStats()
     local _, class = UnitClass("player")
     local value, currentLatency
 
@@ -490,61 +498,60 @@ local function HideHotkeys()
 end
 
 local function PlayerArtThick(self)
-    PlayerFrameTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\Thick-TargetingFrame");
-    self.name:ClearAllPoints();
+    PlayerFrameTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\Thick-TargetingFrame")
+    self.name:ClearAllPoints()
     self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
     self.name:SetFont("Fonts/FRIZQT__.TTF", 10, "OUTLINE")
     self.healthbar:ClearAllPoints()
-    self.healthbar:SetPoint("CENTER", PlayerFrame, "CENTER", 50, 14)
-    self.healthbar:SetHeight(27);
-    self.healthbar.LeftText:ClearAllPoints();
-    self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 8, 0);
-    self.healthbar.RightText:ClearAllPoints();
-    self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -5, 0);
-    self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0);
+    self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 14)
+    self.healthbar:SetHeight(27)
+    self.healthbar.LeftText:ClearAllPoints()
+    self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+    self.healthbar.RightText:ClearAllPoints()
+    self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+    self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
     self.manabar:ClearAllPoints()
-    self.manabar:SetPoint("CENTER", PlayerFrame, "CENTER", 51, -7)
-    self.manabar:SetHeight(13);
-    self.manabar.LeftText:ClearAllPoints();
-    self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 8, 0);
-    self.manabar.RightText:ClearAllPoints();
-    self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -5, 0);
-    self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0);
+    self.manabar:SetPoint("CENTER", self, "CENTER", 50, -7)
+    self.manabar:SetHeight(13)
+    self.manabar.LeftText:ClearAllPoints()
+    self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
+    self.manabar.RightText:ClearAllPoints()
+    self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+    self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
 end
 
 local function VehicleArtThick(self, vehicleType)
     if (vehicleType == "Natural") then
-        PlayerFrameVehicleTexture:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame-Organic");
-        PlayerFrameFlash:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame-Organic-Flash");
-        PlayerFrameFlash:SetTexCoord(-0.02, 1, 0.07, 0.86);
-        self.healthbar:SetSize(103, 12);
-        self.healthbar:SetPoint("TOPLEFT", 116, -41);
-        self.manabar:SetSize(103, 12);
-        self.manabar:SetPoint("TOPLEFT", 116, -52);
+        PlayerFrameVehicleTexture:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame-Organic")
+        PlayerFrameFlash:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame-Organic-Flash")
+        PlayerFrameFlash:SetTexCoord(-0.02, 1, 0.07, 0.86)
+        self.healthbar:SetSize(103, 12)
+        self.healthbar:SetPoint("TOPLEFT", 116, -41)
+        self.manabar:SetSize(103, 12)
+        self.manabar:SetPoint("TOPLEFT", 116, -52)
     else
-        PlayerFrameVehicleTexture:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame");
-        PlayerFrameFlash:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame-Flash");
-        PlayerFrameFlash:SetTexCoord(-0.02, 1, 0.07, 0.86);
-        self.healthbar:SetSize(100, 12);
-        self.healthbar:SetPoint("TOPLEFT", 119, -41);
-        self.manabar:SetSize(100, 12);
-        self.manabar:SetPoint("TOPLEFT", 119, -52);
+        PlayerFrameVehicleTexture:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame")
+        PlayerFrameFlash:SetTexture("Interface\\Vehicles\\UI-Vehicle-Frame-Flash")
+        PlayerFrameFlash:SetTexCoord(-0.02, 1, 0.07, 0.86)
+        self.healthbar:SetSize(100, 12)
+        self.healthbar:SetPoint("TOPLEFT", 119, -41)
+        self.manabar:SetSize(100, 12)
+        self.manabar:SetPoint("TOPLEFT", 119, -52)
     end
 end
 
 local function PetArtThick()
-    PetFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-SmallTargetingFrame");
+    PetFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-SmallTargetingFrame")
     PetName:SetAlpha(0)
-    PetFrameHealthBar:SetWidth(70)
-    PetFrameHealthBar:SetHeight(18)
-    PetFrameManaBar:SetWidth(69)
-    PetFrameManaBar:SetHeight(8)
-    PetFrameHealthBar:SetPoint("TOPLEFT", 45, -14)
-    PetFrameHealthBarText:SetPoint("CENTER", 15, 4)
-    PetFrameHealthBarText:SetFont("Fonts/FRIZQT__.TTF", 11, "OUTLINE")
-    PetFrameManaBarText:SetPoint("CENTER", 15, -9)
-    PetFrameManaBarText:SetFont("Fonts/FRIZQT__.TTF", 8.5, "OUTLINE")
-    PetFrameManaBar:SetPoint("TOPLEFT", 45, -32)
+    PetFrameHealthBar:SetHeight(13)
+    PetFrameHealthBar:ClearAllPoints()
+    PetFrameHealthBar:SetPoint("CENTER", PetFrame, "CENTER", 16, 5)
+    PetFrameManaBar:ClearAllPoints()
+    PetFrameManaBar:SetPoint("CENTER", PetFrame, "CENTER", 16, -7)
+    PetFrameHealthBar.TextString:ClearAllPoints()
+    PetFrameHealthBar.TextString:SetPoint("CENTER", PetFrameHealthBar, "CENTER", 0, -0.5)
+    PetFrameManaBar.TextString:ClearAllPoints()
+    PetFrameManaBar.TextString:SetPoint("CENTER", PetFrameManaBar, "CENTER", 0, 0)
     PetFrameHealthBarTextLeft:ClearAllPoints()
     PetFrameHealthBarTextLeft:SetPoint("TOPLEFT", 45, -18)
     PetFrameHealthBarTextRight:ClearAllPoints()
@@ -638,7 +645,7 @@ e:SetScript("OnEvent", function(self, event)
                         self.nameBackground:SetVertexColor(c.r, c.g, c.b)
                     end
                 else
-                    self.nameBackground:SetVertexColor(0, 0, 0, 0.5);
+                    self.nameBackground:SetVertexColor(0, 0, 0, 0.5)
                 end
             end)
         end
@@ -706,4 +713,4 @@ e:SetScript("OnEvent", function(self, event)
     end
 
     self:UnregisterEvent("PLAYER_LOGIN")
-end);
+end)
