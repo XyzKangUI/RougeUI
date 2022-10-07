@@ -571,6 +571,7 @@ local function ApplyThickness()
     hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
     hooksecurefunc("PlayerFrame_ToVehicleArt", VehicleArtThick)
     hooksecurefunc("PetFrame_Update", PetArtThick)
+    hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
 end
 
 local events = {
