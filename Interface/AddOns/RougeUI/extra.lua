@@ -320,7 +320,7 @@ local function CheckClassification(self, forceNormalTexture)
         self.highLevelTexture:SetPoint("CENTER", self.levelText, "CENTER", 0, 0);
         self.nameBackground:Hide();
         self.name:ClearAllPoints()
-        self.name:SetPoint("CENTER", self, "CENTER", -45, 36);
+        self.name:SetPoint("CENTER", self, "CENTER", -50, 35)
         self.name:SetFont("Fonts/FRIZQT__.TTF", 10, "OUTLINE")
 
         self.healthbar:ClearAllPoints()
@@ -492,7 +492,7 @@ end
 local function PlayerArtThick(self)
     PlayerFrameTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\Thick-TargetingFrame");
     self.name:ClearAllPoints();
-    self.name:SetPoint("CENTER", PlayerFrame, "CENTER", 50.5, 36);
+    self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
     self.name:SetFont("Fonts/FRIZQT__.TTF", 10, "OUTLINE")
     self.healthbar:ClearAllPoints()
     self.healthbar:SetPoint("CENTER", PlayerFrame, "CENTER", 50, 14)
