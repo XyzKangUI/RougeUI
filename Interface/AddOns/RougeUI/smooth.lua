@@ -2,10 +2,11 @@
 -- Smooth animations
 
 local smoothing = {}
+local pairs, ipairs = pairs, ipairs
 local floor = math.floor
 local mabs = math.abs
-local min, max = math.min, math.max
 local UnitGUID = UnitGUID
+local FrameDeltaLerp, Clamp = FrameDeltaLerp, Clamp
 
 local barstosmooth = {
     PlayerFrameHealthBar = "player",
@@ -19,74 +20,81 @@ local barstosmooth = {
 local smoothframe = CreateFrame("Frame")
 smoothframe:RegisterEvent("ADDON_LOADED")
 
-local function isPlate(frame)
-    local name = frame:GetName()
-    if name and name:find("NamePlate") then
-        return true
+local function IsCloseEnough(bar, newValue, targetValue)
+    local _, max = bar:GetMinMaxValues();
+    local range = max
+    if range > 0.0 then
+        return mabs((newValue - targetValue) / range) < .00001
     end
 
-    return false
+    return true;
 end
 
 local function AnimationTick()
-    local limit = .33
     for bar, value in pairs(smoothing) do
         local cur = bar:GetValue()
-        local new = cur + min((value - cur) / 3, max(value - cur, limit))
+        local effectiveTargetValue = Clamp(value, bar:GetMinMaxValues());
+        local newValue = FrameDeltaLerp(cur, effectiveTargetValue, .33);
 
-        if new ~= new then
-            new = value
-        end
-
-        bar:SetValue_(floor(new))
-        if cur == value or mabs(new - value) < 2 then
-            bar:SetValue_(value)
+        if IsCloseEnough(bar, newValue, effectiveTargetValue) then
+            bar:SetValue_(smoothing[bar])
             smoothing[bar] = nil
+        else
+            bar:SetValue_(floor(newValue))
         end
     end
 end
 
-local function SmoothSetValue(self, value)
+local function SetSmoothedValue(self, value)
     self.finalValue = value
+
     if self.unit then
         local guid = UnitGUID(self.unit)
-        if (value == self:GetValue() or (not guid or guid ~= self.lastGuid)) then
-            smoothing[self] = nil
+        if guid ~= self.guid then
             self:SetValue_(value)
-        else
-            smoothing[self] = value
-        end
-        self.lastGuid = guid
-    else
-        local _, max = self:GetMinMaxValues()
-        if (value == self:GetValue() or (self._max and self._max ~= max)) then
             smoothing[self] = nil
-            self:SetValue_(value)
-        else
-            smoothing[self] = value
         end
-        self._max = max
+        self.guid = guid
     end
+    smoothing[self] = value;
+end
+
+local function SmoothSetValue(self, _, max)
+    self:SetMinMaxValues_(0, max)
+
+    local targetValue = smoothing[self];
+    if targetValue then
+        local ratio = 1;
+
+        if max ~= 0 and self._max and self._max ~= 0 then
+            ratio = max / (self._max or max);
+        end
+
+        smoothing[self] = targetValue * ratio;
+    end
+    self._max = max
 end
 
 local function SmoothBar(bar)
+    _, bar._max = bar:GetMinMaxValues()
+    bar._value = bar:GetValue()
+
     if not bar.SetValue_ then
         bar.SetValue_ = bar.SetValue
-        bar.SetValue = SmoothSetValue
+        bar.SetValue = SetSmoothedValue
+    end
+    if not bar.SetMinMaxValues_ then
+        bar.SetMinMaxValues_ = bar.SetMinMaxValues
+        bar.SetMinMaxValues = SmoothSetValue
     end
 end
 
 local function onUpdate()
-    local frames = { WorldFrame:GetChildren() }
-    for _, plate in ipairs(frames) do
-        if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
-            local v = plate:GetChildren()
-            if v.healthBar then
-                SmoothBar(v.healthBar)
-            end
+    for _, plate in pairs(C_NamePlate.GetNamePlates(true)) do
+        if not plate:IsForbidden() and plate:IsVisible() then
+            SmoothBar(plate.UnitFrame.healthBar)
         end
     end
-
     AnimationTick()
 end
 
@@ -112,4 +120,4 @@ smoothframe:SetScript("OnEvent", function(self, event)
     end
     self:UnregisterEvent("ADDON_LOADED")
     self:SetScript("OnEvent", nil)
-end);
+end)

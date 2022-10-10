@@ -1,3 +1,7 @@
+local IsAddOnLoaded, hooksecurefunc = IsAddOnLoaded, hooksecurefunc
+local GetMouseFocus, ToggleDropDownMenu = GetMouseFocus, ToggleDropDownMenu
+local Minimap_OnClick = Minimap_OnClick
+
 local MM = CreateFrame("Frame")
 MM:RegisterEvent("PLAYER_LOGIN")
 MM:SetScript("OnEvent",function(self, event)
@@ -52,7 +56,7 @@ MiniMapMailFrame:ClearAllPoints()
 MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
 
 MinimapZoneText:ClearAllPoints()
-MinimapZoneText:SetPoint('TOP', Minimap, -2, 17)
+MinimapZoneText:SetPoint("TOPLEFT","MinimapZoneTextButton","TOPLEFT", 8, 0)
 
 -- TrackingFrame
 

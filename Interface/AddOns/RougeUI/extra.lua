@@ -10,7 +10,7 @@ local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification = UnitI
 local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled
 local ConsoleExec, RAID_CLASS_COLORS = ConsoleExec, RAID_CLASS_COLORS
 local gsub, format = string.gsub, string.format
-local RegisterStateDriver, GetClassColorObj = RegisterStateDriver, GetClassColorObj
+local GetClassColorObj, GetMouseFocus = GetClassColorObj, GetMouseFocus
 
 local addonlist = {
     ["Shadowed Unit Frames"] = true,
@@ -125,7 +125,7 @@ hooksecurefunc("PlayerFrame_UpdatePvPStatus", FixPvPFrame)
 -- Hide indicators and fancy glows
 
 local function HideGlows()
-    for i, v in pairs({
+    for _, v in pairs({
         PlayerStatusTexture,
         PlayerStatusGlow,
         PlayerRestGlow,
@@ -133,7 +133,9 @@ local function HideGlows()
         PlayerAttackGlow,
         PlayerAttackBackground
     }) do
-        v:Hide()
+        if v:IsShown() then
+            v:Hide()
+        end
     end
 end
 
@@ -227,10 +229,8 @@ local function colour(statusbar, unit)
                 if c then
                     statusbar:SetStatusBarColor(c.r, c.g, c.b)
                 end
-            elseif (RougeUI.GradientHP and UnitCanAttack("player", unit)) or not RougeUI.ClassHP then
+            elseif (RougeUI.GradientHP and UnitCanAttack("player", unit)) or not (RougeUI.ClassHP or RougeUI.unithp) then
                 RougeUIF:GradientColour(statusbar)
-            elseif (not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
-                statusbar:SetStatusBarColor(.5, .5, .5)
             elseif RougeUI.unithp then
                 local red, green = UnitSelectionColor(unit)
                 if red == 0 then
@@ -240,6 +240,8 @@ local function colour(statusbar, unit)
                 else
                     statusbar:SetStatusBarColor(1, 1, 0)
                 end
+            elseif (not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
+                statusbar:SetStatusBarColor(.5, .5, .5)
             end
         end
     end
@@ -613,9 +615,11 @@ e:SetScript("OnEvent", function(self, event)
             hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
         end
         if RougeUI.HideGlows then
+            hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
+        end
+        if RougeUI.HideIndicator then
             hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
             hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
-            hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
         end
         if RougeUI.HideTitles then
             hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
@@ -628,13 +632,16 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.HideAggro then
             hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
                 if self.aggroHighlight then
-                    self.aggroHighlight:Hide()
+                    self.aggroHighlight:SetAlpha(0)
                     return
                 end
             end)
         end
         if RougeUI.Stance then
-            RegisterStateDriver(StanceBarFrame, "visibility", "hide")
+            local stancebar = CreateFrame("Frame", nil, UIParent)
+            stancebar:Hide()
+            StanceBarFrame:UnregisterAllEvents()
+            StanceBarFrame:SetParent(stancebar)
         end
 
         if not RougeUI.ThickFrames then
@@ -664,6 +671,7 @@ e:SetScript("OnEvent", function(self, event)
                 PlayerFrame.bg = true
             end
             TargetFrameNameBackground:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+            FocusFrameNameBackground:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
         end
 
         if RougeUI.AutoReady then

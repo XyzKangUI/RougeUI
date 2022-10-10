@@ -83,7 +83,7 @@ local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        if (RougeUI.CastTimer == true) then
+        if RougeUI.CastTimer then
             modstyle()
             FocusFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
                 c_OnUpdate_Hook(self, elapsed)

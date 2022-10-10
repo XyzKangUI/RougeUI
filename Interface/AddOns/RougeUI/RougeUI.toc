@@ -1,8 +1,10 @@
 ## Interface: 30400
 ## Title: |cff009cffRougeUI-WOTLKC|r
-## Version: 3
+## Version: 3.12
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
+
+TaintLess.xml
 
 settings.lua
 frames.lua

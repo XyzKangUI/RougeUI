@@ -2,6 +2,7 @@ local Name, ns = ...;
 local Title = select(2, GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$", "");
 local floor = math.floor
 local format = format
+local CreateFrame, _G = CreateFrame, _G
 
 local function RoundNumbers(val, valStep)
     return floor(val / valStep) * valStep
@@ -9,7 +10,7 @@ end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG, AutoReady, EnemyTicks, ThickFrames}
+            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow }
 
 RougeUIF = {}
 
@@ -38,7 +39,7 @@ function f:ADDON_LOADED()
         RougeUI.FontSize = 11;
     end
     if RougeUI.SelfSize == nil then
-        RougeUI.SelfSize = 27;
+        RougeUI.SelfSize = 23;
     end
     if RougeUI.OtherBuffSize == nil then
         RougeUI.OtherBuffSize = 23;
@@ -118,8 +119,19 @@ function f:ADDON_LOADED()
     if RougeUI.ThickFrames == nil then
         RougeUI.ThickFrames = false;
     end
+    if RougeUI.HideIndicator == nil then
+        RougeUI.HideIndicator = false;
+    end
+    if RougeUI.Abbreviate == nil then
+        RougeUI.Abbreviate = false;
+    end
+    if RougeUI.ModPlates == nil then
+        RougeUI.ModPlates = true
+    end
+    if RougeUI.AuraRow == nil then
+        RougeUI.AuraRow = 108
+    end
 
-    RougeUIF:Custom_TargetBuffSize();
     RougeUIF:CusFonts();
 
     if not f.options then
@@ -156,32 +168,16 @@ function f:CreateGUI()
         Panel.childPanel3.parent = Panel.name
         InterfaceOptions_AddCategory(Panel.childPanel3)
 
-        local Reload = CreateFrame("Button", nil, Panel.childPanel1, "UIPanelButtonTemplate")
-        Reload:SetPoint("BOTTOMRIGHT", -10, 10)
-        Reload:SetWidth(100)
-        Reload:SetHeight(25)
-        Reload:SetText("Save & Reload")
-        Reload:SetScript("OnClick", function()
-            ReloadUI()
-        end)
-
-        local Reload = CreateFrame("Button", nil, Panel.childPanel2, "UIPanelButtonTemplate")
-        Reload:SetPoint("BOTTOMRIGHT", -10, 10)
-        Reload:SetWidth(100)
-        Reload:SetHeight(25)
-        Reload:SetText("Save & Reload")
-        Reload:SetScript("OnClick", function()
-            ReloadUI()
-        end)
-
-        local Reload = CreateFrame("Button", nil, Panel.childPanel3, "UIPanelButtonTemplate")
-        Reload:SetPoint("BOTTOMRIGHT", -10, 10)
-        Reload:SetWidth(100)
-        Reload:SetHeight(25)
-        Reload:SetText("Save & Reload")
-        Reload:SetScript("OnClick", function()
-            ReloadUI()
-        end)
+        for _, v in pairs({ Panel.childPanel1, Panel.childPanel2, Panel.childPanel3 }) do
+            local Reload = CreateFrame("Button", nil, v, "UIPanelButtonTemplate")
+            Reload:SetPoint("BOTTOMRIGHT", -10, 10)
+            Reload:SetWidth(100)
+            Reload:SetHeight(25)
+            Reload:SetText("Save & Reload")
+            Reload:SetScript("OnClick", function()
+                ReloadUI()
+            end)
+        end
 
         function SlashCmdList.RougeUI()
             InterfaceOptionsFrame_OpenToCategory(Panel)
@@ -236,20 +232,30 @@ function f:CreateGUI()
         local ShortNumericButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
         ShortNumericButton:SetPoint("TOPLEFT", 10, -200)
         ShortNumericButton.text = _G[name .. "Text"]
-        ShortNumericButton.text:SetText("Shorten NUMERIC HP to one decimal")
+        ShortNumericButton.text:SetText("Display numeric HP as one decimal")
         ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
         ShortNumericButton:SetScript("OnClick", function()
             RougeUI.ShortNumeric = not RougeUI.ShortNumeric
         end)
 
-        local name = "HighlightDispellable"
-        local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        HighlightDispellableButton:SetPoint("TOPLEFT", 10, -240)
-        HighlightDispellableButton.text = _G[name .. "Text"]
-        HighlightDispellableButton.text:SetText("Highlight enemy's important Magic/Enrage buffs")
-        HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
-        HighlightDispellableButton:SetScript("OnClick", function()
-            RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable
+        local name = "Abbreviate"
+        local AbbreviateButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        AbbreviateButton:SetPoint("TOPLEFT", 10, -240)
+        AbbreviateButton.text = _G[name .. "Text"]
+        AbbreviateButton.text:SetText("Abbreviate HP/Mana values")
+        AbbreviateButton:SetChecked(RougeUI.Abbreviate)
+        AbbreviateButton:SetScript("OnClick", function()
+            RougeUI.Abbreviate = not RougeUI.Abbreviate
+        end)
+
+        local name = "ModPlates"
+        local ModPlates = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
+        ModPlates:SetPoint("TOPLEFT", 10, -280)
+        ModPlates.text = _G[name .. "Text"]
+        ModPlates.text:SetText("ModUI Nameplate Style")
+        ModPlates:SetChecked(RougeUI.ModPlates)
+        ModPlates:SetScript("OnClick", function()
+            RougeUI.ModPlates = not RougeUI.ModPlates
         end)
 
         local name = "FadeIcon"
@@ -319,13 +325,13 @@ function f:CreateGUI()
 
         local name = "ThickFrame"
         local ThickFrame = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ThickFrame:SetPoint("TOPLEFT", 10, -280)
+        ThickFrame:SetPoint("TOPLEFT", 350, -280)
         ThickFrame.text = _G[name .. "Text"]
         ThickFrame.text:SetText("Enable Big Frames")
         ThickFrame:SetChecked(RougeUI.ThickFrames)
         ThickFrame:SetScript("OnClick", function()
             RougeUI.ThickFrames = not RougeUI.ThickFrames
-		RougeUI.ClassBG = false
+            RougeUI.ClassBG = false
         end)
 
         local name = "FontSizeSlider"
@@ -342,9 +348,9 @@ function f:CreateGUI()
         FontSizeSlider.text:SetText("HP/Mana Font Size: " .. FontSizeSlider:GetValue(FontSize))
         FontSizeSlider:SetValueStep(1)
         FontSizeSlider:SetObeyStepOnDrag(true);
-        FontSizeSlider:SetScript("OnValueChanged", function(self, event, arg1)
-            FontSizeSlider.text:SetText("HP/Mana Font Size: " .. FontSizeSlider:GetValue(RougeUI.FontSize))
-            RougeUI.FontSize = FontSizeSlider:GetValue()
+        FontSizeSlider:SetScript("OnValueChanged", function(self)
+            self.text:SetText("HP/Mana Font Size: " .. self:GetValue(RougeUI.FontSize))
+            RougeUI.FontSize = self:GetValue()
             RougeUIF:CusFonts()
         end)
 
@@ -354,26 +360,26 @@ function f:CreateGUI()
         TargetPlayerBuffSizeSlider.textLow = _G[names .. "Low"]
         TargetPlayerBuffSizeSlider.textHigh = _G[names .. "High"]
         TargetPlayerBuffSizeSlider.text = _G[names .. "Text"]
-        TargetPlayerBuffSizeSlider:SetMinMaxValues(8, 36)
+        TargetPlayerBuffSizeSlider:SetMinMaxValues(15, 34)
         TargetPlayerBuffSizeSlider.minValue, TargetPlayerBuffSizeSlider.maxValue = TargetPlayerBuffSizeSlider:GetMinMaxValues()
         TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
         TargetPlayerBuffSizeSlider.textHigh:SetText(TargetPlayerBuffSizeSlider.maxValue)
         TargetPlayerBuffSizeSlider:SetValue(RougeUI.SelfSize)
-        TargetPlayerBuffSizeSlider.text:SetText("Personal (De)buff Size: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(SelfSize)));
+        TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(SelfSize)));
         TargetPlayerBuffSizeSlider:SetValueStep(1)
         TargetPlayerBuffSizeSlider:SetObeyStepOnDrag(true);
-        TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(self, value)
+        TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if RougeUI.SelfSize ~= value then
-                RougeUI.SelfSize = TargetPlayerBuffSizeSlider:GetValue();
+                RougeUI.SelfSize = value;
                 TargetPlayerBuffSizeSliderText:SetText("Personal (De)buff Size: " .. RoundNumbers(RougeUI.SelfSize, 1))
-                RougeUIF:SetCustomBuffSize(value)
+                RougeUIF:SetCustomBuffSize()
             end
         end)
 
         local names = "TargetBuffSizeSlider"
         local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel1, "OptionsSliderTemplate")
         TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -480)
-        TargetBuffSizeSlider:SetMinMaxValues(8, 36)
+        TargetBuffSizeSlider:SetMinMaxValues(15, 34)
         TargetBuffSizeSlider:SetValueStep(1)
         TargetBuffSizeSlider.textLow = _G[names .. "Low"]
         TargetBuffSizeSlider.textHigh = _G[names .. "High"]
@@ -382,13 +388,13 @@ function f:CreateGUI()
         TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
         TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
         TargetBuffSizeSlider:SetValue(RougeUI.OtherBuffSize)
-        TargetBuffSizeSlider.text:SetText("Target Buff Size: " .. format("%.f", TargetBuffSizeSlider:GetValue(OtherBuffSize)));
+        TargetBuffSizeSlider.text:SetText("Target Aura Size: " .. format("%.f", TargetBuffSizeSlider:GetValue(OtherBuffSize)));
         TargetBuffSizeSlider:SetObeyStepOnDrag(true);
-        TargetBuffSizeSlider:SetScript("OnValueChanged", function(self, value)
+        TargetBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if RougeUI.OtherBuffSize ~= value then
-                RougeUI.OtherBuffSize = TargetBuffSizeSlider:GetValue();
+                RougeUI.OtherBuffSize = value;
                 TargetBuffSizeSliderText:SetText("Target Buff Size: " .. RoundNumbers(RougeUI.OtherBuffSize, 1))
-                RougeUIF:SetCustomBuffSize(value)
+                RougeUIF:SetCustomBuffSize()
             end
         end)
 
@@ -406,10 +412,32 @@ function f:CreateGUI()
         ColorValueSlider.text:SetText("Change brightness of UI: " .. format("%.2f", ColorValueSlider:GetValue(Colval)))
         ColorValueSlider:SetValueStep(0.05)
         ColorValueSlider:SetObeyStepOnDrag(true);
-        ColorValueSlider:SetScript("OnValueChanged", function(self, value)
+        ColorValueSlider:SetScript("OnValueChanged", function(_, value)
             ColorValueSlider.text:SetText("Change brightness of UI: " .. RoundNumbers(RougeUI.Colval, 0.05))
-            RougeUI.Colval = ColorValueSlider:GetValue()
+            RougeUI.Colval = value
             RougeUIF:ChangeFrameColors()
+        end)
+
+        local names = "AuraRowSlider"
+        local AuraRowSlider = CreateFrame("Slider", names, Panel.childPanel1, "OptionsSliderTemplate")
+        AuraRowSlider:SetPoint("TOPLEFT", 20, -540)
+        AuraRowSlider:SetMinMaxValues(108, 200)
+        AuraRowSlider:SetValueStep(14)
+        AuraRowSlider.textLow = _G[names .. "Low"]
+        AuraRowSlider.textHigh = _G[names .. "High"]
+        AuraRowSlider.text = _G[names .. "Text"]
+        AuraRowSlider.minValue, AuraRowSlider.maxValue = AuraRowSlider:GetMinMaxValues()
+        AuraRowSlider.textLow:SetText(floor(AuraRowSlider.minValue))
+        AuraRowSlider.textHigh:SetText(floor(AuraRowSlider.maxValue))
+        AuraRowSlider:SetValue(RougeUI.AuraRow)
+        AuraRowSlider.text:SetText("Aura Row Width Size: " .. format("%.f", AuraRowSlider:GetValue(AuraRow)));
+        AuraRowSlider:SetObeyStepOnDrag(true);
+        AuraRowSlider:SetScript("OnValueChanged", function(_, value)
+            if RougeUI.AuraRow ~= value then
+                RougeUI.AuraRow = value;
+                AuraRowSliderText:SetText("Increase to fit more Aura's per row: " .. RoundNumbers(RougeUI.AuraRow, 1))
+                RougeUIF:SetCustomBuffSize()
+            end
         end)
 
         -- childPanel2
@@ -507,7 +535,7 @@ function f:CreateGUI()
         local AutoReadyButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
         AutoReadyButton:SetPoint("TOPLEFT", 350, -120)
         AutoReadyButton.text = _G[name .. "Text"]
-        AutoReadyButton.text:SetText("Automatically accept a ready check")
+        AutoReadyButton.text:SetText("Auto accept raid/arena ready checks")
         AutoReadyButton:SetChecked(RougeUI.AutoReady)
         AutoReadyButton:SetScript("OnClick", function()
             RougeUI.AutoReady = not RougeUI.AutoReady
@@ -523,21 +551,41 @@ function f:CreateGUI()
             RougeUI.EnemyTicks = not RougeUI.EnemyTicks
         end)
 
+        local name = "HighlightDispellable"
+        local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        HighlightDispellableButton:SetPoint("TOPLEFT", 350, -200)
+        HighlightDispellableButton.text = _G[name .. "Text"]
+        HighlightDispellableButton.text:SetText("Highlight enemy's important Magic/Enrage buffs")
+        HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
+        HighlightDispellableButton:SetScript("OnClick", function()
+            RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable
+        end)
+
         --childPanel3
 
         local name = "HideGlows"
         local HideGlowsButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
         HideGlowsButton:SetPoint("TOPLEFT", 10, -40)
         HideGlowsButton.text = _G[name .. "Text"]
-        HideGlowsButton.text:SetText("Hide hit indicator + glows on Playerframe")
+        HideGlowsButton.text:SetText("Hide the glows on Playerframe")
         HideGlowsButton:SetChecked(RougeUI.HideGlows)
         HideGlowsButton:SetScript("OnClick", function()
             RougeUI.HideGlows = not RougeUI.HideGlows
         end)
 
+        local name = "HideIndicator"
+        local HideIndicatorButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
+        HideIndicatorButton:SetPoint("TOPLEFT", 10, -80)
+        HideIndicatorButton.text = _G[name .. "Text"]
+        HideIndicatorButton.text:SetText("Hide hit indicator on portrait")
+        HideIndicatorButton:SetChecked(RougeUI.HideIndicator)
+        HideIndicatorButton:SetScript("OnClick", function()
+            RougeUI.HideIndicator = not RougeUI.HideIndicator
+        end)
+
         local name = "HideTitles"
         local HideTitlesButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideTitlesButton:SetPoint("TOPLEFT", 10, -80)
+        HideTitlesButton:SetPoint("TOPLEFT", 10, -120)
         HideTitlesButton.text = _G[name .. "Text"]
         HideTitlesButton.text:SetText("Hide Group/Raid title")
         HideTitlesButton:SetChecked(RougeUI.HideTitles)
@@ -547,7 +595,7 @@ function f:CreateGUI()
 
         local name = "AggroHighlight"
         local AggroHighlightButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        AggroHighlightButton:SetPoint("TOPLEFT", 10, -120)
+        AggroHighlightButton:SetPoint("TOPLEFT", 10, -160)
         AggroHighlightButton.text = _G[name .. "Text"]
         AggroHighlightButton.text:SetText("Hide Aggro highlight on default Raid Frames")
         AggroHighlightButton:SetChecked(RougeUI.HideAggro)
@@ -557,7 +605,7 @@ function f:CreateGUI()
 
         local name = "HideStance"
         local HideStanceButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideStanceButton:SetPoint("TOPLEFT", 10, -160)
+        HideStanceButton:SetPoint("TOPLEFT", 10, -200)
         HideStanceButton.text = _G[name .. "Text"]
         HideStanceButton.text:SetText("Hide Stance bar")
         HideStanceButton:SetChecked(RougeUI.Stance)
@@ -567,7 +615,7 @@ function f:CreateGUI()
 
         local name = "HideHotkey"
         local HideHotkeyButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideHotkeyButton:SetPoint("TOPLEFT", 10, -200)
+        HideHotkeyButton:SetPoint("TOPLEFT", 10, -240)
         HideHotkeyButton.text = _G[name .. "Text"]
         HideHotkeyButton.text:SetText("Hide hotkey labels on default actionbar")
         HideHotkeyButton:SetChecked(RougeUI.HideHotkey)
@@ -577,7 +625,7 @@ function f:CreateGUI()
 
         local name = "HideMacro"
         local HideMacroButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideMacroButton:SetPoint("TOPLEFT", 10, -240)
+        HideMacroButton:SetPoint("TOPLEFT", 10, -280)
         HideMacroButton.text = _G[name .. "Text"]
         HideMacroButton.text:SetText("Hide macro text on default actionbar")
         HideMacroButton:SetChecked(RougeUI.HideMacro)

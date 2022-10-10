@@ -93,7 +93,7 @@ local function FrameColour()
 
 CHAT_FONT_HEIGHTS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
-for i, v in pairs({
+for _, v in pairs({
 	MainMenuBarLeftEndCap,
 	MainMenuBarRightEndCap,
 	StanceBarLeft,
@@ -311,12 +311,12 @@ end
 	end
 
 	-- MerchantFrame
-	local a, b, c, d, e, f, g, h = MerchantFrameTab1:GetRegions()
+	local a, b, c, d, e, f  = MerchantFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = MerchantFrameTab2:GetRegions()
+	local a, b, c, d, e, f = MerchantFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
@@ -382,27 +382,27 @@ end
 
 	-- Character Tabs
 
-	local a, b, c, d, e, f, g, h = CharacterFrameTab1:GetRegions()
+	local a, b, c, d, e, f  = CharacterFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = CharacterFrameTab2:GetRegions()
+	local a, b, c, d, e, f  = CharacterFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = CharacterFrameTab3:GetRegions()
+	local a, b, c, d, e, f  = CharacterFrameTab3:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = CharacterFrameTab4:GetRegions()
+	local a, b, c, d, e, f = CharacterFrameTab4:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = CharacterFrameTab5:GetRegions()
+	local a, b, c, d, e, f = CharacterFrameTab5:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
@@ -428,41 +428,41 @@ end
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = FriendsFrameTab1:GetRegions()
+	local a, b, c, d, e, f = FriendsFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = FriendsFrameTab2:GetRegions()
+	local a, b, c, d, e, f = FriendsFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = FriendsFrameTab3:GetRegions()
+	local a, b, c, d, e, f = FriendsFrameTab3:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = FriendsFrameTab4:GetRegions()
+	local a, b, c, d, e, f = FriendsFrameTab4:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- GuildFrame
 
-	local a, b, c, d, e, f = GuildFrame:GetRegions()
+	local _, _, _, _, e, f = GuildFrame:GetRegions()
 	for _, v in pairs({e, f}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
 	-- MailFrame
 
-	local a, b, c, d, e, f, g, h = MailFrameTab1:GetRegions()
+	local a, b, c, d, e, f = MailFrameTab1:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
 
-	local a, b, c, d, e, f, g, h = MailFrameTab2:GetRegions()
+	local a, b, c, d, e, f = MailFrameTab2:GetRegions()
 	for _, v in pairs({a, b, c, d, e, f}) do
   		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 	end
@@ -811,12 +811,12 @@ local function BlizzFrames(addon)
 
 	-- Dungeon finder
 	if addon == "Blizzard_LookingForGroupUI" then
-		local a, b, c, d = LFGListingFrame:GetRegions()
+		local a, b, c = LFGListingFrame:GetRegions()
 		for _, v in pairs({a, b, c}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
 
-		local a, b, c, d, e = LFGBrowseFrame:GetRegions()
+		local a, b, c, d  = LFGBrowseFrame:GetRegions()
 		for _, v in pairs({a, b, c, d}) do
 		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
@@ -862,7 +862,7 @@ end)
 
 local Blizz = CreateFrame("Frame")
 Blizz:RegisterEvent("ADDON_LOADED")
-Blizz:SetScript("OnEvent", function(self, event, addon)
+Blizz:SetScript("OnEvent", function(_, event, addon)
 	if event == "ADDON_LOADED" then
 		BlizzFrames(addon)
 	end

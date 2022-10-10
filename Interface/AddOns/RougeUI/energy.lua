@@ -3,6 +3,7 @@ local last_value = 0
 local externalManaGainTimestamp = 0
 local e = CreateFrame("Frame")
 local fakeTick, startTick, validateTick
+local UnitIsPlayer = UnitIsPlayer
 
 e:RegisterEvent("PLAYER_LOGIN")
 e:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -87,6 +88,7 @@ end
 local eventRegistered = { SPELL_PERIODIC_ENERGIZE = true, SPELL_ENERGIZE = true }
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo;
 local COMBATLOG_FILTER_HOSTILE_PLAYERS = COMBATLOG_FILTER_HOSTILE_PLAYERS;
+local CombatLog_Object_IsA = CombatLog_Object_IsA
 local function RealTick()
     local _, eventType, _, _, _, _, _, _, _, destFlags = CombatLogGetCurrentEventInfo()
     if not (eventRegistered[eventType]) then
