@@ -1,14 +1,11 @@
 ---------------------------------------------------------------------
 -- Smooth animations
 
+local smoothing = {}
 local floor = math.floor
-local activeObjects = {}
-local handledObjects = {}
-local TARGET_FPS = 60
-local AMOUNT = .33
-local abs = math.abs
+local mabs = math.abs
+local min, max = math.min, math.max
 local UnitGUID = UnitGUID
-local smoothframe = CreateFrame("Frame")
 
 local barstosmooth = {
     PlayerFrameHealthBar = "player",
@@ -16,8 +13,11 @@ local barstosmooth = {
     TargetFrameHealthBar = "target",
     TargetFrameManaBar = "target",
     FocusFrameHealthBar = "focus",
-    FocusFrameManaBar = "focus"
+    FocusFrameManaBar = "focus",
 }
+
+local smoothframe = CreateFrame("Frame")
+smoothframe:RegisterEvent("ADDON_LOADED")
 
 local function isPlate(frame)
     local name = frame:GetName()
@@ -28,132 +28,55 @@ local function isPlate(frame)
     return false
 end
 
-local function clamp(v, min, max)
-    min = 0
-    max = max or 1
+local function AnimationTick()
+    local limit = .33
+    for bar, value in pairs(smoothing) do
+        local cur = bar:GetValue()
+        local new = cur + min((value - cur) / 3, max(value - cur, limit))
 
-    if v > max then
-        return max
-    elseif v < min then
-        return min
-    end
+        if new ~= new then
+            new = value
+        end
 
-    return v
-end
-
-local function isCloseEnough(new, target, range)
-    if range > 0 then
-        return abs((new - target) / range) <= 0.001
-    end
-
-    return true
-end
-
-local function lerp(v1, v2, perc)
-    return v1 + (v2 - v1) * perc
-end
-
-local function remove(self)
-    if activeObjects[self] then
-        self:SetValue_(activeObjects[self].currentHealth)
-        self._value = activeObjects[self].currentHealth
-
-        activeObjects[self] = nil
-    end
-
-    if not next(activeObjects) then
-        smoothframe:SetScript("OnUpdate", nil)
-    end
-end
-
-local function AnimationTick(_, elapsed)
-    for unitFrame, info in next, activeObjects do
-        local new = lerp(unitFrame._value, info.currentHealth, clamp(AMOUNT * elapsed * TARGET_FPS))
-        unitFrame:SetValue_(floor(new))
-        unitFrame._value = new
-
-        if info.changedGUID or isCloseEnough(new, info.currentHealth, unitFrame._max - unitFrame._min) then
-            remove(unitFrame)
+        bar:SetValue_(floor(new))
+        if cur == value or mabs(new - value) < 2 then
+            bar:SetValue_(value)
+            smoothing[bar] = nil
         end
     end
 end
 
-local function add(self, value)
-    if not activeObjects[self] then
-        activeObjects[self] = {}
-    end
-
+local function SmoothSetValue(self, value)
+    self.finalValue = value
     if self.unit then
         local guid = UnitGUID(self.unit)
-        if guid ~= self.guid then
-            activeObjects[self].changedGUID = true
+        if (value == self:GetValue() or (not guid or guid ~= self.lastGuid)) then
+            smoothing[self] = nil
+            self:SetValue_(value)
+        else
+            smoothing[self] = value
         end
-        self.guid = guid
-    end
-
-    activeObjects[self].currentHealth = clamp(value, self._min, self._max)
-
-    if not smoothframe:GetScript("OnUpdate") and RougeUI.smooth then
-        smoothframe:SetScript("OnUpdate", smoothframe.OnUpdate)
+        self.lastGuid = guid
+    else
+        local _, max = self:GetMinMaxValues()
+        if (value == self:GetValue() or (self._max and self._max ~= max)) then
+            smoothing[self] = nil
+            self:SetValue_(value)
+        else
+            smoothing[self] = value
+        end
+        self._max = max
     end
 end
 
---- INIT
-
-local function bar_SetValue(self, value)
-    self.finalValue = value
-
-    if not self:IsVisible() or isCloseEnough(self._value, value, self._max - self._min) or value == 0 then
-        self:SetValue_(value)
-        self._value = value
-        return
+local function SmoothBar(bar)
+    if not bar.SetValue_ then
+        bar.SetValue_ = bar.SetValue
+        bar.SetValue = SmoothSetValue
     end
-
-    add(self, value)
 end
 
-local function bar_SetMinMaxValues(self, min, max)
-    self:SetMinMaxValues_(min, max)
-
-    if self._max and self._max ~= max then
-        local ratio = 1
-        if max ~= 0 and self._max and self._max ~= 0 then
-            ratio = max / (self._max or max)
-        end
-
-        local currentHealth = activeObjects[self] and activeObjects[self].currentHealth
-        if currentHealth then
-            activeObjects[self].currentHealth = currentHealth * ratio
-        end
-
-        local cur = self._value
-        if cur then
-            self:SetValue_(cur * ratio)
-            self._value = cur * ratio
-        end
-    end
-
-    self._min = min
-    self._max = max
-end
-
-local function SmoothBar(self)
-    if handledObjects[self] then
-        return
-    end
-
-    self._min, self._max = self:GetMinMaxValues()
-    self._value = self:GetValue()
-
-    self.SetValue_ = self.SetValue
-    self.SetValue = bar_SetValue
-    self.SetMinMaxValues_ = self.SetMinMaxValues
-    self.SetMinMaxValues = bar_SetMinMaxValues
-
-    handledObjects[self] = true
-end
-
-function smoothframe.OnUpdate(_, elapsed)
+local function onUpdate()
     local frames = { WorldFrame:GetChildren() }
     for _, plate in ipairs(frames) do
         if not plate:IsForbidden() and isPlate(plate) and C_NamePlate.GetNamePlates() and plate:IsVisible() then
@@ -163,16 +86,16 @@ function smoothframe.OnUpdate(_, elapsed)
             end
         end
     end
-    AnimationTick(_, elapsed)
+
+    AnimationTick()
 end
 
 local function init()
     for k, v in pairs(barstosmooth) do
         if _G[k] then
             SmoothBar(_G[k])
-            _G[k]:SetScript("OnHide", function()
-                _G[k].guid = nil;
-                _G[k].min = nil;
+            _G[k]:HookScript("OnHide", function()
+                _G[k].lastGuid = nil;
                 _G[k].max_ = nil
             end)
             if v ~= "" then
@@ -182,12 +105,11 @@ local function init()
     end
 end
 
-smoothframe:RegisterEvent("ADDON_LOADED")
-smoothframe:SetScript("OnEvent", function(self)
-    if RougeUI.smooth then
+smoothframe:SetScript("OnEvent", function(self, event)
+    if event == "ADDON_LOADED" and RougeUI.smooth then
+        smoothframe:SetScript("OnUpdate", onUpdate)
         init()
     end
-
     self:UnregisterEvent("ADDON_LOADED")
     self:SetScript("OnEvent", nil)
-end)
+end);
