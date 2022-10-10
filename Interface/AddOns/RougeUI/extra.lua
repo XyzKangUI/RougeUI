@@ -396,7 +396,7 @@ function CP:CreateToTPortraits()
             self.FocusToTPortrait:SetPoint(FocusFrameToT.portrait:GetPoint(i))
         end
         self.FocusToTPortrait:ClearAllPoints()
-        self.FocusToTPortrait:SetPoint("LEFT", TargetFrameToT, "LEFT", 5, 0)
+        self.FocusToTPortrait:SetPoint("LEFT", FocusFrameToT, "LEFT", 5, 0)
     end
 end
 
