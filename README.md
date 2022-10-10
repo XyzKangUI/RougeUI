@@ -50,6 +50,9 @@ The addon settings have 3 categories, where you can manually enable the followin
 
 <ins>Features enabled by default (cannot be disabled)<ins>
 
+- ModUI styled nameplates
+- Hidden nameplates to reduce screen clutter for: feral spirit wolves, treants, risen ghoul, army of the dead, snake trap and mirror image
+- Nameplate castbar text enabled (hidden blizz feature?)
 - Transparent name background
 - Fix proper faction icon in Battlegrounds. I.e. Horde playing as Alliance in a BG will have the alliance PvP icon showing on his PlayerFrame.
 - Removed server names from raid frames & nameplates
