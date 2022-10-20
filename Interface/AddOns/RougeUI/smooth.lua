@@ -6,7 +6,6 @@ local pairs, ipairs = pairs, ipairs
 local floor = math.floor
 local mabs = math.abs
 local UnitGUID = UnitGUID
-local FrameDeltaLerp, Clamp = FrameDeltaLerp, Clamp
 
 local barstosmooth = {
     PlayerFrameHealthBar = "player",
@@ -17,8 +16,21 @@ local barstosmooth = {
     FocusFrameManaBar = "focus",
 }
 
-local smoothframe = CreateFrame("Frame")
-smoothframe:RegisterEvent("ADDON_LOADED")
+local function clamp(value, min, max)
+    min = 0
+    max = max or 1
+
+    if value > max then
+        return max;
+    elseif value < min then
+        return min;
+    end
+    return value;
+end
+
+local function lerp(startValue, endValue, amount)
+    return (1 - amount) * startValue + amount * endValue
+end
 
 local function IsCloseEnough(bar, newValue, targetValue)
     local _, max = bar:GetMinMaxValues();
@@ -33,12 +45,12 @@ end
 local function AnimationTick()
     for bar, value in pairs(smoothing) do
         local cur = bar:GetValue()
-        local effectiveTargetValue = Clamp(value, bar:GetMinMaxValues());
-        local newValue = FrameDeltaLerp(cur, effectiveTargetValue, .33);
+        local effectiveTargetValue = clamp(value, bar:GetMinMaxValues());
+        local newValue = lerp(cur, effectiveTargetValue, .33);
 
         if IsCloseEnough(bar, newValue, effectiveTargetValue) then
-            bar:SetValue_(smoothing[bar])
             smoothing[bar] = nil
+            bar:SetValue_(effectiveTargetValue)
         else
             bar:SetValue_(floor(newValue))
         end
@@ -51,8 +63,8 @@ local function SetSmoothedValue(self, value)
     if self.unit then
         local guid = UnitGUID(self.unit)
         if guid ~= self.guid then
-            self:SetValue_(value)
             smoothing[self] = nil
+            self:SetValue_(value)
         end
         self.guid = guid
     end
@@ -76,9 +88,6 @@ local function SmoothSetValue(self, _, max)
 end
 
 local function SmoothBar(bar)
-    _, bar._max = bar:GetMinMaxValues()
-    bar._value = bar:GetValue()
-
     if not bar.SetValue_ then
         bar.SetValue_ = bar.SetValue
         bar.SetValue = SetSmoothedValue
@@ -103,7 +112,7 @@ local function init()
         if _G[k] then
             SmoothBar(_G[k])
             _G[k]:HookScript("OnHide", function()
-                _G[k].lastGuid = nil;
+                _G[k].guid = nil;
                 _G[k].max_ = nil
             end)
             if v ~= "" then
@@ -113,6 +122,8 @@ local function init()
     end
 end
 
+local smoothframe = CreateFrame("Frame")
+smoothframe:RegisterEvent("ADDON_LOADED")
 smoothframe:SetScript("OnEvent", function(self, event)
     if event == "ADDON_LOADED" and RougeUI.smooth then
         smoothframe:SetScript("OnUpdate", onUpdate)
