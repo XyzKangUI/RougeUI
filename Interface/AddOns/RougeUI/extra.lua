@@ -682,6 +682,9 @@ e:SetScript("OnEvent", function(self, event)
                 QueueReadyCheckPopup.YesButton:Click()
             end)
         end
+        if RougeUI.BuffAlpha then
+            hooksecurefunc("AuraButton_OnUpdate", function(self) self:SetAlpha(1) end)
+        end
 
         for addons in pairs(addonlist) do
             if IsAddOnLoaded(addons) then

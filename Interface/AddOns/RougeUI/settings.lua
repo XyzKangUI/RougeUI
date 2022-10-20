@@ -10,7 +10,7 @@ end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow }
+            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha }
 
 RougeUIF = {}
 
@@ -130,6 +130,9 @@ function f:ADDON_LOADED()
     end
     if RougeUI.AuraRow == nil then
         RougeUI.AuraRow = 108
+    end
+    if RougeUI.BuffAlpha == nil then
+        RougeUI.BuffAlpha = false
     end
 
     RougeUIF:CusFonts();
@@ -559,6 +562,16 @@ function f:CreateGUI()
         HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
         HighlightDispellableButton:SetScript("OnClick", function()
             RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable
+        end)
+
+        local name = "BuffAlpha"
+        local BuffAlphaButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        BuffAlphaButton:SetPoint("TOPLEFT", 350, -240)
+        BuffAlphaButton.text = _G[name .. "Text"]
+        BuffAlphaButton.text:SetText("Disable BuffFrame Flashing Animation")
+        BuffAlphaButton:SetChecked(RougeUI.BuffAlpha)
+        BuffAlphaButton:SetScript("OnClick", function()
+            RougeUI.BuffAlpha = not RougeUI.BuffAlpha
         end)
 
         --childPanel3
