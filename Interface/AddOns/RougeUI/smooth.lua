@@ -2,7 +2,7 @@
 -- Smooth animations
 
 local smoothing = {}
-local pairs, ipairs = pairs, ipairs
+local pairs = pairs
 local floor = math.floor
 local mabs = math.abs
 local UnitGUID = UnitGUID
@@ -36,7 +36,7 @@ local function IsCloseEnough(bar, newValue, targetValue)
     local _, max = bar:GetMinMaxValues();
     local range = max
     if range > 0.0 then
-        return mabs((newValue - targetValue) / range) < .00001
+        return mabs((newValue - targetValue) / range) < .001
     end
 
     return true;
@@ -100,7 +100,7 @@ end
 
 local function onUpdate()
     for _, plate in pairs(C_NamePlate.GetNamePlates(true)) do
-        if not plate:IsForbidden() and plate:IsVisible() then
+        if not plate:IsForbidden() and plate:IsVisible() and plate.UnitFrame:IsShown() then
             SmoothBar(plate.UnitFrame.healthBar)
         end
     end
