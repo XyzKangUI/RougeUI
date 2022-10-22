@@ -304,7 +304,8 @@ local function HookAuras()
             local bu = _G["FocusFrameBuff" .. i]
             if bu then
                 if not bu.skin then
-                    addBorder(bu, 0)
+                    addBorder(bu, .5)
+			  _G["FocusFrameBuff" .. i .. "Icon"]:SetTexCoord(.02, .98, .02, .98)
                     bu.skin = true
                 end
                 bu:SkinColor()
@@ -316,7 +317,8 @@ local function HookAuras()
             local bu = _G["FocusFrameDebuff" .. i]
             if bu then
                 if not bu.skin then
-                    addBorder(bu, 0)
+                    addBorder(bu, .5)
+                    _G["FocusFrameDebuff" .. i .. "Icon"]:SetTexCoord(.02, .98, .02, .98)
                     bu.skin = true
                 end
                 local re, gr, bl = _G["FocusFrameDebuff" .. i .. "Border"]:GetVertexColor()
