@@ -1,81 +1,13 @@
-local AURA_OFFSET_Y = 3;
-local AURA_START_X = 5;
-local AURA_START_Y = 32;
+local AURA_OFFSET_Y = 3
+local AURA_START_X = 5
+local AURA_START_Y = 32
 local OFFSET_X = 3
 local GetSpellInfo, hooksecurefunc, UnitIsFriend = GetSpellInfo, hooksecurefunc, UnitIsFriend
 local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass = UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass
+local UnitBuff, UnitDebuff = UnitBuff, UnitDebuff
 local pairs = pairs
-
-local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
-    local LARGE_AURA_SIZE = RougeUI.SelfSize
-    local SMALL_AURA_SIZE = RougeUI.OtherBuffSize
-    local AURA_ROW_WIDTH = RougeUI.AuraRow
-    local size
-    local offsetY = AURA_OFFSET_Y
-    local rowWidth = 0
-    local firstBuffOnRow = 1
-
-    for i = 1, numAuras do
-        if (largeAuraList[i]) then
-            size = LARGE_AURA_SIZE
-            offsetY = AURA_OFFSET_Y + AURA_OFFSET_Y
-        else
-            size = SMALL_AURA_SIZE
-        end
-
-        if (i == 1) then
-            rowWidth = size
-            frame.auraRows = frame.auraRows + 1;
-        else
-            rowWidth = rowWidth + size + offsetX
-        end
-
-        if (frame.haveToT and (frame.auraRows < 6) and (AURA_ROW_WIDTH == 108)) then
-            maxRowWidth = 108
-        elseif AURA_ROW_WIDTH == 108 then
-            maxRowWidth = 136
-        else
-            maxRowWidth = AURA_ROW_WIDTH
-        end
-
-        if (rowWidth > maxRowWidth) then
-            updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
-            rowWidth = size
-            frame.auraRows = frame.auraRows + 1;
-            firstBuffOnRow = i
-            offsetY = AURA_OFFSET_Y
-        else
-            updateFunc(frame, auraName, i, numOppositeAuras, i - 1, size, offsetX, offsetY, mirrorAurasVertically)
-        end
-    end
-end
-hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
-
-local function New_Target_Spellbar_AdjustPosition(self)
-    local parentFrame = self:GetParent();
-    if (self.boss) then
-        self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, 10);
-    elseif (parentFrame.haveToT) then
-        if (parentFrame.buffsOnTop or parentFrame.auraRows <= 1) then
-            self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -25);
-        else
-            self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15);
-        end
-    elseif (parentFrame.haveElite) then
-        if (parentFrame.buffsOnTop or parentFrame.auraRows <= 1) then
-            self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -5);
-        else
-            self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15);
-        end
-    else
-        if ((not parentFrame.buffsOnTop) and parentFrame.auraRows > 0) then
-            self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15);
-        else
-            self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, 7);
-        end
-    end
-end
-hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
+local MAX_TARGET_DEBUFFS = 16;
+local MAX_TARGET_BUFFS = 32;
 
 local Enraged = {
     [5229] = true,
@@ -153,6 +85,80 @@ local Whitelist = {
     [GetSpellInfo(54372)] = true, -- Nether Protection
 
 };
+
+local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
+    local LARGE_AURA_SIZE = RougeUI.SelfSize
+    local SMALL_AURA_SIZE = RougeUI.OtherBuffSize
+    local AURA_ROW_WIDTH = RougeUI.AuraRow
+    local size
+    local offsetY = AURA_OFFSET_Y
+    local rowWidth = 0
+    local firstBuffOnRow = 1
+
+    for i = 1, numAuras do
+        if (largeAuraList[i]) then
+            size = LARGE_AURA_SIZE
+            offsetY = AURA_OFFSET_Y + AURA_OFFSET_Y
+        else
+            size = SMALL_AURA_SIZE
+        end
+
+        if (i == 1) then
+            rowWidth = size
+            frame.auraRows = frame.auraRows + 1;
+        else
+            rowWidth = rowWidth + size + offsetX
+        end
+
+        --print(frame.auraRows)
+        -- local _, _, _, x = frame.totFrame:GetPoint()
+        if (frame.haveToT and (frame.auraRows < 3) and (AURA_ROW_WIDTH == 108)) then
+            maxRowWidth = 108
+        elseif AURA_ROW_WIDTH == 108 then
+            maxRowWidth = 136
+        else
+            maxRowWidth = AURA_ROW_WIDTH
+        end
+
+        --print(maxRowWidth)
+        if (rowWidth > maxRowWidth) then
+            updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
+            rowWidth = size
+            frame.auraRows = frame.auraRows + 1;
+            firstBuffOnRow = i
+            offsetY = AURA_OFFSET_Y
+        else
+            updateFunc(frame, auraName, i, numOppositeAuras, i - 1, size, offsetX, offsetY, mirrorAurasVertically)
+        end
+    end
+end
+hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
+
+local function New_Target_Spellbar_AdjustPosition(self)
+    local parentFrame = self:GetParent();
+    if (self.boss) then
+        self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, 10);
+    elseif (parentFrame.haveToT) then
+        if (parentFrame.buffsOnTop or parentFrame.auraRows <= 1) then
+            self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -25);
+        else
+            self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15);
+        end
+    elseif (parentFrame.haveElite) then
+        if (parentFrame.buffsOnTop or parentFrame.auraRows <= 1) then
+            self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -5);
+        else
+            self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15);
+        end
+    else
+        if ((not parentFrame.buffsOnTop) and parentFrame.auraRows > 0) then
+            self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15);
+        else
+            self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, 7);
+        end
+    end
+end
+hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
 
 local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuffs, anchorIndex, size, offsetX, offsetY, mirrorVertically)
     --For mirroring vertically
@@ -318,29 +324,35 @@ local function Target_Update(frame)
                 frameCooldown = _G[frameName .. "Cooldown"];
                 CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
 
-                if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 then
+                if RougeUI.HighlightDispellable then
+                    if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 then
+                        local buffSize = RougeUI.OtherBuffSize
+                        buffFrame:SetHeight(buffSize)
+                        buffFrame:SetWidth(buffSize)
+                        frameStealable:Show()
+                        frameStealable:SetHeight(buffSize * 1.4)
+                        frameStealable:SetWidth(buffSize * 1.4)
+                        if Whitelist[name] and isStealable then
+                            frameStealable:SetVertexColor(1, 1, 1) -- White
+                        elseif (class == 4 or class == 3) and (isEnemy and Enraged[spellId]) then
+                            frameStealable:SetVertexColor(1, 0, 0) -- Red
+                        elseif spellId == 31821 then
+                            -- Highlight Aura mastery
+                            frameStealable:SetVertexColor(0, 0, 1) -- Blue
+                        elseif spellId == 49039 and (class == 5 or class == 2) then
+                            -- Highlight Lichborne for shackle/turn evil
+                            frameStealable:SetVertexColor(1, 0, 127 / 255) -- Pink
+                        else
+                            frameStealable:SetVertexColor(1, 1, 1) -- Normal (white)
+                        end
+                    else
+                        frameStealable:SetVertexColor(1, 1, 1)
+                        frameStealable:Hide()
+                    end
+                else
                     local buffSize = RougeUI.OtherBuffSize
                     buffFrame:SetHeight(buffSize)
                     buffFrame:SetWidth(buffSize)
-                    frameStealable:Show()
-                    frameStealable:SetHeight(buffSize * 1.4)
-                    frameStealable:SetWidth(buffSize * 1.4)
-                    if Whitelist[name] and isStealable then
-                        frameStealable:SetVertexColor(1, 1, 1) -- White
-                    elseif (class == 4 or class == 3) and (isEnemy and Enraged[spellId]) then
-                        frameStealable:SetVertexColor(1, 0, 0) -- Red
-                    elseif spellId == 31821 then
-                        -- Highlight Aura mastery
-                        frameStealable:SetVertexColor(0, 0, 1) -- Blue
-                    elseif spellId == 49039 and (class == 5 or class == 2) then
-                        -- Highlight Lichborne for shackle/turn evil
-                        frameStealable:SetVertexColor(1, 0, 127 / 255) -- Pink
-                    else
-                        frameStealable:SetVertexColor(1, 1, 1) -- Normal (white)
-                    end
-                else
-                    frameStealable:SetVertexColor(1, 1, 1)
-                    frameStealable:Hide()
                 end
 
                 -- set the buff to be big if the buff is cast by the player or his pet
@@ -449,22 +461,15 @@ local function Target_Update(frame)
     end
     frame.spellbarAnchor = nil;
     local maxRowWidth = RougeUI.AuraRow
-    if (UnitIsFriend("player", frame.unit)) then
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-    else
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-    end
+    TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
+    -- update debuff positions
+    TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
     -- update the spell bar position
     if (frame.spellbar) then
         New_Target_Spellbar_AdjustPosition(frame.spellbar);
     end
 end
+hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
 
 function RougeUIF:SetCustomBuffSize()
     local frames = {
@@ -476,13 +481,3 @@ function RougeUIF:SetCustomBuffSize()
         TargetFrame_UpdateAuras(frame);
     end
 end
-
-local f = CreateFrame("Frame")
-f:RegisterEvent("PLAYER_LOGIN")
-f:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_LOGIN" and RougeUI.HighlightDispellable == true then
-        hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
-    end
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:SetScript("OnEvent", nil)
-end);
