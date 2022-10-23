@@ -1,6 +1,6 @@
 ## Interface: 30400
 ## Title: |cff009cffRougeUI-WOTLKC|r
-## Version: 3.12
+## Version: 3.13
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
@@ -20,3 +20,4 @@ minimap.lua
 button.lua
 energy.lua
 outlines.lua
+snowfallkey.lua
