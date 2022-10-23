@@ -10,7 +10,7 @@ end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha }
+            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim}
 
 RougeUIF = {}
 
@@ -133,6 +133,9 @@ function f:ADDON_LOADED()
     end
     if RougeUI.BuffAlpha == nil then
         RougeUI.BuffAlpha = false
+    end
+    if RougeUI.ButtonAnim == nil then
+        RougeUI.ButtonAnim = false
     end
 
     RougeUIF:CusFonts();
@@ -446,7 +449,7 @@ function f:CreateGUI()
         -- childPanel2
         local name = "FastKeyPress"
         local FastKeyPressButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        FastKeyPressButton:SetPoint("TOPLEFT", 10, -40)
+        FastKeyPressButton:SetPoint("TOPLEFT", 10, -240)
         FastKeyPressButton.text = _G[name .. "Text"]
         FastKeyPressButton.text:SetText("Cast spells on keypress down")
         FastKeyPressButton:SetChecked(RougeUI.FastKeyPress)
@@ -506,12 +509,22 @@ function f:CreateGUI()
 
         local name = "RetabBind"
         local RetabBind = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        RetabBind:SetPoint("TOPLEFT", 10, -240)
+        RetabBind:SetPoint("TOPLEFT", 10, -40)
         RetabBind.text = _G[name .. "Text"]
         RetabBind.text:SetText("RETabBinder")
         RetabBind:SetChecked(RougeUI.retab)
         RetabBind:SetScript("OnClick", function()
             RougeUI.retab = not RougeUI.retab
+        end)
+
+        local name = "ButtonAnim"
+        local ButtonAnim = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
+        ButtonAnim:SetPoint("TOPLEFT", 10, -280)
+        ButtonAnim.text = _G[name .. "Text"]
+        ButtonAnim.text:SetText("Animate Keypress (SnowfallKeyPress)")
+        ButtonAnim:SetChecked(RougeUI.ButtonAnim)
+        ButtonAnim:SetScript("OnClick", function()
+            RougeUI.ButtonAnim = not RougeUI.ButtonAnim
         end)
 
         local name = "ArenaNumbers"
