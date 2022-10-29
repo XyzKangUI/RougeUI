@@ -1,4 +1,5 @@
 local pairs = pairs
+local doneInit
 
 local function FrameColour()
 		for _,v in pairs({
@@ -606,6 +607,8 @@ local function NewVariables()
 			v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 		end
 	end
+
+	doneInit = true
 end
 
 local function BlizzFrames(addon)
@@ -855,8 +858,10 @@ Framecolor:SetScript("OnEvent", function(self, event, addon)
 	if event == "ADDON_LOADED" and addon == "RougeUI" then
 		FrameColour()
 		NewVariables()
-		self:UnregisterEvent("ADDON_LOADED")
-		self:SetScript("OnEvent", nil)
+		if doneInit then
+			self:UnregisterEvent("ADDON_LOADED")
+			self:SetScript("OnEvent", nil)
+		end
 	end
 end)
 
