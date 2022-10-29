@@ -671,6 +671,10 @@ e:SetScript("OnEvent", function(self, event)
             hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
             hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
             hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
+            PlayerLeaderIcon:SetAlpha(0)
+            TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
+            TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
+            FocusFrameTextureFrameLeaderIcon:SetAlpha(0)
         end
         if RougeUI.pimp then
             hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
