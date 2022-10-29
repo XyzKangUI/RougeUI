@@ -44,10 +44,9 @@ end
 
 local function AnimationTick()
     for bar, value in pairs(smoothing) do
-        local limit = 30/GetFramerate()
         local cur = bar:GetValue()
         local effectiveTargetValue = clamp(value, bar:GetMinMaxValues());
-        local newValue = lerp(cur, effectiveTargetValue, limit);
+        local newValue = lerp(cur, effectiveTargetValue, .25);
 
         if IsCloseEnough(bar, newValue, effectiveTargetValue) then
             smoothing[bar] = nil
