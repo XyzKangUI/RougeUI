@@ -10,7 +10,7 @@ end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim}
+            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PChain }
 
 RougeUIF = {}
 
@@ -136,6 +136,9 @@ function f:ADDON_LOADED()
     end
     if RougeUI.ButtonAnim == nil then
         RougeUI.ButtonAnim = false
+    end
+    if RougeUI.PChain == nil then
+        RougeUI.PChain = nil
     end
 
     RougeUIF:CusFonts();
@@ -658,6 +661,87 @@ function f:CreateGUI()
         HideMacroButton:SetScript("OnClick", function()
             RougeUI.HideMacro = not RougeUI.HideMacro
         end)
+
+        local textstring = Panel.childPanel1:CreateFontString("textstring")
+        textstring:SetPoint("TOPLEFT", 336, -410)
+        textstring:SetFont("Fonts\\MORPHEUS.ttf", 11, "")
+        textstring:SetText("Add a Player Portrait Chain")
+
+        local DropDownMenuChain = CreateFrame("Frame", "DropDownMenuChain", Panel.childPanel1, "UIDropDownMenuTemplate")
+        DropDownMenuChain:ClearAllPoints()
+        DropDownMenuChain:SetPoint("CENTER", 85, -160)
+        DropDownMenuChain:Show()
+        local function OnClick(self)
+            UIDropDownMenu_SetSelectedID(DropDownMenuChain, self:GetID())
+            if RougeUI.Colval < .54 then
+                PlayerFrameTexture:SetVertexColor(1, 1, 1)
+            end
+            if (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 1) then
+                RougeUI.PChain = 1
+                    if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
+                    elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
+                    else
+                    if RougeUI.Colval > .54 then
+                        PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
+                    else
+                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
+                    end
+                end
+            elseif (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 2) then
+                RougeUI.PChain = 2
+                if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
+                elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
+                else
+                    if RougeUI.Colval > .54 then
+                        PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
+                    else
+                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
+                    end
+                end
+            elseif (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 3) then
+                RougeUI.PChain = 3
+                if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
+                elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
+                else
+                    if RougeUI.Colval > .54 then
+                        PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
+                    else
+                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
+                    end
+                end
+            elseif (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 4) then
+                RougeUI.PChain = nil
+                PlayerFrameTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+                if RougeUI.ThickFrames then
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-TargetingFrame")
+                else
+                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+                end
+            end
+        end
+        local chains = { "Elite", "Rare", "Rare-Elite", "None" }
+        local function initialize(self, level)
+            local info = UIDropDownMenu_CreateInfo()
+            for _, v in pairs(chains) do
+                info = UIDropDownMenu_CreateInfo()
+                info.text = v
+                info.value = v
+                info.func = OnClick
+                UIDropDownMenu_AddButton(info, level)
+            end
+        end
+
+        UIDropDownMenu_Initialize(DropDownMenuChain, initialize)
+        UIDropDownMenu_SetWidth(DropDownMenuChain, 100);
+        UIDropDownMenu_SetButtonWidth(DropDownMenuChain, 124)
+        UIDropDownMenu_SetSelectedID(DropDownMenuChain, RougeUI.PChain)
+        UIDropDownMenu_JustifyText(DropDownMenuChain, "LEFT")
 
     end
     return Panel

@@ -266,10 +266,32 @@ local function manabarcolor(statusbar, unit)
     end
 end
 
--- Fix Chain Color
-
 local function FixChain()
-    PlayerFrameTexture:SetVertexColor(1, 1, 1)
+    if RougeUI.Colval < .54 then
+        PlayerFrameTexture:SetVertexColor(1, 1, 1)
+    end
+    if RougeUI.ThickFrames then
+        return
+    end
+    if RougeUI.PChain == 1 then
+        if RougeUI.Colval > .54 then
+            PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
+        else
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
+        end
+    elseif RougeUI.PChain == 2 then
+        if RougeUI.Colval > .54 then
+            PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
+        else
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
+        end
+    elseif RougeUI.PChain == 3 then
+        if RougeUI.Colval > .54 then
+            PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
+        else
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
+        end
+    end
 end
 
 -- Classification
@@ -500,7 +522,27 @@ local function HideHotkeys()
 end
 
 local function PlayerArtThick(self)
-    PlayerFrameTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\Thick-TargetingFrame")
+    if RougeUI.PChain == 1 then
+        if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
+        elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
+        end
+    elseif RougeUI.PChain == 2 then
+        if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
+        elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
+        end
+    elseif RougeUI.PChain == 3 then
+        if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
+        elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
+        end
+    else
+        PlayerFrameTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\Thick-TargetingFrame")
+    end
     self.name:ClearAllPoints()
     self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
     self.name:SetFont("Fonts/FRIZQT__.TTF", 10, "OUTLINE")
@@ -593,6 +635,10 @@ e:SetScript("OnEvent", function(self, event)
             ApplyThickness()
         end
 
+        if RougeUI.PChain then
+            FixChain()
+        end
+
         if RougeUI.TimerGap then
             if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
@@ -683,7 +729,9 @@ e:SetScript("OnEvent", function(self, event)
             end)
         end
         if RougeUI.BuffAlpha then
-            hooksecurefunc("AuraButton_OnUpdate", function(self) self:SetAlpha(1) end)
+            hooksecurefunc("AuraButton_OnUpdate", function(self)
+                self:SetAlpha(1)
+            end)
         end
 
         for addons in pairs(addonlist) do
