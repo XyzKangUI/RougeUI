@@ -132,7 +132,6 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
         end
     end
 end
-hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
 
 local function New_Target_Spellbar_AdjustPosition(self)
     local parentFrame = self:GetParent();
@@ -158,7 +157,7 @@ local function New_Target_Spellbar_AdjustPosition(self)
         end
     end
 end
-hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
+
 
 local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuffs, anchorIndex, size, offsetX, offsetY, mirrorVertically)
     --For mirroring vertically
@@ -469,7 +468,7 @@ local function Target_Update(frame)
         New_Target_Spellbar_AdjustPosition(frame.spellbar);
     end
 end
-hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
+
 
 function RougeUIF:SetCustomBuffSize()
     local frames = {
@@ -481,3 +480,20 @@ function RougeUIF:SetCustomBuffSize()
         TargetFrame_UpdateAuras(frame);
     end
 end
+
+function RougeUIF:HookAuras()
+    hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
+    hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
+    hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
+end
+
+local FF = CreateFrame("Frame")
+FF:RegisterEvent("PLAYER_LOGIN")
+FF:SetScript("OnEvent", function(self)
+    if RougeUI.BuffSizer or RougeUI.HighlightDispellable then
+        RougeUIF:HookAuras()
+    end
+
+    self:UnregisterEvent("PLAYER_LOGIN")
+    self:SetScript("OnEvent", nil)
+end)

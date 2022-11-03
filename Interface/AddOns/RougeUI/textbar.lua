@@ -1,39 +1,42 @@
 local FontType = "Fonts\\FRIZQT__.ttf";
 local mfloor, tonumber, mceil = math.floor, tonumber, math.ceil
 local GetCVar, UnitIsDeadOrGhost = GetCVar, UnitIsDeadOrGhost
+local UnitExists = UnitExists
+local UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax = UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax
+local hooksecurefunc = hooksecurefunc
 
 function RougeUIF:CusFonts()
-    PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    PlayerFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+    PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+    PlayerFrameHealthBar.RightText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
 
-    PlayerFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    PlayerFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    PlayerFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    PlayerFrameManaBar.TextString:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
+    PlayerFrameManaBar.LeftText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
+    PlayerFrameManaBar.RightText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
 
-    PetFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
-    PetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
-    PetFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
+    PetFrameHealthBar.TextString:SetFont(FontType, RougeUI.HPFontSize - 2, "OUTLINE")
+    PetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.HPFontSize - 2, "OUTLINE")
+    PetFrameHealthBar.RightText:SetFont(FontType, RougeUI.HPFontSize - 2, "OUTLINE")
 
-    PetFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
-    PetFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
-    PetFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize - 2, "OUTLINE")
+    PetFrameManaBar.TextString:SetFont(FontType, RougeUI.ManaFontSize - 2, "OUTLINE")
+    PetFrameManaBar.LeftText:SetFont(FontType, RougeUI.ManaFontSize - 2, "OUTLINE")
+    PetFrameManaBar.RightText:SetFont(FontType, RougeUI.ManaFontSize - 2, "OUTLINE")
 
-    TargetFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    TargetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    TargetFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    TargetFrameHealthBar.TextString:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+    TargetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+    TargetFrameHealthBar.RightText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
 
-    TargetFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    TargetFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    TargetFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    TargetFrameManaBar.TextString:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
+    TargetFrameManaBar.LeftText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
+    TargetFrameManaBar.RightText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
 
-    FocusFrameHealthBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    FocusFrameHealthBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    FocusFrameHealthBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    FocusFrameHealthBar.TextString:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+    FocusFrameHealthBar.LeftText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+    FocusFrameHealthBar.RightText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
 
-    FocusFrameManaBar.TextString:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    FocusFrameManaBar.LeftText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
-    FocusFrameManaBar.RightText:SetFont(FontType, RougeUI.FontSize, "OUTLINE")
+    FocusFrameManaBar.TextString:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
+    FocusFrameManaBar.LeftText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
+    FocusFrameManaBar.RightText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
 end
 
 local function true_format(value)
@@ -151,3 +154,93 @@ CF:SetScript("OnEvent", function(self, event)
     self:UnregisterEvent("PLAYER_LOGIN")
     self:SetScript("OnEvent", nil)
 end);
+
+local function PartyStatusBarText()
+    if not PartyText then
+        for i = 1, 4, 1 do
+            local PartyText = CreateFrame("Frame", nil, _G["PartyMemberFrame" .. i])
+            PartyText:SetFrameStrata("HIGH")
+            PartyText:Show()
+
+            PartyText.HealthText = PartyText:CreateFontString("PartyMemberFrame" .. i .. "HealthBarText", "OVERLAY", "TextStatusBarText");
+            PartyText.HealthText:SetFont(FontType, 10, "OUTLINE")
+            PartyText.HealthText:SetAllPoints(_G["PartyMemberFrame" .. i .. "HealthBar"])
+
+            PartyText.ManaText = PartyText:CreateFontString("PartyMemberFrame" .. i .. "ManaBarText", "OVERLAY", "TextStatusBarText");
+            PartyText.ManaText:SetFont(FontType, 10, "OUTLINE")
+            PartyText.ManaText:SetAllPoints(_G["PartyMemberFrame" .. i .. "ManaBar"])
+        end
+    end
+end
+
+local function UpdatePartyMana(unit)
+    local id = string.gsub(unit, "party([1-4])", "%1");
+    local manatext
+    local currMana, maxMana = UnitPower(unit), UnitPowerMax(unit)
+    if RougeUI.ShortNumeric then
+        manatext = true_format(currMana)
+    elseif RougeUI.Abbreviate then
+        manatext = currMana
+    else
+        manatext = currMana .. "/" .. maxMana
+    end
+
+    if id then
+        _G["PartyMemberFrame" .. id .. "ManaBarText"]:SetText(manatext);
+    end
+end
+
+local function UpdatePartyHealth(unit)
+    local id = string.gsub(unit, "party([1-4])", "%1");
+    local hptext
+    local currHP, maxHP = UnitHealth(unit), UnitHealthMax(unit)
+    if RougeUI.ShortNumeric then
+        hptext = true_format(currHP)
+    elseif RougeUI.Abbreviate then
+        hptext = currHP
+    else
+        hptext = currHP .. "/" .. maxHP
+    end
+
+    if id then
+        _G["PartyMemberFrame" .. id .. "HealthBarText"]:SetText(hptext)
+    end
+end
+
+local PW = CreateFrame("Frame")
+PW:RegisterEvent("PLAYER_LOGIN")
+PW:RegisterEvent("UNIT_HEALTH_FREQUENT")
+PW:RegisterEvent("UNIT_POWER_FREQUENT")
+PW:SetScript("OnEvent", function(self, event, unit)
+    if not RougeUI.PartyText then
+        self:UnregisterAllEvents()
+        self:SetScript("OnEvent", nil)
+        return
+    end
+
+    if event == "PLAYER_LOGIN" then
+        hooksecurefunc("PartyMemberFrame_UpdateMember", function(self)
+            local i = self:GetID()
+            if UnitExists("party" .. i) then
+                UpdatePartyMana("party" .. i)
+                UpdatePartyHealth("party" .. i)
+            end
+        end)
+        PartyStatusBarText()
+        self:UnregisterEvent("PLAYER_LOGIN")
+    end
+
+    if not (unit == "party1" or unit == "party2" or unit == "party3" or unit == "party4") then
+        return
+    end
+
+    if event == "UNIT_HEALTH_FREQUENT" then
+        if UnitExists(unit) then
+            UpdatePartyHealth(unit);
+        end
+    elseif event == "UNIT_POWER_FREQUENT" then
+        if UnitExists(unit) then
+            UpdatePartyMana(unit)
+        end
+    end
+end)
