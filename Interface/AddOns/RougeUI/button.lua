@@ -139,7 +139,7 @@ local function init()
     end
 
     if dominos then
-        for i = 1, 60 do
+        for i = 1, 120 do
             styleActionButton(_G["DominosActionButton" .. i])
         end
     end
