@@ -102,7 +102,12 @@ local function PvPIcon()
     for i, v in pairs({
         PlayerPVPIcon,
         FocusFrameTextureFramePVPIcon,
-        TargetFrameTextureFramePVPIcon
+        TargetFrameTextureFramePVPIcon,
+        TargetFrameTextureFramePVPIcon,
+        PartyMemberFrame1PVPIcon,
+        PartyMemberFrame2PVPIcon,
+        PartyMemberFrame3PVPIcon,
+        PartyMemberFrame4PVPIcon
     }) do
         if instanceType == "arena" then
             v:SetAlpha(0)
@@ -249,7 +254,6 @@ end
 
 local function manabarcolor(statusbar, unit)
     if UnitIsPlayer("player") then
-        PlayerFrameManaBar.lockColor = true
         PlayerFrameManaBar:SetStatusBarColor(127 / 255, 0 / 255, 255 / 255)
         if (UnitIsUnit("targettarget", "player")) then
             TargetFrameToTManaBar:SetStatusBarColor(127 / 255, 0 / 255, 255 / 255)
@@ -318,7 +322,7 @@ local function CheckClassification(self, forceNormalTexture)
         elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.16) then
             self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
         else
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-RareElite")
+            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
         end
         self.borderTexture:SetVertexColor(1, 1, 1)
     elseif (classification == "rare") then

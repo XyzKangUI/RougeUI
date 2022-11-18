@@ -126,7 +126,7 @@ local smoothframe = CreateFrame("Frame")
 smoothframe:RegisterEvent("ADDON_LOADED")
 smoothframe:SetScript("OnEvent", function(self, event)
     if event == "ADDON_LOADED" and RougeUI.smooth then
-        smoothframe:SetScript("OnUpdate", onUpdate)
+        smoothframe:SetScript("OnUpdate", AnimationTick)
         init()
     end
     self:UnregisterEvent("ADDON_LOADED")
