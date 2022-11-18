@@ -96,7 +96,11 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
                         statusFrame.LeftText:SetText(mceil((value / valueMax) * 100) .. "%");
                         statusFrame.LeftText:Show();
                     end
-                    statusFrame.RightText:SetText(valueDisplay);
+                    if RougeUI.ShortNumeric then
+                        statusFrame.RightText:SetText(true_format(valueDisplay));
+                    else
+                        statusFrame.RightText:SetText(valueDisplay);
+                    end
                     statusFrame.RightText:Show();
                     textString:Hide();
                 else

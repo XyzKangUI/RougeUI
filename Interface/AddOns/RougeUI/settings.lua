@@ -256,7 +256,7 @@ function f:CreateGUI()
         ShortNumericButton:SetPoint("TOPLEFT", 10, -180)
         ShortNumericButton.text = _G[name .. "Text"]
         ShortNumericButton.text:SetVertexColor(1,1,1)
-        ShortNumericButton.text:SetText("Shorten 'NUMERIC' statusText to one decimal")
+        ShortNumericButton.text:SetText("Shorten statusText to one decimal")
         ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
         ShortNumericButton:SetScript("OnClick", function()
             RougeUI.ShortNumeric = not RougeUI.ShortNumeric
