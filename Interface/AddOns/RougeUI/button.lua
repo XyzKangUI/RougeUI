@@ -96,7 +96,7 @@ local function styleActionButton(bu)
     local ic = _G[name .. "Icon"]
     local nt = _G[name .. "NormalTexture"]
 
-    addBorder(bu, .1, 3)
+    addBorder(bu, .1, "OVERLAY")
     SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 
     ic:SetTexCoord(.03, .97, .03, .97)
@@ -121,7 +121,7 @@ end
 local function init()
     for _, v in pairs(slots) do
         local bu = _G["Character" .. v .. "Slot"]
-        addBorder(bu, 1, 3)
+        addBorder(bu, 1, "OVERLAY")
         SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
         bu:SetNormalTexture("")
     end
@@ -155,14 +155,14 @@ local function init()
 
     for _, v in pairs(slots) do
         local bu = _G["Character" .. v .. "Slot"]
-        addBorder(bu, 0, 3)
+        addBorder(bu, 0, "OVERLAY")
         SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
     end
 
     for i = 0, 3 do
         -- Bagicons
         local bu = _G["CharacterBag" .. i .. "Slot"]
-        addBorder(bu, 1, 3)
+        addBorder(bu, 1, "OVERLAY")
         SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
     end
 
@@ -170,7 +170,7 @@ local function init()
         -- Bagslots
         for k = 1, 36 do
             local bu = _G["ContainerFrame" .. i .. "Item" .. k]
-            addBorder(bu, 1, 3)
+            addBorder(bu, 1, "OVERLAY")
             SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
             if bu:GetNormalTexture() then
                 bu:GetNormalTexture():SetTexture("")
@@ -190,7 +190,7 @@ local function init()
 
     for i = 1, 28 do
         local bu = _G["BankFrameItem" .. i]
-        addBorder(bu, 0, 3)
+        addBorder(bu, 0, "OVERLAY")
         SkinColor(bu, RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
         if bu:GetNormalTexture() then
             bu:GetNormalTexture():SetTexture("")
@@ -218,7 +218,7 @@ local function init()
         local du = _G["TempEnchant" .. i .. "Duration"]
         bu:SetNormalTexture("")
         bo:SetTexture("")
-        addBorder(bu, .8, 3)
+        addBorder(bu, .8, "OVERLAY")
         SkinColor(bu, .7, 0, 1)
         du:SetJustifyH("CENTER")
         du:ClearAllPoints()
