@@ -540,6 +540,7 @@ local function NewVariables()
 
 	for _, v in pairs({
 		GossipFrameGreetingPanel,
+		GossipFrame.GreetingPanel,
 		QuestFrameRewardPanel,
 		QuestFrameDetailPanel,
 		QuestFrameProgressPanel,
@@ -558,7 +559,9 @@ local function NewVariables()
 			v.Material:SetVertexColor(.9, .9, .9)
 		end
 
-		if  v == GossipFrameGreetingPanel or v == QuestFrameGreetingPanel then
+           local _, _, _, nr = GetBuildInfo()
+
+		if ((v == GossipFrameGreetingPanel) and nr == 30400) or ((v == GossipFrame.GreetingPanel) and nr == 30401) or v == QuestFrameGreetingPanel then
 			v.Corner = v:CreateTexture(nil, "OVERLAY", nil, 7)
 			v.Corner:SetTexture("Interface\\QuestFrame\\UI-Quest-BotLeftPatch")
 			v.Corner:SetSize(132, 64)

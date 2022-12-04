@@ -9,7 +9,7 @@ local sappableLocales = {
 
 local function CreatureCanBeSapped(unit)
 	creatureType = UnitCreatureType(unit)
-	for k,value in pairs(sappableLocales) do 
+	for _,value in pairs(sappableLocales) do
 		if (value == creatureType) then
                 	return true;
 		end

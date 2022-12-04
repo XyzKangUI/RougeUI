@@ -11,7 +11,7 @@ local MAX_TARGET_BUFFS = 32;
 
 local Enraged = {
 --    [5229] = true, -- Enrage (Druid)
---    [1719] = true, -- Recklessness
+    [1719] = true, -- Recklessness
 --    [12880] = true, -- Enrage (npc)
 --    [14204] = true, -- Enrage (npc)
 --    [14202] = true, -- Enrage (npc)

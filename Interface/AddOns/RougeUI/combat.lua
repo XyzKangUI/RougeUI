@@ -1,63 +1,60 @@
-local UnitAffectingCombat = UnitAffectingCombat
-local pairs = pairs
+local UnitAffectingCombat, IsActiveBattlefieldArena = UnitAffectingCombat, IsActiveBattlefieldArena
+local UnitIsUnit, UnitExists, UnitClass = UnitIsUnit, UnitExists, UnitClass
+local SecureButton_GetUnit = SecureButton_GetUnit
+local Indicator = {}
 
-local function CreateCombatIndicatorForUnit(unit, frame)
-	local ciFrame = CreateFrame("Frame", nil, frame)
-	ciFrame:SetPoint("LEFT", frame, "RIGHT", -25, 10)
-	ciFrame:SetSize(30, 30)
-	ciFrame.texture = ciFrame:CreateTexture(nil, "BORDER")
-	ciFrame.texture:SetAllPoints(ciFrame)
-	ciFrame.texture:SetTexture("Interface\\Icons\\ABILITY_DUALWIELD")
-	ciFrame:Hide()
-	ciFrame.unit = unit
-	return ciFrame
+local function InCombat(unit)
+    local _, _, class = UnitClass(unit)
+
+    if UnitAffectingCombat(unit) then
+        return true
+    else
+        if (IsActiveBattlefieldArena() and not (class == 1 or class == 2 or class == 4 or class == 11)) then
+            for i = 1, 5, 1 do
+                if UnitExists("arenapet" .. i .. "target") then
+                    if UnitIsUnit(unit, "arena" .. i) then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+
+    return false
 end
 
-local ciCore = CreateFrame("Frame")
-ciCore.ciFrames = {}
-ciCore:RegisterEvent("UNIT_FLAGS")
-ciCore:RegisterEvent("PLAYER_TARGET_CHANGED")
-ciCore:RegisterEvent("PLAYER_FOCUS_CHANGED")
-ciCore:RegisterEvent("ADDON_LOADED")
+local events = {
+    ["UNIT_FLAGS"] = true,
+    ["PLAYER_TARGET_CHANGED"] = true,
+    ["PLAYER_FOCUS_CHANGED"] = true
+}
 
-function ciCore:UNIT_FLAGS(unitTarget)
-	if not (unitTarget == "target" or unitTarget == "focus") then return end
+local function CreateCombatIndicatorForUnit(frame)
+    if not Indicator[frame] then
+        local ciFrame = frame:CreateTexture(nil, "BORDER")
+        ciFrame:SetPoint("LEFT", frame, "RIGHT", -25, 10)
+        ciFrame:SetSize(30, 30)
+        ciFrame:SetTexture("Interface\\Icons\\ABILITY_DUALWIELD")
+        ciFrame:Hide()
+        Indicator[frame] = ciFrame
 
-	for _,ciFrame in pairs(self.ciFrames) do
-		if UnitAffectingCombat(ciFrame.unit) then 
-			ciFrame:Show() 
-		else
-			ciFrame:Hide()
-		end 
-	end
+        frame:RegisterEvent("UNIT_FLAGS")
+        frame:HookScript("OnEvent", function(self, event)
+            if events[event] and frame:IsShown() then
+                local unit = SecureButton_GetUnit(self) -- SecureButton_GetModifiedUnit?
+                Indicator[self]:SetShown(InCombat(unit))
+            end
+        end)
+    end
 end
 
-function ciCore:PLAYER_TARGET_CHANGED()
-	if UnitAffectingCombat("target") then 
-		self.ciFrames["target"]:Show() 
-	else
-		self.ciFrames["target"]:Hide() 
-	end
-end
-
-function ciCore:PLAYER_FOCUS_CHANGED()
-	if UnitAffectingCombat("focus") then 
-		self.ciFrames["focus"]:Show() 
-	else
-		self.ciFrames["focus"]:Hide() 
-	end
-end
-
-ciCore:SetScript("OnEvent", function(self, event, ...)
-	if event == "ADDON_LOADED" and not RougeUI.CombatIndicator then
-		self:UnregisterAllEvents()
-		self:SetScript("OnEvent", nil)
-	elseif event ~= "ADDON_LOADED" then
-		self[event](self, ...)
-		self:UnregisterEvent("ADDON_LOADED")
-	end
+local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_LOGIN")
+f:SetScript("OnEvent", function(self)
+    if RougeUI.CombatIndicator then
+        CreateCombatIndicatorForUnit(TargetFrame)
+        CreateCombatIndicatorForUnit(FocusFrame)
+    end
+    self:UnregisterEvent("PLAYER_LOGIN")
+    self:SetScript("OnEvent", nil)
 end)
-
-
-ciCore.ciFrames["target"] = CreateCombatIndicatorForUnit("target", TargetFrame)
-ciCore.ciFrames["focus"] = CreateCombatIndicatorForUnit("focus", FocusFrame)

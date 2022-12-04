@@ -34,7 +34,7 @@ local function GetBorderColor(self)
     return self.borderTextures and self.borderTextures.TOPLEFT:GetVertexColor()
 end
 
-local function addBorder(object, offset, drawlayer)
+local function addBorder(object, offset, drawlayer, dbf)
     if type(object) ~= "table" or not object.CreateTexture or object.borderTextures then
         return
     end
@@ -44,7 +44,11 @@ local function addBorder(object, offset, drawlayer)
 
     for i = 1, #sections do
         local x = object:CreateTexture(nil, drawlayer or "BACKGROUND", nil, 1)
-        x:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\border-" .. sections[i])
+        if dbf then
+            x:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\debuff-" .. sections[i])
+        else
+            x:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\border-" .. sections[i])
+        end
         t[sections[i]] = x
     end
 
@@ -233,10 +237,10 @@ local function applySkin(b)
 
     if name:match("Debuff") then
         ic:SetTexCoord(0.02, 0.98, 0.02, 0.98)
-        addBorder(b, .25)
+        addBorder(b, .25, "OVERLAY", true)
         if bo then
             local re, gr, bl = bo:GetVertexColor()
-            b:SkinColor(re * 1.5, gr * 1.5, bl * 1.5)
+            SkinColor(b, re, gr, bl)
             bo:SetAlpha(0)
         end
         return
@@ -281,7 +285,7 @@ local function HookAuras()
                     _G["TargetFrameBuff" .. i .. "Icon"]:SetTexCoord(.02, .98, .02, .98)
                     bu.skin = true
                 end
-                bu:SkinColor()
+                SkinColor(bu)
             else
                 break
             end
@@ -290,12 +294,12 @@ local function HookAuras()
             local bu = _G["TargetFrameDebuff" .. i]
             if bu then
                 if not bu.skin then
-                    addBorder(bu, .5)
+                    addBorder(bu, .5, "OVERLAY", true)
                     _G["TargetFrameDebuff" .. i .. "Icon"]:SetTexCoord(.02, .98, .02, .98)
                     bu.skin = true
                 end
                 local re, gr, bl = _G["TargetFrameDebuff" .. i .. "Border"]:GetVertexColor()
-                bu:SkinColor(re, gr, bl)
+                SkinColor(bu, re, gr, bl)
             else
                 break
             end
@@ -305,10 +309,10 @@ local function HookAuras()
             if bu then
                 if not bu.skin then
                     addBorder(bu, .5)
-			  _G["FocusFrameBuff" .. i .. "Icon"]:SetTexCoord(.02, .98, .02, .98)
+                    _G["FocusFrameBuff" .. i .. "Icon"]:SetTexCoord(.02, .98, .02, .98)
                     bu.skin = true
                 end
-                bu:SkinColor()
+                SkinColor(bu)
             else
                 break
             end
@@ -317,12 +321,12 @@ local function HookAuras()
             local bu = _G["FocusFrameDebuff" .. i]
             if bu then
                 if not bu.skin then
-                    addBorder(bu, .5)
+                    addBorder(bu, .5, "OVERLAY", true)
                     _G["FocusFrameDebuff" .. i .. "Icon"]:SetTexCoord(.02, .98, .02, .98)
                     bu.skin = true
                 end
                 local re, gr, bl = _G["FocusFrameDebuff" .. i .. "Border"]:GetVertexColor()
-                bu:SkinColor(re, gr, bl)
+                SkinColor(bu, re, gr, bl)
             else
                 break
             end

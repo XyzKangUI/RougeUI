@@ -10,144 +10,75 @@ end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, ManaFontSize, HPFontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PChain, PartyText, BuffSizer }
+            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PartyText, BuffSizer, GoldElite, RareElite, Rare }
 
 RougeUIF = {}
+
+local stock = {
+    Class_Portrait = false,
+    ClassHP = true,
+    GradientHP = false,
+    FastKeyPress = true,
+    ShortNumeric = true,
+    ManaFontSize = 11,
+    HPFontSize = 11,
+    SelfSize = 23,
+    OtherBuffSize = 23,
+    HighlightDispellable = true,
+    TimerGap = false,
+    ScoreBoard = true,
+    HideTitles = true,
+    FadeIcon = true,
+    CombatIndicator = true,
+    CastTimer = false,
+    smooth = true,
+    pimp = false,
+    retab = false,
+    skinbuttons = true,
+    Colval = 0.25,
+    ArenaNumbers = false,
+    SQFix = false,
+    classoutline = false,
+    HideAggro = true,
+    unithp = false,
+    Stance = false,
+    HideHotkey = false,
+    ClassBG = false,
+    AutoReady = false,
+    EnemyTicks = false,
+    ThickFrames = false,
+    HideIndicator = true,
+    Abbreviate = false,
+    ModPlates = true,
+    AuraRow = 108,
+    BuffAlpha = false,
+    ButtonAnim = false,
+    PartyText = false,
+    BuffSizer = false,
+    GoldElite = false,
+    RareElite = false,
+    Rare = false
+}
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(self, event, ...)
     self[event](self, ...)
 end)
+
 function f:ADDON_LOADED()
-    if RougeUI.Class_Portrait == nil then
-        RougeUI.Class_Portrait = false;
-    end
-    if RougeUI.ClassHP == nil then
-        RougeUI.ClassHP = false;
-    end
-    if RougeUI.GradientHP == nil then
-        RougeUI.GradientHP = false;
-    end
-    if RougeUI.FastKeyPress == nil then
-        RougeUI.FastKeyPress = false;
-    end
-    if RougeUI.ShortNumeric == nil then
-        RougeUI.ShortNumeric = false;
-    end
-    if RougeUI.ManaFontSize == nil then
-        RougeUI.ManaFontSize = 11;
-    end
-    if RougeUI.HPFontSize == nil then
-        RougeUI.HPFontSize = 11;
-    end
-    if RougeUI.SelfSize == nil then
-        RougeUI.SelfSize = 23;
-    end
-    if RougeUI.OtherBuffSize == nil then
-        RougeUI.OtherBuffSize = 23;
-    end
-    if RougeUI.HighlightDispellable == nil then
-        RougeUI.HighlightDispellable = false;
-    end
-    if RougeUI.TimerGap == nil then
-        RougeUI.TimerGap = false;
-    end
-    if RougeUI.ScoreBoard == nil then
-        RougeUI.ScoreBoard = false;
-    end
-    if RougeUI.HideTitles == nil then
-        RougeUI.HideTitles = false;
-    end
-    if RougeUI.FadeIcon == nil then
-        RougeUI.FadeIcon = false;
-    end
-    if RougeUI.HideGlows == nil then
-        RougeUI.HideGlows = false;
-    end
-    if RougeUI.CombatIndicator == nil then
-        RougeUI.CombatIndicator = false;
-    end
-    if RougeUI.CastTimer == nil then
-        RougeUI.CastTimer = false;
-    end
-    if RougeUI.smooth == nil then
-        RougeUI.smooth = false;
-    end
-    if RougeUI.pimp == nil then
-        RougeUI.pimp = false;
-    end
-    if RougeUI.retab == nil then
-        RougeUI.retab = false;
-    end
-    if RougeUI.classoutline == nil then
-        RougeUI.classoutline = false;
-    end
-    if RougeUI.skinbuttons == nil then
-        RougeUI.skinbuttons = false;
-    end
-    if RougeUI.Colval == nil then
-        RougeUI.Colval = 1;
-    end
-    if RougeUI.ArenaNumbers == nil then
-        RougeUI.ArenaNumbers = false;
-    end
-    if RougeUI.SQFix == nil then
-        RougeUI.SQFix = false;
-    end
-    if RougeUI.HideAggro == nil then
-        RougeUI.HideAggro = false;
-    end
-    if RougeUI.unithp == nil then
-        RougeUI.unithp = false;
-    end
-    if RougeUI.Stance == nil then
-        RougeUI.Stance = false;
-    end
-    if RougeUI.HideHotkey == nil then
-        RougeUI.HideHotkey = false;
-    end
-    if RougeUI.HideMacro == nil then
-        RougeUI.HideMacro = false;
-    end
-    if RougeUI.ClassBG == nil then
-        RougeUI.ClassBG = false;
-    end
-    if RougeUI.AutoReady == nil then
-        RougeUI.AutoReady = false;
-    end
-    if RougeUI.EnemyTicks == nil then
-        RougeUI.EnemyTicks = false;
-    end
-    if RougeUI.ThickFrames == nil then
-        RougeUI.ThickFrames = false;
-    end
-    if RougeUI.HideIndicator == nil then
-        RougeUI.HideIndicator = false;
-    end
-    if RougeUI.Abbreviate == nil then
-        RougeUI.Abbreviate = false;
-    end
-    if RougeUI.ModPlates == nil then
-        RougeUI.ModPlates = true
-    end
-    if RougeUI.AuraRow == nil then
-        RougeUI.AuraRow = 108
-    end
-    if RougeUI.BuffAlpha == nil then
-        RougeUI.BuffAlpha = false
-    end
-    if RougeUI.ButtonAnim == nil then
-        RougeUI.ButtonAnim = false
-    end
-    if RougeUI.PChain == nil then
-        RougeUI.PChain = nil
-    end
-    if RougeUI.PartyText == nil then
-        RougeUI.PartyText = false
-    end
-    if RougeUI.BuffSizer == nil then
-        RougeUI.BuffSizer = true
+    for i, j in pairs(stock) do
+        if type(j) == "table" then
+            for k, v in pairs(j) do
+                if RougeUI[i][k] == nil then
+                    RougeUI[i][k] = v
+                end
+            end
+        else
+            if RougeUI[i] == nil then
+                RougeUI[i] = j
+            end
+        end
     end
 
     RougeUIF:CusFonts();
@@ -155,13 +86,36 @@ function f:ADDON_LOADED()
     if not f.options then
         f.options = f:CreateGUI()
     end
+
+    f:UnregisterEvent("ADDON_LOADED")
+    f:SetScript("OnEvent", nil)
+end
+
+local function CheckBtn(title, desc, panel, onClick)
+    local frame = CreateFrame("CheckButton", title, panel, "InterfaceOptionsCheckButtonTemplate")
+    frame:SetScript("OnClick", function(self)
+        local enabled = self:GetChecked()
+        onClick(self, enabled and true or false)
+    end)
+    frame.text = _G[frame:GetName() .. "Text"]
+    frame.text:SetText(title)
+    frame.tooltipText = desc
+    return frame
+end
+
+local function CreateText(frame, x, y, text)
+    local textstring = frame:CreateFontString("textstring")
+    textstring:SetPoint("TOPLEFT", x, y)
+    textstring:SetFont("Fonts\\MORPHEUS.ttf", 14, "")
+    textstring:SetText(text)
+    textstring:SetVertexColor(0.99, 0.82, 0)
 end
 
 function f:CreateGUI()
     local Panel = CreateFrame("Frame", "$parentRougeUI_Config", InterfaceOptionsPanelContainer)
     do
         Panel.name = Title;
-        InterfaceOptions_AddCategory(Panel);--	Panel Registration
+        InterfaceOptions_AddCategory(Panel)
 
         local title = Panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge");
         title:SetPoint("TOPLEFT", 12, -15);
@@ -186,7 +140,17 @@ function f:CreateGUI()
         Panel.childPanel3.parent = Panel.name
         InterfaceOptions_AddCategory(Panel.childPanel3)
 
-        for _, v in pairs({ Panel.childPanel1, Panel.childPanel2, Panel.childPanel3 }) do
+        Panel.childPanel4 = CreateFrame("Frame", "$parentConfigChild_StatusBar", Panel)
+        Panel.childPanel4.name = "StatusBar"
+        Panel.childPanel4.parent = Panel.name
+        InterfaceOptions_AddCategory(Panel.childPanel4)
+
+        Panel.childPanel5 = CreateFrame("Frame", "$parentConfigChild_Theme", Panel)
+        Panel.childPanel5.name = "Theme"
+        Panel.childPanel5.parent = Panel.name
+        InterfaceOptions_AddCategory(Panel.childPanel5)
+
+        for _, v in pairs({ Panel.childPanel1, Panel.childPanel2, Panel.childPanel3, Panel.childPanel4, Panel.childPanel5 }) do
             local Reload = CreateFrame("Button", nil, v, "UIPanelButtonTemplate")
             Reload:SetPoint("BOTTOMRIGHT", -10, 10)
             Reload:SetWidth(100)
@@ -207,180 +171,76 @@ function f:CreateGUI()
 
         --childPanel1
 
-        local name = "ClassPortraitButton"
-        local ClassPortraitButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ClassPortraitButton:SetPoint("TOPLEFT", 10, -40)
-        ClassPortraitButton.text = _G[name .. "Text"]
-        ClassPortraitButton.text:SetText("Show class portraits")
-        ClassPortraitButton.text:SetVertexColor(1,1,1)
+        CreateText(Panel.childPanel1, 10, -40, "Class colored indicators")
+
+        local ClassPortraitButton = CheckBtn("Enable Class Portraits", "Turn this on to display class portrait on target and focus frame", Panel.childPanel1, function(self, value) RougeUI.Class_Portrait = value end)
         ClassPortraitButton:SetChecked(RougeUI.Class_Portrait)
-        ClassPortraitButton:SetScript("OnClick", function()
-            RougeUI.Class_Portrait = not RougeUI.Class_Portrait
-        end)
+        ClassPortraitButton:SetPoint("TOPLEFT", 10, -70)
 
-        local name = "ClassHP"
-        local ClassHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ClassHPButton:SetPoint("TOPLEFT", 10, -75)
-        ClassHPButton.text = _G[name .. "Text"]
-        ClassHPButton.text:SetVertexColor(1,1,1)
-        ClassHPButton.text:SetText("Class colored Healthbars")
+        local ClassHPButton = CheckBtn("Enable Class Colored HealthBar", "Enabling this will change the green healthBar color to the class color", Panel.childPanel4, function(self, value) RougeUI.ClassHP = value end)
         ClassHPButton:SetChecked(RougeUI.ClassHP)
-        ClassHPButton:SetScript("OnClick", function()
-            RougeUI.ClassHP = not RougeUI.ClassHP
-        end)
+        ClassHPButton:SetPoint("TOPLEFT", 10, -75)
 
-        local name = "GradientHP"
-        local GradientHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        GradientHPButton:SetPoint("TOPLEFT", 10, -110)
-        GradientHPButton.text = _G[name .. "Text"]
-        GradientHPButton.text:SetVertexColor(1,1,1)
-        GradientHPButton.text:SetText("Gradient Healthbars")
+        local GradientHPButton = CheckBtn("Enable Gradient HealthBar", "This changes the healthBar color from green > yellow > orange > red based on the current percentage", Panel.childPanel4, function(self, value) RougeUI.GradientHP = value end)
         GradientHPButton:SetChecked(RougeUI.GradientHP)
-        GradientHPButton:SetScript("OnClick", function()
-            RougeUI.GradientHP = not RougeUI.GradientHP
-        end)
+        GradientHPButton:SetPoint("TOPLEFT", 10, -110)
 
-        local name = "UnitHP"
-        local UnitHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        UnitHPButton:SetPoint("TOPLEFT", 10, -145)
-        UnitHPButton.text = _G[name .. "Text"]
-        UnitHPButton.text:SetVertexColor(1,1,1)
-        UnitHPButton.text:SetText("Color Healthbars by status (enemy/friendly/neutral)")
+        local UnitHPButton = CheckBtn("Color HealthBar by Unit's Reaction", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value) RougeUI.unithp = value end)
         UnitHPButton:SetChecked(RougeUI.unithp)
-        UnitHPButton:SetScript("OnClick", function()
-            RougeUI.unithp = not RougeUI.unithp
-        end)
+        UnitHPButton:SetPoint("TOPLEFT", 10, -145)
 
-        local name = "ShortNumeric"
-        local ShortNumericButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ShortNumericButton:SetPoint("TOPLEFT", 10, -180)
-        ShortNumericButton.text = _G[name .. "Text"]
-        ShortNumericButton.text:SetVertexColor(1,1,1)
-        ShortNumericButton.text:SetText("Shorten statusText to one decimal")
+        CreateText(Panel.childPanel1, 10, -180, "StatusText")
+
+        local ShortNumericButton = CheckBtn("Display HP/Mana Text as '10k'", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value) RougeUI.ShortNumeric = value end)
         ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
-        ShortNumericButton:SetScript("OnClick", function()
-            RougeUI.ShortNumeric = not RougeUI.ShortNumeric
-        end)
+        ShortNumericButton:SetPoint("TOPLEFT", 10, -215)
 
-        local name = "Abbreviate"
-        local AbbreviateButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        AbbreviateButton:SetPoint("TOPLEFT", 10, -215)
-        AbbreviateButton.text = _G[name .. "Text"]
-        AbbreviateButton.text:SetVertexColor(1,1,1)
-        AbbreviateButton.text:SetText("Abbreviate statusText values")
-        AbbreviateButton:SetChecked(RougeUI.Abbreviate)
-        AbbreviateButton:SetScript("OnClick", function()
-            RougeUI.Abbreviate = not RougeUI.Abbreviate
-        end)
+        local ShortNumericButton = CheckBtn("Display only CURRENT HP/Mana Text", "This will show the HP/Mana StatusText as CURRENT value instead of CURRENT / MAX", Panel.childPanel1, function(self, value) RougeUI.Abbreviate = value end)
+        ShortNumericButton:SetChecked(RougeUI.Abbreviate)
+        ShortNumericButton:SetPoint("TOPLEFT", 10, -250)
 
-        local name = "PartyTextButton"
-        local PartyTextButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        PartyTextButton:SetPoint("TOPLEFT", 10, -250)
-        PartyTextButton.text = _G[name .. "Text"]
-        PartyTextButton.text:SetVertexColor(1,1,1)
-        PartyTextButton.text:SetText("Enable statusText on Party frames")
+        local PartyTextButton = CheckBtn("Show HP/Mana Text on PartyFrames", "This will show the HP/Mana StatusText on party1-4", Panel.childPanel1, function(self, value) RougeUI.PartyText = value end)
         PartyTextButton:SetChecked(RougeUI.PartyText)
-        PartyTextButton:SetScript("OnClick", function()
-            RougeUI.PartyText = not RougeUI.PartyText
-        end)
+        PartyTextButton:SetPoint("TOPLEFT", 10, -285)
 
-        local name = "FadeIcon"
-        local FadeIconButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        FadeIconButton:SetPoint("TOPLEFT", 350, -40)
-        FadeIconButton.text = _G[name .. "Text"]
-        FadeIconButton.text:SetVertexColor(1,1,1)
-        FadeIconButton.text:SetText("Fade PvP Icon")
+        CreateText(Panel.childPanel1, 350, -40, "Misc")
+
+        local FadeIconButton = CheckBtn("Fade out PvP Icon", "Enabling this will set the PvP Icon's transparency at 35%", Panel.childPanel1, function(self, value) RougeUI.FadeIcon = value end)
         FadeIconButton:SetChecked(RougeUI.FadeIcon)
-        FadeIconButton:SetScript("OnClick", function()
-            RougeUI.FadeIcon = not RougeUI.FadeIcon
-        end)
+        FadeIconButton:SetPoint("TOPLEFT", 350, -70)
 
-        local name = "SmoothFrame"
-        local SmoothFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        SmoothFrameButton:SetPoint("TOPLEFT", 350, -75)
-        SmoothFrameButton.text = _G[name .. "Text"]
-        SmoothFrameButton.text:SetVertexColor(1,1,1)
-        SmoothFrameButton.text:SetText("Smooth animated health & mana bar")
+        local SmoothFrameButton = CheckBtn("Smooth Animated Health & Mana Bar", "Adds a smoother transition effect when gaining / losing mana or health", Panel.childPanel4, function(self, value) RougeUI.smooth = value end)
         SmoothFrameButton:SetChecked(RougeUI.smooth)
-        SmoothFrameButton:SetScript("OnClick", function()
-            RougeUI.smooth = not RougeUI.smooth
-        end)
+        SmoothFrameButton:SetPoint("TOPLEFT", 10, -180)
 
-        local name = "PimpFrame"
-        local PimpFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        PimpFrameButton:SetPoint("TOPLEFT", 350, -110)
-        PimpFrameButton.text = _G[name .. "Text"]
-        PimpFrameButton.text:SetVertexColor(1,1,1)
-        PimpFrameButton.text:SetText("Enable Violet colored manabar")
+        local PimpFrameButton = CheckBtn("Purple Manabar", "Pimps your manabar to a purple color", Panel.childPanel4, function(self, value) RougeUI.pimp = value end)
         PimpFrameButton:SetChecked(RougeUI.pimp)
-        PimpFrameButton:SetScript("OnClick", function()
-            RougeUI.pimp = not RougeUI.pimp
-        end)
+        PimpFrameButton:SetPoint("TOPLEFT", 10, -40)
 
-        local name = "ClassOutlines"
-        local ClassOutlines = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ClassOutlines:SetPoint("TOPLEFT", 350, -145)
-        ClassOutlines.text = _G[name .. "Text"]
-        ClassOutlines.text:SetVertexColor(1,1,1)
-        ClassOutlines.text:SetText("Add class colored outline to frames")
+        local ClassOutlines = CheckBtn("Class Colored Outlines", "When enabled it will add a class colored circle around target and focus frame portraits", Panel.childPanel1, function(self, value) RougeUI.classoutline = value end)
         ClassOutlines:SetChecked(RougeUI.classoutline)
-        ClassOutlines:SetScript("OnClick", function()
-            RougeUI.classoutline = not RougeUI.classoutline
-        end)
+        ClassOutlines:SetPoint("TOPLEFT", 10, -105)
 
-        local name = "Skinbuttons"
-        local Skinbuttons = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        Skinbuttons:SetPoint("TOPLEFT", 350, -180)
-        Skinbuttons.text = _G[name .. "Text"]
-        Skinbuttons.text:SetVertexColor(1,1,1)
-        Skinbuttons.text:SetText("Apply modUI border theme")
-        Skinbuttons:SetChecked(RougeUI.skinbuttons)
-        Skinbuttons:SetScript("OnClick", function()
-            RougeUI.skinbuttons = not RougeUI.skinbuttons
-        end)
+        local ButtonSkin = CheckBtn("Skin Icons", "Adds a theme on top of actionbar, buff and debuff icons", Panel.childPanel5, function(self, value) RougeUI.skinbuttons = value end)
+        ButtonSkin:SetChecked(RougeUI.skinbuttons)
+        ButtonSkin:SetPoint("TOPLEFT", 10, -75)
 
-        local name = "ClassBG"
-        local ClassBG = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ClassBG:SetPoint("TOPLEFT", 350, -215)
-        ClassBG.text = _G[name .. "Text"]
-        ClassBG.text:SetVertexColor(1,1,1)
-        ClassBG.text:SetText("Class colored name background")
+        local ClassBG = CheckBtn("Class Colored Name Background", "Adds a class colored texture behind the UnitFrame name", Panel.childPanel1, function(self, value) if RougeUI.ThickFrames then UIErrorsFrame:AddMessage("This cannot be enabled with big frames", 1, 0, 0) else RougeUI.ClassBG = value end end)
         ClassBG:SetChecked(RougeUI.ClassBG)
-        ClassBG:SetScript("OnClick", function(self)
-            if RougeUI.ThickFrames then
-                UIErrorsFrame:AddMessage("This cannot be enabled with big frames", 1, 0, 0)
-                self:SetChecked(nil)
-            else
-                RougeUI.ClassBG = self:GetChecked()
-            end
-        end)
+        ClassBG:SetPoint("TOPLEFT", 10, -140)
 
-        local name = "ThickFrame"
-        local ThickFrame = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ThickFrame:SetPoint("TOPLEFT", 350, -250)
-        ThickFrame.text = _G[name .. "Text"]
-        ThickFrame.text:SetVertexColor(1,1,1)
-        ThickFrame.text:SetText("Enable Big Frames")
+        local ThickFrame = CheckBtn("Enable Big Frames", "Enable this for big (thick) UnitFrames", Panel.childPanel1, function(self, value) RougeUI.ThickFrames = value RougeUI.ClassBG = false end)
         ThickFrame:SetChecked(RougeUI.ThickFrames)
-        ThickFrame:SetScript("OnClick", function()
-            RougeUI.ThickFrames = not RougeUI.ThickFrames
-            RougeUI.ClassBG = false
-        end)
+        ThickFrame:SetPoint("TOPLEFT", 350, -105)
 
-        local name = "ModPlates"
-        local ModPlates = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-        ModPlates:SetPoint("TOPLEFT", 350, -285)
-        ModPlates.text = _G[name .. "Text"]
-        ModPlates.text:SetVertexColor(1,1,1)
-        ModPlates.text:SetText("ModUI Nameplate Style")
+        local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value) RougeUI.ModPlates = value end)
         ModPlates:SetChecked(RougeUI.ModPlates)
-        ModPlates:SetScript("OnClick", function()
-            RougeUI.ModPlates = not RougeUI.ModPlates
-        end)
+        ModPlates:SetPoint("TOPLEFT", 10, -110)
+
 
         local name = "FontSizeSlider"
         local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
-        FontSizeSlider:SetPoint("TOPLEFT", 20, -460)
+        FontSizeSlider:SetPoint("TOPLEFT", 20, -355)
         FontSizeSlider.textLow = _G[name .. "Low"]
         FontSizeSlider.textHigh = _G[name .. "High"]
         FontSizeSlider.text = _G[name .. "Text"]
@@ -400,7 +260,7 @@ function f:CreateGUI()
 
         local name = "MFontSizeSlider"
         local MFontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
-        MFontSizeSlider:SetPoint("TOPLEFT", 20, -520)
+        MFontSizeSlider:SetPoint("TOPLEFT", 20, -415)
         MFontSizeSlider.textLow = _G[name .. "Low"]
         MFontSizeSlider.textHigh = _G[name .. "High"]
         MFontSizeSlider.text = _G[name .. "Text"]
@@ -473,9 +333,9 @@ function f:CreateGUI()
         end)
 
         local name = "ColorValueSlider"
-        local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
+        local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
         ColorValueSlider:SetMinMaxValues(0, 1)
-        ColorValueSlider:SetPoint("TOPLEFT", 20, -400)
+        ColorValueSlider:SetPoint("TOPLEFT", 20, -170)
         ColorValueSlider.text = _G[name .. "Text"]
         ColorValueSlider.textLow = _G[name .. "Low"]
         ColorValueSlider.textHigh = _G[name .. "High"]
@@ -520,16 +380,10 @@ function f:CreateGUI()
         end)
 
         -- childPanel2
-        local name = "FastKeyPress"
-        local FastKeyPressButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        FastKeyPressButton:SetPoint("TOPLEFT", 10, -215)
-        FastKeyPressButton.text = _G[name .. "Text"]
-        FastKeyPressButton.text:SetVertexColor(1,1,1)
-        FastKeyPressButton.text:SetText("Cast spells on keypress down")
+
+        local FastKeyPressButton = CheckBtn("Activate spells on pressing keys", "Enabling this will trigger your spells on pressing keys down instead of on releasing them", Panel.childPanel2, function(self, value) RougeUI.FastKeyPress = value  end)
         FastKeyPressButton:SetChecked(RougeUI.FastKeyPress)
-        FastKeyPressButton:SetScript("OnClick", function()
-            RougeUI.FastKeyPress = not RougeUI.FastKeyPress
-        end)
+        FastKeyPressButton:SetPoint("TOPLEFT", 10, -215)
         FastKeyPressButton:RegisterEvent("PLAYER_LOGIN")
         FastKeyPressButton:SetScript("OnEvent", function(self, event, ...)
             if (event == "PLAYER_LOGIN") and RougeUI.FastKeyPress == true then
@@ -539,81 +393,32 @@ function f:CreateGUI()
             end
         end)
 
-        local name = "TimerGap"
-        local TimerGapButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        TimerGapButton:SetPoint("TOPLEFT", 10, -75)
-        TimerGapButton.text = _G[name .. "Text"]
-        TimerGapButton.text:SetVertexColor(1,1,1)
-        TimerGapButton.text:SetText("Remove space gap in (de)buff timer")
-        TimerGapButton:SetChecked(RougeUI.TimerGap)
-        TimerGapButton:SetScript("OnClick", function()
-            RougeUI.TimerGap = not RougeUI.TimerGap
-        end)
+        local TimerButton = CheckBtn("Display Buff timers without space indentation", "When enabled (De)buffs will display the time as '1s' instead of '1 s'", Panel.childPanel2, function(self, value) RougeUI.TimerGap = value  end)
+        TimerButton:SetChecked(RougeUI.TimerGap)
+        TimerButton:SetPoint("TOPLEFT", 10, -75)
 
-        local name = "ScoreBoard"
-        local ScoreBoardButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        ScoreBoardButton:SetPoint("TOPLEFT", 10, -110)
-        ScoreBoardButton.text = _G[name .. "Text"]
-        ScoreBoardButton.text:SetVertexColor(1,1,1)
-        ScoreBoardButton.text:SetText("Class colored PvP Scoreboard")
+        local ScoreBoardButton = CheckBtn("Class colored PvP Scoreboard", "Color names on the PvP Scoreboard by class", Panel.childPanel2, function(self, value) RougeUI.ScoreBoard = value  end)
         ScoreBoardButton:SetChecked(RougeUI.ScoreBoard)
-        ScoreBoardButton:SetScript("OnClick", function()
-            RougeUI.ScoreBoard = not RougeUI.ScoreBoard
-        end)
+        ScoreBoardButton:SetPoint("TOPLEFT", 10, -110)
 
-        local name = "CombatIndicator"
-        local CombatIndicatorButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        CombatIndicatorButton:SetPoint("TOPLEFT", 10, -145)
-        CombatIndicatorButton.text = _G[name .. "Text"]
-        CombatIndicatorButton.text:SetVertexColor(1,1,1)
-        CombatIndicatorButton.text:SetText("Enable Combat Indicator")
+        local CombatIndicatorButton = CheckBtn("Combat Indicator", "Displays a Combat icon next to Target-/FocusFrame when they enter combat or send pet", Panel.childPanel2, function(self, value) RougeUI.CombatIndicator = value  end)
         CombatIndicatorButton:SetChecked(RougeUI.CombatIndicator)
-        CombatIndicatorButton:SetScript("OnClick", function()
-            RougeUI.CombatIndicator = not RougeUI.CombatIndicator
-        end)
+        CombatIndicatorButton:SetPoint("TOPLEFT", 10, -145)
 
-        local name = "CastTimer"
-        local CastTimerButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        CastTimerButton:SetPoint("TOPLEFT", 10, -180)
-        CastTimerButton.text = _G[name .. "Text"]
-        CastTimerButton.text:SetVertexColor(1,1,1)
-        CastTimerButton.text:SetText("Enable modUI castbar style with a timer")
+        local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value) RougeUI.CastTimer = value  end)
         CastTimerButton:SetChecked(RougeUI.CastTimer)
-        CastTimerButton:SetScript("OnClick", function()
-            RougeUI.CastTimer = not RougeUI.CastTimer
-        end)
+        CastTimerButton:SetPoint("TOPLEFT", 10, -40)
 
-        local name = "RetabBind"
-        local RetabBind = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        RetabBind:SetPoint("TOPLEFT", 10, -40)
-        RetabBind.text = _G[name .. "Text"]
-        RetabBind.text:SetVertexColor(1,1,1)
-        RetabBind.text:SetText("RETabBinder")
-        RetabBind:SetChecked(RougeUI.retab)
-        RetabBind:SetScript("OnClick", function()
-            RougeUI.retab = not RougeUI.retab
-        end)
+        local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value) RougeUI.RETabBinder = value  end)
+        Retab:SetChecked(RougeUI.RETabBinder)
+        Retab:SetPoint("TOPLEFT", 10, -40)
 
-        local name = "ButtonAnim"
-        local ButtonAnim = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        ButtonAnim:SetPoint("TOPLEFT", 10, -250)
-        ButtonAnim.text = _G[name .. "Text"]
-        ButtonAnim.text:SetVertexColor(1,1,1)
-        ButtonAnim.text:SetText("Animate Keypress (SnowfallKeyPress)")
+        local ButtonAnim = CheckBtn("Animated Keypress (SnowFallKeyPress)", "Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value) RougeUI.ButtonAnim = value  end)
         ButtonAnim:SetChecked(RougeUI.ButtonAnim)
-        ButtonAnim:SetScript("OnClick", function()
-            RougeUI.ButtonAnim = not RougeUI.ButtonAnim
-        end)
+        ButtonAnim:SetPoint("TOPLEFT", 10, -180)
 
-        local name = "BuffSizer"
-        local BuffSizerButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        BuffSizerButton:SetPoint("TOPLEFT", 10, -285)
-        BuffSizerButton.text = _G[name .. "Text"]
-        BuffSizerButton.text:SetVertexColor(1,1,1)
-        BuffSizerButton.text:SetText("Enable for aura resizing")
-        BuffSizerButton:SetChecked(RougeUI.BuffSizer)
-        BuffSizerButton:SetScript("OnClick", function()
-            RougeUI.BuffSizer = not RougeUI.BuffSizer
+        local BuffSizerButton = CheckBtn("Enable (De)Buff Resizing", "Enables Target/Focus Frame Buff/Debuff scale sliders", Panel.childPanel2, function(self, value)
+            RougeUI.BuffSizer = value
             RougeUIF:HookAuras()
             if RougeUI.BuffSizer then
                 AuraRowSlider:Show()
@@ -625,234 +430,134 @@ function f:CreateGUI()
                 TargetPlayerBuffSizeSlider:Hide()
             end
         end)
+        BuffSizerButton:SetChecked(RougeUI.BuffSizer)
+        BuffSizerButton:SetPoint("TOPLEFT", 10, -285)
 
-        local name = "ArenaNumbers"
-        local ArenaNumbersButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        ArenaNumbersButton:SetPoint("TOPLEFT", 350, -40)
-        ArenaNumbersButton.text = _G[name .. "Text"]
-        ArenaNumbersButton.text:SetVertexColor(1,1,1)
-        ArenaNumbersButton.text:SetText("Show arena number on nameplate")
+        local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value) RougeUI.ArenaNumbers = value  end)
         ArenaNumbersButton:SetChecked(RougeUI.ArenaNumbers)
-        ArenaNumbersButton:SetScript("OnClick", function()
-            RougeUI.ArenaNumbers = not RougeUI.ArenaNumbers
-        end)
+        ArenaNumbersButton:SetPoint("TOPLEFT", 350, -40)
 
-        local name = "SpellQueueWindow"
-        local SQFixButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        SQFixButton:SetPoint("TOPLEFT", 350, -75)
-        SQFixButton.text = _G[name .. "Text"]
-        SQFixButton.text:SetVertexColor(1,1,1)
-        SQFixButton.text:SetText("Auto-adjust SpellQueue Window")
-        SQFixButton:SetChecked(RougeUI.SQFix)
-        SQFixButton:SetScript("OnClick", function()
-            RougeUI.SQFix = not RougeUI.SQFix
-        end)
+        local SpellQueueWindow = CheckBtn("Auto-adjust SpellQueue Window", "Automatically changes SpellQueue value based on current latency", Panel.childPanel2, function(self, value) RougeUI.SQFix = value  end)
+        SpellQueueWindow:SetChecked(RougeUI.SQFix)
+        SpellQueueWindow:SetPoint("TOPLEFT", 350, -75)
 
-        local name = "AutoReady"
-        local AutoReadyButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        AutoReadyButton:SetPoint("TOPLEFT", 350, -110)
-        AutoReadyButton.text = _G[name .. "Text"]
-        AutoReadyButton.text:SetVertexColor(1,1,1)
-        AutoReadyButton.text:SetText("Auto accept raid/arena ready checks")
+        local AutoReadyButton = CheckBtn("Auto accept raid/arena ready checks", "When enabled it will automatically accept any readychecks. Warning: Don't AFK or enable when queueing arena with a random", Panel.childPanel2, function(self, value) RougeUI.AutoReady = value  end)
         AutoReadyButton:SetChecked(RougeUI.AutoReady)
-        AutoReadyButton:SetScript("OnClick", function()
-            RougeUI.AutoReady = not RougeUI.AutoReady
-        end)
+        AutoReadyButton:SetPoint("TOPLEFT", 350, -110)
 
-        local name = "EnemyTicks"
-        local EnemyTicksButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        EnemyTicksButton:SetPoint("TOPLEFT", 350, -145)
-        EnemyTicksButton.text = _G[name .. "Text"]
-        EnemyTicksButton.text:SetVertexColor(1,1,1)
-        EnemyTicksButton.text:SetText("Enable target mana/energy tick tracker")
+        local EnemyTicksButton = CheckBtn("Track Target Energy/Mana Ticks", "EXPERIMENTAL: tracks target mana/energy ticks on manabar", Panel.childPanel2, function(self, value) RougeUI.EnemyTicks = value  end)
         EnemyTicksButton:SetChecked(RougeUI.EnemyTicks)
-        EnemyTicksButton:SetScript("OnClick", function()
-            RougeUI.EnemyTicks = not RougeUI.EnemyTicks
-        end)
+        EnemyTicksButton:SetPoint("TOPLEFT", 350, -145)
 
-        local name = "HighlightDispellable"
-        local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        HighlightDispellableButton:SetPoint("TOPLEFT", 350, -180)
-        HighlightDispellableButton.text = _G[name .. "Text"]
-        HighlightDispellableButton.text:SetVertexColor(1,1,1)
-        HighlightDispellableButton.text:SetText("Highlight enemy's important Magic/Enrage buffs")
-        HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
-        HighlightDispellableButton:SetScript("OnClick", function()
-            RougeUI.BuffSizer = true
-            RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable
-        end)
+        local HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value) RougeUI.HighlightDispellable = value RougeUI.BuffSizer = true end)
+        HighlightDispellable:SetChecked(RougeUI.HighlightDispellable)
+        HighlightDispellable:SetPoint("TOPLEFT", 350, -180)
 
-        local name = "BuffAlpha"
-        local BuffAlphaButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-        BuffAlphaButton:SetPoint("TOPLEFT", 350, -215)
-        BuffAlphaButton.text = _G[name .. "Text"]
-        BuffAlphaButton.text:SetVertexColor(1,1,1)
-        BuffAlphaButton.text:SetText("Disable BuffFrame fading animation")
+        local BuffAlphaButton = CheckBtn("Disable BuffFrame fading animation", "Disable the pulsing effect on buffs and debuffs", Panel.childPanel2, function(self, value) RougeUI.BuffAlpha = value  end)
         BuffAlphaButton:SetChecked(RougeUI.BuffAlpha)
-        BuffAlphaButton:SetScript("OnClick", function()
-            RougeUI.BuffAlpha = not RougeUI.BuffAlpha
-        end)
+        BuffAlphaButton:SetPoint("TOPLEFT", 350, -215)
 
         --childPanel3
 
-        local name = "HideGlows"
-        local HideGlowsButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideGlowsButton:SetPoint("TOPLEFT", 10, -40)
-        HideGlowsButton.text = _G[name .. "Text"]
-        HideGlowsButton.text:SetVertexColor(1,1,1)
-        HideGlowsButton.text:SetText("Hide all glows on Playerframe")
+        local HideGlowsButton = CheckBtn("Hide glowing effects on PlayerFrame", "Hides the yellow and red glowing when resting or being attacked on PlayerFrame", Panel.childPanel3, function(self, value) RougeUI.HideGlows = value  end)
         HideGlowsButton:SetChecked(RougeUI.HideGlows)
-        HideGlowsButton:SetScript("OnClick", function()
-            RougeUI.HideGlows = not RougeUI.HideGlows
-        end)
+        HideGlowsButton:SetPoint("TOPLEFT", 10, -40)
 
-        local name = "HideIndicator"
-        local HideIndicatorButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideIndicatorButton:SetPoint("TOPLEFT", 10, -75)
-        HideIndicatorButton.text = _G[name .. "Text"]
-        HideIndicatorButton.text:SetVertexColor(1,1,1)
-        HideIndicatorButton.text:SetText("Hide combat text on portrait")
+        local HideIndicatorButton = CheckBtn("Hide Combat Text on Portrait", "Hides the player and pet combat text on portraits", Panel.childPanel3, function(self, value) RougeUI.HideIndicator = value  end)
         HideIndicatorButton:SetChecked(RougeUI.HideIndicator)
-        HideIndicatorButton:SetScript("OnClick", function()
-            RougeUI.HideIndicator = not RougeUI.HideIndicator
-        end)
+        HideIndicatorButton:SetPoint("TOPLEFT", 10, -75)
 
-        local name = "HideTitles"
-        local HideTitlesButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideTitlesButton:SetPoint("TOPLEFT", 10, -110)
-        HideTitlesButton.text = _G[name .. "Text"]
-        HideTitlesButton.text:SetVertexColor(1,1,1)
-        HideTitlesButton.text:SetText("Hide Group/Raid title")
+        local HideTitlesButton = CheckBtn("Hide Group/Raid text", "Hides the Group/Raid text showing on top of frames", Panel.childPanel3, function(self, value) RougeUI.HideTitles = value  end)
         HideTitlesButton:SetChecked(RougeUI.HideTitles)
-        HideTitlesButton:SetScript("OnClick", function()
-            RougeUI.HideTitles = not RougeUI.HideTitles
-        end)
+        HideTitlesButton:SetPoint("TOPLEFT", 10, -110)
 
-        local name = "AggroHighlight"
-        local AggroHighlightButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        AggroHighlightButton:SetPoint("TOPLEFT", 10, -145)
-        AggroHighlightButton.text = _G[name .. "Text"]
-        AggroHighlightButton.text:SetVertexColor(1,1,1)
-        AggroHighlightButton.text:SetText("Hide Aggro highlight on default Raid Frames")
+        local AggroHighlightButton = CheckBtn("Hide Aggro highlight on default Raid Frames", "Hides the red texture that appears on raid frames when someone has aggro", Panel.childPanel3, function(self, value) RougeUI.HideAggro = value  end)
         AggroHighlightButton:SetChecked(RougeUI.HideAggro)
-        AggroHighlightButton:SetScript("OnClick", function()
-            RougeUI.HideAggro = not RougeUI.HideAggro
-        end)
+        AggroHighlightButton:SetPoint("TOPLEFT", 10, -145)
 
-        local name = "HideStance"
-        local HideStanceButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideStanceButton:SetPoint("TOPLEFT", 10, -180)
-        HideStanceButton.text = _G[name .. "Text"]
-        HideStanceButton.text:SetVertexColor(1,1,1)
-        HideStanceButton.text:SetText("Hide Stance bar")
+        local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value) RougeUI.Stance = value  end)
         HideStanceButton:SetChecked(RougeUI.Stance)
-        HideStanceButton:SetScript("OnClick", function()
-            RougeUI.Stance = not RougeUI.Stance
-        end)
+        HideStanceButton:SetPoint("TOPLEFT", 10, -180)
 
-        local name = "HideHotkey"
-        local HideHotkeyButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideHotkeyButton:SetPoint("TOPLEFT", 10, -215)
-        HideHotkeyButton.text = _G[name .. "Text"]
-        HideHotkeyButton.text:SetVertexColor(1,1,1)
-        HideHotkeyButton.text:SetText("Hide hotkey labels on default actionbar")
+        local HideHotkeyButton = CheckBtn("Hide Hotkey text on default actionbar", "Hides the keybinding text displayed", Panel.childPanel3, function(self, value) RougeUI.HideHotkey = value  end)
         HideHotkeyButton:SetChecked(RougeUI.HideHotkey)
-        HideHotkeyButton:SetScript("OnClick", function()
-            RougeUI.HideHotkey = not RougeUI.HideHotkey
-        end)
+        HideHotkeyButton:SetPoint("TOPLEFT", 10, -215)
 
-        local name = "HideMacro"
-        local HideMacroButton = CreateFrame("CheckButton", name, Panel.childPanel3, "UICheckButtonTemplate")
-        HideMacroButton:SetPoint("TOPLEFT", 10, -250)
-        HideMacroButton.text = _G[name .. "Text"]
-        HideMacroButton.text:SetVertexColor(1,1,1)
-        HideMacroButton.text:SetText("Hide macro text on default actionbar")
+        local HideMacroButton = CheckBtn("Hide macro text on default actionbar", "Hides the macro name displayed on icons", Panel.childPanel3, function(self, value) RougeUI.HideMacro = value  end)
         HideMacroButton:SetChecked(RougeUI.HideMacro)
-        HideMacroButton:SetScript("OnClick", function()
-            RougeUI.HideMacro = not RougeUI.HideMacro
-        end)
+        HideMacroButton:SetPoint("TOPLEFT", 10, -250)
 
-        local textstring = Panel.childPanel1:CreateFontString("textstring")
-        textstring:SetPoint("TOPLEFT", 15, -310)
-        textstring:SetFont("Fonts\\MORPHEUS.ttf", 11, "")
-        textstring:SetText("Set Player EliteFrame:")
+        CreateText(Panel.childPanel1, 350, -180, "Player Chain")
 
-        local DropDownMenuChain = CreateFrame("Frame", "DropDownMenuChain", Panel.childPanel1, "UIDropDownMenuTemplate")
-        DropDownMenuChain:ClearAllPoints()
-        DropDownMenuChain:SetPoint("LEFT", 0, -60)
-        DropDownMenuChain:Show()
-        local function OnClick(self)
-            UIDropDownMenu_SetSelectedID(DropDownMenuChain, self:GetID())
+        local EliteChain = CheckBtn("Gold Elite PlayerFrame", "Show a `Gold Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+            RougeUI.GoldElite = value
+            RougeUI.Rare = false
+            RougeUI.RareElite = false
             if RougeUI.Colval < .54 then
                 PlayerFrameTexture:SetVertexColor(1, 1, 1)
             end
-            if (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 1) then
-                RougeUI.PChain = 1
-                if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
-                elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
-                else
-                    if RougeUI.Colval > .54 then
-                        PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
-                    else
-                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
-                    end
-                end
-            elseif (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 2) then
-                RougeUI.PChain = 2
-                if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
-                elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
-                else
-                    if RougeUI.Colval > .54 then
-                        PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
-                    else
-                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
-                    end
-                end
-            elseif (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 3) then
-                RougeUI.PChain = 3
-                if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
-                elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
-                else
-                    if RougeUI.Colval > .54 then
-                        PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
-                    else
-                        PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
-                    end
-                end
-            elseif (UIDropDownMenu_GetSelectedID(DropDownMenuChain) == 4) then
-                RougeUI.PChain = nil
-                PlayerFrameTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-                if RougeUI.ThickFrames then
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-TargetingFrame")
-                else
-                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
-                end
-            end
-        end
-        local chains = { "Elite", "Rare", "Rare-Elite", "None" }
-        local function initialize(self, level)
-            local info = UIDropDownMenu_CreateInfo()
-            for _, v in pairs(chains) do
-                info = UIDropDownMenu_CreateInfo()
-                info.text = v
-                info.value = v
-                info.func = OnClick
-                UIDropDownMenu_AddButton(info, level)
-            end
-        end
 
-        UIDropDownMenu_Initialize(DropDownMenuChain, initialize)
-        UIDropDownMenu_SetWidth(DropDownMenuChain, 100);
-        UIDropDownMenu_SetButtonWidth(DropDownMenuChain, 124)
-        UIDropDownMenu_SetSelectedID(DropDownMenuChain, RougeUI.PChain)
-        UIDropDownMenu_JustifyText(DropDownMenuChain, "LEFT")
+            if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
+            elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
+            else
+                if RougeUI.Colval > .54 then
+                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
+                else
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
+                end
+            end
+        end)
+        EliteChain:SetChecked(RougeUI.GoldElite)
+        EliteChain:SetPoint("TOPLEFT", 350, -215)
+
+        local RareChain = CheckBtn("Rare PlayerFrame", "Show a `Rare` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+            RougeUI.Rare = value
+            RougeUI.RareElite = false
+            RougeUI.GoldElite = false
+            if RougeUI.Colval < .54 then
+                PlayerFrameTexture:SetVertexColor(1, 1, 1)
+            end
+            if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
+            elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
+            else
+                if RougeUI.Colval > .54 then
+                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
+                else
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
+                end
+            end
+        end)
+        RareChain:SetChecked(RougeUI.Rare)
+        RareChain:SetPoint("TOPLEFT", 350, -250)
+
+        local RareElite = CheckBtn("Rare Elite PlayerFrame", "Show a `Rare Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+            RougeUI.RareElite = value
+            RougeUI.Rare = false
+            RougeUI.GoldElite = false
+            if RougeUI.Colval < .54 then
+                PlayerFrameTexture:SetVertexColor(1, 1, 1)
+            end
+            if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
+            elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
+            else
+                if RougeUI.Colval > .54 then
+                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
+                else
+                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
+                end
+            end
+        end)
+        RareElite:SetChecked(RougeUI.RareElite)
+        RareElite:SetPoint("TOPLEFT", 350, -285)
 
     end
     return Panel
 end
+
+

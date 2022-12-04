@@ -277,19 +277,19 @@ local function FixChain()
     if RougeUI.ThickFrames then
         return
     end
-    if RougeUI.PChain == 1 then
+    if RougeUI.GoldElite then
         if RougeUI.Colval > .54 then
             PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
         else
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
         end
-    elseif RougeUI.PChain == 2 then
+    elseif RougeUI.Rare then
         if RougeUI.Colval > .54 then
             PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
         else
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
         end
-    elseif RougeUI.PChain == 3 then
+    elseif RougeUI.RareElite then
         if RougeUI.Colval > .54 then
             PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
         else
@@ -526,19 +526,19 @@ local function HideHotkeys()
 end
 
 local function PlayerArtThick(self)
-    if RougeUI.PChain == 1 then
+    if RougeUI.GoldElite then
         if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
         elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
         end
-    elseif RougeUI.PChain == 2 then
+    elseif RougeUI.Rare then
         if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
         elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
         end
-    elseif RougeUI.PChain == 3 then
+    elseif RougeUI.RareElite then
         if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
         elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
@@ -639,7 +639,7 @@ e:SetScript("OnEvent", function(self, event)
             ApplyThickness()
         end
 
-        if RougeUI.PChain then
+        if RougeUI.GoldElite or RougeUI.RareElite or RougeUI.Elite then
             FixChain()
         end
 
