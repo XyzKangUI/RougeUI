@@ -1,4 +1,4 @@
-local FontType = "Fonts\\FRIZQT__.ttf";
+local FontType = STANDARD_TEXT_FONT
 local mfloor, tonumber, mceil = math.floor, tonumber, math.ceil
 local GetCVar, UnitIsDeadOrGhost = GetCVar, UnitIsDeadOrGhost
 local UnitExists = UnitExists

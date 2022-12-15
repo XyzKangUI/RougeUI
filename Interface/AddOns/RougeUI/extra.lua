@@ -349,7 +349,7 @@ local function CheckClassification(self, forceNormalTexture)
         self.nameBackground:Hide()
         self.name:ClearAllPoints()
         self.name:SetPoint("CENTER", self, "CENTER", -50, 35)
-        self.name:SetFont("Fonts/FRIZQT__.TTF", 10, "OUTLINE")
+        self.name:SetFontObject(SystemFont_Outline_Small);
 
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", -50, 14)
@@ -549,7 +549,7 @@ local function PlayerArtThick(self)
     end
     self.name:ClearAllPoints()
     self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
-    self.name:SetFont("Fonts/FRIZQT__.TTF", 10, "OUTLINE")
+    self.name:SetFontObject(SystemFont_Outline_Small)
     self.healthbar:ClearAllPoints()
     self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 14)
     self.healthbar:SetHeight(27)
