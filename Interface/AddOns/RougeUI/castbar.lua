@@ -1,3 +1,7 @@
+local _G = getfenv(0)
+local UnitCastingInfo = _G.UnitCastingInfo
+local UnitChannelInfo = _G.UnitChannelInfo
+
 local function modstyle()
     local t = TargetFrameSpellBar
     t.timer = t:CreateFontString(nil, "OVERLAY")
@@ -15,7 +19,7 @@ local function modstyle()
     f.timer:SetPoint("RIGHT", f, -3, 1)
     f.update = .1
 
-    t.Text:SetFont(STANDARD_TEXT_FONT, 10)
+    t.Text:SetFontObject("SystemFont_Outline_Small")
     t:ClearAllPoints()
     t:SetWidth(142)
     t:SetHeight(10)
@@ -28,7 +32,7 @@ local function modstyle()
     t.Text:SetPoint("TOPLEFT", t, "BOTTOMLEFT", 2, -5)
     t.Text:SetJustifyH("LEFT")
 
-    f.Text:SetFont(STANDARD_TEXT_FONT, 11)
+    f.Text:SetFontObject("SystemFont_Outline_Small")
     f:ClearAllPoints()
     f:SetWidth(142)
     f:SetHeight(10)
@@ -79,6 +83,23 @@ local function RedBars(frame)
     end
 end
 
+local function NonInterrupt(frame, event)
+    local unit = frame.unit
+    if event == "UNIT_SPELLCAST_START" then
+        local _, text = UnitCastingInfo(unit)
+        if frame.BorderShield:IsShown() and frame.Text then
+            frame.BorderShield:Hide()
+            frame.Text:SetText(text .. " (IMMUNE)")
+        end
+    elseif event == "UNIT_SPELLCAST_CHANNEL_START" then
+        local _, text = UnitChannelInfo(unit)
+        if frame.BorderShield:IsShown() and frame.Text then
+            frame.BorderShield:Hide()
+            frame.Text:SetText(text .. " (IMMUNE)")
+        end
+    end
+end
+
 local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event)
@@ -99,8 +120,14 @@ FR:SetScript("OnEvent", function(self, event)
                 RougeUIF:GradientColour(self, CastingBarFrame)
                 RedBars(self)
             end)
+            TargetFrameSpellBar:HookScript("OnEvent", function(self, event)
+                NonInterrupt(self, event)
+            end)
+            FocusFrameSpellBar:HookScript("OnEvent", function(self, event)
+                NonInterrupt(self, event)
+            end)
         end
     end
     self:UnregisterEvent("PLAYER_LOGIN")
     self:SetScript("OnEvent", nil)
-end);
+end)

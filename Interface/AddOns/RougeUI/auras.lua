@@ -1,11 +1,12 @@
+local _G = getfenv(0)
 local AURA_OFFSET_Y = 3
 local AURA_START_X = 5
 local AURA_START_Y = 32
 local OFFSET_X = 3
-local GetSpellInfo, hooksecurefunc, UnitIsFriend = GetSpellInfo, hooksecurefunc, UnitIsFriend
-local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass = UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass
-local UnitBuff, UnitDebuff = UnitBuff, UnitDebuff
-local pairs = pairs
+local GetSpellInfo, hooksecurefunc, UnitIsFriend = _G.GetSpellInfo, _G.hooksecurefunc, _G.UnitIsFriend
+local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy, _G.UnitClass
+local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
+local pairs = _G.pairs
 local MAX_TARGET_DEBUFFS = 16;
 local MAX_TARGET_BUFFS = 32;
 

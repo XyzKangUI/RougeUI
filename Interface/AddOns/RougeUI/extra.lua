@@ -47,10 +47,22 @@ local function TimeFormat(button, time)
         m = floor(fmod(time, 3600) / 60 + 1)
         s = fmod(time, 60)
         text = duration:SetFormattedText("|r%d|rm", m)
-    elseif time < 60 then
+    elseif time > 5 and time < 60 then
         m = floor(time / 60)
         s = fmod(time, 60)
-        text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
+        if RougeUI.Roug or RougeUI.Modern then
+            text = m == 0 and duration:SetFormattedText("|r%d|r", s)
+        else
+            text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
+        end
+    elseif time < 5 then
+        m = floor(time / 60)
+        s = fmod(time, 60)
+        if RougeUI.Roug or RougeUI.Modern then
+            text = m == 0 and duration:SetFormattedText("|r%.1f|r", s)
+        else
+            text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
+        end
     else
         h = floor(time / 3600 + 1)
         text = duration:SetFormattedText("|r%d|rh", h)
@@ -643,7 +655,7 @@ e:SetScript("OnEvent", function(self, event)
             FixChain()
         end
 
-        if RougeUI.TimerGap then
+        if RougeUI.TimerGap or RougeUI.Lorti or RougeUI.Roug or RougeUI.Modern then
             if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
             end
@@ -675,10 +687,10 @@ e:SetScript("OnEvent", function(self, event)
             hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
             hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
             hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
-            PlayerLeaderIcon:SetAlpha(0)
-            TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
-            TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
-            FocusFrameTextureFrameLeaderIcon:SetAlpha(0)
+            --PlayerLeaderIcon:SetAlpha(0)
+            --TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
+            --TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
+            --FocusFrameTextureFrameLeaderIcon:SetAlpha(0)
         end
         if RougeUI.pimp then
             hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)

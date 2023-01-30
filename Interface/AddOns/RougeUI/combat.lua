@@ -1,5 +1,6 @@
 local UnitAffectingCombat, IsActiveBattlefieldArena = UnitAffectingCombat, IsActiveBattlefieldArena
 local UnitIsUnit, UnitExists, UnitClass = UnitIsUnit, UnitExists, UnitClass
+local UnitClassification = UnitClassification
 local SecureButton_GetUnit = SecureButton_GetUnit
 local Indicator = {}
 
@@ -32,9 +33,9 @@ local events = {
 local function CreateCombatIndicatorForUnit(frame)
     if not Indicator[frame] then
         local ciFrame = frame:CreateTexture(nil, "BORDER")
-        ciFrame:SetPoint("LEFT", frame, "RIGHT", -25, 10)
-        ciFrame:SetSize(30, 30)
-        ciFrame:SetTexture("Interface\\Icons\\ABILITY_DUALWIELD")
+        ciFrame:SetPoint("LEFT", frame, "RIGHT", -25, -5)
+        ciFrame:SetSize(60, 60)
+        ciFrame:SetTexture("Interface\\AddOns\\RougeUI\\textures\\CombatSwords")
         ciFrame:Hide()
         Indicator[frame] = ciFrame
 
@@ -43,6 +44,11 @@ local function CreateCombatIndicatorForUnit(frame)
             if events[event] and frame:IsShown() then
                 local unit = SecureButton_GetUnit(self) -- SecureButton_GetModifiedUnit?
                 Indicator[self]:SetShown(InCombat(unit))
+                if UnitClassification(unit) ~= "normal" then
+                    ciFrame:SetPoint("LEFT", frame, "RIGHT", 0, -5)
+                else
+                    ciFrame:SetPoint("LEFT", frame, "RIGHT", -25, -5)
+                end
             end
         end)
     end

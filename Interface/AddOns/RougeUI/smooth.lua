@@ -33,7 +33,7 @@ local function clamp(v, min, max)
 end
 
 local function lerp(startValue, endValue, amount)
-    return (1 - amount) * startValue + amount * endValue
+    return startValue + (endValue - startValue) * amount
 end
 
 local function isCloseEnough(new, target, range)

@@ -1,4 +1,5 @@
-local pairs = pairs
+local _G = getfenv(0)
+local pairs = _G.pairs
 local doneInit
 
 local function FrameColour()

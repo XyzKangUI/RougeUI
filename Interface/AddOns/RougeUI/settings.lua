@@ -1,4 +1,4 @@
-local Name, ns = ...;
+local Name = ...
 local Title = select(2, GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$", "");
 local floor = math.floor
 local format = format
@@ -9,8 +9,9 @@ local function RoundNumbers(val, valStep)
 end
 
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, ManaFontSize, HPFontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-            FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, skinbuttons, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
-            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PartyText, BuffSizer, GoldElite, RareElite, Rare }
+            FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
+            ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PartyText, BuffSizer, GoldElite, RareElite, Rare,
+            Lorti, Roug, Modern, BuffsRow, BuffVal}
 
 RougeUIF = {}
 
@@ -34,7 +35,6 @@ local stock = {
     smooth = true,
     pimp = false,
     retab = false,
-    skinbuttons = true,
     Colval = 0.25,
     ArenaNumbers = false,
     SQFix = false,
@@ -57,7 +57,12 @@ local stock = {
     BuffSizer = false,
     GoldElite = false,
     RareElite = false,
-    Rare = false
+    Rare = false,
+    Lorti = false,
+    Roug = false,
+    Modern = false,
+    BuffsRow = 10,
+    BuffVal = 1.0,
 }
 
 local f = CreateFrame("Frame")
@@ -221,10 +226,6 @@ function f:CreateGUI()
         ClassOutlines:SetChecked(RougeUI.classoutline)
         ClassOutlines:SetPoint("TOPLEFT", 10, -105)
 
-        local ButtonSkin = CheckBtn("Skin Icons", "Adds a theme on top of actionbar, buff and debuff icons", Panel.childPanel5, function(self, value) RougeUI.skinbuttons = value end)
-        ButtonSkin:SetChecked(RougeUI.skinbuttons)
-        ButtonSkin:SetPoint("TOPLEFT", 10, -75)
-
         local ClassBG = CheckBtn("Class Colored Name Background", "Adds a class colored texture behind the UnitFrame name", Panel.childPanel1, function(self, value) if RougeUI.ThickFrames then UIErrorsFrame:AddMessage("This cannot be enabled with big frames", 1, 0, 0) else RougeUI.ClassBG = value end end)
         ClassBG:SetChecked(RougeUI.ClassBG)
         ClassBG:SetPoint("TOPLEFT", 10, -140)
@@ -235,7 +236,21 @@ function f:CreateGUI()
 
         local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value) RougeUI.ModPlates = value end)
         ModPlates:SetChecked(RougeUI.ModPlates)
-        ModPlates:SetPoint("TOPLEFT", 10, -110)
+        ModPlates:SetPoint("TOPLEFT", 10, -75)
+
+        CreateText(Panel.childPanel5, 350, -40, "Theme's")
+
+        local LortiTheme = CheckBtn("Lorti Theme", "This will theme the UI to look like Lorti", Panel.childPanel5, function(self, value) RougeUI.Lorti = value end)
+        LortiTheme:SetChecked(RougeUI.Lorti)
+        LortiTheme:SetPoint("TOPLEFT", 350, -105)
+
+        local RougTheme = CheckBtn("RougeUI Theme", nil, Panel.childPanel5, function(self, value) RougeUI.Roug = value end)
+        RougTheme:SetChecked(RougeUI.Roug)
+        RougTheme:SetPoint("TOPLEFT", 350, -70)
+
+        local ModernTheme = CheckBtn("Minimalist Theme", nil, Panel.childPanel5, function(self, value) RougeUI.Modern = value BuffColSlider:Show() end)
+        ModernTheme:SetChecked(RougeUI.Modern)
+        ModernTheme:SetPoint("TOPLEFT", 350, -140)
 
 
         local name = "FontSizeSlider"
@@ -335,7 +350,7 @@ function f:CreateGUI()
         local name = "ColorValueSlider"
         local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
         ColorValueSlider:SetMinMaxValues(0, 1)
-        ColorValueSlider:SetPoint("TOPLEFT", 20, -170)
+        ColorValueSlider:SetPoint("TOPLEFT", 25, -230)
         ColorValueSlider.text = _G[name .. "Text"]
         ColorValueSlider.textLow = _G[name .. "Low"]
         ColorValueSlider.textHigh = _G[name .. "High"]
@@ -350,6 +365,49 @@ function f:CreateGUI()
             ColorValueSlider.text:SetText("UI Brightness: " .. RoundNumbers(RougeUI.Colval, 0.05))
             RougeUI.Colval = value
             RougeUIF:ChangeFrameColors()
+        end)
+
+        local name = "BuffValueSlider"
+        local BuffValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+        BuffValueSlider:SetMinMaxValues(2, 10)
+        BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
+        BuffValueSlider.text = _G[name .. "Text"]
+        BuffValueSlider.textLow = _G[name .. "Low"]
+        BuffValueSlider.textHigh = _G[name .. "High"]
+        BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
+        BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
+        BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
+        BuffValueSlider:SetValue(RougeUI.BuffsRow)
+        BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(BuffsRow)))
+        BuffValueSlider:SetValueStep(1)
+        BuffValueSlider:SetObeyStepOnDrag(true);
+        BuffValueSlider:SetScript("OnValueChanged", function(_, value)
+            BuffValueSlider.text:SetText("Buffs Per Row: " .. RoundNumbers(RougeUI.BuffsRow, 1))
+            RougeUI.BuffsRow = value
+        end)
+
+        local name = "BuffColSlider"
+        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+        BuffColSlider:SetMinMaxValues(0, 1)
+        BuffColSlider:SetPoint("TOPLEFT", 25, -300)
+        if RougeUI.Modern then
+            BuffColSlider:Show()
+        else
+            BuffColSlider:Hide()
+        end
+        BuffColSlider.text = _G[name .. "Text"]
+        BuffColSlider.textLow = _G[name .. "Low"]
+        BuffColSlider.textHigh = _G[name .. "High"]
+        BuffColSlider.minValue, BuffColSlider.maxValue = BuffColSlider:GetMinMaxValues()
+        BuffColSlider.textLow:SetText(floor(BuffColSlider.minValue))
+        BuffColSlider.textHigh:SetText(floor(BuffColSlider.maxValue))
+        BuffColSlider:SetValue(RougeUI.BuffVal)
+        BuffColSlider.text:SetText("Theme's Border Brightness: " .. format("%.f", BuffColSlider:GetValue(BuffVal)))
+        BuffColSlider:SetValueStep(0.05)
+        BuffColSlider:SetObeyStepOnDrag(true);
+        BuffColSlider:SetScript("OnValueChanged", function(_, value)
+            BuffColSlider.text:SetText("Theme's Border Brightness: " .. RoundNumbers(RougeUI.BuffVal, 0.05))
+            RougeUI.BuffVal = value
         end)
 
         local names = "AuraRowSlider"
@@ -445,7 +503,7 @@ function f:CreateGUI()
         AutoReadyButton:SetChecked(RougeUI.AutoReady)
         AutoReadyButton:SetPoint("TOPLEFT", 350, -110)
 
-        local EnemyTicksButton = CheckBtn("Track Target Energy/Mana Ticks", "EXPERIMENTAL: tracks target mana/energy ticks on manabar", Panel.childPanel2, function(self, value) RougeUI.EnemyTicks = value  end)
+        local EnemyTicksButton = CheckBtn("Track Target Energy/Mana Ticks", "Track target/focus enemy ticks (ARENA-ONLY)", Panel.childPanel2, function(self, value) RougeUI.EnemyTicks = value  end)
         EnemyTicksButton:SetChecked(RougeUI.EnemyTicks)
         EnemyTicksButton:SetPoint("TOPLEFT", 350, -145)
 

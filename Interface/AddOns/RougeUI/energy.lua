@@ -1,25 +1,101 @@
-local last_tick = GetTime()
-local last_value = 0
+local _G = getfenv(0)
+local UnitPowerType = _G.UnitPowerType
+local pairs = _G.pairs
+local UnitExists, UnitIsUnit, UnitIsPlayer = _G.UnitExists, _G.UnitIsUnit, _G.UnitIsPlayer
+local UnitPower, UnitPowerMax, UnitIsEnemy = _G.UnitPower, _G.UnitPowerMax, _G.UnitIsEnemy
+local inArena = false
+local eventRegistered = { ["SPELL_PERIODIC_ENERGIZE"] = true, ["SPELL_ENERGIZE"] = true }
+local CombatLogGetCurrentEventInfo = _G.CombatLogGetCurrentEventInfo;
+local COMBATLOG_FILTER_HOSTILE_PLAYERS = _G.COMBATLOG_FILTER_HOSTILE_PLAYERS;
+local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
 local externalManaGainTimestamp = 0
-local e = CreateFrame("Frame")
-local fakeTick, startTick, validateTick
-local UnitIsPlayer = UnitIsPlayer
+local gain = 0
+local TargetFrameManaBar, FocusFrameManaBar = _G.TargetFrameManaBar, _G.FocusFrameManaBar
 
-e:RegisterEvent("PLAYER_LOGIN")
-e:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-e:RegisterEvent("PLAYER_TARGET_CHANGED")
-e:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
-e:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "target")
-e:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "target")
+local frames = {
+    ["target"] = TargetFrameManaBar,
+    ["focus"] = FocusFrameManaBar,
+}
 
+local updateUnit = {
+    ["target"] = TargetFrameManaBar,
+    ["focus"] = FocusFrameManaBar,
+    ["arena1"] = TargetFrameManaBar or FocusFrameManaBar,
+    ["arena2"] = TargetFrameManaBar or FocusFrameManaBar,
+    ["arena3"] = TargetFrameManaBar or FocusFrameManaBar,
+    ["arena4"] = TargetFrameManaBar or FocusFrameManaBar,
+    ["arena5"] = TargetFrameManaBar or FocusFrameManaBar
+}
 
-local function PowerType()
-    return UnitPowerType("target")
+local powerTypes = { [0] = true, [3] = true }
+
+local energyValues = {
+    target = {
+        last_tick = 0,
+        last_value = 0,
+        startTick = false,
+        validTick = false,
+    },
+    focus = {
+        last_tick = 0,
+        last_value = 0,
+        startTick = false,
+        validTick = false,
+    },
+    arena1 = {
+        last_tick = 0,
+        last_value = 0,
+        startTick = false,
+        validTick = false,
+    },
+    arena2 = {
+        last_tick = 0,
+        last_value = 0,
+        startTick = false,
+        validTick = false,
+    },
+    arena3 = {
+        last_tick = 0,
+        last_value = 0,
+        startTick = false,
+        validTick = false,
+    },
+    arena4 = {
+        last_tick = 0,
+        last_value = 0,
+        startTick = false,
+        validTick = false,
+    },
+    arena5 = {
+        last_tick = 0,
+        last_value = 0,
+        startTick = false,
+        validTick = false,
+    },
+}
+
+local function IsInArena()
+    local _, instanceType = IsInInstance()
+    if instanceType == "arena" then
+        return true
+    else
+        return false
+    end
+end
+
+local function PowerType(unit)
+    return UnitPowerType(unit)
 end
 
 local function SetEnergyValue(self, value)
     local x = self:GetWidth()
     local position = ((x * value) / 2.02)
+
+    if (position >= x * 0.2 and position <= x * 0.45) then
+        self.energy.spark:SetVertexColor(0, 1, 0)
+    else
+        self.energy.spark:SetVertexColor(1, 1, 1)
+    end
 
     if (position < x) then
         self.energy.spark:Show()
@@ -27,86 +103,119 @@ local function SetEnergyValue(self, value)
     end
 end
 
-local function OnUpdate(self)
-    local time = GetTime()
-    local v = time - last_tick
+local function OnUpdate(self, elapsed)
+    for unit, frame in pairs(updateUnit) do
+        if not powerTypes[PowerType(unit)] then
+            return
+        end
 
-    if (v > 2.01 and v < 2.04) then -- ticks occur every 2.02s if not for deviations due to latency
-        last_tick = time
-        validateTick = false
+        if inArena then
+            for i = 1, 5 do
+                if UnitExists("arena" .. i) and UnitIsUnit(unit, "arena" .. i) then
+                    energyValues[unit].last_tick = energyValues["arena" .. i].last_tick
+                    break
+                end
+            end
+        end
+
+        energyValues[unit].last_tick = energyValues[unit].last_tick + elapsed
+
+        if (energyValues[unit].last_tick >= 2.02) and energyValues[unit].startTick then
+            if inArena then
+                for i = 1, 5 do
+                    if UnitExists("arena" .. i) and UnitIsUnit(unit, "arena" .. i) then
+                        energyValues["arena" .. i].last_tick = 0
+                        energyValues["arena" .. i].validTick = false
+                        break
+                    end
+                end
+            else
+                energyValues[unit].last_tick = 0
+                energyValues[unit].validTick = false
+            end
+        end
+        SetEnergyValue(frame, energyValues[unit].last_tick)
     end
-
-    SetEnergyValue(self:GetParent(), v)
 end
 
 local function UpdateEnergy(unit)
+    if not energyValues[unit] or not powerTypes[PowerType(unit)] then
+        return
+    end
+
     local energy = UnitPower(unit)
-    local maxenergy = UnitPowerMax(unit)
-    local time = GetTime()
-    local energyInc = energy - last_value
+    local energyInc = energy - energyValues[unit].last_value
 
-    if time - externalManaGainTimestamp < 0.02 then
+    if ((GetTime() - externalManaGainTimestamp) <= 0.02) and energyInc == gain then
         externalManaGainTimestamp = 0
+        gain = 0
         return
     end
 
-    last_value = energy
-
-    if energy == maxenergy and energyInc ~= 20 or energyInc <= 0 then
-        return
-    end
-
-    if (energyInc > 0 and energyInc < 999) and not fakeTick then
-        startTick = true
-    end
-
-    if startTick and not validateTick then
-        last_tick = time
-        validateTick = true
-        if TargetFrameManaBar.energy.spark:GetAlpha() < 1 then
-            TargetFrameManaBar.energy.spark:SetAlpha(1)
+    if inArena then
+        for i = 1, 5 do
+            if UnitExists("arena" .. i) and UnitIsUnit(unit, "arena" .. i) and (unit == "target" or unit == "focus") then
+                for key, value in pairs(energyValues["arena" .. i]) do
+                    energyValues[unit][key] = value
+                end
+                return
+            end
         end
     end
 
-    fakeTick = false
+    if (energyValues[unit].last_value == 0) then
+        energyValues[unit].last_value = energy
+        return
+    end
+
+    if (energy > energyValues[unit].last_value) and not energyValues[unit].validTick then
+        energyValues[unit].startTick = true
+        energyValues[unit].last_tick = 0
+        energyValues[unit].validTick = true
+        if frames[unit] then
+            SetEnergyValue(frames[unit], energyValues[unit].last_tick)
+            if frames[unit].energy.spark:GetAlpha() < 1 then
+                frames[unit].energy.spark:SetAlpha(1)
+            end
+        end
+    end
+
+    energyValues[unit].last_value = energy
 end
 
-local function AddEnergy()
-    TargetFrameManaBar.energy = CreateFrame("Statusbar", "TargetFrameManaBar_energy", TargetFrameManaBar)
-    TargetFrameManaBar.energy.spark = TargetFrameManaBar.energy:CreateTexture(nil, "OVERLAY")
-    TargetFrameManaBar.energy.spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-    TargetFrameManaBar.energy.spark:SetSize(32, 32)
-    TargetFrameManaBar.energy.spark:SetPoint("CENTER", TargetFrameManaBar, 0, 0)
-    TargetFrameManaBar.energy.spark:SetBlendMode("ADD")
-    TargetFrameManaBar.energy.spark:SetAlpha(.4)
-
-    if not TargetFrameManaBar.energy:GetScript("OnUpdate") then
-        TargetFrameManaBar.energy:SetScript("OnUpdate", OnUpdate)
+local function AddEnergy(frame)
+    if not frame.energy then
+        frame.energy = CreateFrame("Statusbar", frame:GetName() .. "_energy", frame)
+        frame.energy.spark = frame.energy:CreateTexture(nil, "OVERLAY")
+        frame.energy.spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+        frame.energy.spark:SetSize(32, 32)
+        frame.energy.spark:SetPoint("CENTER", frame, 0, 0)
+        frame.energy.spark:SetBlendMode("ADD")
+        frame.energy.spark:SetAlpha(0)
     end
 end
 
-local eventRegistered = { SPELL_PERIODIC_ENERGIZE = true, SPELL_ENERGIZE = true }
-local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo;
-local COMBATLOG_FILTER_HOSTILE_PLAYERS = COMBATLOG_FILTER_HOSTILE_PLAYERS;
-local CombatLog_Object_IsA = CombatLog_Object_IsA
 local function RealTick()
-    local _, eventType, _, _, _, _, _, _, _, destFlags = CombatLogGetCurrentEventInfo()
+    local _, eventType, _, _, _, _, _, _, _, destFlags, _, _, _, _, amount = CombatLogGetCurrentEventInfo()
+
     if not (eventRegistered[eventType]) then
         return
     end
 
     local isDestEnemy = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
 
-    if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE") then
-        if isDestEnemy then
-            externalManaGainTimestamp = GetTime()
-            fakeTick = true
-        end
+    if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE") and isDestEnemy then
+        gain = amount
+        externalManaGainTimestamp = GetTime()
         return
     end
 end
 
-local function OnEvent(self, event, ...)
+local e = CreateFrame("Frame")
+e:RegisterEvent("PLAYER_LOGIN")
+e:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+e:SetScript("OnEvent", function(self, event, ...)
     if not RougeUI.EnemyTicks then
         self:UnregisterAllEvents()
         self:SetScript("OnEvent", nil)
@@ -114,33 +223,60 @@ local function OnEvent(self, event, ...)
     end
 
     if event == "PLAYER_LOGIN" then
-        AddEnergy()
+        for _, v in pairs(frames) do
+            AddEnergy(v)
+        end
         self:UnregisterEvent("PLAYER_LOGIN")
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        inArena = IsInArena()
+
+        if inArena then
+            for unit, values in pairs(energyValues) do
+                energyValues[unit] = {
+                    last_tick = 0,
+                    last_value = 0,
+                    startTick = false,
+                    validTick = false,
+                }
+            end
+            self:RegisterEvent("PLAYER_TARGET_CHANGED")
+            self:RegisterEvent("PLAYER_FOCUS_CHANGED")
+            self:RegisterEvent("UNIT_POWER_UPDATE")
+            self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+            if not self:GetScript("OnUpdate") then
+                self:SetScript("OnUpdate", OnUpdate)
+            end
+        else
+            self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+            self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
+            self:UnregisterEvent("UNIT_POWER_UPDATE")
+            self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+            if self:GetScript("OnUpdate") then
+                self:SetScript("OnUpdate", nil)
+            end
+        end
     elseif event == "UNIT_POWER_UPDATE" then
         local unit = ...
-        UpdateEnergy(unit)
+        if UnitIsEnemy("player", unit) and UnitIsPlayer(unit) then
+            UpdateEnergy(unit)
+        end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         RealTick()
     elseif event == "PLAYER_TARGET_CHANGED" then
-        if not (PowerType() == 0 or PowerType() == 3) or not UnitIsPlayer("target") then
-            TargetFrameManaBar.energy:SetScript("OnUpdate", nil)
+        if not powerTypes[PowerType("target")] or not UnitIsPlayer("target") or not UnitIsEnemy("player", "target") then
             TargetFrameManaBar.energy.spark:SetAlpha(0)
-            return
         else
-            if not TargetFrameManaBar.energy:GetScript("OnUpdate") then
-                TargetFrameManaBar.energy:SetScript("OnUpdate", OnUpdate)
+            if UnitPower("target") ~= UnitPowerMax("target") then
+                TargetFrameManaBar.energy.spark:SetAlpha(1)
             end
-            TargetFrameManaBar.energy.spark:SetAlpha(1)
         end
-        last_tick = GetTime()
-        validateTick = false
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        fakeTick = true
-        if PowerType() == 0 then
-            TargetFrameManaBar.energy.spark:SetAlpha(0)
-	  end
-    elseif event == "UNIT_SPELLCAST_FAILED" then
-        fakeTick = true
+    elseif event == "PLAYER_FOCUS_CHANGED" then
+        if not powerTypes[PowerType("focus")] or not UnitIsPlayer("focus") or not UnitIsEnemy("player", "focus") then
+            FocusFrameManaBar.energy.spark:SetAlpha(0)
+        else
+            if UnitPower("focus") ~= UnitPowerMax("focus") then
+                FocusFrameManaBar.energy.spark:SetAlpha(1)
+            end
+        end
     end
-end
-e:SetScript("OnEvent", OnEvent)
+end)
