@@ -8,7 +8,7 @@ local function modstyle()
     t.timer:SetFontObject("SystemFont_Shadow_Small")
     t.timer:SetShadowColor(0, 0, 0)
     t.timer:SetShadowOffset(1, -1)
-    t.timer:SetPoint("RIGHT", t, -3, 1)
+    t.timer:SetPoint("RIGHT", t, -3, 0)
     t.update = .1
 
     local f = FocusFrameSpellBar
@@ -16,7 +16,7 @@ local function modstyle()
     f.timer:SetFontObject("SystemFont_Shadow_Small")
     f.timer:SetShadowColor(0, 0, 0)
     f.timer:SetShadowOffset(1, -1)
-    f.timer:SetPoint("RIGHT", f, -3, 1)
+    f.timer:SetPoint("RIGHT", f, -3, 0)
     f.update = .1
 
     t.Text:SetFontObject("SystemFont_Outline_Small")
@@ -83,23 +83,6 @@ local function RedBars(frame)
     end
 end
 
-local function NonInterrupt(frame, event)
-    local unit = frame.unit
-    if event == "UNIT_SPELLCAST_START" then
-        local _, text = UnitCastingInfo(unit)
-        if frame.BorderShield:IsShown() and frame.Text then
-            frame.BorderShield:Hide()
-            frame.Text:SetText(text .. " (IMMUNE)")
-        end
-    elseif event == "UNIT_SPELLCAST_CHANNEL_START" then
-        local _, text = UnitChannelInfo(unit)
-        if frame.BorderShield:IsShown() and frame.Text then
-            frame.BorderShield:Hide()
-            frame.Text:SetText(text .. " (IMMUNE)")
-        end
-    end
-end
-
 local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event)
@@ -120,11 +103,29 @@ FR:SetScript("OnEvent", function(self, event)
                 RougeUIF:GradientColour(self, CastingBarFrame)
                 RedBars(self)
             end)
-            TargetFrameSpellBar:HookScript("OnEvent", function(self, event)
-                NonInterrupt(self, event)
-            end)
-            FocusFrameSpellBar:HookScript("OnEvent", function(self, event)
-                NonInterrupt(self, event)
+            hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, ...)
+                local arg1 = ...
+                local unit = self.unit;
+                local name, text
+
+                if self:IsForbidden() or not (self == TargetFrameSpellBar or self == FocusFrameSpellBar) or arg1 ~= unit then
+                    return
+                end
+
+                if event == "UNIT_SPELLCAST_START" then
+                    name, text = UnitCastingInfo(unit)
+                elseif event == "UNIT_SPELLCAST_CHANNEL_START" then
+                    name, text = UnitChannelInfo(unit)
+                else
+                    return
+                end
+
+                if self.BorderShield:IsShown() and name then
+                    self.BorderShield:Hide()
+                    if self.Text then
+                        self.Text:SetText(text .. " (IMMUNE)")
+                    end
+                end
             end)
         end
     end

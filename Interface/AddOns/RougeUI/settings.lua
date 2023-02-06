@@ -551,16 +551,16 @@ function f:CreateGUI()
             RougeUI.GoldElite = value
             RougeUI.Rare = false
             RougeUI.RareElite = false
-            if RougeUI.Colval < .54 then
+            if RougeUI.Colval < 0.54 then
                 PlayerFrameTexture:SetVertexColor(1, 1, 1)
             end
 
-            if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
                 PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
-            elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+            elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
                 PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
             else
-                if RougeUI.Colval > .54 then
+                if (RougeUI.Colval > 0.54) then
                     PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
                 else
                     PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
@@ -574,15 +574,15 @@ function f:CreateGUI()
             RougeUI.Rare = value
             RougeUI.RareElite = false
             RougeUI.GoldElite = false
-            if RougeUI.Colval < .54 then
+            if (RougeUI.Colval < 0.54) then
                 PlayerFrameTexture:SetVertexColor(1, 1, 1)
             end
-            if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
                 PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
-            elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+            elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
                 PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
             else
-                if RougeUI.Colval > .54 then
+                if (RougeUI.Colval > 0.54) then
                     PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
                 else
                     PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
@@ -596,15 +596,15 @@ function f:CreateGUI()
             RougeUI.RareElite = value
             RougeUI.Rare = false
             RougeUI.GoldElite = false
-            if RougeUI.Colval < .54 then
+            if (RougeUI.Colval < 0.54) then
                 PlayerFrameTexture:SetVertexColor(1, 1, 1)
             end
-            if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
                 PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
-            elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+            elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
                 PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
             else
-                if RougeUI.Colval > .54 then
+                if (RougeUI.Colval > 0.54) then
                     PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
                 else
                     PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")

@@ -1,6 +1,6 @@
 local UnitAffectingCombat, IsActiveBattlefieldArena = UnitAffectingCombat, IsActiveBattlefieldArena
 local UnitIsUnit, UnitExists, UnitClass = UnitIsUnit, UnitExists, UnitClass
-local UnitClassification = UnitClassification
+local UnitClassification, UnitDetailedThreatSituation = UnitClassification, UnitDetailedThreatSituation
 local SecureButton_GetUnit = SecureButton_GetUnit
 local Indicator = {}
 
@@ -12,7 +12,8 @@ local function InCombat(unit)
     else
         if (IsActiveBattlefieldArena() and not (class == 1 or class == 2 or class == 4 or class == 11)) then
             for i = 1, 5, 1 do
-                if UnitExists("arenapet" .. i .. "target") then
+                if UnitExists("arenapet" .. i .. "target") or UnitDetailedThreatSituation("player", "arenapet" .. i) or
+                        UnitDetailedThreatSituation("party"..i, "arenapet" .. i) then
                     if UnitIsUnit(unit, "arena" .. i) then
                         return true
                     end
@@ -42,7 +43,7 @@ local function CreateCombatIndicatorForUnit(frame)
         frame:RegisterEvent("UNIT_FLAGS")
         frame:HookScript("OnEvent", function(self, event)
             if events[event] and frame:IsShown() then
-                local unit = SecureButton_GetUnit(self) -- SecureButton_GetModifiedUnit?
+                local unit = SecureButton_GetUnit(self)
                 Indicator[self]:SetShown(InCombat(unit))
                 if UnitClassification(unit) ~= "normal" then
                     ciFrame:SetPoint("LEFT", frame, "RIGHT", 0, -5)
@@ -56,11 +57,13 @@ end
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
-f:SetScript("OnEvent", function(self)
-    if RougeUI.CombatIndicator then
-        CreateCombatIndicatorForUnit(TargetFrame)
-        CreateCombatIndicatorForUnit(FocusFrame)
+f:SetScript("OnEvent", function(self, event)
+    if event == "PLAYER_LOGIN" then
+        if RougeUI.CombatIndicator then
+            CreateCombatIndicatorForUnit(TargetFrame)
+            CreateCombatIndicatorForUnit(FocusFrame)
+        end
+        self:UnregisterEvent("PLAYER_LOGIN")
+        self:SetScript("OnEvent", nil)
     end
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:SetScript("OnEvent", nil)
 end)

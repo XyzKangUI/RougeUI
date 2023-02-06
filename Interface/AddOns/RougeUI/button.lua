@@ -73,7 +73,6 @@ local function addBorder(button, shadow, drawLayer)
         end
         border:ClearAllPoints()
         if RougeUI.Lorti then
-            border:ClearAllPoints()
             border:SetAllPoints(button)
         else
             if button.tempenchant then
@@ -206,7 +205,7 @@ local function styleActionButton(bu)
 
     if ic then
         if RougeUI.Lorti then
-            ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+            ic:SetTexCoord(0, 1, 0, 1)
         else
             ic:SetTexCoord(0.06, 0.94, 0.06, 0.94)
         end
@@ -258,6 +257,11 @@ local function init()
     if bartender4 then
         for i = 1, 120 do
             styleActionButton(_G["BT4Button" .. i])
+        end
+        if GetNumShapeshiftForms() ~= 0 then
+            for i = 1, GetNumShapeshiftForms() do
+                styleActionButton(_G["BT4StanceButton" .. i])
+            end
         end
     end
 
@@ -369,7 +373,7 @@ local function BuffAnchor()
                 -- New row
                 numAuraRows = numAuraRows + 1;
                 if (index == BUFFS_PER_ROW + 1) then
-                    buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING - 3);
+                    buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING); --xx
                 else
                     buff:SetPoint("TOPRIGHT", aboveBuff, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING);
                 end

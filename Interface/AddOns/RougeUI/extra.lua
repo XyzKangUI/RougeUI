@@ -320,7 +320,7 @@ local function CheckClassification(self, forceNormalTexture)
         self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
         self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
     elseif (classification == "worldboss" or classification == "elite") then
-        if RougeUI.ThickFrames and not (RougeUI.Colval < 0.16) then
+        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.16) then
             self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
         elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.16) then
             self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
@@ -329,7 +329,7 @@ local function CheckClassification(self, forceNormalTexture)
         end
         self.borderTexture:SetVertexColor(1, 1, 1)
     elseif (classification == "rareelite") then
-        if RougeUI.ThickFrames and not (RougeUI.Colval < 0.16) then
+        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.16) then
             self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
         elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.16) then
             self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
@@ -338,7 +338,7 @@ local function CheckClassification(self, forceNormalTexture)
         end
         self.borderTexture:SetVertexColor(1, 1, 1)
     elseif (classification == "rare") then
-        if RougeUI.ThickFrames and not (RougeUI.Colval < 0.16) then
+        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.16) then
             self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
         elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.16) then
             self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
@@ -361,7 +361,8 @@ local function CheckClassification(self, forceNormalTexture)
         self.nameBackground:Hide()
         self.name:ClearAllPoints()
         self.name:SetPoint("CENTER", self, "CENTER", -50, 35)
-        self.name:SetFontObject(SystemFont_Outline_Small);
+        self.name:SetFontObject("SystemFont_Outline_Small")
+        self.name:SetShadowOffset(0, 0)
 
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", -50, 14)
@@ -414,32 +415,6 @@ end
 
 -- Class portrait frames
 
-local lastTargetToTGuid = nil
-local lastFocusToTGuid = nil
-local CP = {}
-
-function CP:CreateToTPortraits()
-    if not self.TargetToTPortrait then
-        self.TargetToTPortrait = TargetFrameToT:CreateTexture(nil, "ARTWORK")
-        self.TargetToTPortrait:SetSize(TargetFrameToT.portrait:GetSize())
-        for i = 1, TargetFrameToT.portrait:GetNumPoints() do
-            self.TargetToTPortrait:SetPoint(TargetFrameToT.portrait:GetPoint(i))
-        end
-        self.TargetToTPortrait:ClearAllPoints()
-        self.TargetToTPortrait:SetPoint("LEFT", TargetFrameToT, "LEFT", 5, 0)
-    end
-
-    if not self.FocusToTPortrait then
-        self.FocusToTPortrait = FocusFrameToT:CreateTexture(nil, "ARTWORK")
-        self.FocusToTPortrait:SetSize(FocusFrameToT.portrait:GetSize())
-        for i = 1, FocusFrameToT.portrait:GetNumPoints() do
-            self.FocusToTPortrait:SetPoint(FocusFrameToT.portrait:GetPoint(i))
-        end
-        self.FocusToTPortrait:ClearAllPoints()
-        self.FocusToTPortrait:SetPoint("LEFT", FocusFrameToT, "LEFT", 5, 0)
-    end
-end
-
 local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.blp"
 
 local function ClassPortrait(self)
@@ -447,47 +422,13 @@ local function ClassPortrait(self)
         return
     end
 
-    if self.portrait and not (self.unit == "targettarget" or self.unit == "focus-target") then
-        if UnitIsPlayer(self.unit) then
-            local _, class = UnitClass(self.unit)
-            if (class and UnitIsPlayer(self.unit)) then
-                self.portrait:SetTexture(CLASS_TEXTURE:format(class))
-            else
-                format(self.unit)
-            end
-        end
-    end
-
-    if UnitExists("targettarget") ~= nil then
-        if UnitGUID("targettarget") ~= lastTargetToTGuid then
-            lastTargetToTGuid = UnitGUID("targettarget")
-            if UnitIsPlayer("targettarget") then
-                local _, class = UnitClass("targettarget")
-                CP.TargetToTPortrait:SetTexture(CLASS_TEXTURE:format(class))
-                CP.TargetToTPortrait:Show()
-            else
-                CP.TargetToTPortrait:Hide()
-            end
+    if self.portrait and UnitIsPlayer(self.unit) then
+        local _, class = UnitClass(self.unit)
+        if class then
+            self.portrait:SetTexture(CLASS_TEXTURE:format(class))
         end
     else
-        CP.TargetToTPortrait:Hide()
-        lastTargetToTGuid = nil
-    end
-
-    if UnitExists("focus-target") ~= nil then
-        if UnitGUID("focus-target") ~= lastFocusToTGuid then
-            lastFocusToTGuid = UnitGUID("focus-target")
-            if UnitIsPlayer("focus-target") then
-                local _, class = UnitClass("focus-target")
-                CP.FocusToTPortrait:SetTexture(CLASS_TEXTURE:format(class))
-                CP.FocusToTPortrait:Show()
-            else
-                CP.FocusToTPortrait:Hide()
-            end
-        end
-    else
-        CP.FocusToTPortrait:Hide()
-        lastFocusToTGuid = nil
+        format(self.unit)
     end
 end
 
@@ -539,21 +480,21 @@ end
 
 local function PlayerArtThick(self)
     if RougeUI.GoldElite then
-        if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
         end
     elseif RougeUI.Rare then
-        if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
         end
     elseif RougeUI.RareElite then
-        if RougeUI.ThickFrames and not (RougeUI.Colval < .54) then
+        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < .54) then
+        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
             PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
         end
     else
@@ -561,7 +502,8 @@ local function PlayerArtThick(self)
     end
     self.name:ClearAllPoints()
     self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
-    self.name:SetFontObject(SystemFont_Outline_Small)
+    self.name:SetFontObject("SystemFont_Outline_Small")
+    self.name:SetShadowOffset(0, 0)
     self.healthbar:ClearAllPoints()
     self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 14)
     self.healthbar:SetHeight(27)
@@ -670,7 +612,6 @@ e:SetScript("OnEvent", function(self, event)
             end)
         end
         if RougeUI.Class_Portrait then
-            CP:CreateToTPortraits()
             hooksecurefunc("UnitFramePortrait_Update", ClassPortrait)
         end
         if RougeUI.ScoreBoard then
@@ -727,7 +668,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.ClassBG then
             if PlayerFrame:IsShown() and not PlayerFrame.bg then
                 local c = RAID_CLASS_COLORS[select(2, UnitClass("player"))]
-                bg = PlayerFrame:CreateTexture()
+                local bg = PlayerFrame:CreateTexture()
                 bg:SetPoint("TOPLEFT", PlayerFrameBackground)
                 bg:SetPoint("BOTTOMRIGHT", PlayerFrameBackground, 0, 22)
                 bg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
