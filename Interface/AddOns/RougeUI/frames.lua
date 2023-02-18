@@ -620,7 +620,7 @@ local function BlizzFrames(addon)
 			if RougeUI.Colval <= 0.5 then
 				v:SetVertexColor(.5, .5, .5)
 			else
-				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval)
+				v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
 			end
 		end
 	end

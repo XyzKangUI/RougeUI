@@ -13,19 +13,10 @@ local gsub, format = string.gsub, string.format
 local GetClassColorObj, GetMouseFocus = GetClassColorObj, GetMouseFocus
 
 local addonlist = {
-    ["Shadowed Unit Frames"] = true,
-    ["PitBull Unit Frames 4.0"] = true,
-    ["X-Perl UnitFrames"] = true,
-    ["Z-Perl UnitFrames"] = true,
     ["EasyFrames"] = true,
-    ["ElvUI"] = true,
-    ["Uber UI Classic"] = true,
-    ["whoaThickFrames_BCC"] = true,
-    ["whoaUnitFrames_BCC"] = true,
-    ["AbyssUI"] = true,
-    ["KkthnxUI"] = true,
+    ["whoaThickFrames_WotLK"] = true,
+    ["whoaUnitFrames_WotLK"] = true,
     ["TextureScript"] = true,
-    ["DarkModeUI"] = true,
     ["SUI"] = true,
     ["RiizUI"] = true
 }
@@ -276,7 +267,7 @@ local function manabarcolor(statusbar, unit)
         if (UnitIsUnit("focus", "player")) then
             FocusFrameManaBar:SetStatusBarColor(127 / 255, 0 / 255, 255 / 255)
         end
-        if (UnitIsUnit("focus-target", "player")) then
+        if (UnitIsUnit("focustarget", "player")) then
             FocusFrameToTManaBar:SetStatusBarColor(127 / 255, 0 / 255, 255 / 255)
         end
     end

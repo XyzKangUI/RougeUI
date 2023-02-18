@@ -344,7 +344,7 @@ local function HookAuras()
 end
 
 local function BuffAnchor()
-    local buff, previousBuff, aboveBuff, index, xOffset
+    local buff, previousBuff, aboveBuff, index
     local numBuffs = 0;
     local numAuraRows = 0;
     local slack = BuffFrame.numEnchants;
@@ -373,7 +373,7 @@ local function BuffAnchor()
                 -- New row
                 numAuraRows = numAuraRows + 1;
                 if (index == BUFFS_PER_ROW + 1) then
-                    buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING); --xx
+                    buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING - 3); --xx
                 else
                     buff:SetPoint("TOPRIGHT", aboveBuff, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING);
                 end
@@ -385,12 +385,7 @@ local function BuffAnchor()
             else
                 if (numBuffs == 1) then
                     if (BuffFrame.numEnchants > 0) then
-                        if RougeUI.Lorti then
-                            xOffset = BUFF_HORIZ_SPACING + 2
-                        else
-                            xOffset = BUFF_HORIZ_SPACING - 2
-                        end
-                        buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", xOffset, 0);
+                        buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", BUFF_HORIZ_SPACING, 0);
                         aboveBuff = TemporaryEnchantFrame;
                     else
                         buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "TOPLEFT", BUFF_HORIZ_SPACING, 0);
