@@ -5,6 +5,10 @@ local UnitExists = UnitExists
 local UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax = UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax
 local hooksecurefunc = hooksecurefunc
 
+local function round(value)
+    return mfloor(value + 0.5)
+end
+
 function RougeUIF:CusFonts()
     PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
     PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
@@ -42,13 +46,13 @@ end
 local function true_format(value)
     if (RougeUI.ShortNumeric == true) then
         if value > 1e7 then
-            return (mfloor(value / 1e6)) .. 'm'
+            return (round(value / 1e6)) .. 'm'
         elseif value > 1e6 then
-            return (mfloor((value / 1e6) * 10) / 10) .. 'm'
+            return (round((value / 1e6) * 10) / 10) .. 'm'
         elseif value > 1e4 then
-            return (mfloor(value / 1e3)) .. 'k'
+            return (round(value / 1e3)) .. 'k'
         elseif value > 1e3 then
-            return (mfloor((value / 1e3) * 10) / 10) .. 'k'
+            return (round((value / 1e3) * 10) / 10) .. 'k'
         else
             return value
         end

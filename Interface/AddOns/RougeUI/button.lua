@@ -138,7 +138,7 @@ local function SkinBuffs(bu)
     local icon = _G[name .. "Icon"]
 
     if icon then
-        if name:match("Debuff") then
+        if name:match("Debuff") and not RougeUI.Lorti then
             icon:SetTexCoord(0.06, 0.94, 0.06, 0.94)
         else
             if RougeUI.Lorti then

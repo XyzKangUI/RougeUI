@@ -11,7 +11,7 @@ end
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, ManaFontSize, HPFontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
             ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PartyText, BuffSizer, GoldElite, RareElite, Rare,
-            Lorti, Roug, Modern, BuffsRow, BuffVal}
+            Lorti, Roug, Modern, BuffsRow, BuffVal, PSTrack, cfix}
 
 RougeUIF = {}
 
@@ -63,6 +63,8 @@ local stock = {
     Modern = false,
     BuffsRow = 10,
     BuffVal = 1.0,
+    PSTrack = false,
+    cfix = false
 }
 
 local f = CreateFrame("Frame")
@@ -251,7 +253,6 @@ function f:CreateGUI()
         local ModernTheme = CheckBtn("Minimalist Theme", nil, Panel.childPanel5, function(self, value) RougeUI.Modern = value BuffColSlider:Show() end)
         ModernTheme:SetChecked(RougeUI.Modern)
         ModernTheme:SetPoint("TOPLEFT", 350, -140)
-
 
         local name = "FontSizeSlider"
         local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
@@ -451,6 +452,10 @@ function f:CreateGUI()
             end
         end)
 
+        local PSTrackBtn = CheckBtn("CC Absorb Tracker", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default nameplate", Panel.childPanel2, function(self, value) RougeUI.PSTrack = value  end)
+        PSTrackBtn:SetChecked(RougeUI.PSTrack)
+        PSTrackBtn:SetPoint("TOPLEFT", 10, -250)
+
         local TimerButton = CheckBtn("Display Buff timers without space indentation", "When enabled (De)buffs will display the time as '1s' instead of '1 s'", Panel.childPanel2, function(self, value) RougeUI.TimerGap = value  end)
         TimerButton:SetChecked(RougeUI.TimerGap)
         TimerButton:SetPoint("TOPLEFT", 10, -75)
@@ -514,6 +519,10 @@ function f:CreateGUI()
         local BuffAlphaButton = CheckBtn("Disable BuffFrame fading animation", "Disable the pulsing effect on buffs and debuffs", Panel.childPanel2, function(self, value) RougeUI.BuffAlpha = value  end)
         BuffAlphaButton:SetChecked(RougeUI.BuffAlpha)
         BuffAlphaButton:SetPoint("TOPLEFT", 350, -215)
+
+        local ComboFixButton = CheckBtn("ComboFrame Fix", "This change will allow you to see combo points on mind controlled enemy players", Panel.childPanel2, function(self, value) RougeUI.cfix = value  end)
+        ComboFixButton:SetChecked(RougeUI.cfix)
+        ComboFixButton:SetPoint("TOPLEFT", 350, -250)
 
         --childPanel3
 
