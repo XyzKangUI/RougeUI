@@ -18,7 +18,7 @@ local function ComboUpdate(self)
     end
 
     targetGUID = UnitGUID("target")
-    if UnitIsPossessed("target") then
+    if UnitIsPossessed("target") and UnitIsPlayer("target") then
         comboPoints = comboPointsCache[targetGUID] or 0;
     else
         comboPoints = GetComboPoints(self.unit, "target");

@@ -11,7 +11,7 @@ end
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, ManaFontSize, HPFontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
             ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PartyText, BuffSizer, GoldElite, RareElite, Rare,
-            Lorti, Roug, Modern, BuffsRow, BuffVal, PSTrack, cfix}
+            Lorti, Roug, Modern, BuffsRow, BuffVal, PSTrack, cfix, roleIcon}
 
 RougeUIF = {}
 
@@ -64,7 +64,8 @@ local stock = {
     BuffsRow = 10,
     BuffVal = 1.0,
     PSTrack = false,
-    cfix = false
+    cfix = false,
+    roleIcon = false
 }
 
 local f = CreateFrame("Frame")
@@ -508,7 +509,7 @@ function f:CreateGUI()
         AutoReadyButton:SetChecked(RougeUI.AutoReady)
         AutoReadyButton:SetPoint("TOPLEFT", 350, -110)
 
-        local EnemyTicksButton = CheckBtn("Track Target Energy/Mana Ticks", "Track target/focus enemy ticks (ARENA-ONLY)", Panel.childPanel2, function(self, value) RougeUI.EnemyTicks = value  end)
+        local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value) RougeUI.EnemyTicks = value  end)
         EnemyTicksButton:SetChecked(RougeUI.EnemyTicks)
         EnemyTicksButton:SetPoint("TOPLEFT", 350, -145)
 
@@ -538,7 +539,7 @@ function f:CreateGUI()
         HideTitlesButton:SetChecked(RougeUI.HideTitles)
         HideTitlesButton:SetPoint("TOPLEFT", 10, -110)
 
-        local AggroHighlightButton = CheckBtn("Hide Aggro highlight on default Raid Frames", "Hides the red texture that appears on raid frames when someone has aggro", Panel.childPanel3, function(self, value) RougeUI.HideAggro = value  end)
+        local AggroHighlightButton = CheckBtn("Hide Aggro highlight on default raid frames", "Hides the red texture that appears on raid frames when someone has aggro", Panel.childPanel3, function(self, value) RougeUI.HideAggro = value  end)
         AggroHighlightButton:SetChecked(RougeUI.HideAggro)
         AggroHighlightButton:SetPoint("TOPLEFT", 10, -145)
 
@@ -553,6 +554,10 @@ function f:CreateGUI()
         local HideMacroButton = CheckBtn("Hide macro text on default actionbar", "Hides the macro name displayed on icons", Panel.childPanel3, function(self, value) RougeUI.HideMacro = value  end)
         HideMacroButton:SetChecked(RougeUI.HideMacro)
         HideMacroButton:SetPoint("TOPLEFT", 10, -250)
+
+        local HideRoleButton = CheckBtn("Hide role icon on default raid frames", "Hides the role icon on blizzard raid frames", Panel.childPanel3, function(self, value) RougeUI.roleIcon = value  end)
+        HideRoleButton:SetChecked(RougeUI.roleIcon)
+        HideRoleButton:SetPoint("TOPLEFT", 10, -285)
 
         CreateText(Panel.childPanel1, 350, -180, "Player Chain")
 

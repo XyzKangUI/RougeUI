@@ -5,7 +5,7 @@ local GetSpellInfo = GetSpellInfo
 local GetNetStats = GetNetStats
 local IsInInstance = IsInInstance
 local GetBattlefieldScore = GetBattlefieldScore
-local UnitClass, UnitExists, UnitGUID, UnitCanAttack, GetUnitName = UnitClass, UnitExists, UnitGUID, UnitCanAttack, GetUnitName
+local UnitClass, UnitExists, UnitHealth, UnitCanAttack, GetUnitName = UnitClass, UnitExists, UnitHealth, UnitCanAttack, GetUnitName
 local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification
 local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled
 local ConsoleExec, RAID_CLASS_COLORS = ConsoleExec, RAID_CLASS_COLORS
@@ -608,12 +608,32 @@ local events = {
     "ZONE_CHANGED_NEW_AREA"
 }
 
+local function ToTDebuffs(frame)
+    frame:HookScript("OnEvent", function(self, event, ...)
+        if not frame:IsEventRegistered("UNIT_AURA") then
+            frame:RegisterEvent("UNIT_AURA")
+        end
+        local arg1 = ...;
+        if event == "UNIT_AURA" then
+            local parent = self:GetParent()
+            if UnitIsUnit(arg1, self.unit) and UnitExists(self.unit) and UnitExists(parent.unit) and ( UnitHealth(parent.unit) > 0 ) then
+                RefreshDebuffs(self, self.unit, nil, nil, true)
+            end
+        end
+    end)
+end
+
 local e = CreateFrame("Frame")
 for _, v in pairs(events) do
     e:RegisterEvent(v)
 end
 e:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
+
+        if SHOW_TARGET_OF_TARGET == "1" then
+            ToTDebuffs(TargetFrameToT)
+            ToTDebuffs(FocusFrameToT)
+        end
 
         if RougeUI.ThickFrames then
             ApplyThickness()
@@ -668,6 +688,17 @@ e:SetScript("OnEvent", function(self, event)
                 if self.aggroHighlight then
                     self.aggroHighlight:SetAlpha(0)
                     return
+                end
+            end)
+        end
+        if RougeUI.roleIcon then
+            hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
+                if not frame.roleIcon then
+                    return;
+                end
+
+                if frame.roleIcon:IsShown() then
+                    frame.roleIcon:SetAlpha(0);
                 end
             end)
         end
