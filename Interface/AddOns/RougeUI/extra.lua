@@ -697,7 +697,7 @@ e:SetScript("OnEvent", function(self, event)
                     return;
                 end
 
-                if frame.roleIcon:IsShown() then
+                if frame.roleIcon:IsShown() and (frame.roleIcon:GetAlpha() > 0) then
                     frame.roleIcon:SetAlpha(0);
                 end
             end)

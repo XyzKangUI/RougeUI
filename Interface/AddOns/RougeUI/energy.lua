@@ -12,8 +12,9 @@ local durations = { [1] = dur, [2] = dur * 2, [3] = dur * 3, [4] = dur * 4, [5] 
 local expirationTime = {}
 local oocTime = {}
 local outOfCombatTime = {}
+local running = {}
 local m_abs, ipairs, pairs = math.abs, ipairs, pairs
-local UnitDetailedThreatSituation = _G.UnitDetailedThreatSituation
+local UnitDetailedThreatSituation, UnitIsPlayer = _G.UnitDetailedThreatSituation, _G.UnitIsPlayer
 local CombatLogGetCurrentEventInfo = _G.CombatLogGetCurrentEventInfo;
 local COMBATLOG_FILTER_HOSTILE_PLAYERS = _G.COMBATLOG_FILTER_HOSTILE_PLAYERS;
 local COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_ME
@@ -33,18 +34,6 @@ local updateUnit = {
 local powerTypes = { [0] = true, [3] = true }
 
 local energyValues = {
-    target = {
-        last_tick = 0,
-        last_value = 0,
-        startTick = false,
-        validTick = false,
-    },
-    focus = {
-        last_tick = 0,
-        last_value = 0,
-        startTick = false,
-        validTick = false,
-    },
     arena1 = {
         last_tick = 0,
         last_value = 0,
@@ -231,6 +220,7 @@ EnemyOOC.Quirks = {
     [12579] = true, -- Winter's chill
     [57761] = true, -- Fireball!
     [60947] = true, -- Nightmare
+    [25711] = true, -- Forbearance
 };
 
 EnemyOOC.Channeling = {
@@ -534,9 +524,13 @@ function EnemyOOC:UNIT_FLAGS(unit)
     end
 
     if UnitAffectingCombat(unit) then
-        self:StartTimer(unit)
+        if not running[unit] then
+            self:StartTimer(unit)
+            running[unit] = true
+        end
     else
         self:StopTimer(unit)
+        running[unit] = false
         -- if not powerTypes[PowerType(unit)] then
         -- self:Predict(unit, GetTime())
         -- energyValues[unit].startTick = true
@@ -634,6 +628,19 @@ local function isInCombat(guid)
     return false
 end
 
+local function PetOwner(guid)
+    local owner
+    for i = 1, 5 do
+        if UnitExists("arena" .. i) and UnitExists("arenapet" .. i) then
+            if guid == UnitGUID("arenapet" .. i) then
+                owner = UnitGUID("arena" .. i)
+                break
+            end
+        end
+    end
+    return owner
+end
+
 local eventRegistered = {
     ["SWING_DAMAGE"] = true,
     ["RANGE_DAMAGE"] = true,
@@ -667,6 +674,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     local isDestEnemy = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
     local isSourceEnemy = CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
     local isEnemyPet = CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_UNITS)
+    local isDestHostile = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_UNITS)
     local isUnknown = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_UNKNOWN_UNITS)
 
     if (not isDestEnemy and not isSourceEnemy and not isEnemyPet) then
@@ -684,7 +692,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     end
 
     -- When you dodge/parry/resist etc an attack you drop combat
-    if eventType == "SWING_MISSED" and (isDestEnemy or isEnemyPet) then
+    if eventType == "SWING_MISSED" and (isDestEnemy or isDestHostile) then
         return
     end
 
@@ -695,7 +703,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     end
 
     -- Don't reset timer on throw.
-    if ((eventType == "RANGE_DAMAGE") and isSourceEnemy and (spellID == 2764 or spellID == 3018)) then
+    if ((eventType == "RANGE_DAMAGE" or eventType == "SPELL_CAST_SUCCESS") and isSourceEnemy and (spellID == 2764 or spellID == 3018)) then
         return
     end
 
@@ -712,7 +720,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
             eventType == "SPELL_AURA_APPLIED" or
             eventType == "SPELL_CAST_SUCCESS" or
             eventType == "SPELL_AURA_REFRESH") then
-        if isSourceEnemy and (self.Nova[spellID] or (isDestEnemy and not isInCombat(destGUID))) then
+        if isSourceEnemy and (self.Nova[spellID] or ((isDestEnemy or isDestHostile) and not isInCombat(destGUID))) then
             return
         end
     end
@@ -722,7 +730,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
         return
     end
 
-    --return if player only gets dispelled or buffed by someone/self
+    --return if enemy only gets dispelled or buffed by hostile unit/self
     if ((eventType == "SPELL_AURA_APPLIED" or
             eventType == "SPELL_CAST_SUCCESS" or eventType == "SPELL_AURA_REFRESH") and (isDestEnemy and (isSourceEnemy or isEnemyPet))) then
         return
@@ -748,7 +756,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     end
 
     -- Feral charge (bear) affects only source's combat state.
-    if isDestEnemy and spellID == 16979 then
+    if (isDestEnemy or isDestHostile) and spellID == 16979 then
         return
     end
 
@@ -761,9 +769,46 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
         return ;
     end
 
-    --reset timer, not knowing who's guid -> just handle both which the function will sort out by itself
-    self:ResetTimer(sourceGUID)
-    self:ResetTimer(destGUID)
+    --reset
+    if isSourceEnemy then
+        self:ResetTimer(sourceGUID)
+    end
+    if isDestEnemy then
+        self:ResetTimer(destGUID)
+    end
+    if isEnemyPet then
+        self:ResetTimer(PetOwner(sourceGUID))
+    end
+end
+
+function EnemyOOC:UNIT_SPELLCAST_SUCCEEDED(unit, a, b, spellID)
+    if not updateUnit[unit] then
+        return
+    end
+
+    -- stealth/vanish fallback
+    if spellID == 26889 or spellID == 1784 or spellID == 58984 or spellID == 5215 then
+        if running[unit] then
+            running[unit] = false
+        end
+    end
+
+    if spellID == 2764 or spellID == 3018 then
+        local guid = UnitGUID(unit)
+        self:ResetTimer(guid)
+    end
+end
+
+local failSpellIDs = {[5171] = true, [6774] = true, [48674] = true, [48673] = true, [26679] = true}
+function EnemyOOC:UNIT_SPELLCAST_FAILED(unit, a, b, spellID)
+    if not updateUnit[unit] then
+        return
+    end
+
+    -- UNIT_POWER_UPDATE event can be forcefully triggered by this event. We don't want that
+    if failSpellIDs[spellID] then
+        energyValues[unit].validTick = true
+    end
 end
 
 function EnemyOOC:PLAYER_ENTERING_WORLD()
@@ -783,6 +828,8 @@ function EnemyOOC:PLAYER_ENTERING_WORLD()
         EnemyOOC.event:RegisterEvent("UNIT_POWER_UPDATE")
         EnemyOOC.event:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         EnemyOOC.event:RegisterEvent("UNIT_FLAGS")
+        EnemyOOC.event:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        EnemyOOC.event:RegisterEvent("UNIT_SPELLCAST_FAILED")
         EnemyOOC.event:SetScript("OnUpdate", EnemyOOC.OnUpdate)
     else
         EnemyOOC.event:UnregisterEvent("PLAYER_TARGET_CHANGED")
@@ -790,11 +837,14 @@ function EnemyOOC:PLAYER_ENTERING_WORLD()
         EnemyOOC.event:UnregisterEvent("UNIT_POWER_UPDATE")
         EnemyOOC.event:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         EnemyOOC.event:UnregisterEvent("UNIT_FLAGS")
+        EnemyOOC.event:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        EnemyOOC.event:UnregisterEvent("UNIT_SPELLCAST_FAILED")
         EnemyOOC.event:SetScript("OnUpdate", nil)
         expirationTime = {}
         oocTime = {}
         endTime = {}
         outOfCombatTime = {}
+        running = {}
         EnemyOOC.U["target"]:Hide()
         EnemyOOC.U["focus"]:Hide()
     end
@@ -814,7 +864,7 @@ function EnemyOOC:UpdateText(unit)
         if UnitIsUnit(unit, "arena" .. i) and (oocTime["arena" .. i] ~= nil) then
             EnemyOOC.U[unit].text:SetText(string.format("%.1f", oocTime["arena" .. i] >= 0 and oocTime["arena" .. i] or 0))
             if (oocTime["arena" .. i] > 0 and oocTime["arena" .. i] < 4) and not (UnitDetailedThreatSituation("player", "arenapet" .. i) or
-                    UnitDetailedThreatSituation("party" .. i, "arenapet" .. i)) then
+                    UnitDetailedThreatSituation("party" .. i, "arenapet" .. i)) and energyValues["arena" .. i].startTick then
                 EnemyOOC.U[unit].text:SetAlpha(1)
             else
                 EnemyOOC.U[unit].text:SetAlpha(0)
@@ -833,7 +883,7 @@ EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
         CreateIcon("focus", FocusFrame)
         self:UnregisterEvent("PLAYER_LOGIN")
     elseif event == "PLAYER_TARGET_CHANGED" then
-        if powerTypes[PowerType("target")] and UnitAffectingCombat("target") and UnitCanAttack("player", "target") then
+        if powerTypes[PowerType("target")] and UnitAffectingCombat("target") and UnitCanAttack("player", "target") and UnitIsPlayer("target") then
             -- xx
             EnemyOOC:UpdateText("target")
             EnemyOOC.U["target"].text:SetAlpha(1)
@@ -844,7 +894,7 @@ EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
             EnemyOOC.U["target"].text:SetAlpha(0)
         end
     elseif event == "PLAYER_FOCUS_CHANGED" then
-        if powerTypes[PowerType("focus")] and UnitAffectingCombat("focus") and UnitCanAttack("player", "focus") then
+        if powerTypes[PowerType("focus")] and UnitAffectingCombat("focus") and UnitCanAttack("player", "focus") and UnitIsPlayer("focus") then
             -- xx
             EnemyOOC:UpdateText("focus")
             EnemyOOC.U["focus"].text:SetAlpha(1)
@@ -858,3 +908,4 @@ EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
         EnemyOOC[event](EnemyOOC, ...)
     end
 end)
+
