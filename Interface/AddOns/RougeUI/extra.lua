@@ -709,7 +709,7 @@ e:SetScript("OnEvent", function(self, event)
             StanceBarFrame:SetParent(stancebar)
         end
 
-        if not RougeUI.ThickFrames then
+        if not RougeUI.ThickFrames and (RougeUI.ClassBG or RougeUI.transparent) then
             hooksecurefunc("TargetFrame_CheckFaction", function(self)
                 if RougeUI.ClassBG and UnitIsPlayer(self.unit) then
                     local _, class = UnitClass(self.unit)

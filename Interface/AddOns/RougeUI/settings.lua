@@ -11,7 +11,7 @@ end
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, ManaFontSize, HPFontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
             ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PartyText, BuffSizer, GoldElite, RareElite, Rare,
-            Lorti, Roug, Modern, BuffsRow, BuffVal, PSTrack, cfix, roleIcon}
+            Lorti, Roug, Modern, BuffsRow, BuffVal, PSTrack, cfix, roleIcon, transparent}
 
 RougeUIF = {}
 
@@ -65,7 +65,8 @@ local stock = {
     BuffVal = 1.0,
     PSTrack = false,
     cfix = false,
-    roleIcon = false
+    roleIcon = false,
+    transparent = true
 }
 
 local f = CreateFrame("Frame")
@@ -236,6 +237,10 @@ function f:CreateGUI()
         local ThickFrame = CheckBtn("Enable Big Frames", "Enable this for big (thick) UnitFrames", Panel.childPanel1, function(self, value) RougeUI.ThickFrames = value RougeUI.ClassBG = false end)
         ThickFrame:SetChecked(RougeUI.ThickFrames)
         ThickFrame:SetPoint("TOPLEFT", 350, -105)
+
+        local Transparent = CheckBtn("Transparent name background", nil, Panel.childPanel1, function(self, value) RougeUI.transparent = value RougeUI.ClassBG = false end)
+        Transparent:SetChecked(RougeUI.transparent)
+        Transparent:SetPoint("TOPLEFT", 350, -140)
 
         local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value) RougeUI.ModPlates = value end)
         ModPlates:SetChecked(RougeUI.ModPlates)
