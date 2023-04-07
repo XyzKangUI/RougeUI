@@ -221,6 +221,8 @@ EnemyOOC.Quirks = {
     [57761] = true, -- Fireball!
     [60947] = true, -- Nightmare
     [25711] = true, -- Forbearance
+    [642] = true, -- Divine Shield
+    [10278] = true, -- Hand of Protection
 };
 
 EnemyOOC.Channeling = {
@@ -715,24 +717,23 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
         return
     end
 
-    --return if player heals or dispels out of combat friendly target. Holy Nova doesn't keep combat when it heals a friendly (intended?)
+    --return if enemy heals or dispels out of combat friendly target. Holy Nova/Beacon of Light doesn't keep combat when it heals a friendly (intended?)
     if (eventType == "SPELL_HEAL" or
             eventType == "SPELL_AURA_APPLIED" or
             eventType == "SPELL_CAST_SUCCESS" or
             eventType == "SPELL_AURA_REFRESH") then
-        if isSourceEnemy and (self.Nova[spellID] or ((isDestEnemy or isDestHostile) and not isInCombat(destGUID))) then
+        if isSourceEnemy and (((isDestEnemy or isDestHostile) and not isInCombat(destGUID)) or self.Nova[spellID] or (sourceGUID == destGUID) or spellID == 53653) then
             return
         end
     end
 
     -- Hellfire didn't keep combat, finally this is fixed. Haunt healing effect doesn't reset timer.
-    if eventType == "SPELL_HEAL" and (isDestEnemy or (isSourceEnemy and (isDestPlayer or isDestFriend))) then
+    if eventType == "SPELL_HEAL" and isDestEnemy and spellID == 48210 then
         return
     end
 
-    --return if enemy only gets dispelled or buffed by hostile unit/self
-    if ((eventType == "SPELL_AURA_APPLIED" or
-            eventType == "SPELL_CAST_SUCCESS" or eventType == "SPELL_AURA_REFRESH") and (isDestEnemy and (isSourceEnemy or isEnemyPet))) then
+    --return if enemy only gets dispelled or buffed by his pet / self
+    if ((eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_CAST_SUCCESS" or eventType == "SPELL_AURA_REFRESH") and ((sourceGUID == destGUID) or isEnemyPet and isDestEnemy)) then
         return
     end
 
