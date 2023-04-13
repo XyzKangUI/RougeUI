@@ -11,7 +11,6 @@ MM:SetScript("OnEvent", function(self)
             MinimapToggleButton,
             MinimapZoomIn,
             MinimapZoomOut,
-            MiniMapTracking
         }) do
             v:Hide()
         end
@@ -57,8 +56,12 @@ MM:SetScript("OnEvent", function(self)
         MinimapZoneText:ClearAllPoints()
         MinimapZoneText:SetPoint("TOPLEFT", "MinimapZoneTextButton", "TOPLEFT", 8, 0)
 
-        -- TrackingFrame
+        self:UnregisterEvent("PLAYER_LOGIN")
 
+        if IsAddOnLoaded("Leatrix_Plus") and (LeaPlusDB["MinimapModder"] == "On" and LeaPlusDB["CombineAddonButtons"] == "On") then
+            return
+        end
+        MiniMapTracking:Hide()
         Minimap:SetScript("OnMouseUp", function(self, btn)
             if btn == "RightButton" then
                 ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, "MiniMapTracking", 0, -5)
@@ -66,9 +69,7 @@ MM:SetScript("OnEvent", function(self)
                 Minimap_OnClick(self)
             end
         end)
-
-		self:UnregisterEvent("PLAYER_LOGIN")
-	end
+    end
 end)
 
 hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)

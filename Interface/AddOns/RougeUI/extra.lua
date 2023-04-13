@@ -616,11 +616,72 @@ local function ToTDebuffs(frame)
         local arg1 = ...;
         if event == "UNIT_AURA" then
             local parent = self:GetParent()
-            if UnitIsUnit(arg1, self.unit) and UnitExists(self.unit) and UnitExists(parent.unit) and ( UnitHealth(parent.unit) > 0 ) then
+            if UnitIsUnit(arg1, self.unit) and UnitExists(self.unit) and UnitExists(parent.unit) and (UnitHealth(parent.unit) > 0) then
                 RefreshDebuffs(self, self.unit, nil, nil, true)
             end
         end
     end)
+end
+
+local function GetActionButton(slot)
+    local name
+
+    local bonusBar = GetBonusBarOffset()
+    local slotID = (1 + (NUM_ACTIONBAR_PAGES + bonusBar - 1) * NUM_ACTIONBAR_BUTTONS)
+    if (bonusBar == 0 and slot <= 12) or (bonusBar > 0 and slot >= slotID and slot < (slotID + 12)) then
+        name = "ACTIONBUTTON" .. (((slot - 1) % 12) + 1)
+    elseif slot <= 36 then
+        name = "MULTIACTIONBAR3BUTTON" .. (slot - 24)
+    elseif slot <= 48 then
+        name = "MULTIACTIONBAR4BUTTON" .. (slot - 36)
+    elseif slot <= 60 then
+        name = "MULTIACTIONBAR2BUTTON" .. (slot - 48)
+    elseif slot <= 72 then
+        name = "MULTIACTIONBAR1BUTTON" .. (slot - 60)
+    elseif IsAddOnLoaded("Bartender4") and slot >= 1 and slot <= 120 then
+        name = "CLICK BT4Button" .. slot .. ":Keybind"
+    elseif IsAddOnLoaded("Dominos") and slot >= 1 and slot <= 120 then
+        name = "CLICK DominosActionButton" .. slot .. ":HOTKEY"
+    elseif slot <= 144 then
+        name = nil
+    elseif slot <= 156 then
+        name = "MULTIACTIONBAR5BUTTON" .. (slot - 144)
+    elseif slot <= 168 then
+        name = "MULTIACTIONBAR6BUTTON" .. (slot - 156)
+    elseif slot <= 180 then
+        name = "MULTIACTIONBAR7BUTTON" .. (slot - 168)
+    elseif slot <= 192 then
+        name = "MULTIACTIONBAR8BUTTON" .. (slot - 180)
+    end
+
+    return name
+end
+
+local function Haxx()
+    local slots = C_ActionBar.FindSpellActionButtons(6774)
+    if slots then
+        for _, slot in ipairs(slots) do
+            local actionButton = GetActionButton(slot)
+            if actionButton then
+                local key = GetBindingKey(actionButton)
+                if string.match(actionButton, "^ACTIONBUTTON%d+$") then
+                    print("RougeUI: For the Slice and Dice hax to work, place your unmodified Slice and Dice spell in any other slot than the (stealth) actionbar.")
+                    return
+                end
+                if key then
+                    local button = CreateFrame("Button", "FSND", nil, "SecureActionButtonTemplate")
+                    button:RegisterForClicks("AnyDown", "AnyUp")
+                    button:SetAttribute("type", "macro")
+                    SecureHandlerWrapScript(button, "OnClick", button, [[ if down then
+                    self:SetAttribute("macrotext","/cast Slice and Dice") else
+                    self:SetAttribute("macrotext","/cast [@focus, exists] Slice and Dice") end]])
+                    SetOverrideBindingClick(button, true, key, "FSND")
+                end
+            end
+        end
+    elseif slots == nil then
+        print("Can't find Slice and Dice on the actionbar or this actionbar is unsupported")
+    end
 end
 
 local e = CreateFrame("Frame")
@@ -681,7 +742,7 @@ e:SetScript("OnEvent", function(self, event)
         end
         if RougeUI.pimp then
             hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
-           -- hooksecurefunc("UnitFrameManaBar_UpdateType", ZunitFrame)
+            -- hooksecurefunc("UnitFrameManaBar_UpdateType", ZunitFrame)
         end
         if RougeUI.HideAggro then
             hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
@@ -694,7 +755,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.roleIcon then
             hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
                 if not frame.roleIcon then
-                    return;
+                    return ;
                 end
 
                 if frame.roleIcon:IsShown() and (frame.roleIcon:GetAlpha() > 0) then
@@ -751,6 +812,10 @@ e:SetScript("OnEvent", function(self, event)
             hooksecurefunc("AuraButton_OnUpdate", function(self)
                 self:SetAlpha(1)
             end)
+        end
+
+        if RougeUI.Slice then
+            Haxx()
         end
 
         for addons in pairs(addonlist) do

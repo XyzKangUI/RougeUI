@@ -11,34 +11,34 @@ local MAX_TARGET_DEBUFFS = 16;
 local MAX_TARGET_BUFFS = 32;
 
 local Enraged = {
---    [5229] = true, -- Enrage (Druid)
+    --    [5229] = true, -- Enrage (Druid)
     [1719] = true, -- Recklessness
---    [12880] = true, -- Enrage (npc)
---    [14204] = true, -- Enrage (npc)
---    [14202] = true, -- Enrage (npc)
---    [14203] = true, -- Enrage (npc)
---    [14201] = true, -- Enrage (npc)
+    --    [12880] = true, -- Enrage (npc)
+    --    [14204] = true, -- Enrage (npc)
+    --    [14202] = true, -- Enrage (npc)
+    --    [14203] = true, -- Enrage (npc)
+    --    [14201] = true, -- Enrage (npc)
     [18499] = true, -- Berseker Rage
---    [12292] = true, -- Death Wish
---    [2687] = true, -- Bloodrage
---    [29131] = true, -- Bloodrage
+    --    [12292] = true, -- Death Wish
+    --    [2687] = true, -- Bloodrage
+    --    [29131] = true, -- Bloodrage
     [48391] = true, -- Owlkin Frenzy
     [49016] = true, -- Unholy Frenzy
     [50636] = true, -- Tormented Roar (npc)
---    [51662] = true, -- Hunger for blood
+    --    [51662] = true, -- Hunger for blood
     [54508] = true, -- Demonic Empowerment
---    [57514] = true, -- Enrage (npc)
---    [57516] = true, -- Enrage
---    [57518] = true, -- Enrage
---    [57519] = true, -- Enrage
---    [57520] = true, -- Enrage
---    [57522] = true, -- Enrage
+    --    [57514] = true, -- Enrage (npc)
+    --    [57516] = true, -- Enrage
+    --    [57518] = true, -- Enrage
+    --    [57519] = true, -- Enrage
+    --    [57520] = true, -- Enrage
+    --    [57522] = true, -- Enrage
     [63147] = true, -- Sara's Anger (npc)
     [66759] = true, -- Frothing Rage (npc)
     [62071] = true, -- Savage Roar
---    [51513] = true, -- Enrage
+    --    [51513] = true, -- Enrage
     [60177] = true, -- Hfb (npc)
---    [57521] = true, -- Enrage
+    --    [57521] = true, -- Enrage
     [63848] = true, -- Hfb (npc)
     [52610] = true, -- Savage roar
     [66759] = true, -- Frothing Rage
@@ -87,6 +87,20 @@ local Whitelist = {
 
 };
 
+local function maxRows(self, width, mirror)
+    local haveTargetofTarget
+
+    if self.totFrame ~= nil then
+        haveTargetofTarget = self.totFrame:IsShown();
+    end
+
+    if (haveTargetofTarget and self.auraRows <= 2) and not mirror then
+        return self.TOT_AURA_ROW_WIDTH
+    else
+        return width
+    end
+end
+
 local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
     local LARGE_AURA_SIZE = RougeUI.SelfSize
     local SMALL_AURA_SIZE = RougeUI.OtherBuffSize
@@ -95,6 +109,8 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
     local offsetY = AURA_OFFSET_Y
     local rowWidth = 0
     local firstBuffOnRow = 1
+
+    maxRowWidth = AURA_ROW_WIDTH;
 
     for i = 1, numAuras do
         if (largeAuraList[i]) then
@@ -111,18 +127,7 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             rowWidth = rowWidth + size + offsetX
         end
 
-        --print(frame.auraRows)
-        -- local _, _, _, x = frame.totFrame:GetPoint()
-        if (frame.haveToT and (frame.auraRows < 3) and (AURA_ROW_WIDTH == 108)) then
-            maxRowWidth = 108
-        elseif AURA_ROW_WIDTH == 108 then
-            maxRowWidth = 136
-        else
-            maxRowWidth = AURA_ROW_WIDTH
-        end
-
-        --print(maxRowWidth)
-        if (rowWidth > maxRowWidth) then
+        if (rowWidth > maxRows(frame, maxRowWidth, mirrorAurasVertically)) then
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
             rowWidth = size
             frame.auraRows = frame.auraRows + 1;
@@ -158,7 +163,6 @@ local function New_Target_Spellbar_AdjustPosition(self)
         end
     end
 end
-
 
 local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuffs, anchorIndex, size, offsetX, offsetY, mirrorVertically)
     --For mirroring vertically
@@ -325,7 +329,7 @@ local function Target_Update(frame)
                 CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
 
                 if RougeUI.HighlightDispellable then
-                    if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 then
+                    if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 or spellId == 53659 then
                         local buffSize = RougeUI.OtherBuffSize
                         buffFrame:SetHeight(buffSize)
                         buffFrame:SetWidth(buffSize)
@@ -342,6 +346,8 @@ local function Target_Update(frame)
                         elseif spellId == 49039 and (class == 5 or class == 2) then
                             -- Highlight Lichborne for shackle/turn evil
                             frameStealable:SetVertexColor(1, 0, 127 / 255) -- Pink
+                        elseif spellId == 53659 then
+                            frameStealable:SetVertexColor(52 / 255, 235 / 255, 146 / 255) -- Green
                         else
                             frameStealable:SetVertexColor(1, 1, 1) -- Normal (white)
                         end
@@ -455,21 +461,25 @@ local function Target_Update(frame)
     if (frame.buffsOnTop) then
         mirrorAurasVertically = true;
     end
-    local haveTargetofTarget;
-    if (frame.totFrame) then
-        haveTargetofTarget = frame.totFrame:IsShown();
-    end
+
     frame.spellbarAnchor = nil;
     local maxRowWidth = RougeUI.AuraRow
-    TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-    -- update debuff positions
-    TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
+    if (UnitIsFriend("player", frame.unit)) then
+        -- update buff positions
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
+        -- update debuff positions
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
+    else
+        -- update debuff positions
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
+        -- update buff positions
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
+    end
     -- update the spell bar position
     if (frame.spellbar) then
         New_Target_Spellbar_AdjustPosition(frame.spellbar);
     end
 end
-
 
 function RougeUIF:SetCustomBuffSize()
     local frames = {
