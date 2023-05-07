@@ -11,7 +11,7 @@ end
 RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, ManaFontSize, HPFontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
             FadeIcon, CombatIndicator, CastTimer, smooth, pimp, retab, Colval, ArenaNumbers, SQFix, classoutline, HideAggro, unithp, Stance, HideHotkey,
             ClassBG, AutoReady, EnemyTicks, ThickFrames, HideIndicator, Abbreviate, ModPlates, AuraRow, BuffAlpha, ButtonAnim, PartyText, BuffSizer, GoldElite, RareElite, Rare,
-            Lorti, Roug, Modern, BuffsRow, BuffVal, PSTrack, cfix, roleIcon, transparent, Slice }
+            Lorti, Roug, Modern, BuffsRow, BuffVal, PSTrack, cfix, roleIcon, transparent, Slice, NoLevel }
 
 RougeUIF = {}
 
@@ -67,7 +67,8 @@ local stock = {
     cfix = false,
     roleIcon = false,
     transparent = true,
-    Slice = false
+    Slice = false,
+    NoLevel = false
 }
 
 local f = CreateFrame("Frame")
@@ -124,8 +125,14 @@ end
 function f:CreateGUI()
     local Panel = CreateFrame("Frame", "$parentRougeUI_Config", InterfaceOptionsPanelContainer)
     do
-        Panel.name = Title;
-        InterfaceOptions_AddCategory(Panel)
+        Panel.name = Title
+        local category
+        if Settings then
+            category = Settings.RegisterCanvasLayoutCategory(Panel, "RougeUI")
+            Settings.RegisterAddOnCategory(category)
+        else
+            InterfaceOptions_AddCategory(Panel)
+        end
 
         local title = Panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge");
         title:SetPoint("TOPLEFT", 12, -15);
@@ -138,27 +145,52 @@ function f:CreateGUI()
         Panel.childPanel1 = CreateFrame("Frame", "$parentConfigChild_UnitFrame", Panel)
         Panel.childPanel1.name = "UnitFrame"
         Panel.childPanel1.parent = Panel.name
-        InterfaceOptions_AddCategory(Panel.childPanel1)
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel1, "UnitFrame")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel1)
+        end
 
         Panel.childPanel2 = CreateFrame("Frame", "$parentConfigChild_Tweaks", Panel)
         Panel.childPanel2.name = "Tweaks"
         Panel.childPanel2.parent = Panel.name
-        InterfaceOptions_AddCategory(Panel.childPanel2)
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel2, "Tweaks")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel2)
+        end
 
         Panel.childPanel3 = CreateFrame("Frame", "$parentConfigChild_Hide", Panel)
         Panel.childPanel3.name = "Hide Elements"
         Panel.childPanel3.parent = Panel.name
-        InterfaceOptions_AddCategory(Panel.childPanel3)
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel3, "Hide Elements")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel3)
+        end
 
         Panel.childPanel4 = CreateFrame("Frame", "$parentConfigChild_StatusBar", Panel)
         Panel.childPanel4.name = "StatusBar"
         Panel.childPanel4.parent = Panel.name
-        InterfaceOptions_AddCategory(Panel.childPanel4)
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel4, "StatusBar")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel4)
+        end
 
         Panel.childPanel5 = CreateFrame("Frame", "$parentConfigChild_Theme", Panel)
         Panel.childPanel5.name = "Theme"
         Panel.childPanel5.parent = Panel.name
-        InterfaceOptions_AddCategory(Panel.childPanel5)
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel5, "Theme")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel5)
+        end
 
         for _, v in pairs({ Panel.childPanel1, Panel.childPanel2, Panel.childPanel3, Panel.childPanel4, Panel.childPanel5 }) do
             local Reload = CreateFrame("Button", nil, v, "UIPanelButtonTemplate")
@@ -170,14 +202,6 @@ function f:CreateGUI()
                 ReloadUI()
             end)
         end
-
-        function SlashCmdList.RougeUI()
-            InterfaceOptionsFrame_OpenToCategory(Panel)
-            InterfaceOptionsFrame_OpenToCategory(Panel)
-        end
-        SLASH_RougeUI1 = "/rui"
-
-        print("|cffFFF468RougeUI|cffffffff loaded. Open options with: |cffFFF468/rui")
 
         --childPanel1
 
@@ -276,6 +300,12 @@ function f:CreateGUI()
         end)
         Transparent:SetChecked(RougeUI.transparent)
         Transparent:SetPoint("TOPLEFT", 350, -140)
+
+        local Nolvl = CheckBtn("Hide level text on frames", nil, Panel.childPanel1, function(self, value)
+            RougeUI.NoLevel = value
+        end)
+        Nolvl:SetChecked(RougeUI.NoLevel)
+        Nolvl:SetPoint("TOPLEFT", 350, -175)
 
         local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
             RougeUI.ModPlates = value
@@ -671,77 +701,26 @@ function f:CreateGUI()
         HideRoleButton:SetChecked(RougeUI.roleIcon)
         HideRoleButton:SetPoint("TOPLEFT", 10, -285)
 
-        CreateText(Panel.childPanel1, 350, -180, "Player Chain")
+        CreateText(Panel.childPanel1, 350, -215, "Player Chain")
 
         local EliteChain = CheckBtn("Gold Elite PlayerFrame", "Show a `Gold Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
             RougeUI.GoldElite = value
-            RougeUI.Rare = false
-            RougeUI.RareElite = false
-            if RougeUI.Colval < 0.54 then
-                PlayerFrameTexture:SetVertexColor(1, 1, 1)
-            end
-
-            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
-                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
-            elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
-                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
-            else
-                if (RougeUI.Colval > 0.54) then
-                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
-                else
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
-                end
-            end
         end)
         EliteChain:SetChecked(RougeUI.GoldElite)
-        EliteChain:SetPoint("TOPLEFT", 350, -215)
+        EliteChain:SetPoint("TOPLEFT", 350, -250)
 
         local RareChain = CheckBtn("Rare PlayerFrame", "Show a `Rare` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
             RougeUI.Rare = value
-            RougeUI.RareElite = false
-            RougeUI.GoldElite = false
-            if (RougeUI.Colval < 0.54) then
-                PlayerFrameTexture:SetVertexColor(1, 1, 1)
-            end
-            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
-                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
-            elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
-                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
-            else
-                if (RougeUI.Colval > 0.54) then
-                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
-                else
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
-                end
-            end
         end)
         RareChain:SetChecked(RougeUI.Rare)
-        RareChain:SetPoint("TOPLEFT", 350, -250)
+        RareChain:SetPoint("TOPLEFT", 350, -285)
 
         local RareElite = CheckBtn("Rare Elite PlayerFrame", "Show a `Rare Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
             RougeUI.RareElite = value
-            RougeUI.Rare = false
-            RougeUI.GoldElite = false
-            if (RougeUI.Colval < 0.54) then
-                PlayerFrameTexture:SetVertexColor(1, 1, 1)
-            end
-            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
-                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
-            elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
-                PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
-            else
-                if (RougeUI.Colval > 0.54) then
-                    PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
-                else
-                    PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
-                end
-            end
         end)
         RareElite:SetChecked(RougeUI.RareElite)
-        RareElite:SetPoint("TOPLEFT", 350, -285)
+        RareElite:SetPoint("TOPLEFT", 350, -320)
 
     end
     return Panel
 end
-
-

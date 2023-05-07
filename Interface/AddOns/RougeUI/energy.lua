@@ -22,6 +22,7 @@ local COMBATLOG_FILTER_FRIENDLY_UNITS = _G.COMBATLOG_FILTER_FRIENDLY_UNITS
 local COMBATLOG_FILTER_HOSTILE_UNITS = _G.COMBATLOG_FILTER_HOSTILE_UNITS
 local COMBATLOG_FILTER_UNKNOWN_UNITS = _G.COMBATLOG_FILTER_UNKNOWN_UNITS
 local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
+local indicator
 
 local updateUnit = {
     ["arena1"] = true,
@@ -470,6 +471,10 @@ local function CreateIcon(unit, frame)
         EnemyOOC.U[unit].text = EnemyOOC.U[unit]:CreateFontString(nil, "OVERLAY", "GameFontWhite")
         EnemyOOC.U[unit].text:SetFontObject("SystemFont_Outline_Small")
         EnemyOOC.U[unit].text:SetAllPoints()
+        EnemyOOC.U[unit].texture = EnemyOOC.U[unit]:CreateTexture(nil, "BACKGROUND")
+        EnemyOOC.U[unit].texture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\CombatSwords2.blp")
+        EnemyOOC.U[unit].texture:SetSize(45, 45)
+        EnemyOOC.U[unit].texture:SetPoint("LEFT", frame, "RIGHT", -18, -3)
         EnemyOOC.U[unit]:Hide()
     end
 end
@@ -859,6 +864,9 @@ function EnemyOOC:UpdateText(unit)
     if not powerTypes[PowerType(unit)] then
         -- xx
         EnemyOOC.U[unit].text:SetAlpha(0)
+        if indicator then
+            EnemyOOC.U[unit].texture:SetAlpha(0)
+        end
     end
 
     for i = 1, 5, 1 do
@@ -867,8 +875,14 @@ function EnemyOOC:UpdateText(unit)
             if (oocTime["arena" .. i] > 0 and oocTime["arena" .. i] < 4) and not (UnitDetailedThreatSituation("player", "arenapet" .. i) or
                     UnitDetailedThreatSituation("party" .. i, "arenapet" .. i)) and energyValues["arena" .. i].startTick then
                 EnemyOOC.U[unit].text:SetAlpha(1)
+                if indicator then
+                    EnemyOOC.U[unit].texture:SetAlpha(1)
+                end
             else
                 EnemyOOC.U[unit].text:SetAlpha(0)
+                if indicator then
+                    EnemyOOC.U[unit].texture:SetAlpha(0)
+                end
             end
         end
     end
@@ -879,31 +893,43 @@ EnemyOOC.event:RegisterEvent("PLAYER_LOGIN")
 EnemyOOC.event:RegisterEvent("PLAYER_ENTERING_WORLD")
 EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-
         CreateIcon("target", TargetFrame)
         CreateIcon("focus", FocusFrame)
+        indicator = RougeUI.CombatIndicator
         self:UnregisterEvent("PLAYER_LOGIN")
     elseif event == "PLAYER_TARGET_CHANGED" then
         if powerTypes[PowerType("target")] and UnitAffectingCombat("target") and UnitCanAttack("player", "target") and UnitIsPlayer("target") then
             -- xx
             EnemyOOC:UpdateText("target")
             EnemyOOC.U["target"].text:SetAlpha(1)
+            if indicator then
+                EnemyOOC.U["target"].texture:SetAlpha(1)
+            end
             if not EnemyOOC.U["target"]:IsShown() then
                 EnemyOOC.U["target"]:Show()
             end
         else
             EnemyOOC.U["target"].text:SetAlpha(0)
+            if indicator then
+                EnemyOOC.U["target"].texture:SetAlpha(0)
+            end
         end
     elseif event == "PLAYER_FOCUS_CHANGED" then
         if powerTypes[PowerType("focus")] and UnitAffectingCombat("focus") and UnitCanAttack("player", "focus") and UnitIsPlayer("focus") then
             -- xx
             EnemyOOC:UpdateText("focus")
             EnemyOOC.U["focus"].text:SetAlpha(1)
+            if indicator then
+                EnemyOOC.U["focus"].texture:SetAlpha(1)
+            end
             if not EnemyOOC.U["focus"]:IsShown() then
                 EnemyOOC.U["focus"]:Show()
             end
         else
             EnemyOOC.U["focus"].text:SetAlpha(0)
+            if indicator then
+                EnemyOOC.U["focus"].texture:SetAlpha(0)
+            end
         end
     else
         EnemyOOC[event](EnemyOOC, ...)

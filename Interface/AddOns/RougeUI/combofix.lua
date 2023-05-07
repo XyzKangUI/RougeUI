@@ -51,7 +51,7 @@ local function ComboUpdate(self)
                     UIFrameFade(comboPointHighlight, fadeInfo);
                 end
             else
-                if (ENABLE_COLORBLIND_MODE == "1") then
+                if GetCVarBool("colorblindMode") then
                     comboPoint:Hide();
                 end
                 comboPointHighlight:SetAlpha(0);

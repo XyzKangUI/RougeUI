@@ -87,6 +87,20 @@ local Whitelist = {
 
 };
 
+local function ToTegrity(frame)
+    if not (frame == TargetFrameToT or frame == FocusFrameToT) then
+        return
+    end
+
+    local _, _, a, b, c = frame:GetPoint()
+
+    if a == "BOTTOMRIGHT" and b == -35 and c == -10 then
+        return true
+    else
+        return false
+    end
+end
+
 local function maxRows(self, width, mirror)
     local haveTargetofTarget
 
@@ -94,7 +108,7 @@ local function maxRows(self, width, mirror)
         haveTargetofTarget = self.totFrame:IsShown();
     end
 
-    if (haveTargetofTarget and self.auraRows <= 2) and not mirror then
+    if (haveTargetofTarget and self.auraRows <= 2) and not mirror and ToTegrity(self.totFrame) then
         return self.TOT_AURA_ROW_WIDTH
     else
         return width

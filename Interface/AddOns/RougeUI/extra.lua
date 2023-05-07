@@ -308,78 +308,127 @@ local function ZunitFrame(manaBar)
     end
 end
 
-local function FixChain()
-    if RougeUI.Colval < .54 then
-        PlayerFrameTexture:SetVertexColor(1, 1, 1)
-    end
-    if RougeUI.ThickFrames then
-        return
-    end
-    if RougeUI.GoldElite then
-        if RougeUI.Colval > .54 then
-            PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite.blp")
-        else
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
-        end
-    elseif RougeUI.Rare then
-        if RougeUI.Colval > .54 then
-            PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare.blp")
-        else
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
-        end
-    elseif RougeUI.RareElite then
-        if RougeUI.Colval > .54 then
-            PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite.blp")
-        else
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
-        end
-    end
-end
-
 -- Classification
 
-local function CheckClassification(self, forceNormalTexture)
+local classificationTexture = {
+    ["worldboss"] = {
+        ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite",
+        ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite",
+        ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2",
+        ["nthin"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Elite",
+        ["nthin2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Elite2",
+        ["nthick"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Elite",
+        ["nthick2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Elite2",
+    },
+    ["rareelite"] = {
+        ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite",
+        ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite",
+        ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2",
+        ["nthin"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Rare-Elite",
+        ["nthin2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Rare-Elite2",
+        ["nthick"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-RareElite",
+        ["nthick2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-RareElite2",
+    },
+    ["elite"] = {
+        ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite",
+        ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite",
+        ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2",
+        ["nthin"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Elite",
+        ["nthin2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Elite2",
+        ["nthick"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Elite",
+        ["nthick2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Elite2",
+    },
+    ["rare"] = {
+        ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare",
+        ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare",
+        ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2",
+        ["nthin"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Rare",
+        ["nthin2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame-Rare2",
+        ["nthick"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Rare",
+        ["nthick2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Rare2",
+    },
+}
 
-    local classification = UnitClassification(self.unit)
+local function FrameTexture(frame, classification)
+    local textureName, textureType = "", ""
 
-    if (forceNormalTexture) then
-        self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
-        self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-    elseif (classification == "worldboss" or classification == "elite") then
-        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.16) then
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.16) then
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
-        else
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite")
+    if classification then
+        if classificationTexture[classification] then
+            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.3) then
+                if RougeUI.NoLevel then
+                    textureName = classificationTexture[classification]["nthick2"]
+                    textureType = "nthick2"
+                else
+                    textureName = classificationTexture[classification]["thick2"]
+                    textureType = "thick2"
+                end
+            elseif RougeUI.ThickFrames then
+                if RougeUI.NoLevel then
+                    textureName = classificationTexture[classification]["nthick"]
+                    textureType = "nthick"
+                else
+                    textureName = classificationTexture[classification]["thick"]
+                    textureType = "thick"
+                end
+            else
+                if RougeUI.NoLevel then
+                    if (RougeUI.Colval >= 0.3) then
+                        textureName = classificationTexture[classification]["nthin2"]
+                        textureType = "nthin2"
+                    else
+                        textureName = classificationTexture[classification]["nthin"]
+                        textureType = "nthin"
+                    end
+                else
+                    textureName = classificationTexture[classification]["thin"]
+                    textureType = "thin"
+                end
+            end
+            if (RougeUI.Colval >= 0.3) then
+                frame:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+            else
+                frame:SetVertexColor(1, 1, 1)
+            end
         end
-        self.borderTexture:SetVertexColor(1, 1, 1)
-    elseif (classification == "rareelite") then
-        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.16) then
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.16) then
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
-        else
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite")
-        end
-        self.borderTexture:SetVertexColor(1, 1, 1)
-    elseif (classification == "rare") then
-        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.16) then
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.16) then
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
-        else
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare")
-        end
-        self.borderTexture:SetVertexColor(1, 1, 1)
-    else
+    end
+
+    if textureName == "" then
         if RougeUI.ThickFrames then
-            self.borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-TargetingFrame")
+            if RougeUI.NoLevel then
+                textureName = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-TargetingFrame"
+            else
+                textureName = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-TargetingFrame"
+            end
         else
-            self.borderTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+            if RougeUI.NoLevel then
+                textureName = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame"
+            else
+                textureName = "Interface\\TargetingFrame\\UI-TargetingFrame"
+            end
         end
-        self.borderTexture:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+        if RougeUI.NoLevel then
+            textureType = "nthin"
+        else
+            textureType = "thin"
+        end
+        frame:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+    end
+    frame:SetTexture(textureName)
+end
+
+local function CheckClassification(self, forceNormalTexture)
+    local classification = UnitClassification(self.unit)
+    local textureName = ""
+
+    FrameTexture(self.borderTexture, classification)
+
+    if textureName == "" then
         forceNormalTexture = true
+    end
+
+    if RougeUI.NoLevel then
+        self.levelText:SetAlpha(0)
+        self.threatIndicator:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\ui-targetingframe-flash")
     end
 
     if RougeUI.ThickFrames then
@@ -505,47 +554,43 @@ local function HideHotkeys()
 end
 
 local function PlayerArtThick(self)
-    if RougeUI.GoldElite then
-        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite")
-        end
-    elseif RougeUI.Rare then
-        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare")
-        end
-    elseif RougeUI.RareElite then
-        if RougeUI.ThickFrames and (RougeUI.Colval >= 0.54) then
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2")
-        elseif RougeUI.ThickFrames and (RougeUI.Colval < 0.54) then
-            PlayerFrameTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite")
-        end
-    else
-        PlayerFrameTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\Thick-TargetingFrame")
+    local classification
+
+    if RougeUI.NoLevel then
+        PlayerLevelText:Hide()
     end
-    self.name:ClearAllPoints()
-    self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
-    self.name:SetFontObject("SystemFont_Outline_Small")
-    self.name:SetShadowOffset(0, 0)
-    self.healthbar:ClearAllPoints()
-    self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 14)
-    self.healthbar:SetHeight(27)
-    self.healthbar.LeftText:ClearAllPoints()
-    self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
-    self.healthbar.RightText:ClearAllPoints()
-    self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
-    self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
-    self.manabar:ClearAllPoints()
-    self.manabar:SetPoint("CENTER", self, "CENTER", 50, -7)
-    self.manabar:SetHeight(13)
-    self.manabar.LeftText:ClearAllPoints()
-    self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
-    self.manabar.RightText:ClearAllPoints()
-    self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
-    self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
+
+    if RougeUI.RareElite then
+        classification = "rareelite"
+    elseif RougeUI.GoldElite then
+        classification = "elite"
+    elseif RougeUI.Rare then
+        classification = "rare"
+    end
+    FrameTexture(PlayerFrameTexture, classification)
+
+    if RougeUI.ThickFrames then
+        self.name:ClearAllPoints()
+        self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
+        self.name:SetFontObject("SystemFont_Outline_Small")
+        self.name:SetShadowOffset(0, 0)
+        self.healthbar:ClearAllPoints()
+        self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 14)
+        self.healthbar:SetHeight(27)
+        self.healthbar.LeftText:ClearAllPoints()
+        self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        self.healthbar.RightText:ClearAllPoints()
+        self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        self.manabar:ClearAllPoints()
+        self.manabar:SetPoint("CENTER", self, "CENTER", 50, -7)
+        self.manabar:SetHeight(13)
+        self.manabar.LeftText:ClearAllPoints()
+        self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
+        self.manabar.RightText:ClearAllPoints()
+        self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+        self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
+    end
 end
 
 local function VehicleArtThick(self, vehicleType)
@@ -596,7 +641,6 @@ local function ApplyThickness()
     PlayerStatusTexture:SetTexture()
     PlayerRestGlow:SetAlpha(0)
     hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
-    hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
     hooksecurefunc("PlayerFrame_ToVehicleArt", VehicleArtThick)
     hooksecurefunc("PetFrame_Update", PetArtThick)
     hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
@@ -691,7 +735,8 @@ end
 e:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
 
-        if SHOW_TARGET_OF_TARGET == "1" then
+        local _, _, _, nr = GetBuildInfo()
+        if SHOW_TARGET_OF_TARGET == "1" and nr == 30401 then
             ToTDebuffs(TargetFrameToT)
             ToTDebuffs(FocusFrameToT)
         end
@@ -700,8 +745,8 @@ e:SetScript("OnEvent", function(self, event)
             ApplyThickness()
         end
 
-        if RougeUI.GoldElite or RougeUI.RareElite or RougeUI.Elite then
-            FixChain()
+        if RougeUI.NoLevel or RougeUI.ThickFrames or RougeUI.GoldElite or RougeUI.RareElite or RougeUI.Rare then
+            hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
         end
 
         if RougeUI.TimerGap or RougeUI.Lorti or RougeUI.Roug or RougeUI.Modern then
@@ -827,7 +872,7 @@ e:SetScript("OnEvent", function(self, event)
 
         OnLoad()
 
-        if RougeUI.ThickFrames or RougeUI.Colval < 0.16 then
+        if RougeUI.ThickFrames or RougeUI.NoLevel or (RougeUI.Colval < 0.3) then
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
     end

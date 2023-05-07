@@ -41,6 +41,19 @@ function RougeUIF:CusFonts()
     FocusFrameManaBar.TextString:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
     FocusFrameManaBar.LeftText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
     FocusFrameManaBar.RightText:SetFont(FontType, RougeUI.ManaFontSize, "OUTLINE")
+
+    for i = 1, 5 do
+        if _G["ArenaEnemyFrame"..i] then
+            local hp = _G["ArenaEnemyFrame"..i.."HealthBar"]
+            local mana = _G["ArenaEnemyFrame"..i.."ManaBar"]
+            hp.TextString:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+            hp.LeftText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+            hp.RightText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+            mana.TextString:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+            mana.LeftText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+            mana.RightText:SetFont(FontType, RougeUI.HPFontSize, "OUTLINE")
+        end
+    end
 end
 
 local function true_format(value)
