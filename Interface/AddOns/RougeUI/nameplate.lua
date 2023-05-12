@@ -72,8 +72,8 @@ local function HidePlates(plate, unit)
     end
 
     local _, _, _, _, _, npcId = str_split("-", UnitGUID(unit))
-    -- Hide feral spirit, treants, army of the dead, snake trap, mirror image, underbelly croc (this should be forbidden lol)
-    if npcId == "29264" or npcId == "1964" or npcId == "24207" or npcId == "19833" or npcId == "19921" or npcId == "31216" or npcId == "32441" then
+    -- Hide feral spirit, treants, army of the dead, snake trap, mirror image, underbelly croc, Crashin' Thrashin' Robot
+    if npcId == "29264" or npcId == "1964" or npcId == "24207" or npcId == "19833" or npcId == "19921" or npcId == "31216" or npcId == "32441" or npcId == "17299" then
         plate.UnitFrame:Hide()
     else
         plate.UnitFrame:Show()

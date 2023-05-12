@@ -191,6 +191,9 @@ frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 frame:RegisterEvent("GLYPH_UPDATED")
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
+        for _, plate in pairs(plates) do
+            plate.indicator:Hide()
+        end
         plates = {}
         cacheUnit = {}
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then

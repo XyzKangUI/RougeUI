@@ -41,7 +41,11 @@ local function addBorder(button, shadow, drawLayer)
         icon:SetDrawLayer("BACKGROUND", -8)
     end
 
-    if button.debuff or button.tempenchant then
+    if button.tempenchant then
+        drawLayer = "OVERLAY"
+    end
+
+    if button.debuff then
         border = _G[name .. "Border"]
     else
         border = button:CreateTexture(nil, drawLayer or "BACKGROUND", nil, -7)

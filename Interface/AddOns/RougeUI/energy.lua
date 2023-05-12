@@ -665,6 +665,7 @@ local eventRegistered = {
     ["SPELL_ENERGIZE"] = true,
     ["SPELL_DISPEL"] = true,
     ["SPELL_DISPEL_FAILED"] = true,
+    ["DAMAGE_SPLIT"] = true,
 }
 
 function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
@@ -893,6 +894,11 @@ EnemyOOC.event:RegisterEvent("PLAYER_LOGIN")
 EnemyOOC.event:RegisterEvent("PLAYER_ENTERING_WORLD")
 EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
+        if not RougeUI.EnemyTicks then
+            self:UnregisterAllEvents()
+            self:SetScript("OnEvent", nil)
+            return  
+        end
         CreateIcon("target", TargetFrame)
         CreateIcon("focus", FocusFrame)
         indicator = RougeUI.CombatIndicator
