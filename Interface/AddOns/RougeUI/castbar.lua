@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local _G = getfenv(0)
 local UnitCastingInfo = _G.UnitCastingInfo
 local UnitChannelInfo = _G.UnitChannelInfo
@@ -87,20 +88,20 @@ local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        if RougeUI.CastTimer then
+        if RougeUI.db.CastTimer then
             modstyle()
             FocusFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
                 c_OnUpdate_Hook(self, elapsed)
-                RougeUIF:GradientColour(self, FocusFrameSpellBar)
+                RougeUI.RougeUIF:GradientColour(self, FocusFrameSpellBar)
                 RedBars(self)
             end)
             TargetFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
                 c_OnUpdate_Hook(self, elapsed)
-                RougeUIF:GradientColour(self, TargetFrameSpellBar)
+                RougeUI.RougeUIF:GradientColour(self, TargetFrameSpellBar)
                 RedBars(self)
             end)
             CastingBarFrame:HookScript("OnUpdate", function(self)
-                RougeUIF:GradientColour(self, CastingBarFrame)
+                RougeUI.RougeUIF:GradientColour(self, CastingBarFrame)
                 RedBars(self)
             end)
             hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, ...)

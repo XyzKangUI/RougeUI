@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------
 -- Smooth animations -- Ls
 
+local _, RougeUI = ...
 local smoothing = {}
 local pairs = pairs
 local floor = math.floor
@@ -142,14 +143,9 @@ local function init()
     end
 end
 
-function RougeUIF:SetSmoothing(amount)
-	AMOUNT = clamp(amount, 0.2, 0.8)
-end
-
-
 smoothframe:RegisterEvent("ADDON_LOADED")
 smoothframe:SetScript("OnEvent", function(self, event)
-    if event == "ADDON_LOADED" and RougeUI.smooth then
+    if event == "ADDON_LOADED" and RougeUI.db.smooth then
         init()
         smoothframe:SetScript("OnUpdate", AnimationTick)
     end

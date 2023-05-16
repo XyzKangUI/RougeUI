@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local plates = {}
 local cacheUnit = {}
 local unitID = { "target", "arena1", "arena2", "arena3" }
@@ -91,18 +92,17 @@ local function CreateIcon(unit, unitGUID)
 end
 
 local function UpdateIndicator(amount, guid)
-    if plates[guid] then
-        local plate = plates[guid]
-        if plate.indicator then
-            if amount <= 0 then
-                plate.indicator:SetText(amount)
-                plate.indicator:Hide()
-            elseif amount > 0 then
-                plate.indicator:SetText(mceil(amount))
-                if not plate.indicator:IsShown() then
-                    plate.indicator:Show()
-                end
+    local plate = plates[guid]
+
+    if plate and plate.indicator then
+        if amount > 0 then
+            plate.indicator:SetText(mceil(amount))
+            if not plate.indicator:IsShown() then
+                plate.indicator:Show()
             end
+        else
+            plate.indicator:Hide()
+            plate.indicator:SetText("")
         end
     end
 end
@@ -126,7 +126,7 @@ local function CLEU()
     if type == "SPELL_AURA_APPLIED" and PF[spellID] then
         local unit = unitToken(destGUID)
 
-        if not UnitIsPlayer(unit) then
+        if not unit then
             return
         end
 
@@ -205,7 +205,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
             self:UnregisterEvent("GLYPH_UPDATED")
         end
     elseif event == "PLAYER_LOGIN" then
-        if not RougeUI.PSTrack then
+        if not RougeUI.db.PSTrack then
             self:UnregisterAllEvents()
             self:SetScript("OnEvent", nil)
             return

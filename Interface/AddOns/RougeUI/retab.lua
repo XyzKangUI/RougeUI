@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local SetBinding = SetBinding
 local RE = CreateFrame("Frame")
 RE:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -15,7 +16,7 @@ local function Retabbind()
 end
 
 RE:SetScript("OnEvent", function(self, event, ...)
-	if not RougeUI.retab then
+	if not RougeUI.db.retab then
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 		self:SetScript("OnEvent", nil)
 		return

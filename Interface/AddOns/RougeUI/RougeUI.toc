@@ -1,6 +1,6 @@
 ## Interface: 30401
 ## Title: |cff009cffRougeUI-WOTLKC|r
-## Version: 3.28
+## Version: 3.29
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
@@ -21,3 +21,4 @@ outlines.lua
 snowfallkey.lua
 sappable.lua
 combofix.lua
+XYZ.lua

@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local IsAddOnLoaded, hooksecurefunc = IsAddOnLoaded, hooksecurefunc
 local _G = getfenv(0)
 local ceil, mod = _G.math.ceil, _G.math.fmod
@@ -41,26 +42,22 @@ local function addBorder(button, shadow, drawLayer)
         icon:SetDrawLayer("BACKGROUND", -8)
     end
 
-    if button.tempenchant then
-        drawLayer = "OVERLAY"
-    end
-
-    if button.debuff then
+    if button.debuff or button.tempenchant then
         border = _G[name .. "Border"]
     else
         border = button:CreateTexture(nil, drawLayer or "BACKGROUND", nil, -7)
     end
 
     if button and border then
-        if RougeUI.Lorti then
+        if RougeUI.db.Lorti then
             border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss")
-        elseif RougeUI.Roug then
+        elseif RougeUI.db.Roug then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\debuff")
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\rouge")
             end
-        elseif RougeUI.Modern then
+        elseif RougeUI.db.Modern then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\expdebuff")
             else
@@ -71,12 +68,12 @@ local function addBorder(button, shadow, drawLayer)
         border:SetTexCoord(0, 1, 0, 1)
         border:SetDrawLayer(drawLayer or "BACKGROUND", -7)
         if not button.debuff then
-            border:SetVertexColor(RougeUI.BuffVal, RougeUI.BuffVal, RougeUI.BuffVal)
+            border:SetVertexColor(RougeUI.db.BuffVal, RougeUI.db.BuffVal, RougeUI.db.BuffVal)
         elseif button.tempenchant then
             border:SetVertexColor(.7, 0, 1)
         end
         border:ClearAllPoints()
-        if RougeUI.Lorti then
+        if RougeUI.db.Lorti then
             border:SetAllPoints(button)
         else
             if button.tempenchant then
@@ -91,12 +88,12 @@ local function addBorder(button, shadow, drawLayer)
     end
 
     -- Lortis shadowy BG
-    if (RougeUI.Lorti or RougeUI.Roug) then
-        if RougeUI.Roug and button.debuff then
+    if (RougeUI.db.Lorti or RougeUI.db.Roug) then
+        if RougeUI.db.Roug and button.debuff then
             return
         end
         local bg = CreateFrame("Frame", nil, button, BackdropTemplateMixin and "BackdropTemplate")
-        if RougeUI.Roug then
+        if RougeUI.db.Roug then
             bg:SetPoint("TOPLEFT", button, "TOPLEFT", -4, 4)
             bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 4, -4)
         else
@@ -142,10 +139,10 @@ local function SkinBuffs(bu)
     local icon = _G[name .. "Icon"]
 
     if icon then
-        if name:match("Debuff") and not RougeUI.Lorti then
+        if name:match("Debuff") and not RougeUI.db.Lorti then
             icon:SetTexCoord(0.06, 0.94, 0.06, 0.94)
         else
-            if RougeUI.Lorti then
+            if RougeUI.db.Lorti then
                 icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
                 icon:ClearAllPoints()
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
@@ -158,7 +155,7 @@ local function SkinBuffs(bu)
 
     bu:SetNormalTexture("")
 
-    if RougeUI.Lorti then
+    if RougeUI.db.Lorti then
         bu:SetSize(28, 28)
         bu.duration:SetFont(STANDARD_TEXT_FONT, 11, "THINOUTLINE")
         bu.duration:ClearAllPoints()
@@ -166,7 +163,7 @@ local function SkinBuffs(bu)
     else
         bu.duration:ClearAllPoints()
         bu.duration:SetPoint("CENTER", bu, "BOTTOM", 0, -6.5)
-        if RougeUI.Roug or RougeUI.Modern then
+        if RougeUI.db.Roug or RougeUI.db.Modern then
             bu.duration:SetFont(STANDARD_TEXT_FONT, 9.5, "THINOUTLINE")
             bu.duration:SetShadowOffset(0, 0)
         end
@@ -208,7 +205,7 @@ local function styleActionButton(bu)
     addBorder(bu, nil, "OVERLAY")
 
     if ic then
-        if RougeUI.Lorti then
+        if RougeUI.db.Lorti then
             ic:SetTexCoord(0, 1, 0, 1)
         else
             ic:SetTexCoord(0.06, 0.94, 0.06, 0.94)
@@ -216,7 +213,7 @@ local function styleActionButton(bu)
     end
 
     if not bartender4 then
-        if RougeUI.Lorti then
+        if RougeUI.db.Lorti then
             ho:ClearAllPoints()
             ho:SetPoint("TOPRIGHT", bu, 0, -4)
         else
@@ -355,7 +352,7 @@ local function BuffAnchor()
     if (BuffFrame.numConsolidated > 0) then
         slack = slack + 1;    -- one icon for all consolidated buffs
     end
-    local BUFFS_PER_ROW = RougeUI.BuffsRow
+    local BUFFS_PER_ROW = RougeUI.db.BuffsRow
 
     for i = 1, BUFF_ACTUAL_DISPLAY do
         buff = _G["BuffButton" .. i];
@@ -405,7 +402,7 @@ end
 
 local function DebuffAnchor(buttonName, index)
     local numBuffs = BUFF_ACTUAL_DISPLAY + BuffFrame.numEnchants;
-    local BUFFS_PER_ROW = RougeUI.BuffsRow
+    local BUFFS_PER_ROW = RougeUI.db.BuffsRow
 
     if (BuffFrame.numConsolidated > 0) then
         numBuffs = numBuffs - BuffFrame.numConsolidated + 1;
@@ -439,14 +436,14 @@ e3:SetScript("OnEvent", function(self, event)
         hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
         hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
 
-        if RougeUI.Lorti or RougeUI.Roug or RougeUI.Modern then
+        if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
             init()
             hooksecurefunc("AuraButton_Update", function(self, index)
                 local button = _G[self .. index]
                 if button and not button.styled then
                     SkinBuffs(button)
                 end
-                if button and RougeUI.Roug then
+                if button and RougeUI.db.Roug then
                     BtnGlow(button)
                 end
             end)

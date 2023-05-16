@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local IsAddOnLoaded, hooksecurefunc = IsAddOnLoaded, hooksecurefunc
 local GetMouseFocus, ToggleDropDownMenu = GetMouseFocus, ToggleDropDownMenu
 local Minimap_OnClick = Minimap_OnClick
@@ -14,7 +15,7 @@ MM:SetScript("OnEvent", function(self)
         }) do
             v:Hide()
         end
-        select(1, TimeManagerClockButton:GetRegions()):SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+        select(1, TimeManagerClockButton:GetRegions()):SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
 
         Minimap:EnableMouseWheel(true)
         Minimap:SetScript('OnMouseWheel', function(self, delta)

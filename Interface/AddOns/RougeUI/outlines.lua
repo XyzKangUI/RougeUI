@@ -1,10 +1,11 @@
+local _, RougeUI = ...
 local CL = {}
 CL.NF = {}
 
 local classcolors = {}
 
 local function ApplyTextures()
-    if RougeUI.NoLevel then
+    if RougeUI.db.NoLevel then
         classcolors = {
             ["ROGUE"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Rogue",
             ["PRIEST"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Priest",
@@ -69,7 +70,7 @@ end
 local eventframe = CreateFrame("Frame")
 eventframe:RegisterEvent("ADDON_LOADED")
 eventframe:SetScript("OnEvent", function(self, event, ...)
-	if RougeUI.classoutline then
+	if RougeUI.db.classoutline then
         ApplyTextures()
 		CL[event](CL, ...)
 	end

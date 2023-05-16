@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local EnemyOOC = {}
 EnemyOOC.U = {}
 local _G = getfenv(0)
@@ -894,14 +895,14 @@ EnemyOOC.event:RegisterEvent("PLAYER_LOGIN")
 EnemyOOC.event:RegisterEvent("PLAYER_ENTERING_WORLD")
 EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        if not RougeUI.EnemyTicks then
+        if not RougeUI.db.EnemyTicks then
             self:UnregisterAllEvents()
             self:SetScript("OnEvent", nil)
             return  
         end
         CreateIcon("target", TargetFrame)
         CreateIcon("focus", FocusFrame)
-        indicator = RougeUI.CombatIndicator
+        indicator = RougeUI.db.CombatIndicator
         self:UnregisterEvent("PLAYER_LOGIN")
     elseif event == "PLAYER_TARGET_CHANGED" then
         if powerTypes[PowerType("target")] and UnitAffectingCombat("target") and UnitCanAttack("player", "target") and UnitIsPlayer("target") then

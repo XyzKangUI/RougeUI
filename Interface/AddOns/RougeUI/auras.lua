@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local _G = getfenv(0)
 local AURA_OFFSET_Y = 3
 local AURA_START_X = 5
@@ -116,9 +117,9 @@ local function maxRows(self, width, mirror)
 end
 
 local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
-    local LARGE_AURA_SIZE = RougeUI.SelfSize
-    local SMALL_AURA_SIZE = RougeUI.OtherBuffSize
-    local AURA_ROW_WIDTH = RougeUI.AuraRow
+    local LARGE_AURA_SIZE = RougeUI.db.SelfSize
+    local SMALL_AURA_SIZE = RougeUI.db.OtherBuffSize
+    local AURA_ROW_WIDTH = RougeUI.db.AuraRow
     local size
     local offsetY = AURA_OFFSET_Y
     local rowWidth = 0
@@ -342,9 +343,9 @@ local function Target_Update(frame)
                 frameCooldown = _G[frameName .. "Cooldown"];
                 CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
 
-                if RougeUI.HighlightDispellable then
+                if RougeUI.db.HighlightDispellable then
                     if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 or spellId == 53659 then
-                        local buffSize = RougeUI.OtherBuffSize
+                        local buffSize = RougeUI.db.OtherBuffSize
                         buffFrame:SetHeight(buffSize)
                         buffFrame:SetWidth(buffSize)
                         frameStealable:Show()
@@ -370,7 +371,7 @@ local function Target_Update(frame)
                         frameStealable:Hide()
                     end
                 else
-                    local buffSize = RougeUI.OtherBuffSize
+                    local buffSize = RougeUI.db.OtherBuffSize
                     buffFrame:SetHeight(buffSize)
                     buffFrame:SetWidth(buffSize)
                 end
@@ -477,7 +478,7 @@ local function Target_Update(frame)
     end
 
     frame.spellbarAnchor = nil;
-    local maxRowWidth = RougeUI.AuraRow
+    local maxRowWidth = RougeUI.db.AuraRow
     if (UnitIsFriend("player", frame.unit)) then
         -- update buff positions
         TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
@@ -495,7 +496,7 @@ local function Target_Update(frame)
     end
 end
 
-function RougeUIF:SetCustomBuffSize()
+function RougeUI.RougeUIF:SetCustomBuffSize()
     local frames = {
         TargetFrame,
         FocusFrame
@@ -506,7 +507,7 @@ function RougeUIF:SetCustomBuffSize()
     end
 end
 
-function RougeUIF:HookAuras()
+function RougeUI.RougeUIF:HookAuras()
     hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
     hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
     hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
@@ -515,8 +516,8 @@ end
 local FF = CreateFrame("Frame")
 FF:RegisterEvent("PLAYER_LOGIN")
 FF:SetScript("OnEvent", function(self)
-    if RougeUI.BuffSizer or RougeUI.HighlightDispellable then
-        RougeUIF:HookAuras()
+    if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
+        RougeUI.RougeUIF:HookAuras()
     end
 
     self:UnregisterEvent("PLAYER_LOGIN")

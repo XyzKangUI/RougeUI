@@ -1,9 +1,10 @@
+local _, RougeUI = ...
 local comboPoints = 0;
 local comboPointsCache = {};
 local targetGUID
 local UnitGUID, UnitCanAttack, UnitIsPlayer, GetComboPoints = UnitGUID, UnitCanAttack, UnitIsPlayer, GetComboPoints
-local COMBOFRAME_FADE_IN = 0.3;
-local COMBOFRAME_HIGHLIGHT_FADE_IN = 0.4;
+local COMBOFRAME_FADE_IN = 0;
+local COMBOFRAME_HIGHLIGHT_FADE_IN = 0;
 local COMBO_FRAME_LAST_NUM_POINTS = 0;
 local UnitIsPossessed = UnitIsPossessed
 
@@ -75,7 +76,7 @@ CF:RegisterEvent("UNIT_POWER_UPDATE")
 
 CF:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        if not RougeUI.cfix then
+        if not RougeUI.db.cfix then
             self:UnregisterAllEvents()
             self:SetScript("OnEvent", nil)
             return

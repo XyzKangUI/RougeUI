@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local bt4 = IsAddOnLoaded("Bartender4")
 local dm = IsAddOnLoaded("Dominos")
 local CreateFrame, hooksecurefunc = CreateFrame, hooksecurefunc
@@ -117,7 +118,7 @@ CF:SetScript("OnEvent", function(self)
         return
     end
 
-    if RougeUI.ButtonAnim then
+    if RougeUI.db.ButtonAnim then
         if bt4 then
             AnimateBartender()
         elseif dm then

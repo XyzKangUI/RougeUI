@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local hooksecurefunc = hooksecurefunc
 local pairs = pairs
 local IsAddOnLoaded = IsAddOnLoaded
@@ -41,7 +42,7 @@ local function TimeFormat(button, time)
     elseif time > 5 and time < 60 then
         m = floor(time / 60)
         s = fmod(time, 60)
-        if RougeUI.Roug or RougeUI.Modern then
+        if RougeUI.db.Roug or RougeUI.db.Modern then
             text = m == 0 and duration:SetFormattedText("|r%d|r", s)
         else
             text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
@@ -49,7 +50,7 @@ local function TimeFormat(button, time)
     elseif time < 5 then
         m = floor(time / 60)
         s = fmod(time, 60)
-        if RougeUI.Roug or RougeUI.Modern then
+        if RougeUI.db.Roug or RougeUI.db.Modern then
             text = m == 0 and duration:SetFormattedText("|r%.1f|r", s)
         else
             text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
@@ -194,7 +195,7 @@ manager.containerResizeFrame:SetIgnoreParentAlpha(true)
 
 -- Class colored health and/or gradient
 
-function RougeUIF:GradientColour(statusbar)
+function RougeUI.RougeUIF:GradientColour(statusbar)
     if (not statusbar or statusbar.disconnected) then
         return
     end
@@ -231,15 +232,15 @@ local function colour(statusbar, unit)
 
     if unit then
         if UnitIsConnected(unit) and unit == statusbar.unit then
-            if UnitIsPlayer(unit) and UnitClass(unit) and RougeUI.ClassHP then
+            if UnitIsPlayer(unit) and UnitClass(unit) and RougeUI.db.ClassHP then
                 local _, class = UnitClass(unit)
                 local c = RAID_CLASS_COLORS[class]
                 if c then
                     statusbar:SetStatusBarColor(c.r, c.g, c.b)
                 end
-            elseif (RougeUI.GradientHP and UnitCanAttack("player", unit)) or not (RougeUI.ClassHP or RougeUI.unithp) then
-                RougeUIF:GradientColour(statusbar)
-            elseif RougeUI.unithp then
+            elseif (RougeUI.db.GradientHP and UnitCanAttack("player", unit)) or not (RougeUI.db.ClassHP or RougeUI.db.unithp) then
+                RougeUI.RougeUIF:GradientColour(statusbar)
+            elseif RougeUI.db.unithp then
                 local red, green = UnitSelectionColor(unit)
                 if red == 0 then
                     statusbar:SetStatusBarColor(0, 1, 0)
@@ -354,16 +355,16 @@ local function FrameTexture(frame, classification)
 
     if classification then
         if classificationTexture[classification] then
-            if RougeUI.ThickFrames and (RougeUI.Colval >= 0.3) then
-                if RougeUI.NoLevel then
+            if RougeUI.db.ThickFrames and (RougeUI.db.Colval >= 0.3) then
+                if RougeUI.db.NoLevel then
                     textureName = classificationTexture[classification]["nthick2"]
                     textureType = "nthick2"
                 else
                     textureName = classificationTexture[classification]["thick2"]
                     textureType = "thick2"
                 end
-            elseif RougeUI.ThickFrames then
-                if RougeUI.NoLevel then
+            elseif RougeUI.db.ThickFrames then
+                if RougeUI.db.NoLevel then
                     textureName = classificationTexture[classification]["nthick"]
                     textureType = "nthick"
                 else
@@ -371,8 +372,8 @@ local function FrameTexture(frame, classification)
                     textureType = "thick"
                 end
             else
-                if RougeUI.NoLevel then
-                    if (RougeUI.Colval >= 0.3) then
+                if RougeUI.db.NoLevel then
+                    if (RougeUI.db.Colval >= 0.3) then
                         textureName = classificationTexture[classification]["nthin2"]
                         textureType = "nthin2"
                     else
@@ -384,8 +385,8 @@ local function FrameTexture(frame, classification)
                     textureType = "thin"
                 end
             end
-            if (RougeUI.Colval >= 0.3) then
-                frame:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+            if (RougeUI.db.Colval >= 0.3) then
+                frame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             else
                 frame:SetVertexColor(1, 1, 1)
             end
@@ -393,25 +394,25 @@ local function FrameTexture(frame, classification)
     end
 
     if textureName == "" then
-        if RougeUI.ThickFrames then
-            if RougeUI.NoLevel then
+        if RougeUI.db.ThickFrames then
+            if RougeUI.db.NoLevel then
                 textureName = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-TargetingFrame"
             else
                 textureName = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-TargetingFrame"
             end
         else
-            if RougeUI.NoLevel then
+            if RougeUI.db.NoLevel then
                 textureName = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame"
             else
                 textureName = "Interface\\TargetingFrame\\UI-TargetingFrame"
             end
         end
-        if RougeUI.NoLevel then
+        if RougeUI.db.NoLevel then
             textureType = "nthin"
         else
             textureType = "thin"
         end
-        frame:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+        frame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
     frame:SetTexture(textureName)
 end
@@ -426,12 +427,22 @@ local function CheckClassification(self, forceNormalTexture)
         forceNormalTexture = true
     end
 
-    if RougeUI.NoLevel then
+    if RougeUI.db.ClassNames then
+        local _, class = UnitClass(self.unit)
+        local c = RAID_CLASS_COLORS[class]
+        if c and UnitIsPlayer(self.unit) then
+            self.name:SetVertexColor(c.r, c.g, c.b)
+        else
+            self.name:SetVertexColor(1, 0.81960791349411, 0, 1)
+        end
+    end
+
+    if RougeUI.db.NoLevel then
         self.levelText:SetAlpha(0)
         self.threatIndicator:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\ui-targetingframe-flash")
     end
 
-    if RougeUI.ThickFrames then
+    if RougeUI.db.ThickFrames then
         self.highLevelTexture:SetPoint("CENTER", self.levelText, "CENTER", 0, 0)
         self.nameBackground:Hide()
         self.name:ClearAllPoints()
@@ -533,7 +544,7 @@ local function SpellQueueFix()
 end
 
 local function HideHotkeys()
-    if RougeUI.HideHotkey then
+    if RougeUI.db.HideHotkey then
         for i = 1, 12 do
             _G["ActionButton" .. i .. "HotKey"]:SetAlpha(0)
             _G["MultiBarBottomRightButton" .. i .. "HotKey"]:SetAlpha(0)
@@ -542,7 +553,7 @@ local function HideHotkeys()
             _G["MultiBarLeftButton" .. i .. "HotKey"]:SetAlpha(0)
         end
     end
-    if RougeUI.HideMacro then
+    if RougeUI.db.HideMacro then
         for i = 1, 12 do
             _G["ActionButton" .. i .. "Name"]:SetAlpha(0)
             _G["MultiBarBottomRightButton" .. i .. "Name"]:SetAlpha(0)
@@ -556,20 +567,28 @@ end
 local function PlayerArtThick(self)
     local classification
 
-    if RougeUI.NoLevel then
+    if RougeUI.db.NoLevel then
         PlayerLevelText:Hide()
     end
 
-    if RougeUI.RareElite then
+    if RougeUI.db.ClassNames then
+        local _, class = UnitClass("player")
+        local c = RAID_CLASS_COLORS[class]
+        if c then
+            self.name:SetVertexColor(c.r, c.g, c.b)
+        end
+    end
+
+    if RougeUI.db.RareElite then
         classification = "rareelite"
-    elseif RougeUI.GoldElite then
+    elseif RougeUI.db.GoldElite then
         classification = "elite"
-    elseif RougeUI.Rare then
+    elseif RougeUI.db.Rare then
         classification = "rare"
     end
     FrameTexture(PlayerFrameTexture, classification)
 
-    if RougeUI.ThickFrames then
+    if RougeUI.db.ThickFrames then
         self.name:ClearAllPoints()
         self.name:SetPoint("CENTER", self, "CENTER", 50, 35)
         self.name:SetFontObject("SystemFont_Outline_Small")
@@ -741,21 +760,21 @@ e:SetScript("OnEvent", function(self, event)
             ToTDebuffs(FocusFrameToT)
         end
 
-        if RougeUI.ThickFrames then
+        if RougeUI.db.ThickFrames then
             ApplyThickness()
         end
 
-        if RougeUI.NoLevel or RougeUI.ThickFrames or RougeUI.GoldElite or RougeUI.RareElite or RougeUI.Rare then
+        if RougeUI.db.NoLevel or RougeUI.db.ThickFrames or RougeUI.db.GoldElite or RougeUI.db.RareElite or RougeUI.db.Rare or RougeUI.db.ClassNames then
             hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
         end
 
-        if RougeUI.TimerGap or RougeUI.Lorti or RougeUI.Roug or RougeUI.Modern then
+        if RougeUI.db.TimerGap or RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
             if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
             end
         end
 
-        if (RougeUI.ClassHP or RougeUI.GradientHP or RougeUI.unithp) then
+        if (RougeUI.db.ClassHP or RougeUI.db.GradientHP or RougeUI.db.unithp) then
             hooksecurefunc("UnitFrameHealthBar_Update", colour)
             hooksecurefunc("HealthBar_OnValueChanged", function(self)
                 if not self:IsForbidden() then
@@ -763,20 +782,20 @@ e:SetScript("OnEvent", function(self, event)
                 end
             end)
         end
-        if RougeUI.Class_Portrait then
+        if RougeUI.db.Class_Portrait then
             hooksecurefunc("UnitFramePortrait_Update", ClassPortrait)
         end
-        if RougeUI.ScoreBoard then
+        if RougeUI.db.ScoreBoard then
             hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
         end
-        if RougeUI.HideGlows then
+        if RougeUI.db.HideGlows then
             hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
         end
-        if RougeUI.HideIndicator then
+        if RougeUI.db.HideIndicator then
             hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
             hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
         end
-        if RougeUI.HideTitles then
+        if RougeUI.db.HideTitles then
             hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
             hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
             hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
@@ -785,11 +804,11 @@ e:SetScript("OnEvent", function(self, event)
             --TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
             --FocusFrameTextureFrameLeaderIcon:SetAlpha(0)
         end
-        if RougeUI.pimp then
+        if RougeUI.db.pimp then
             hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
             -- hooksecurefunc("UnitFrameManaBar_UpdateType", ZunitFrame)
         end
-        if RougeUI.HideAggro then
+        if RougeUI.db.HideAggro then
             hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
                 if self.aggroHighlight then
                     self.aggroHighlight:SetAlpha(0)
@@ -797,7 +816,7 @@ e:SetScript("OnEvent", function(self, event)
                 end
             end)
         end
-        if RougeUI.roleIcon then
+        if RougeUI.db.roleIcon then
             hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
                 if not frame.roleIcon then
                     return ;
@@ -808,16 +827,16 @@ e:SetScript("OnEvent", function(self, event)
                 end
             end)
         end
-        if RougeUI.Stance then
+        if RougeUI.db.Stance then
             local stancebar = CreateFrame("Frame", nil, UIParent)
             stancebar:Hide()
             StanceBarFrame:UnregisterAllEvents()
             StanceBarFrame:SetParent(stancebar)
         end
 
-        if not RougeUI.ThickFrames and (RougeUI.ClassBG or RougeUI.transparent) then
+        if not RougeUI.db.ThickFrames and (RougeUI.db.ClassBG or RougeUI.db.transparent) then
             hooksecurefunc("TargetFrame_CheckFaction", function(self)
-                if RougeUI.ClassBG and UnitIsPlayer(self.unit) then
+                if RougeUI.db.ClassBG and UnitIsPlayer(self.unit) then
                     local _, class = UnitClass(self.unit)
                     local c = RAID_CLASS_COLORS[class]
                     if c then
@@ -829,7 +848,7 @@ e:SetScript("OnEvent", function(self, event)
             end)
         end
 
-        if RougeUI.ClassBG then
+        if RougeUI.db.ClassBG then
             if PlayerFrame:IsShown() and not PlayerFrame.bg then
                 local c = RAID_CLASS_COLORS[select(2, UnitClass("player"))]
                 local bg = PlayerFrame:CreateTexture()
@@ -845,7 +864,7 @@ e:SetScript("OnEvent", function(self, event)
             FocusFrameNameBackground:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
         end
 
-        if RougeUI.AutoReady then
+        if RougeUI.db.AutoReady then
             ReadyCheckFrame:HookScript("OnShow", function(self)
                 ReadyCheckFrameYesButton:Click()
             end)
@@ -853,13 +872,13 @@ e:SetScript("OnEvent", function(self, event)
                 QueueReadyCheckPopup.YesButton:Click()
             end)
         end
-        if RougeUI.BuffAlpha then
+        if RougeUI.db.BuffAlpha then
             hooksecurefunc("AuraButton_OnUpdate", function(self)
                 self:SetAlpha(1)
             end)
         end
 
-        if RougeUI.Slice then
+        if RougeUI.db.Slice then
             Haxx()
         end
 
@@ -872,30 +891,30 @@ e:SetScript("OnEvent", function(self, event)
 
         OnLoad()
 
-        if RougeUI.ThickFrames or RougeUI.NoLevel or (RougeUI.Colval < 0.3) then
+        if RougeUI.db.ThickFrames or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3)  or RougeUI.db.ClassNames then
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
     end
 
     if event == "PLAYER_ENTERING_WORLD" then
-        if RougeUI.FadeIcon then
+        if RougeUI.db.FadeIcon then
             PvPIcon()
         end
 
-        if RougeUI.SQFix then
+        if RougeUI.db.SQFix then
             SpellQueueFix()
         end
 
-        if RougeUI.HideHotkey or RougeUI.HideMacro then
+        if RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
             HideHotkeys()
         end
 
-        if not RougeUI.FadeIcon and not RougeUI.SQFix and not RougeUI.HideHotkey and not RougeUI.HideMacro then
+        if not RougeUI.db.FadeIcon and not RougeUI.db.SQFix and not RougeUI.db.HideHotkey and not RougeUI.db.HideMacro then
             self:UnregisterEvent("PLAYER_ENTERING_WORLD")
         end
     end
 
-    if event == "ZONE_CHANGED_NEW_AREA" and RougeUI.SQFix then
+    if event == "ZONE_CHANGED_NEW_AREA" and RougeUI.db.SQFix then
         SpellQueueFix()
     else
         self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")

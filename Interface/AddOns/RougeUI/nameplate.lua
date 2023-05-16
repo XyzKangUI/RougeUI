@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local str_split = string.split
 local UnitGUID = UnitGUID
 local U = UnitIsUnit
@@ -23,7 +24,7 @@ local function NameToArenaNumber(plate)
                     plate.name:SetJustifyH("CENTER")
                     break
                 else
-                    if RougeUI.ModPlates then
+                    if RougeUI.db.ModPlates then
                         plate.name:SetFont(STANDARD_TEXT_FONT, 8)
                         plate.name:ClearAllPoints()
                         plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
@@ -40,11 +41,11 @@ local function AddElements(plate)
         return
     end
 
-    if RougeUI.ModPlates then
+    if RougeUI.db.ModPlates then
         local sh = plate.selectionHighlight -- kang from evolvee
         sh:SetPoint("TOPLEFT", sh:GetParent(), "TOPLEFT", 1, -1)
         sh:SetPoint("BOTTOMRIGHT", sh:GetParent(), "BOTTOMRIGHT", -1, 1)
-        if RougeUI.ArenaNumbers and not select(1, IsActiveBattlefieldArena()) or not RougeUI.ArenaNumbers then
+        if RougeUI.db.ArenaNumbers and not select(1, IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers then
             plate.name:SetFont(STANDARD_TEXT_FONT, 8)
             plate.name:ClearAllPoints()
             plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
@@ -53,7 +54,7 @@ local function AddElements(plate)
     end
 
     for _, v in pairs({ plate.healthBar.border:GetRegions(), plate.CastBar.Border }) do
-        v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
+        v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 end
 
@@ -91,7 +92,7 @@ local OnEvent = function(self, event, ...)
         HidePlates(namePlateFrameBase, base)
         AddElements(namePlateFrameBase.UnitFrame)
     elseif event == "ADDON_LOADED" then
-        if RougeUI.ArenaNumbers then
+        if RougeUI.db.ArenaNumbers then
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
         end
         self:UnregisterEvent("ADDON_LOADED")

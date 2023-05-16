@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local UnitAffectingCombat, IsActiveBattlefieldArena = UnitAffectingCombat, IsActiveBattlefieldArena
 local UnitIsUnit, UnitExists, UnitClass = UnitIsUnit, UnitExists, UnitClass
 local UnitClassification, UnitDetailedThreatSituation = UnitClassification, UnitDetailedThreatSituation
@@ -59,7 +60,7 @@ local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        if RougeUI.CombatIndicator then
+        if RougeUI.db.CombatIndicator then
             CreateCombatIndicatorForUnit(TargetFrame)
             CreateCombatIndicatorForUnit(FocusFrame)
         end
