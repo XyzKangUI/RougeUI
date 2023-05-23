@@ -10,6 +10,7 @@ local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
 local pairs = _G.pairs
 local MAX_TARGET_DEBUFFS = 16;
 local MAX_TARGET_BUFFS = 32;
+local mceil = math.ceil
 
 local Enraged = {
     --    [5229] = true, -- Enrage (Druid)
@@ -95,7 +96,7 @@ local function ToTegrity(frame)
 
     local _, _, a, b, c = frame:GetPoint()
 
-    if a == "BOTTOMRIGHT" and b == -35 and c == -10 then
+    if (a == "BOTTOMRIGHT") and (mceil(b) == -35) and (mceil(c) == -10) then
         return true
     else
         return false
