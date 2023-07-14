@@ -180,137 +180,19 @@ local function New_Target_Spellbar_AdjustPosition(self)
     end
 end
 
-local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuffs, anchorIndex, size, offsetX, offsetY, mirrorVertically)
-    --For mirroring vertically
-    local point, relativePoint;
-    local startY, auraOffsetY;
-    if (mirrorVertically) then
-        point = "BOTTOM";
-        relativePoint = "TOP";
-        startY = -9;
-        offsetY = -offsetY;
-        auraOffsetY = -AURA_OFFSET_Y;
-    else
-        point = "TOP";
-        relativePoint = "BOTTOM";
-        startY = AURA_START_Y;
-        auraOffsetY = AURA_OFFSET_Y;
-    end
-
-    local buff = _G[buffName .. index];
-    if (index == 1) then
-        if (UnitIsFriend("player", self.unit) or numDebuffs == 0) then
-            -- unit is friendly or there are no debuffs...buffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", AURA_START_X, startY);
-        else
-            -- unit is not friendly and we have debuffs...buffs start on bottom
-            buff:SetPoint(point .. "LEFT", self.debuffs, relativePoint .. "LEFT", 0, -offsetY);
-        end
-        self.buffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0);
-        self.buffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY);
-        self.spellbarAnchor = buff;
-    elseif (anchorIndex ~= (index - 1)) then
-        -- anchor index is not the previous index...must be a new row
-        buff:SetPoint(point .. "LEFT", _G[buffName .. anchorIndex], relativePoint .. "LEFT", 0, -offsetY);
-        self.buffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY);
-        self.spellbarAnchor = buff;
-    else
-        -- anchor index is the previous index
-        buff:SetPoint(point .. "LEFT", _G[buffName .. anchorIndex], point .. "RIGHT", offsetX, 0);
-    end
-
-    -- Resize
-    buff:SetWidth(size);
-    buff:SetHeight(size);
-end
-
-local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBuffs, anchorIndex, size, offsetX, offsetY, mirrorVertically)
-    local buff = _G[debuffName .. index];
-    local isFriend = UnitIsFriend("player", self.unit);
-
-    --For mirroring vertically
-    local point, relativePoint;
-    local startY, auraOffsetY;
-    if (mirrorVertically) then
-        point = "BOTTOM";
-        relativePoint = "TOP";
-        startY = -15;
-        offsetY = -offsetY;
-        auraOffsetY = -AURA_OFFSET_Y;
-    else
-        point = "TOP";
-        relativePoint = "BOTTOM";
-        startY = AURA_START_Y;
-        auraOffsetY = AURA_OFFSET_Y;
-    end
-
-    if (index == 1) then
-        if (isFriend and numBuffs > 0) then
-            -- unit is friendly and there are buffs...debuffs start on bottom
-            buff:SetPoint(point .. "LEFT", self.buffs, relativePoint .. "LEFT", 0, -offsetY);
-        else
-            -- unit is not friendly or there are no buffs...debuffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", AURA_START_X, startY);
-        end
-        self.debuffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0);
-        self.debuffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY);
-        if ((isFriend) or (not isFriend and numBuffs == 0)) then
-            self.spellbarAnchor = buff;
-        end
-    elseif (anchorIndex ~= (index - 1)) then
-        -- anchor index is not the previous index...must be a new row
-        buff:SetPoint(point .. "LEFT", _G[debuffName .. anchorIndex], relativePoint .. "LEFT", 0, -offsetY);
-        self.debuffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY);
-        if ((isFriend) or (not isFriend and numBuffs == 0)) then
-            self.spellbarAnchor = buff;
-        end
-    else
-        -- anchor index is the previous index
-        buff:SetPoint(point .. "LEFT", _G[debuffName .. (index - 1)], point .. "RIGHT", offsetX, 0);
-    end
-
-    -- Resize
-    buff:SetWidth(size);
-    buff:SetHeight(size);
-    local debuffFrame = _G[debuffName .. index .. "Border"];
-    debuffFrame:SetWidth(size + 2);
-    debuffFrame:SetHeight(size + 2);
-end
-
-local largeBuffList = {};
-local largeDebuffList = {};
-local PLAYER_UNITS = {
-    player = true,
-    vehicle = true,
-    pet = true,
-};
-
-local function ShouldAuraBeLarge(caster)
-    if not caster then
-        return false;
-    end
-
-    for token, value in pairs(PLAYER_UNITS) do
-        if UnitIsUnit(caster, token) or UnitIsOwnerOrControllerOfUnit(token, caster) then
-            return value;
-        end
-    end
-end
-
 local function Target_Update(frame)
     if not (frame == TargetFrame or frame == FocusFrame) then
         return
     end
 
     local buffFrame, frameStealable, frameName
-    local frameIcon, frameCount, frameCooldown
     local numBuffs = 0;
     local selfName = frame:GetName()
-    local isEnemy = UnitIsEnemy(PlayerFrame.unit, frame.unit)
+    local isEnemy = UnitIsEnemy("player", frame.unit)
     local _, _, class = UnitClass("player")
 
     for i = 1, MAX_TARGET_BUFFS do
-        local name, icon, count, _, duration, expirationTime, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, nil);
+        local name, icon, _, _, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, nil);
         if (name) then
             frameName = selfName .. "Buff" .. i
             buffFrame = _G[frameName]
@@ -319,31 +201,9 @@ local function Target_Update(frame)
             if (not buffFrame) then
                 if (not icon) then
                     break ;
-                else
-                    buffFrame = CreateFrame("Button", frameName, frame, "TargetBuffFrameTemplate");
-                    buffFrame.unit = frame.unit;
                 end
             end
             if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
-                buffFrame:SetID(i);
-
-                -- set the icon
-                frameIcon = _G[frameName .. "Icon"];
-                frameIcon:SetTexture(icon);
-
-                -- set the count
-                frameCount = _G[frameName .. "Count"];
-                if (count > 1 and frame.showAuraCount) then
-                    frameCount:SetText(count);
-                    frameCount:Show();
-                else
-                    frameCount:Hide();
-                end
-
-                -- Handle cooldowns
-                frameCooldown = _G[frameName .. "Cooldown"];
-                CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
-
                 if RougeUI.db.HighlightDispellable then
                     if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 or spellId == 53659 then
                         local buffSize = RougeUI.db.OtherBuffSize
@@ -376,121 +236,12 @@ local function Target_Update(frame)
                     buffFrame:SetHeight(buffSize)
                     buffFrame:SetWidth(buffSize)
                 end
-
-                -- set the buff to be big if the buff is cast by the player or his pet
-                numBuffs = numBuffs + 1;
-                largeBuffList[numBuffs] = ShouldAuraBeLarge(caster);
-
-                buffFrame:ClearAllPoints();
-                buffFrame:Show();
-            else
-                buffFrame:Hide();
             end
         else
             break ;
         end
     end
-    for i = numBuffs + 1, MAX_TARGET_BUFFS do
-        local frame = _G[selfName .. "Buff" .. i];
-        if (frame) then
-            frame:Hide();
-        else
-            break ;
-        end
-    end
 
-    local color;
-    local frameBorder;
-    local numDebuffs = 0;
-
-    local frameNum = 1;
-    local index = 1;
-
-    local maxDebuffs = frame.maxDebuffs or MAX_TARGET_DEBUFFS;
-    while (frameNum <= maxDebuffs and index <= maxDebuffs) do
-        local debuffName, icon, count, debuffType, duration, expirationTime, caster, _, _, _, _, _, casterIsPlayer, nameplateShowAll = UnitDebuff(frame.unit, index, "INCLUDE_NAME_PLATE_ONLY");
-        if (debuffName) then
-            if (TargetFrame_ShouldShowDebuffs(frame.unit, caster, nameplateShowAll, casterIsPlayer)) then
-                frameName = selfName .. "Debuff" .. frameNum;
-                buffFrame = _G[frameName];
-                if (icon) then
-                    if (not buffFrame) then
-                        buffFrame = CreateFrame("Button", buffFrame, frame, "TargetDebuffFrameTemplate");
-                        buffFrame.unit = frame.unit;
-                    end
-                    buffFrame:SetID(index);
-
-                    -- set the icon
-                    frameIcon = _G[frameName .. "Icon"];
-                    frameIcon:SetTexture(icon);
-
-                    -- set the count
-                    frameCount = _G[frameName .. "Count"];
-                    if (count > 1 and frame.showAuraCount) then
-                        frameCount:SetText(count);
-                        frameCount:Show();
-                    else
-                        frameCount:Hide();
-                    end
-
-                    -- Handle cooldowns
-                    frameCooldown = _G[frameName .. "Cooldown"];
-                    CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
-
-                    -- set debuff type color
-                    if (debuffType) then
-                        color = DebuffTypeColor[debuffType];
-                    else
-                        color = DebuffTypeColor["none"];
-                    end
-                    frameBorder = _G[frameName .. "Border"];
-                    frameBorder:SetVertexColor(color.r, color.g, color.b);
-
-                    -- set the debuff to be big if the buff is cast by the player or his pet
-                    numDebuffs = numDebuffs + 1;
-                    largeDebuffList[numDebuffs] = ShouldAuraBeLarge(caster);
-
-                    buffFrame:ClearAllPoints();
-                    buffFrame:Show();
-
-                    frameNum = frameNum + 1;
-                end
-            end
-        else
-            break ;
-        end
-        index = index + 1;
-    end
-
-    for i = frameNum, MAX_TARGET_DEBUFFS do
-        local frameName = _G[selfName .. "Debuff" .. i];
-        if (frameName) then
-            frameName:Hide();
-        else
-            break ;
-        end
-    end
-
-    frame.auraRows = 0;
-
-    local mirrorAurasVertically = false;
-    if (frame.buffsOnTop) then
-        mirrorAurasVertically = true;
-    end
-
-    frame.spellbarAnchor = nil;
-    local maxRowWidth = RougeUI.db.AuraRow
-    if (UnitIsFriend("player", frame.unit)) then
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-    else
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically);
-    end
     -- update the spell bar position
     if (frame.spellbar) then
         New_Target_Spellbar_AdjustPosition(frame.spellbar);
@@ -509,7 +260,9 @@ function RougeUI.RougeUIF:SetCustomBuffSize()
 end
 
 function RougeUI.RougeUIF:HookAuras()
-    hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
+    if not IsAddOnLoaded("DeBuffFilter") then
+        hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
+    end
     hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
     hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
 end

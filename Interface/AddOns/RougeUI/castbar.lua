@@ -107,7 +107,7 @@ FR:SetScript("OnEvent", function(self, event)
             hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, ...)
                 local arg1 = ...
                 local unit = self.unit;
-                local name, text
+                local name, text, name2, text2
 
                 if self:IsForbidden() or not (self == TargetFrameSpellBar or self == FocusFrameSpellBar) or arg1 ~= unit then
                     return
@@ -117,6 +117,12 @@ FR:SetScript("OnEvent", function(self, event)
                     name, text = UnitCastingInfo(unit)
                 elseif event == "UNIT_SPELLCAST_CHANNEL_START" then
                     name, text = UnitChannelInfo(unit)
+                elseif event == "UNIT_SPELLCAST_INTERRUPTIBLE" then
+                    name, text = UnitCastingInfo(unit)
+                    name2, text2 = UnitChannelInfo(unit)
+                    if self.Text and (name or name2) then
+                        self.Text:SetText(text or text2)
+                    end
                 else
                     return
                 end

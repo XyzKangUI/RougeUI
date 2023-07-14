@@ -671,21 +671,6 @@ local events = {
     "ZONE_CHANGED_NEW_AREA"
 }
 
-local function ToTDebuffs(frame)
-    frame:HookScript("OnEvent", function(self, event, ...)
-        if not frame:IsEventRegistered("UNIT_AURA") then
-            frame:RegisterEvent("UNIT_AURA")
-        end
-        local arg1 = ...;
-        if event == "UNIT_AURA" then
-            local parent = self:GetParent()
-            if UnitIsUnit(arg1, self.unit) and UnitExists(self.unit) and UnitExists(parent.unit) and (UnitHealth(parent.unit) > 0) then
-                RefreshDebuffs(self, self.unit, nil, nil, true)
-            end
-        end
-    end)
-end
-
 local function GetActionButton(slot)
     local name
 
@@ -753,12 +738,6 @@ for _, v in pairs(events) do
 end
 e:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-
-        local _, _, _, nr = GetBuildInfo()
-        if SHOW_TARGET_OF_TARGET == "1" and nr == 30401 then
-            ToTDebuffs(TargetFrameToT)
-            ToTDebuffs(FocusFrameToT)
-        end
 
         if RougeUI.db.ThickFrames then
             ApplyThickness()
