@@ -186,13 +186,13 @@ local function Target_Update(frame)
     end
 
     local buffFrame, frameStealable, frameName
-    local numBuffs = 0;
     local selfName = frame:GetName()
     local isEnemy = UnitIsEnemy("player", frame.unit)
     local _, _, class = UnitClass("player")
+    local buffSize = RougeUI.db.OtherBuffSize
 
     for i = 1, MAX_TARGET_BUFFS do
-        local name, icon, _, _, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, nil);
+        local name, icon, _, _, _, _, _, isStealable, _, spellId = UnitBuff(frame.unit, i, nil);
         if (name) then
             frameName = selfName .. "Buff" .. i
             buffFrame = _G[frameName]
@@ -206,7 +206,6 @@ local function Target_Update(frame)
             if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
                 if RougeUI.db.HighlightDispellable then
                     if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 or spellId == 53659 then
-                        local buffSize = RougeUI.db.OtherBuffSize
                         buffFrame:SetHeight(buffSize)
                         buffFrame:SetWidth(buffSize)
                         frameStealable:Show()
@@ -232,7 +231,6 @@ local function Target_Update(frame)
                         frameStealable:Hide()
                     end
                 else
-                    local buffSize = RougeUI.db.OtherBuffSize
                     buffFrame:SetHeight(buffSize)
                     buffFrame:SetWidth(buffSize)
                 end
@@ -262,8 +260,8 @@ end
 function RougeUI.RougeUIF:HookAuras()
     if not IsAddOnLoaded("DeBuffFilter") then
         hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
+        hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
     end
-    hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
     hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
 end
 

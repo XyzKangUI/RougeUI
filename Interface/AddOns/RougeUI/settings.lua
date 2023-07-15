@@ -464,23 +464,27 @@ function f:CreateGUI()
             addon.RougeUIF:ChangeFrameColors()
         end)
 
-        local name = "BuffValueSlider"
-        local BuffValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
-        BuffValueSlider:SetMinMaxValues(2, 10)
-        BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
-        BuffValueSlider.text = _G[name .. "Text"]
-        BuffValueSlider.textLow = _G[name .. "Low"]
-        BuffValueSlider.textHigh = _G[name .. "High"]
-        BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
-        BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
-        BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
-        BuffValueSlider:SetValue(addon.db.BuffsRow)
-        BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(BuffsRow)))
-        BuffValueSlider:SetValueStep(1)
-        BuffValueSlider:SetObeyStepOnDrag(true);
-        BuffValueSlider:SetScript("OnValueChanged", function(_, value)
-            BuffValueSlider.text:SetText("Buffs Per Row: " .. RoundNumbers(addon.db.BuffsRow, 1))
-            addon.db.BuffsRow = value
+        C_Timer.After(1, function()
+            if not IsAddOnLoaded("SimpleAuraFilter") then
+                local name = "BuffValueSlider"
+                local BuffValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+                BuffValueSlider:SetMinMaxValues(2, 10)
+                BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
+                BuffValueSlider.text = _G[name .. "Text"]
+                BuffValueSlider.textLow = _G[name .. "Low"]
+                BuffValueSlider.textHigh = _G[name .. "High"]
+                BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
+                BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
+                BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
+                BuffValueSlider:SetValue(addon.db.BuffsRow)
+                BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(BuffsRow)))
+                BuffValueSlider:SetValueStep(1)
+                BuffValueSlider:SetObeyStepOnDrag(true);
+                BuffValueSlider:SetScript("OnValueChanged", function(_, value)
+                    BuffValueSlider.text:SetText("Buffs Per Row: " .. RoundNumbers(addon.db.BuffsRow, 1))
+                    addon.db.BuffsRow = value
+                end)
+            end
         end)
 
         local name = "BuffColSlider"

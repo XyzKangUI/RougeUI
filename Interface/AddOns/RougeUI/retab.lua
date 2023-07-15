@@ -22,8 +22,10 @@ local function Retabbind()
 
     if (instanceType == "arena" or instanceType == "pvp") then
         SetOverrideBindingClick(button, true, key, "Tabber")
+        SetCVar("TargetEnemyAttacker", 0)
     else
         ClearOverrideBindings(button)
+        SetCVar("TargetEnemyAttacker", 1)
     end
 end
 

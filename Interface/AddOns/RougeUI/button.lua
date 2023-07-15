@@ -433,8 +433,10 @@ local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
-        hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
+        if not IsAddOnLoaded("SimpleAuraFilter") then
+            hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
+            hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
+        end
 
         if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
             init()
