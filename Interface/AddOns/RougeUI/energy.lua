@@ -701,7 +701,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     end
 
     -- When you dodge/parry/resist etc an attack you drop combat
-    if eventType == "SWING_MISSED" and (isDestEnemy or isDestHostile) then
+    if eventType == "SWING_MISSED" and (isDestEnemy or isDestHostile) and not spellID == "ABSORB" then
         return
     end
 
@@ -729,8 +729,18 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
             eventType == "SPELL_AURA_APPLIED" or
             eventType == "SPELL_CAST_SUCCESS" or
             eventType == "SPELL_AURA_REFRESH") then
-        if isSourceEnemy and (((isDestEnemy or isDestHostile) and not isInCombat(destGUID)) or self.Nova[spellID] or (sourceGUID == destGUID) or spellID == 53653) then
-            return
+
+        if isSourceEnemy and (isDestEnemy or isDestHostile) then
+            if (sourceGUID == destGUID) or self.Nova[spellID] or (spellID == 53653) or not isInCombat(destGUID) then
+                return
+            end
+
+            if destGUID ~= sourceGUID then
+                if isInCombat(destGUID) then
+                    self:ResetTimer(sourceGUID)
+                    return
+                end
+            end
         end
     end
 

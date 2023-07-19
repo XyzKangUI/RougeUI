@@ -4,7 +4,6 @@ local _G = getfenv(0)
 local ceil, mod = _G.math.ceil, _G.math.fmod
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
-local BUFF_HORIZ_SPACING = -5
 
 if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
     return

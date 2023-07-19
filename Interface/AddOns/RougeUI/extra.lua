@@ -74,7 +74,7 @@ local function HideFrameTitles(groupIndex)
     end
 
     if frame then
-        frame:Hide()
+        frame:SetAlpha(0)
     end
 end
 
