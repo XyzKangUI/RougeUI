@@ -467,7 +467,14 @@ local function FrameColour()
     ChatFrame1EditBoxRight:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
 
     GameTooltip:SetBackdropBorderColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-    GameTooltip.SetBackdropBorderColor = function()
+
+    if GetBuildInfo() == "3.4.3" then -- Blizz lack of quality control
+        MainMenuMaxLevelBar0:SetPoint("CENTER", -394, 4)
+        MainMenuMaxLevelBar0:SetSize(261, 7)
+        MainMenuMaxLevelBar1:SetSize(261, 7)
+        MainMenuMaxLevelBar2:SetSize(261, 7)
+        MainMenuMaxLevelBar3:SetSize(261, 7)
+        MainMenuBarTextureExtender:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 end
 

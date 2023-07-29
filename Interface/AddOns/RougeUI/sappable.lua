@@ -62,7 +62,7 @@ local function GlyphCheck()
     for i = 1, 6 do
         local _, _, glyphID = GetGlyphSocketInfo(i);
 
-        if (glyphID and glyphID == 63095) then
+        if glyphID and (glyphID == 63291 or glyphID == 56244) then
             glyphHex = true
             return
         end
@@ -199,7 +199,8 @@ frame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         CLEU()
     elseif event == "GLYPH_UPDATED" then
-        if select(3, UnitClass("player")) == 7 then
+        local _, _, class = UnitClass("player")
+        if (class == 7 or class == 9) then
             GlyphCheck()
         else
             self:UnregisterEvent("GLYPH_UPDATED")
@@ -210,7 +211,8 @@ frame:SetScript("OnEvent", function(self, event, ...)
             self:SetScript("OnEvent", nil)
             return
         end
-        if select(3, UnitClass("player")) == 7 then
+        local _, _, class = UnitClass("player")
+        if (class == 7 or class == 9) then
             GlyphCheck()
         end
         self:UnregisterEvent("PLAYER_LOGIN")

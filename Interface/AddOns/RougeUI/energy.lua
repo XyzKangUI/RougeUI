@@ -701,7 +701,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     end
 
     -- When you dodge/parry/resist etc an attack you drop combat
-    if eventType == "SWING_MISSED" and (isDestEnemy or isDestHostile) and not spellID == "ABSORB" then
+    if eventType == "SWING_MISSED" and (isDestEnemy or isDestHostile) and (spellID ~= "ABSORB") then
         return
     end
 

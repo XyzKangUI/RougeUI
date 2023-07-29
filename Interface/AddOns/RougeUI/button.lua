@@ -23,7 +23,7 @@ local backdrop = {
     },
 }
 
-local function addBorder(button, shadow, drawLayer)
+local function addBorder(button, drawLayer, dbf)
 
     local name = button:GetName() or "nil"
     local icon = _G[name .. "Icon"]
@@ -49,7 +49,11 @@ local function addBorder(button, shadow, drawLayer)
 
     if button and border then
         if RougeUI.db.Lorti then
-            border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss")
+            if button.debuff and dbf then
+                border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss2")
+            else
+                border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss")
+            end
         elseif RougeUI.db.Roug then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\debuff")
@@ -175,7 +179,7 @@ local function SkinBuffs(bu)
         bu.count:SetPoint("TOPRIGHT", 1, 0)
     end
 
-    addBorder(bu)
+    addBorder(bu, "BACKGROUND", true)
 
     bu.styled = true
 end
@@ -201,8 +205,6 @@ local function styleActionButton(bu)
         nt2:SetTexture(nil)
     end
 
-    addBorder(bu, nil, "OVERLAY")
-
     if ic then
         if RougeUI.db.Lorti then
             ic:SetTexCoord(0, 1, 0, 1)
@@ -214,7 +216,8 @@ local function styleActionButton(bu)
     if not bartender4 then
         if RougeUI.db.Lorti then
             ho:ClearAllPoints()
-            ho:SetPoint("TOPRIGHT", bu, 0, -4)
+            ho:SetPoint("TOPRIGHT", bu, -1, -3)
+            ho:SetPoint("TOPLEFT", bu, -1, -3)
         else
             ho:ClearAllPoints()
             ho:SetPoint("TOPRIGHT", bu, 1, -2)
@@ -229,6 +232,32 @@ local function styleActionButton(bu)
     end
     if fobs then
         fobs:SetTexture(nil)
+    end
+
+    if RougeUI.db.Lorti then
+        bu:SetPushedTexture("Interface\\AddOns\\RougeUI\\textures\\art\\pushed")
+        bu:SetNormalTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss")
+        if not nt then
+            nt = bu:GetNormalTexture()
+        end
+        if not nt2 then
+            nt2 = bu:GetNormalTexture()
+        end
+        if nt then
+            nt:SetAllPoints(bu)
+        end
+        if nt2 then
+            nt2:SetAllPoints(bu)
+        end
+        local bg = CreateFrame("Frame", nil, bu, BackdropTemplateMixin and "BackdropTemplate")
+        bg:SetPoint("TOPLEFT", bu, "TOPLEFT", -4, 4)
+        bg:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 4, -4)
+        bg:SetFrameLevel(bu:GetFrameLevel() - 1)
+        bg:SetBackdrop(backdrop)
+        bg:SetBackdropBorderColor(0.05, 0.05, 0.05)
+        bu.bg = bg
+    else
+        addBorder(bu, "OVERLAY")
     end
 
     bu.styled = true
@@ -272,12 +301,12 @@ local function init()
 
     -- Castbar
     local tf = CreateFrame("Frame", nil, TargetFrameSpellBar, BackdropTemplateMixin and "BackdropTemplate")
-    addBorder(tf, nil, "OVERLAY")
+    addBorder(tf,"OVERLAY")
     tf:SetAllPoints(TargetFrameSpellBar.Icon)
     TargetFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
     local ff = CreateFrame("Frame", nil, FocusFrameSpellBar, BackdropTemplateMixin and "BackdropTemplate")
-    addBorder(ff, nil, "OVERLAY")
+    addBorder(ff, "OVERLAY")
     ff:SetAllPoints(FocusFrameSpellBar.Icon)
     FocusFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
@@ -296,7 +325,7 @@ local function HookAuras()
             local bu = _G["TargetFrameBuff" .. i]
             if bu then
                 if not bu.skin then
-                    addBorder(bu, 0)
+                    addBorder(bu)
                     _G["TargetFrameBuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
                     bu.skin = true
                 end
@@ -308,7 +337,7 @@ local function HookAuras()
             local bu = _G["TargetFrameDebuff" .. i]
             if bu then
                 if not bu.skin then
-                    addBorder(bu, 0)
+                    addBorder(bu)
                     _G["TargetFrameDebuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
                     bu.skin = true
                 end
@@ -355,19 +384,10 @@ local function BuffAnchor()
 
     for i = 1, BUFF_ACTUAL_DISPLAY do
         buff = _G["BuffButton" .. i];
-        if (buff.consolidated) then
-            if (buff.parent == BuffFrame) then
-                buff:SetParent(ConsolidatedBuffsContainer);
-                buff.parent = ConsolidatedBuffsContainer;
-            end
-        else
+        if not buff.consolidated then
             numBuffs = numBuffs + 1;
             index = numBuffs + slack;
-            if (buff.parent ~= BuffFrame) then
-                buff.count:SetFontObject(NumberFontNormal);
-                buff:SetParent(BuffFrame);
-                buff.parent = BuffFrame;
-            end
+
             buff:ClearAllPoints();
             if ((index > 1) and (mod(index, BUFFS_PER_ROW) == 1)) then
                 -- New row
@@ -391,7 +411,7 @@ local function BuffAnchor()
                         buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "TOPLEFT", BUFF_HORIZ_SPACING, 0);
                     end
                 else
-                    buff:SetPoint("RIGHT", previousBuff, "LEFT", BUFF_HORIZ_SPACING , 0); -- spacing
+                    buff:SetPoint("RIGHT", previousBuff, "LEFT", BUFF_HORIZ_SPACING, 0); -- spacing
                 end
             end
             previousBuff = buff;

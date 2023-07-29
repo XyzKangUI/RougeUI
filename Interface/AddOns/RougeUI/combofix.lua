@@ -5,7 +5,7 @@ local targetGUID
 local UnitGUID, UnitCanAttack, UnitIsPlayer, GetComboPoints = UnitGUID, UnitCanAttack, UnitIsPlayer, GetComboPoints
 local COMBOFRAME_FADE_IN = 0;
 local COMBOFRAME_HIGHLIGHT_FADE_IN = 0;
-local COMBO_FRAME_LAST_NUM_POINTS = 0;
+local COMBOFRAMELAST_NUM_POINTS = 0;
 local UnitIsPossessed = UnitIsPossessed
 
 local function ComboUpdate(self)
@@ -43,7 +43,7 @@ local function ComboUpdate(self)
             comboPointHighlight = comboPoint.Highlight;
             comboPointShine = comboPoint.Shine;
             if (i <= comboPoints) then
-                if (i > COMBO_FRAME_LAST_NUM_POINTS) then
+                if (i > COMBOFRAMELAST_NUM_POINTS) then
                     -- Fade in the highlight and set a function that triggers when it is done fading
                     fadeInfo.mode = "IN";
                     fadeInfo.timeToFade = COMBOFRAME_HIGHLIGHT_FADE_IN;
@@ -66,7 +66,7 @@ local function ComboUpdate(self)
         self.ComboPoints[1].Shine:SetAlpha(0);
         self:Hide();
     end
-    COMBO_FRAME_LAST_NUM_POINTS = comboPoints;
+    COMBOFRAMELAST_NUM_POINTS = comboPoints;
 end
 
 local CF = CreateFrame("Frame")
