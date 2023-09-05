@@ -37,7 +37,7 @@ local function WAHK(button)
         end
     end
 
-    if key then
+    if key and not bartender then
         SetOverrideBindingClick(btn, true, key, btn:GetName())
     end
 end
@@ -80,7 +80,8 @@ frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", "player")
 frame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player")
 frame:SetScript("OnEvent", function(self, event, ...)
-    if not RougeUI.db.KeyEcho then -- stop copying my work, use the addon.
+    if not RougeUI.db.KeyEcho then
+        -- stop copying my work, use the addon.
         self:UnregisterAllEvents()
         self:SetScript("OnEvent", nil)
         return

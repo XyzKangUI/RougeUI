@@ -234,30 +234,10 @@ local function styleActionButton(bu)
         fobs:SetTexture(nil)
     end
 
+    addBorder(bu, "BACKGROUND")
+
     if RougeUI.db.Lorti then
         bu:SetPushedTexture("Interface\\AddOns\\RougeUI\\textures\\art\\pushed")
-        bu:SetNormalTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss")
-        if not nt then
-            nt = bu:GetNormalTexture()
-        end
-        if not nt2 then
-            nt2 = bu:GetNormalTexture()
-        end
-        if nt then
-            nt:SetAllPoints(bu)
-        end
-        if nt2 then
-            nt2:SetAllPoints(bu)
-        end
-        local bg = CreateFrame("Frame", nil, bu, BackdropTemplateMixin and "BackdropTemplate")
-        bg:SetPoint("TOPLEFT", bu, "TOPLEFT", -4, 4)
-        bg:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 4, -4)
-        bg:SetFrameLevel(bu:GetFrameLevel() - 1)
-        bg:SetBackdrop(backdrop)
-        bg:SetBackdropBorderColor(0.05, 0.05, 0.05)
-        bu.bg = bg
-    else
-        addBorder(bu, "OVERLAY")
     end
 
     bu.styled = true
@@ -301,7 +281,7 @@ local function init()
 
     -- Castbar
     local tf = CreateFrame("Frame", nil, TargetFrameSpellBar, BackdropTemplateMixin and "BackdropTemplate")
-    addBorder(tf,"OVERLAY")
+    addBorder(tf, "OVERLAY")
     tf:SetAllPoints(TargetFrameSpellBar.Icon)
     TargetFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 

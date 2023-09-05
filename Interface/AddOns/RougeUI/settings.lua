@@ -65,7 +65,8 @@ local stock = {
     Slice = false,
     NoLevel = false,
     KeyEcho = false,
-    ClassNames = false
+    ClassNames = false,
+    RangeIndicator = false
 }
 
 local f = CreateFrame("Frame")
@@ -622,19 +623,25 @@ function f:CreateGUI()
         Echo:SetChecked(addon.db.KeyEcho)
         Echo:SetPoint("TOPLEFT", 350, -245)
 
-        CreateText(Panel.childPanel2, 350, -295, "Rogue Specific")
+        local Echo = CheckBtn("Actionbar Range Indicator", "Color your actionbuttons when out of range or oom", Panel.childPanel2, function(self, value)
+            addon.db.RangeIndicator = value
+        end)
+        Echo:SetChecked(addon.db.RangeIndicator)
+        Echo:SetPoint("TOPLEFT", 350, -280)
+
+        CreateText(Panel.childPanel2, 350, -330, "Rogue Specific")
 
         local ComboFixButton = CheckBtn("ComboFrame Fix", "This change will allow you to see combo points on mind controlled enemy players", Panel.childPanel2, function(self, value)
             addon.db.cfix = value
         end)
         ComboFixButton:SetChecked(addon.db.cfix)
-        ComboFixButton:SetPoint("TOPLEFT", 350, -330)
+        ComboFixButton:SetPoint("TOPLEFT", 350, -365)
 
         local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
             addon.db.Slice = value
         end)
         SliceButton:SetChecked(addon.db.Slice)
-        SliceButton:SetPoint("TOPLEFT", 350, -365)
+        SliceButton:SetPoint("TOPLEFT", 350, -400)
 
         local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
             addon.db.CastTimer = value

@@ -732,6 +732,44 @@ local function Haxx()
     end
 end
 
+local function Usable(button)
+    local isUsable, notEnoughMana = IsUsableAction(button.action)
+    local icon = button.icon
+
+    if isUsable then
+        icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+        icon:SetDesaturated(false)
+    elseif notEnoughMana then
+        icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
+        icon:SetDesaturated(true)
+    else
+        icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
+        icon:SetDesaturated(true)
+    end
+end
+
+local function RangeIndicator(self)
+    local _, oom = IsUsableAction(self.action)
+    local valid = IsActionInRange(self.action);
+    local checksRange = (valid ~= nil);
+    local inRange = checksRange and valid;
+
+    if self.HotKey and self.HotKey:GetAlpha() > 0 then
+        self.HotKey:SetAlpha(0)
+    end
+    if checksRange and not inRange then
+        if oom then
+            self.icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
+            self.icon:SetDesaturated(true)
+        else
+            self.icon:SetVertexColor(1.0, 0.35, 0.35, 0.75)
+            self.icon:SetDesaturated(true)
+        end
+    else
+        Usable(self)
+    end
+end
+
 local e = CreateFrame("Frame")
 for _, v in pairs(events) do
     e:RegisterEvent(v)
@@ -859,6 +897,10 @@ e:SetScript("OnEvent", function(self, event)
 
         if RougeUI.db.Slice then
             Haxx()
+        end
+
+        if RougeUI.db.RangeIndicator and not (IsAddOnLoaded("Bartender4") or IsAddOnLoaded("tullaRange")) then
+            hooksecurefunc("ActionButton_OnUpdate", RangeIndicator)
         end
 
         for addons in pairs(addonlist) do
