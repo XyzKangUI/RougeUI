@@ -743,8 +743,8 @@ local function Usable(button)
         icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
         icon:SetDesaturated(true)
     else
-        icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
-        icon:SetDesaturated(true)
+        icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+        icon:SetDesaturated(false)
     end
 end
 

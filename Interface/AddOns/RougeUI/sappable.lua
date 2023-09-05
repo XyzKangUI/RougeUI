@@ -2,8 +2,8 @@ local _, RougeUI = ...
 local plates = {}
 local cacheUnit = {}
 local unitID = { "target", "arena1", "arena2", "arena3" }
-local ipairs, strsplit, mceil = ipairs, string.split, math.ceil
-local UnitGUID, UnitIsPlayer, UnitClass = UnitGUID, UnitIsPlayer, UnitClass
+local ipairs, mceil = ipairs, math.ceil
+local UnitGUID, UnitClass = UnitGUID, UnitClass
 local CombatLog_Object_IsA, COMBATLOG_FILTER_HOSTILE_PLAYERS = CombatLog_Object_IsA, COMBATLOG_FILTER_HOSTILE_PLAYERS
 local glyphHex = nil
 
@@ -53,6 +53,7 @@ local classHealth = {
     [11] = 7417, -- Druid
 }
 
+-- Do all damaging trinket procs count or only pendulum of telluric currents?
 local bustedSpells = {
     [GetSpellInfo(58381)] = true, -- Mind Flay
     [GetSpellInfo(63675)] = true, -- Improved Devouring Plague
@@ -91,10 +92,15 @@ local function CreateIcon(unit, unitGUID)
     plates[unitGUID] = plate
 end
 
-local function UpdateIndicator(amount, guid)
+local function UpdateIndicator(guid)
     local plate = plates[guid]
 
-    if plate and plate.indicator then
+    if not plate then
+        return
+    end
+
+    local amount = cacheUnit[guid] and cacheUnit[guid].maxAmount or 0
+    if plate.indicator then
         if amount > 0 then
             plate.indicator:SetText(mceil(amount))
             if not plate.indicator:IsShown() then
@@ -116,71 +122,58 @@ local function CLEU()
         return
     end
 
-    if not cacheUnit[destGUID] then
-        cacheUnit[destGUID] = {
-            maxAmount = nil,
-            feared = false,
-        }
-    end
+    if type == "SPELL_AURA_APPLIED" then
+        if PF[spellID] then
+            local unit = unitToken(destGUID)
 
-    if type == "SPELL_AURA_APPLIED" and PF[spellID] then
-        local unit = unitToken(destGUID)
+            if not unit then
+                return
+            end
 
-        if not unit then
-            return
+            local _, _, class = UnitClass(unit)
+            local amount = classHealth[class] * 0.40
+            --local amount = UnitHealthMax(unit) * 0.15
+
+            if spellID == 51514 and glyphHex then
+                amount = amount * 1.2
+            end
+
+            cacheUnit[destGUID] = {
+                maxAmount = amount,
+                feared = true,
+            }
+            CreateIcon(unit, destGUID)
+            UpdateIndicator(destGUID)
         end
-
-        local _, _, class = UnitClass(unit)
-        local amount = classHealth[class] * 0.4
-
-        if spellID == 51514 and glyphHex then
-            amount = amount * 1.2
+    elseif type == "SPELL_AURA_REMOVED" then
+        if PF[spellID] and (cacheUnit[destGUID] and cacheUnit[destGUID].feared) then
+            cacheUnit[destGUID] = {}
+            UpdateIndicator(destGUID)
         end
+    else
+        if (cacheUnit[destGUID] and cacheUnit[destGUID].feared) then
+            if bustedSpells[spellName] and (type ~= "SPELL_PERIODIC_DAMAGE") then
+                return
+            end
 
-        cacheUnit[destGUID] = {
-            maxAmount = amount,
-            feared = true,
-        }
-        CreateIcon(unit, destGUID)
-        UpdateIndicator(amount, destGUID)
-    elseif (type == "SPELL_DAMAGE" or type == "RANGE_DAMAGE") and cacheUnit[destGUID].feared then
-        if bustedSpells[spellName] then
-            return
+            local damage, arg
+
+            if type == "SWING_DAMAGE" then
+                damage = spellID
+                arg = arg18
+            else
+                damage = arg15
+                arg = arg21
+            end
+
+            -- Crits count towards breaking CC, stealthfix?
+            --   if arg then
+            --       damage = damage / 2
+            --    end
+
+            cacheUnit[destGUID].maxAmount = cacheUnit[destGUID].maxAmount - damage
+            UpdateIndicator(destGUID)
         end
-
-        local damage = arg15
-        if arg21 then
-            damage = arg15 / 2
-        end
-
-        cacheUnit[destGUID].maxAmount = cacheUnit[destGUID].maxAmount - damage
-
-        local amount = cacheUnit[destGUID].maxAmount
-        UpdateIndicator(amount, destGUID)
-    elseif (type == "SPELL_PERIODIC_DAMAGE") and cacheUnit[destGUID].feared then
-        local damage = arg15
-        if arg21 then
-            damage = arg15 / 2
-        end
-
-        cacheUnit[destGUID].maxAmount = cacheUnit[destGUID].maxAmount - damage
-
-        local amount = cacheUnit[destGUID].maxAmount
-        UpdateIndicator(amount, destGUID)
-    elseif type == "SWING_DAMAGE" and cacheUnit[destGUID].feared then
-        local damage = spellID
-        if arg18 then
-            damage = spellID / 2
-        end
-
-        cacheUnit[destGUID].maxAmount = cacheUnit[destGUID].maxAmount - damage
-
-        local amount = cacheUnit[destGUID].maxAmount
-        UpdateIndicator(amount, destGUID)
-    elseif type == "SPELL_AURA_REMOVED" and PF[spellID] and cacheUnit[destGUID].feared then
-        cacheUnit[destGUID] = {}
-
-        UpdateIndicator(0, destGUID)
     end
 end
 
@@ -188,6 +181,7 @@ local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 frame:RegisterEvent("GLYPH_UPDATED")
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
@@ -216,5 +210,12 @@ frame:SetScript("OnEvent", function(self, event, ...)
             GlyphCheck()
         end
         self:UnregisterEvent("PLAYER_LOGIN")
+    elseif event == "NAME_PLATE_UNIT_ADDED" then
+        local unit = ...
+        local namePlateFrameBase = C_NamePlate.GetNamePlateForUnit(unit, issecure())
+        local guid = UnitGUID(unit)
+        if unit and namePlateFrameBase then
+            UpdateIndicator(guid)
+        end
     end
 end)
