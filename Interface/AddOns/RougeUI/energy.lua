@@ -33,7 +33,7 @@ local updateUnit = {
     ["arena5"] = true
 }
 
-local powerTypes = { [0] = true, [3] = true }
+local powerTypes = { [0] = true, [3] = true, [1] = true, [6] = true }
 
 local energyValues = {
     arena1 = {
@@ -539,6 +539,10 @@ function EnemyOOC:UNIT_FLAGS(unit)
     else
         self:StopTimer(unit)
         running[unit] = false
+        energyValues[unit].last_tick = GetTime()
+        if UnitPower(unit) == 0 then
+            energyValues[unit].startTick = true
+        end
         -- if not powerTypes[PowerType(unit)] then
         -- self:Predict(unit, GetTime())
         -- energyValues[unit].startTick = true
@@ -596,7 +600,7 @@ function EnemyOOC.OnUpdate(self, elapsed)
     end
 end
 
-function EnemyOOC:UNIT_POWER_UPDATE(unit)
+function EnemyOOC:UNIT_POWER_UPDATE(unit, type)
     if not energyValues[unit] or not powerTypes[PowerType(unit)] then
         return
     end
@@ -611,14 +615,20 @@ function EnemyOOC:UNIT_POWER_UPDATE(unit)
         return
     end
 
-    if (energyValues[unit].last_value == 0) then
+    if ((energyValues[unit].last_value == 0) and (type == "ENERGY" or type == "MANA")) then
         energyValues[unit].last_value = energy
+        return
+    elseif (type == "RAGE" or type == "RUNIC_POWER") and not (energyInc == -2 or energyInc == -1 or energyInc == -3) then
+        energyValues[unit].last_value = energy
+        return
+    elseif energyInc == 0 then
         return
     end
 
-    if (energy > energyValues[unit].last_value) and not energyValues[unit].validTick then
+    if ((energy > energyValues[unit].last_value) or (type == "RAGE" or type == "RUNIC_POWER")) and not energyValues[unit].validTick then
+        --print(type, energy > energyValues[unit].last_value, unit, energyInc)
         energyValues[unit].startTick = true
-        energyValues[unit].last_tick = 0
+        energyValues[unit].last_tick = now
         energyValues[unit].validTick = true
         EnemyOOC:Predict(unit, now)
     end

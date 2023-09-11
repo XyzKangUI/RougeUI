@@ -319,9 +319,7 @@ local function Target_Update(frame)
             if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
                 if RougeUI.db.HighlightDispellable then
                     if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 or spellId == 53659 then
-                        local buffSize = RougeUI.db.OtherBuffSize
-                        buffFrame:SetHeight(buffSize)
-                        buffFrame:SetWidth(buffSize)
+                        local buffSize = buffFrame:GetSize()
                         frameStealable:Show()
                         frameStealable:SetHeight(buffSize * 1.4)
                         frameStealable:SetWidth(buffSize * 1.4)
@@ -344,10 +342,6 @@ local function Target_Update(frame)
                         frameStealable:SetVertexColor(1, 1, 1)
                         frameStealable:Hide()
                     end
-                else
-                    local buffSize = RougeUI.db.OtherBuffSize
-                    buffFrame:SetHeight(buffSize)
-                    buffFrame:SetWidth(buffSize)
                 end
 
                 -- set the buff to be big if the buff is cast by the player or his pet

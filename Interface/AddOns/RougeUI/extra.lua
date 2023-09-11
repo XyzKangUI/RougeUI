@@ -733,14 +733,19 @@ local function Haxx()
 end
 
 local function Usable(button)
-    local isUsable, notEnoughMana = IsUsableAction(button.action)
+    local action = button.action
+    local isUsable, notEnoughMana = IsUsableAction(action)
     local icon = button.icon
+    local count =  GetActionCount(action)
 
     if isUsable then
         icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
         icon:SetDesaturated(false)
     elseif notEnoughMana then
         icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
+        icon:SetDesaturated(true)
+    elseif (IsConsumableAction(action) or IsStackableAction(action)) and count == 0 then
+        icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
         icon:SetDesaturated(true)
     else
         icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
