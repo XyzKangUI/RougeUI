@@ -736,7 +736,7 @@ local function Usable(button)
     local action = button.action
     local isUsable, notEnoughMana = IsUsableAction(action)
     local icon = button.icon
-    local count =  GetActionCount(action)
+    local count = GetActionCount(action)
 
     if isUsable then
         icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
@@ -748,8 +748,13 @@ local function Usable(button)
         icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
         icon:SetDesaturated(true)
     else
-        icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-        icon:SetDesaturated(false)
+        if UnitExists("target") or UnitExists("focus") then
+            icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
+            icon:SetDesaturated(true)
+        else
+            icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+            icon:SetDesaturated(false)
+        end
     end
 end
 
@@ -917,7 +922,7 @@ e:SetScript("OnEvent", function(self, event)
 
         OnLoad()
 
-        if RougeUI.db.ThickFrames or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3)  or RougeUI.db.ClassNames then
+        if RougeUI.db.ThickFrames or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3) or RougeUI.db.ClassNames then
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
     end

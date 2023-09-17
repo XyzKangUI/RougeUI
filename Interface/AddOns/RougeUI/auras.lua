@@ -1,6 +1,6 @@
 local _, RougeUI = ...
 local _G = getfenv(0)
-local AURA_OFFSET_Y = 3
+local AURA_OFFSET_Y = 1
 local AURA_START_X = 5
 local AURA_START_Y = 32
 local OFFSET_X = 3
@@ -10,7 +10,7 @@ local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
 local pairs = _G.pairs
 local MAX_TARGET_DEBUFFS = 16;
 local MAX_TARGET_BUFFS = 32;
-local mceil = math.ceil
+local mabs, mfloor = math.abs, math.floor
 local DBFLoaded
 
 local Enraged = {
@@ -90,29 +90,34 @@ local Whitelist = {
 
 };
 
-local function ToTegrity(frame)
-    if not (frame == TargetFrameToT or frame == FocusFrameToT) then
+local function RealWidth(frame, auraName, width)
+    if not (frame.totFrame == _G.TargetFrameToT or frame.totFrame == _G.FocusFrameToT) then
         return
     end
 
-    local _, _, a, b, c = frame:GetPoint()
+    local x1 = frame.totFrame:GetLeft()
+    local x2 = _G[auraName..1]:GetLeft()
+    local diff = mabs(x2 - x1)
+    local distance = mfloor(diff) + 2 -- cheat a bit
 
-    if (a == "BOTTOMRIGHT") and (mceil(b) == -35) and (mceil(c) == -10) then
-        return true
-    else
-        return false
+    if not x1 or not x2 or not distance then
+        return frame.TOT_AURA_ROW_WIDTH
+    elseif distance > 136 then -- let user regulate when ToTo is in Africa
+        return width
     end
+
+    return distance
 end
 
-local function maxRows(self, width, mirror)
+local function maxRows(self, width, mirror, auraName)
     local haveTargetofTarget
 
     if self.totFrame ~= nil then
         haveTargetofTarget = self.totFrame:IsShown();
     end
 
-    if (haveTargetofTarget and self.auraRows <= 2) and not mirror and ToTegrity(self.totFrame) then
-        return self.TOT_AURA_ROW_WIDTH
+    if (haveTargetofTarget and self.auraRows <= 2) and not mirror then
+        return RealWidth(self, auraName, width)
     else
         return width
     end
@@ -144,7 +149,7 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             rowWidth = rowWidth + size + offsetX
         end
 
-        if (rowWidth > maxRows(frame, maxRowWidth, mirrorAurasVertically)) then
+        if (rowWidth > maxRows(frame, maxRowWidth, mirrorAurasVertically, auraName)) then
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
             rowWidth = size
             frame.auraRows = frame.auraRows + 1;

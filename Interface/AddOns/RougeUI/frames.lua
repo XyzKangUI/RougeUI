@@ -579,11 +579,18 @@ local function FrameColour()
                     region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
             end
+            for _, region in pairs({ LFGListFrame.CategorySelection.Inset:GetRegions() }) do
+                if region and region:IsObjectType("Texture") then
+                    region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
+            end
             LFDQueueFrameFindGroupButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             LFDQueueFrameFindGroupButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVEFrameLeftInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVEFrameLeftInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVEFrameLeftInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            LFGListFrame.CategorySelection.FindGroupButton.LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            LFGListFrame.CategorySelection.StartGroupButton.RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVEFramePortrait:SetVertexColor(1, 1, 1)
         end
     end
@@ -684,14 +691,6 @@ local function NewVariables()
     for _, v in pairs({ a, b, c, d, e }) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        end
-    end
-
-    -- Worldmap
-    local a, b, c, d, e, f, g, h, i, j, k, l = WorldMapFrame.BorderFrame:GetRegions()
-    for _, v in pairs({ a, b, c, d, e, f, g, h, i, j, k, l }) do
-        if v then
-            v:SetVertexColor(.5, .5, .5)
         end
     end
 
