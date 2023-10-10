@@ -895,9 +895,6 @@ e:SetScript("OnEvent", function(self, event)
             ReadyCheckFrame:HookScript("OnShow", function(self)
                 ReadyCheckFrameYesButton:Click()
             end)
-            QueueReadyCheckPopup:HookScript("OnShow", function(self)
-                QueueReadyCheckPopup.YesButton:Click()
-            end)
         end
         if RougeUI.db.BuffAlpha then
             hooksecurefunc("AuraButton_OnUpdate", function(self)

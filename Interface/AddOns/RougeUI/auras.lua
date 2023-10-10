@@ -11,7 +11,6 @@ local pairs = _G.pairs
 local MAX_TARGET_DEBUFFS = 16;
 local MAX_TARGET_BUFFS = 32;
 local mabs, mfloor = math.abs, math.floor
-local DBFLoaded
 
 local Enraged = {
     --    [5229] = true, -- Enrage (Druid)
@@ -358,10 +357,6 @@ local function Target_Update(frame)
         end
     end
 
-    if DBFLoaded then
-        return
-    end
-
     local numDebuffs = 0;
 
     local frameNum = 1;
@@ -428,10 +423,8 @@ function RougeUI.RougeUIF:HookAuras()
     if not IsAddOnLoaded("DeBuffFilter") then
         hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize);
         hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
-    else
-        DBFLoaded = true
+        hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
     end
-    hooksecurefunc("TargetFrame_UpdateAuras", Target_Update);
 end
 
 local FF = CreateFrame("Frame")

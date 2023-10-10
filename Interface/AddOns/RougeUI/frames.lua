@@ -66,7 +66,6 @@ local function FrameColour()
         Rune4BorderTexture,
         Rune5BorderTexture,
         Rune6BorderTexture,
-        QueueReadyCheckPopup.Border,
     }) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)

@@ -599,7 +599,7 @@ function f:CreateGUI()
         SpellQueueWindow:SetChecked(addon.db.SQFix)
         SpellQueueWindow:SetPoint("TOPLEFT", 350, -105)
 
-        local AutoReadyButton = CheckBtn("Auto accept raid/arena ready check", "When enabled it will automatically accept any readychecks. Warning: Don't AFK or enable when queueing arena with a random", Panel.childPanel2, function(self, value)
+        local AutoReadyButton = CheckBtn("Auto accept raid ready check", "When enabled it will automatically accept any readychecks. Warning: Don't AFK or enable when queueing arena with a random", Panel.childPanel2, function(self, value)
             addon.db.AutoReady = value
         end)
         AutoReadyButton:SetChecked(addon.db.AutoReady)
