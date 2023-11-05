@@ -764,9 +764,10 @@ local function RangeIndicator(self)
     local checksRange = (valid ~= nil);
     local inRange = checksRange and valid;
 
-    if self.HotKey and self.HotKey:GetAlpha() > 0 then
-        self.HotKey:SetAlpha(0)
+    if self.HotKey and self.HotKey:GetText() == RANGE_INDICATOR then
+        self.HotKey:Hide()
     end
+
     if checksRange and not inRange then
         if oom then
             self.icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)

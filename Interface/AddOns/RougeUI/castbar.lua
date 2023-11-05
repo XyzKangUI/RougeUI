@@ -2,6 +2,7 @@ local _, RougeUI = ...
 local _G = getfenv(0)
 local UnitCastingInfo = _G.UnitCastingInfo
 local UnitChannelInfo = _G.UnitChannelInfo
+local strformat, max = string.format, math.max
 
 local function modstyle()
     local t = TargetFrameSpellBar
@@ -20,31 +21,37 @@ local function modstyle()
     f.timer:SetPoint("RIGHT", f, -3, 0)
     f.update = .1
 
-    t.Text:SetFontObject("SystemFont_Outline_Small")
-    t:ClearAllPoints()
-    t:SetWidth(142)
+    t.Text:SetFontObject("Game12Font_o1")
+    t:SetWidth(145)
     t:SetHeight(10)
-    -- t.Text:SetPoint("TOP", t, 0, 4)
-    t.Icon:Show()
-    t.Icon:SetHeight(21)
-    t.Icon:SetWidth(21)
-    t.Icon:SetPoint("RIGHT", t, "LEFT", -10, 1)
+    t.Border:SetHeight(40)
+    t.Border:SetWidth(190)
+    t.Border:ClearAllPoints()
+    t.Border:SetPoint("TOPLEFT", t, "TOPLEFT", -22, 15)
+    t.Icon:SetHeight(16)
+    t.Icon:SetWidth(16)
+    t.Icon:ClearAllPoints()
+    t.Icon:SetPoint("RIGHT", t, "LEFT", -5, 1)
     t.Text:ClearAllPoints()
     t.Text:SetPoint("TOPLEFT", t, "BOTTOMLEFT", 2, -5)
     t.Text:SetJustifyH("LEFT")
+    t.Text:SetShadowOffset(0, 0)
 
-    f.Text:SetFontObject("SystemFont_Outline_Small")
-    f:ClearAllPoints()
-    f:SetWidth(142)
+    f.Text:SetFontObject("Game12Font_o1")
+    f:SetWidth(145)
     f:SetHeight(10)
-    f.Text:SetPoint("TOP", f, 0, 4)
-    f.Icon:Show()
-    f.Icon:SetHeight(21)
-    f.Icon:SetWidth(21)
-    f.Icon:SetPoint("RIGHT", f, "LEFT", -10, 1)
+    f.Border:SetHeight(40)
+    f.Border:SetWidth(190)
+    f.Border:ClearAllPoints()
+    f.Border:SetPoint("TOPLEFT", f, "TOPLEFT", -22, 15)
+    f.Icon:SetHeight(16)
+    f.Icon:SetWidth(16)
+    f.Icon:ClearAllPoints()
+    f.Icon:SetPoint("RIGHT", f, "LEFT", -5, 1)
     f.Text:ClearAllPoints()
     f.Text:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 2, -5)
     f.Text:SetJustifyH("LEFT")
+    f.Text:SetShadowOffset(0, 0)
 end
 
 local cf = CastingBarFrame
@@ -66,9 +73,9 @@ local function c_OnUpdate_Hook(self, elapsed)
     end
     if self.update and self.update < elapsed then
         if self.casting then
-            self.timer:SetText(string.format("%.1f", math.max(self.maxValue - self.value, 0)))
+            self.timer:SetText(strformat("%.1f", max(self.maxValue - self.value, 0)))
         elseif self.channeling then
-            self.timer:SetText(string.format("%.1f", math.max(self.value, 0)))
+            self.timer:SetText(strformat("%.1f", max(self.value, 0)))
         else
             self.timer:SetText("")
         end
@@ -78,9 +85,20 @@ local function c_OnUpdate_Hook(self, elapsed)
     end
 end
 
-local function RedBars(frame)
-    if frame.Text:GetText() == INTERRUPTED or frame.Text:GetText() == FAILED then
-        frame:SetStatusBarColor(1, 0, 0)
+local function ClassColors(self)
+    local _, class = UnitClass(self.unit)
+    local c = RAID_CLASS_COLORS[class]
+    local failed = self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED)
+    if c and not self.casted then
+        self.casted = true
+        if self.BorderShield:IsShown() and not failed then
+            self:SetStatusBarColor(0, 1, 0.6)
+        elseif failed then
+            self:SetStatusBarColor(1, 0, 0)
+        else
+            self:SetStatusBarColor(c.r, c.g, c.b)
+        end
+        self.casted = false
     end
 end
 
@@ -90,28 +108,17 @@ FR:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
         if RougeUI.db.CastTimer then
             modstyle()
-            FocusFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
-                c_OnUpdate_Hook(self, elapsed)
-                RougeUI.RougeUIF:GradientColour(self, FocusFrameSpellBar)
-                RedBars(self)
-            end)
-            TargetFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
-                c_OnUpdate_Hook(self, elapsed)
-                RougeUI.RougeUIF:GradientColour(self, TargetFrameSpellBar)
-                RedBars(self)
-            end)
-            CastingBarFrame:HookScript("OnUpdate", function(self)
-                RougeUI.RougeUIF:GradientColour(self, CastingBarFrame)
-                RedBars(self)
-            end)
+            FocusFrameSpellBar:HookScript("OnUpdate", c_OnUpdate_Hook)
+            TargetFrameSpellBar:HookScript("OnUpdate",c_OnUpdate_Hook)
             hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, ...)
                 local arg1 = ...
                 local unit = self.unit;
-                local name, text, name2, text2
 
                 if self:IsForbidden() or not (self == TargetFrameSpellBar or self == FocusFrameSpellBar) or arg1 ~= unit then
                     return
                 end
+
+                local name, text, name2, text2
 
                 if event == "UNIT_SPELLCAST_START" then
                     name, text = UnitCastingInfo(unit)
@@ -127,10 +134,10 @@ FR:SetScript("OnEvent", function(self, event)
                     return
                 end
 
-                if self.BorderShield:IsShown() and name then
-                    self.BorderShield:Hide()
+                if self.BorderShield:IsShown() and (name or name2) then
+                    self.BorderShield:SetAlpha(0)
                     if self.Text then
-                        self.Text:SetText(text .. " (IMMUNE)")
+                        self.Text:SetText((text or text2) .. " (IMMUNE)")
                     end
                 end
             end)
