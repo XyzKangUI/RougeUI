@@ -40,23 +40,24 @@ local function WAHK(button, ok)
 
     if key and btn then
         if ok then
+            if not id then
+                id = tonumber(button:match("(%d+)"))
+            end
             local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
             wahk:RegisterForClicks("AnyDown", "AnyUp")
             wahk:SetAttribute("type", "macro")
-            local onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then if HasVehicleActionBar() then self:SetAttribute("macrotext", "/click OverrideActionBarButton" .. id) else self:SetAttribute("macrotext", "/click ActionButton" .. id) end else if HasVehicleActionBar() then self:SetAttribute("macrotext", "/click OverrideActionBarButton" .. id) else self:SetAttribute("macrotext", "/click ActionButton" .. id) end end]], id, id, id)
+            local onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
             SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
             SetOverrideBindingClick(wahk, true, key, wahk:GetName())
-            wahk:SetScript("OnMouseDown", function() if HasVehicleActionBar() then _G["OverrideActionBarButton"..id]:SetButtonState("PUSHED") else btn:SetButtonState("PUSHED") end end)
-            wahk:SetScript("OnMouseUp", function() if HasVehicleActionBar() then _G["OverrideActionBarButton"..id]:SetButtonState("NORMAL") else btn:SetButtonState("NORMAL") end end)
+            wahk:SetScript("OnMouseDown", function() if HasVehicleActionBar() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("PUSHED") else btn:SetButtonState("PUSHED") end end)
+            wahk:SetScript("OnMouseUp", function() if HasVehicleActionBar() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("NORMAL") else btn:SetButtonState("NORMAL") end end)
         else
             btn:RegisterForClicks("AnyDown", "AnyUp")
             local onclick = ([[ if down then
         self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end
     ]]):gsub("clk", clk), nil
             SecureHandlerWrapScript(btn, "OnClick", btn, onclick)
-            if not bartender then
-                SetOverrideBindingClick(btn, true, key, btn:GetName())
-            end
+            SetOverrideBindingClick(btn, true, key, btn:GetName())
         end
     end
 end

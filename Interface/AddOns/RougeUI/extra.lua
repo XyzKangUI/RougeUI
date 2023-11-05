@@ -1,4 +1,5 @@
 local _, RougeUI = ...
+local _G = getfenv(0)
 local hooksecurefunc = hooksecurefunc
 local pairs = pairs
 local IsAddOnLoaded = IsAddOnLoaded
@@ -6,11 +7,12 @@ local GetSpellInfo = GetSpellInfo
 local GetNetStats = GetNetStats
 local IsInInstance = IsInInstance
 local GetBattlefieldScore = GetBattlefieldScore
-local UnitClass, UnitExists, UnitHealth, UnitCanAttack, GetUnitName = UnitClass, UnitExists, UnitHealth, UnitCanAttack, GetUnitName
+local UnitClass, UnitExists, UnitCanAttack, GetUnitName = UnitClass, UnitExists, UnitCanAttack, GetUnitName
 local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification
-local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied, UnitPlayerControlled
+local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied
 local ConsoleExec, RAID_CLASS_COLORS = ConsoleExec, RAID_CLASS_COLORS
 local gsub, format = string.gsub, string.format
+local floor, fmod = math.floor, math.fmod
 local GetClassColorObj, GetMouseFocus = GetClassColorObj, GetMouseFocus
 
 local addonlist = {
@@ -29,7 +31,6 @@ hooksecurefunc(mg, "Show", mg.Hide)
 -- Remove gap in buff timers & color the format
 local function TimeFormat(button, time)
     local duration = _G[button:GetName() .. "Duration"]
-    local floor, fmod = math.floor, math.fmod
     local h, m, s, text
 
     if time <= 0 then
@@ -80,7 +81,7 @@ end
 
 -- Class colored scoreboard
 local function ColorScoreBoard()
-    local inInstance, instanceType = IsInInstance()
+    local _, instanceType = IsInInstance()
     if (instanceType ~= "pvp") then
         return
     end
@@ -102,7 +103,7 @@ end
 -- Some PvPIcon tweaks for BG/Arena/CP Classes
 
 local function PvPIcon()
-    local inInstance, instanceType = IsInInstance()
+    local _, instanceType = IsInInstance()
     for i, v in pairs({
         PlayerPVPIcon,
         FocusFrameTextureFramePVPIcon,
@@ -151,7 +152,7 @@ end
 -- Remove server name from raid frames
 
 hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
-    local inInstance, instanceType = IsInInstance()
+    local _, instanceType = IsInInstance()
     local name = frame.name
     local xName = GetUnitName(frame.unit, true)
     if (instanceType == "pvp" or instanceType == "arena") then
@@ -732,6 +733,8 @@ local function Haxx()
     end
 end
 
+local IsUsableAction, GetActionCount, IsConsumableAction = IsUsableAction, GetActionCount, IsConsumableAction
+local IsStackableAction, IsActionInRange, RANGE_INDICATOR = IsStackableAction, IsActionInRange, RANGE_INDICATOR
 local function Usable(button)
     local action = button.action
     local isUsable, notEnoughMana = IsUsableAction(action)
@@ -767,7 +770,6 @@ local function RangeIndicator(self)
     if self.HotKey and self.HotKey:GetText() == RANGE_INDICATOR then
         self.HotKey:Hide()
     end
-
     if checksRange and not inRange then
         if oom then
             self.icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
@@ -878,7 +880,8 @@ e:SetScript("OnEvent", function(self, event)
 
         if RougeUI.db.ClassBG then
             if PlayerFrame:IsShown() and not PlayerFrame.bg then
-                local c = RAID_CLASS_COLORS[select(2, UnitClass("player"))]
+                local _, class = UnitClass("player")
+                local c = RAID_CLASS_COLORS[class]
                 local bg = PlayerFrame:CreateTexture()
                 bg:SetPoint("TOPLEFT", PlayerFrameBackground)
                 bg:SetPoint("BOTTOMRIGHT", PlayerFrameBackground, 0, 22)
@@ -899,7 +902,9 @@ e:SetScript("OnEvent", function(self, event)
         end
         if RougeUI.db.BuffAlpha then
             hooksecurefunc("AuraButton_OnUpdate", function(self)
-                self:SetAlpha(1)
+                if self:GetAlpha() < 1 then
+                    self:SetAlpha(1)
+                end
             end)
         end
 
