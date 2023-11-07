@@ -550,7 +550,16 @@ local function FrameColour()
     end
 
     if GetBuildInfo() == "3.4.3" then -- Blizz lack of quality control
-        MainMenuMaxLevelBar0:SetPoint("CENTER", -394, 4)
+        MainMenuExpBar:SetSize(1034, 13);
+        MainMenuXPBarTexture0:SetSize(262, 10);
+        MainMenuXPBarTexture1:SetSize(262, 10);
+        MainMenuXPBarTexture2:SetSize(262, 10);
+        MainMenuXPBarTexture3:SetSize(262, 10);
+        MainMenuXPBarTexture0:SetPoint("BOTTOM", -391, 3);
+        MainMenuXPBarTexture1:SetPoint("BOTTOM", -130, 3);
+        MainMenuXPBarTexture2:SetPoint("BOTTOM", 130, 3);
+        MainMenuXPBarTexture3:SetPoint("BOTTOM", 391, 3);
+        MainMenuMaxLevelBar0:SetPoint("CENTER", -391, 4)
         MainMenuMaxLevelBar0:SetSize(261, 7)
         MainMenuMaxLevelBar1:SetSize(261, 7)
         MainMenuMaxLevelBar2:SetSize(261, 7)

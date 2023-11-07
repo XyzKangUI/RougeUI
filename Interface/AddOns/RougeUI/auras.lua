@@ -95,17 +95,20 @@ local function RealWidth(frame, auraName, width)
     end
 
     local x1 = frame.totFrame:GetLeft()
-    local x2 = _G[auraName..1]:GetLeft()
+    local x2 = _G[auraName .. "1"]:GetLeft()
+    if not x1 or not x2 then
+        return frame.TOT_AURA_ROW_WIDTH
+    end
+
     local diff = mabs(x2 - x1)
     local distance = mfloor(diff) + 2 -- cheat a bit
 
-    if not x1 or not x2 or not distance then
-        return frame.TOT_AURA_ROW_WIDTH
-    elseif distance > 136 then -- let user regulate when ToTo is in Africa
+    if distance > 136 then
+        -- let user regulate when ToTo is in Africa
         return width
+    else
+        return distance
     end
-
-    return distance
 end
 
 local function maxRows(self, width, mirror, auraName)
