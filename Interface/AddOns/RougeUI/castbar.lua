@@ -3,6 +3,7 @@ local _G = getfenv(0)
 local UnitCastingInfo = _G.UnitCastingInfo
 local UnitChannelInfo = _G.UnitChannelInfo
 local strformat, max = string.format, math.max
+local FocusFrame = FocusFrame
 
 local function modstyle()
     local t = TargetFrameSpellBar
@@ -12,14 +13,6 @@ local function modstyle()
     t.timer:SetShadowOffset(1, -1)
     t.timer:SetPoint("RIGHT", t, -3, 0)
     t.update = .1
-
-    local f = FocusFrameSpellBar
-    f.timer = f:CreateFontString(nil, "OVERLAY")
-    f.timer:SetFontObject("SystemFont_Shadow_Small")
-    f.timer:SetShadowColor(0, 0, 0)
-    f.timer:SetShadowOffset(1, -1)
-    f.timer:SetPoint("RIGHT", f, -3, 0)
-    f.update = .1
 
     t.Text:SetFontObject("Game12Font_o1")
     t:SetWidth(142)
@@ -37,21 +30,31 @@ local function modstyle()
     t.Text:SetJustifyH("LEFT")
     t.Text:SetShadowOffset(0, 0)
 
-    f.Text:SetFontObject("Game12Font_o1")
-    f:SetWidth(142)
-    f:SetHeight(10)
-    f.Border:SetHeight(40)
-    f.Border:SetWidth(190)
-    f.Border:ClearAllPoints()
-    f.Border:SetPoint("TOPLEFT", f, "TOPLEFT", -24, 15)
-    f.Icon:SetHeight(16)
-    f.Icon:SetWidth(16)
-    f.Icon:ClearAllPoints()
-    f.Icon:SetPoint("RIGHT", f, "LEFT", -5, 0)
-    f.Text:ClearAllPoints()
-    f.Text:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 2, -5)
-    f.Text:SetJustifyH("LEFT")
-    f.Text:SetShadowOffset(0, 0)
+    if FocusFrame then
+        local f = FocusFrameSpellBar
+        f.timer = f:CreateFontString(nil, "OVERLAY")
+        f.timer:SetFontObject("SystemFont_Shadow_Small")
+        f.timer:SetShadowColor(0, 0, 0)
+        f.timer:SetShadowOffset(1, -1)
+        f.timer:SetPoint("RIGHT", f, -3, 0)
+        f.update = .1
+
+        f.Text:SetFontObject("Game12Font_o1")
+        f:SetWidth(142)
+        f:SetHeight(10)
+        f.Border:SetHeight(40)
+        f.Border:SetWidth(190)
+        f.Border:ClearAllPoints()
+        f.Border:SetPoint("TOPLEFT", f, "TOPLEFT", -24, 15)
+        f.Icon:SetHeight(16)
+        f.Icon:SetWidth(16)
+        f.Icon:ClearAllPoints()
+        f.Icon:SetPoint("RIGHT", f, "LEFT", -5, 0)
+        f.Text:ClearAllPoints()
+        f.Text:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 2, -5)
+        f.Text:SetJustifyH("LEFT")
+        f.Text:SetShadowOffset(0, 0)
+    end
 end
 
 local cf = CastingBarFrame
@@ -108,8 +111,22 @@ FR:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
         if RougeUI.db.CastTimer then
             modstyle()
-            FocusFrameSpellBar:HookScript("OnUpdate", c_OnUpdate_Hook)
-            TargetFrameSpellBar:HookScript("OnUpdate",c_OnUpdate_Hook)
+            if FocusFrame then
+                FocusFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
+                    c_OnUpdate_Hook(self, elapsed)
+                    RougeUI.RougeUIF:GradientColour(self)
+                    if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
+                        self:SetStatusBarColor(1, 0, 0)
+                    end
+                end)
+            end
+            TargetFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
+                c_OnUpdate_Hook(self, elapsed)
+                RougeUI.RougeUIF:GradientColour(self)
+                if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
+                    self:SetStatusBarColor(1, 0, 0)
+                end
+            end)
             hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, ...)
                 local arg1 = ...
                 local unit = self.unit;

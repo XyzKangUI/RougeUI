@@ -1,0 +1,22 @@
+## Interface: 11500
+## Title: |cff009cffRougeUI-WOTLKC|r
+## Version: 3.44
+## SavedVariablesPerCharacter: RougeUI
+## DefaultState: enabled
+
+settings.lua
+frames.lua
+smooth.lua
+extra.lua
+textbar.lua
+combat.lua
+castbar.lua
+nameplate.lua
+auras.lua
+minimap.lua
+button.lua
+outlines.lua
+snowfallkey.lua
+combofix.lua
+ticks.lua
+XYZ.lua

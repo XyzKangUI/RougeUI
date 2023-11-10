@@ -1,4 +1,5 @@
 local _, RougeUI = ...
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bt4 = IsAddOnLoaded("Bartender4")
 local dm = IsAddOnLoaded("Dominos")
 local CreateFrame, hooksecurefunc = CreateFrame, hooksecurefunc

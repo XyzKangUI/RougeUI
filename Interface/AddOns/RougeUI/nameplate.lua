@@ -3,6 +3,9 @@ local str_split = string.split
 local UnitGUID = UnitGUID
 local U = UnitIsUnit
 local select, hooksecurefunc = select, hooksecurefunc
+local STANDARD_TEXT_FONT, IsActiveBattlefieldArena = STANDARD_TEXT_FONT, IsActiveBattlefieldArena
+local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 if GetCVar("nameplateShowOnlyNames") == "1" then
     return
@@ -42,7 +45,7 @@ local function AddElements(plate)
     end
 
     if RougeUI.db.ModPlates then
-        local sh = plate.selectionHighlight -- kang from evolvee
+        local sh = plate.selectionHighlight
         sh:SetPoint("TOPLEFT", sh:GetParent(), "TOPLEFT", 1, -1)
         sh:SetPoint("BOTTOMRIGHT", sh:GetParent(), "BOTTOMRIGHT", -1, 1)
         if RougeUI.db.ArenaNumbers and not select(1, IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers then
@@ -53,8 +56,13 @@ local function AddElements(plate)
         end
     end
 
-    for _, v in pairs({ plate.healthBar.border:GetRegions(), plate.CastBar.Border }) do
-        v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    for _, v in pairs({ plate.healthBar.border:GetRegions() }) do
+        if v then
+            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
+    if plate.CastBar and plate.CastBar.Border then
+        plate.CastBar.Border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 end
 
@@ -64,7 +72,9 @@ local function NiceOne(self)
         self.Text:Show()
     end
 end
-hooksecurefunc("Nameplate_CastBar_AdjustPosition", NiceOne)
+if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    hooksecurefunc("Nameplate_CastBar_AdjustPosition", NiceOne)
+end
 
 -- Modification of Knall's genius pet script. Ty <3
 local function HidePlates(plate, unit)
@@ -84,12 +94,14 @@ end
 local OnEvent = function(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
         local base = ...
-        local namePlateFrameBase = C_NamePlate.GetNamePlateForUnit(base, issecure());
+        local namePlateFrameBase = GetNamePlateForUnit(base, true);
         if not namePlateFrameBase then
             return
         end
 
-        HidePlates(namePlateFrameBase, base)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            HidePlates(namePlateFrameBase, base)
+        end
         AddElements(namePlateFrameBase.UnitFrame)
     elseif event == "ADDON_LOADED" then
         if RougeUI.db.ArenaNumbers then

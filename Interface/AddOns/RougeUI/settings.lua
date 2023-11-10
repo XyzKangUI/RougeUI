@@ -3,8 +3,9 @@ local Title = select(2, GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$", "");
 local floor = math.floor
 local format = format
 local CreateFrame, _G = CreateFrame, _G
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 addon.RougeUIF = {}
-
+local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 
 local function RoundNumbers(val, valStep)
     return floor(val / valStep) * valStep
@@ -20,7 +21,7 @@ local stock = {
     HPFontSize = 11,
     SelfSize = 23,
     OtherBuffSize = 23,
-    HighlightDispellable = true,
+    HighlightDispellable = false,
     TimerGap = false,
     ScoreBoard = true,
     HideTitles = true,
@@ -66,7 +67,8 @@ local stock = {
     NoLevel = false,
     KeyEcho = false,
     ClassNames = false,
-    RangeIndicator = false
+    RangeIndicator = false,
+    EnergyTicker = false
 }
 
 local f = CreateFrame("Frame")
@@ -543,35 +545,41 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel2, 10, -40, "PvP Tweaks")
 
-        local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value)
-            addon.db.EnemyTicks = value
-        end)
-        EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
-        EnemyTicksButton:SetPoint("TOPLEFT", 10, -70)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value)
+                addon.db.EnemyTicks = value
+            end)
+            EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
+            EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
+        end
 
-        local PSTrackBtn = CheckBtn("CC Absorb Tracker", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default Blizzard nameplate", Panel.childPanel2, function(self, value)
-            addon.db.PSTrack = value
-        end)
-        PSTrackBtn:SetChecked(addon.db.PSTrack)
-        PSTrackBtn:SetPoint("TOPLEFT", 10, -105)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local PSTrackBtn = CheckBtn("CC Absorb Tracker", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default Blizzard nameplate", Panel.childPanel2, function(self, value)
+                addon.db.PSTrack = value
+            end)
+            PSTrackBtn:SetChecked(addon.db.PSTrack)
+            PSTrackBtn:SetPoint("TOPLEFT", 10, -210)
+        end
 
         local CombatIndicatorButton = CheckBtn("Combat Indicator", "Displays a Combat icon next to Target-/FocusFrame when they enter combat or send pet", Panel.childPanel2, function(self, value)
             addon.db.CombatIndicator = value
         end)
         CombatIndicatorButton:SetChecked(addon.db.CombatIndicator)
-        CombatIndicatorButton:SetPoint("TOPLEFT", 10, -140)
+        CombatIndicatorButton:SetPoint("TOPLEFT", 10, -70)
 
-        local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value)
-            addon.db.ArenaNumbers = value
-        end)
-        ArenaNumbersButton:SetChecked(addon.db.ArenaNumbers)
-        ArenaNumbersButton:SetPoint("TOPLEFT", 10, -175)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value)
+                addon.db.ArenaNumbers = value
+            end)
+            ArenaNumbersButton:SetChecked(addon.db.ArenaNumbers)
+            ArenaNumbersButton:SetPoint("TOPLEFT", 10, -175)
+        end
 
         local ScoreBoardButton = CheckBtn("Class colored PvP Scoreboard", "Color names on the PvP Scoreboard by class", Panel.childPanel2, function(self, value)
             addon.db.ScoreBoard = value
         end)
         ScoreBoardButton:SetChecked(addon.db.ScoreBoard)
-        ScoreBoardButton:SetPoint("TOPLEFT", 10, -210)
+        ScoreBoardButton:SetPoint("TOPLEFT", 10, -105)
 
         CreateText(Panel.childPanel2, 10, -255, "Buffs/Debuffs")
 
@@ -605,11 +613,13 @@ function f:CreateGUI()
         AutoReadyButton:SetChecked(addon.db.AutoReady)
         AutoReadyButton:SetPoint("TOPLEFT", 350, -140)
 
-        local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
-            addon.db.RETabBinder = value
-        end)
-        Retab:SetChecked(addon.db.RETabBinder)
-        Retab:SetPoint("TOPLEFT", 350, -175)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
+                addon.db.RETabBinder = value
+            end)
+            Retab:SetChecked(addon.db.RETabBinder)
+            Retab:SetPoint("TOPLEFT", 350, -280)
+        end
 
         local ButtonAnim = CheckBtn("Animated Keypress (SnowFallKeyPress)", "Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
             addon.db.ButtonAnim = value
@@ -627,7 +637,7 @@ function f:CreateGUI()
             addon.db.RangeIndicator = value
         end)
         Echo:SetChecked(addon.db.RangeIndicator)
-        Echo:SetPoint("TOPLEFT", 350, -280)
+        Echo:SetPoint("TOPLEFT", 350, -175)
 
         CreateText(Panel.childPanel2, 350, -330, "Rogue Specific")
 
@@ -637,11 +647,20 @@ function f:CreateGUI()
         ComboFixButton:SetChecked(addon.db.cfix)
         ComboFixButton:SetPoint("TOPLEFT", 350, -365)
 
-        local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
-            addon.db.Slice = value
-        end)
-        SliceButton:SetChecked(addon.db.Slice)
-        SliceButton:SetPoint("TOPLEFT", 350, -400)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            local EnemyTicksButton = CheckBtn("Energy Ticker", "Track your Energy Ticks on the manabar", Panel.childPanel2, function(self, value)
+                addon.db.EnergyTicker = value
+            end)
+            EnemyTicksButton:SetChecked(addon.db.EnergyTicker)
+            EnemyTicksButton:SetPoint("TOPLEFT", 350, -400)
+        else
+            local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
+                addon.db.Slice = value
+            end)
+            SliceButton:SetChecked(addon.db.Slice)
+            SliceButton:SetPoint("TOPLEFT", 350, -400)
+        end
+
 
         local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
             addon.db.CastTimer = value
@@ -649,12 +668,14 @@ function f:CreateGUI()
         CastTimerButton:SetChecked(addon.db.CastTimer)
         CastTimerButton:SetPoint("TOPLEFT", 10, -40)
 
-        local HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
-            addon.db.HighlightDispellable = value
-            addon.db.BuffSizer = true
-        end)
-        HighlightDispellable:SetChecked(addon.db.HighlightDispellable)
-        HighlightDispellable:SetPoint("TOPLEFT", 10, -285)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
+                addon.db.HighlightDispellable = value
+                addon.db.BuffSizer = true
+            end)
+            HighlightDispellable:SetChecked(addon.db.HighlightDispellable)
+            HighlightDispellable:SetPoint("TOPLEFT", 10, -285)
+        end
 
         local TimerButton = CheckBtn("Remove space indentation from buffs", "When enabled (De)buffs will display the time as '1s' instead of '1 s'", Panel.childPanel2, function(self, value)
             addon.db.TimerGap = value
@@ -704,11 +725,13 @@ function f:CreateGUI()
         HideTitlesButton:SetChecked(addon.db.HideTitles)
         HideTitlesButton:SetPoint("TOPLEFT", 10, -110)
 
-        local AggroHighlightButton = CheckBtn("Hide Aggro highlight on default raid frames", "Hides the red texture that appears on raid frames when someone has aggro", Panel.childPanel3, function(self, value)
-            addon.db.HideAggro = value
-        end)
-        AggroHighlightButton:SetChecked(addon.db.HideAggro)
-        AggroHighlightButton:SetPoint("TOPLEFT", 10, -145)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local AggroHighlightButton = CheckBtn("Hide Aggro highlight on default raid frames", "Hides the red texture that appears on raid frames when someone has aggro", Panel.childPanel3, function(self, value)
+                addon.db.HideAggro = value
+            end)
+            AggroHighlightButton:SetChecked(addon.db.HideAggro)
+            AggroHighlightButton:SetPoint("TOPLEFT", 10, -285)
+        end
 
         local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value)
             addon.db.Stance = value
@@ -732,7 +755,7 @@ function f:CreateGUI()
             addon.db.roleIcon = value
         end)
         HideRoleButton:SetChecked(addon.db.roleIcon)
-        HideRoleButton:SetPoint("TOPLEFT", 10, -285)
+        HideRoleButton:SetPoint("TOPLEFT", 10, -145)
 
         CreateText(Panel.childPanel1, 350, -215, "Player Chain")
 

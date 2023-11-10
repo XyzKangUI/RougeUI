@@ -11,37 +11,49 @@ local function round(value)
 end
 
 function RougeUI.RougeUIF:CusFonts()
-    PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-    PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-    PlayerFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+    if PlayerFrameHealthBar and PlayerFrameHealthBar.TextString then
+        PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+        PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+        PlayerFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+    end
 
-    PlayerFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
-    PlayerFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
-    PlayerFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+    if PlayerFrameManaBar and PlayerFrameManaBar.TextString then
+        PlayerFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        PlayerFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        PlayerFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+    end
 
-    PetFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
-    PetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
-    PetFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
+    if PetFrameHealthBar and PetFrameHealthBar.TextString then
+        PetFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
+        PetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
+        PetFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
+    end
 
-    PetFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
-    PetFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
-    PetFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
+    if PetFrameManaBar and PetFrameManaBar.TextString then
+        PetFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
+        PetFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
+        PetFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
+    end
 
-    TargetFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-    TargetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-    TargetFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+    if TargetFrameHealthBar and TargetFrameHealthBar.TextString then
+        TargetFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+        TargetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+        TargetFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
 
-    TargetFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
-    TargetFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
-    TargetFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        TargetFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        TargetFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        TargetFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+    end
 
-    FocusFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-    FocusFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-    FocusFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+    if FocusFrameHealthBar and FocusFrameHealthBar.TextString then
+        FocusFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+        FocusFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+        FocusFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
 
-    FocusFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
-    FocusFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
-    FocusFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        FocusFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        FocusFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+        FocusFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+    end
 
     for i = 1, 5 do
         if _G["ArenaEnemyFrame"..i] then

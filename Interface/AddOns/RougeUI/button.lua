@@ -1,9 +1,10 @@
 local _, RougeUI = ...
-local IsAddOnLoaded, hooksecurefunc = IsAddOnLoaded, hooksecurefunc
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local _G = getfenv(0)
 local ceil, mod = _G.math.ceil, _G.math.fmod
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
+local max = math.max
 
 if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
     return
@@ -103,7 +104,7 @@ local function addBorder(button, drawLayer, dbf)
             bg:SetPoint("TOPLEFT", button, "TOPLEFT", -5, 5)
             bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 5, -5)
         end
-        bg:SetFrameLevel(button:GetFrameLevel() - 1)
+        bg:SetFrameLevel(max(button:GetFrameLevel() - 1, 0))
         bg:SetBackdrop(backdrop)
         bg:SetBackdropBorderColor(0.05, 0.05, 0.05)
         button.bg = bg
@@ -285,10 +286,12 @@ local function init()
     tf:SetAllPoints(TargetFrameSpellBar.Icon)
     TargetFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
-    local ff = CreateFrame("Frame", nil, FocusFrameSpellBar, BackdropTemplateMixin and "BackdropTemplate")
-    addBorder(ff, "OVERLAY")
-    ff:SetAllPoints(FocusFrameSpellBar.Icon)
-    FocusFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    if FocusFrameSpellBar then
+        local ff = CreateFrame("Frame", nil, FocusFrameSpellBar, BackdropTemplateMixin and "BackdropTemplate")
+        addBorder(ff, "OVERLAY")
+        ff:SetAllPoints(FocusFrameSpellBar.Icon)
+        FocusFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    end
 
     -- TempEnchantFrame
     for i = 1, NUM_TEMP_ENCHANT_FRAMES do
@@ -325,28 +328,30 @@ local function HookAuras()
                 break
             end
         end
-        for i = 1, 32 do
-            local bu = _G["FocusFrameBuff" .. i]
-            if bu then
-                if not bu.skin then
-                    addBorder(bu)
-                    _G["FocusFrameBuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
-                    bu.skin = true
+        if FocusFrame then
+            for i = 1, 32 do
+                local bu = _G["FocusFrameBuff" .. i]
+                if bu then
+                    if not bu.skin then
+                        addBorder(bu)
+                        _G["FocusFrameBuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
+                        bu.skin = true
+                    end
+                else
+                    break
                 end
-            else
-                break
             end
-        end
-        for i = 1, 16 do
-            local bu = _G["FocusFrameDebuff" .. i]
-            if bu then
-                if not bu.skin then
-                    addBorder(bu)
-                    _G["FocusFrameDebuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
-                    bu.skin = true
+            for i = 1, 16 do
+                local bu = _G["FocusFrameDebuff" .. i]
+                if bu then
+                    if not bu.skin then
+                        addBorder(bu)
+                        _G["FocusFrameDebuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
+                        bu.skin = true
+                    end
+                else
+                    break
                 end
-            else
-                break
             end
         end
     end)

@@ -2,7 +2,7 @@ local _, RougeUI = ...
 local _G = getfenv(0)
 local hooksecurefunc = hooksecurefunc
 local pairs = pairs
-local IsAddOnLoaded = IsAddOnLoaded
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local GetSpellInfo = GetSpellInfo
 local GetNetStats = GetNetStats
 local IsInInstance = IsInInstance
@@ -14,6 +14,8 @@ local ConsoleExec, RAID_CLASS_COLORS = ConsoleExec, RAID_CLASS_COLORS
 local gsub, format = string.gsub, string.format
 local floor, fmod = math.floor, math.fmod
 local GetClassColorObj, GetMouseFocus = GetClassColorObj, GetMouseFocus
+local FocusFrame = _G.FocusFrame
+local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 
 local addonlist = {
     ["EasyFrames"] = true,
@@ -106,7 +108,6 @@ local function PvPIcon()
     local _, instanceType = IsInInstance()
     for i, v in pairs({
         PlayerPVPIcon,
-        FocusFrameTextureFramePVPIcon,
         TargetFrameTextureFramePVPIcon,
         TargetFrameTextureFramePVPIcon,
         PartyMemberFrame1PVPIcon,
@@ -116,8 +117,14 @@ local function PvPIcon()
     }) do
         if instanceType == "arena" then
             v:SetAlpha(0)
+            if FocusFrame then
+                FocusFrameTextureFramePVPIcon:SetAlpha(0)
+            end
         else
             v:SetAlpha(0.45)
+            if FocusFrame then
+                FocusFrameTextureFramePVPIcon:SetAlpha(0.45)
+            end
         end
     end
 end
@@ -270,11 +277,13 @@ local function manabarcolor(statusbar, unit)
         if (UnitIsUnit("target", "player")) then
             TargetFrameManaBar:SetStatusBarColor(r, g, b)
         end
-        if (UnitIsUnit("focus", "player")) then
-            FocusFrameManaBar:SetStatusBarColor(r, g, b)
-        end
-        if (UnitIsUnit("focustarget", "player")) then
-            FocusFrameToTManaBar:SetStatusBarColor(r, g, b)
+        if FocusFrame then
+            if (UnitIsUnit("focus", "player")) then
+                FocusFrameManaBar:SetStatusBarColor(r, g, b)
+            end
+            if (UnitIsUnit("focustarget", "player")) then
+                FocusFrameToTManaBar:SetStatusBarColor(r, g, b)
+            end
         end
     end
 end
@@ -440,7 +449,20 @@ local function CheckClassification(self, forceNormalTexture)
 
     if RougeUI.db.NoLevel then
         self.levelText:SetAlpha(0)
-        self.threatIndicator:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\ui-targetingframe-flash")
+        if self.threatIndicator then
+            self.threatIndicator:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\ui-targetingframe-flash")
+        end
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and IsAddOnLoaded("ModernTargetFrame") then
+            for i = 1, TargetFrame:GetNumRegions() do
+                local region = select(i, TargetFrame:GetRegions())
+                if region:IsObjectType("Texture") and not region:GetName() then
+                    local r, g, b, a = region:GetVertexColor()
+                    if r == 1 and g == 0 and b == 0 and a == 1 then
+                        region:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\ui-targetingframe-flash")
+                    end
+                end
+            end
+        end
     end
 
     if RougeUI.db.ThickFrames then
@@ -454,30 +476,48 @@ local function CheckClassification(self, forceNormalTexture)
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", -50, 14)
         self.healthbar:SetHeight(27)
-        self.healthbar.LeftText:ClearAllPoints()
-        self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
-        self.healthbar.RightText:ClearAllPoints()
-        self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
-        self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        if self.healthbar.LeftText then
+            self.healthbar.LeftText:ClearAllPoints()
+            self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        end
+        if self.healthbar.RightText then
+            self.healthbar.RightText:ClearAllPoints()
+            self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        end
+        if self.healthbar.TextString then
+            self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        end
 
-        self.deadText:ClearAllPoints()
-        self.deadText:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        if self.deadText then
+            self.deadText:ClearAllPoints()
+            self.deadText:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        end
 
         self.manabar:ClearAllPoints()
         self.manabar:SetPoint("CENTER", self, "CENTER", -50, -7)
 
-        self.manabar.LeftText:ClearAllPoints()
-        self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
-        self.manabar.RightText:ClearAllPoints()
-        self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
-        self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
+        if self.manabar.LeftText then
+            self.manabar.LeftText:ClearAllPoints()
+            self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
+        end
+        if self.manabar.RightText then
+            self.manabar.RightText:ClearAllPoints()
+            self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+        end
+        if self.manabar.TextString then
+            self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
+        end
 
         if GetCVar("threatShowNumeric") == "1" then
-            TargetFrameNumericalThreat:SetScale(0.9)
-            TargetFrameNumericalThreat:ClearAllPoints()
-            TargetFrameNumericalThreat:SetPoint("CENTER", TargetFrame, "CENTER", 44, 50)
-            FocusFrameNumericalThreat:ClearAllPoints()
-            FocusFrameNumericalThreat:SetPoint("CENTER", FocusFrame, "CENTER", 44, 48)
+            if TargetFrameNumericalThreat then
+                TargetFrameNumericalThreat:SetScale(0.9)
+                TargetFrameNumericalThreat:ClearAllPoints()
+                TargetFrameNumericalThreat:SetPoint("CENTER", TargetFrame, "CENTER", 44, 50)
+            end
+            if FocusFrame and FocusFrameNumericalThreat then
+                FocusFrameNumericalThreat:ClearAllPoints()
+                FocusFrameNumericalThreat:SetPoint("CENTER", FocusFrame, "CENTER", 44, 48)
+            end
         end
 
         if (forceNormalTexture) then
@@ -496,8 +536,10 @@ end
 local function OnLoad()
     TargetFrameToTPortrait:ClearAllPoints()
     TargetFrameToTPortrait:SetPoint("LEFT", TargetFrameToT, "LEFT", 5, 0)
-    FocusFrameToTPortrait:ClearAllPoints()
-    FocusFrameToTPortrait:SetPoint("LEFT", FocusFrameToT, "LEFT", 5, 0)
+    if FocusFrame then
+        FocusFrameToTPortrait:ClearAllPoints()
+        FocusFrameToTPortrait:SetPoint("LEFT", FocusFrameToT, "LEFT", 5, 0)
+    end
 end
 
 -- Class portrait frames
@@ -547,20 +589,43 @@ end
 local function HideHotkeys()
     if RougeUI.db.HideHotkey then
         for i = 1, 12 do
-            _G["ActionButton" .. i .. "HotKey"]:SetAlpha(0)
-            _G["MultiBarBottomRightButton" .. i .. "HotKey"]:SetAlpha(0)
-            _G["MultiBarBottomLeftButton" .. i .. "HotKey"]:SetAlpha(0)
-            _G["MultiBarRightButton" .. i .. "HotKey"]:SetAlpha(0)
-            _G["MultiBarLeftButton" .. i .. "HotKey"]:SetAlpha(0)
+            if _G["ActionButton" .. i .. "HotKey"] then
+                _G["ActionButton" .. i .. "HotKey"]:SetAlpha(0)
+            end
+            if _G["MultiBarBottomRightButton" .. i .. "HotKey"] then
+                _G["MultiBarBottomRightButton" .. i .. "HotKey"]:SetAlpha(0)
+            end
+            if _G["MultiBarBottomLeftButton" .. i .. "HotKey"] then
+                _G["MultiBarBottomLeftButton" .. i .. "HotKey"]:SetAlpha(0)
+            end
+            if _G["MultiBarRightButton" .. i .. "HotKey"] then
+                _G["MultiBarRightButton" .. i .. "HotKey"]:SetAlpha(0)
+            end
+            if _G["MultiBarLeftButton" .. i .. "HotKey"] then
+                _G["MultiBarLeftButton" .. i .. "HotKey"]:SetAlpha(0)
+            end
+            if _G["PetActionButton" .. i .. "HotKey"] then
+                _G["PetActionButton" .. i .. "HotKey"]:SetAlpha(0)
+            end
         end
     end
     if RougeUI.db.HideMacro then
         for i = 1, 12 do
-            _G["ActionButton" .. i .. "Name"]:SetAlpha(0)
-            _G["MultiBarBottomRightButton" .. i .. "Name"]:SetAlpha(0)
-            _G["MultiBarBottomLeftButton" .. i .. "Name"]:SetAlpha(0)
-            _G["MultiBarRightButton" .. i .. "Name"]:SetAlpha(0)
-            _G["MultiBarLeftButton" .. i .. "Name"]:SetAlpha(0)
+            if _G["ActionButton" .. i .. "Name"] then
+                _G["ActionButton" .. i .. "Name"]:SetAlpha(0)
+            end
+            if _G["MultiBarBottomRightButton" .. i .. "Name"] then
+                _G["MultiBarBottomRightButton" .. i .. "Name"]:SetAlpha(0)
+            end
+            if _G["MultiBarBottomLeftButton" .. i .. "Name"] then
+                _G["MultiBarBottomLeftButton" .. i .. "Name"]:SetAlpha(0)
+            end
+            if _G["MultiBarRightButton" .. i .. "Name"] then
+                _G["MultiBarRightButton" .. i .. "Name"]:SetAlpha(0)
+            end
+            if _G["MultiBarLeftButton" .. i .. "Name"] then
+                _G["MultiBarLeftButton" .. i .. "Name"]:SetAlpha(0)
+            end
         end
     end
 end
@@ -785,9 +850,13 @@ local function RangeIndicator(self)
 end
 
 local function ChangeText(frame)
-    if not frame then return end
-    local regions = {frame:GetRegions()}
-    local childFrames = {frame:GetChildren()}
+    if not frame then
+        return
+    end
+    local regions = { frame:GetRegions() }
+    local childFrames = { frame:GetChildren() }
+
+    frame:EnableMouse(false)
 
     for _, region in ipairs(regions) do
         if region:IsObjectType("FontString") then
@@ -874,12 +943,14 @@ e:SetScript("OnEvent", function(self, event)
             -- hooksecurefunc("UnitFrameManaBar_UpdateType", ZunitFrame)
         end
         if RougeUI.db.HideAggro then
-            hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
-                if self.aggroHighlight then
-                    self.aggroHighlight:SetAlpha(0)
-                    return
-                end
-            end)
+            if CompactUnitFrame_UpdateAggroHighlight then
+                hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
+                    if self.aggroHighlight then
+                        self.aggroHighlight:SetAlpha(0)
+                        return
+                    end
+                end)
+            end
         end
         if RougeUI.db.roleIcon then
             hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
@@ -927,7 +998,9 @@ e:SetScript("OnEvent", function(self, event)
                 PlayerFrame.bg = true
             end
             TargetFrameNameBackground:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
-            FocusFrameNameBackground:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+            if FocusFrame then
+                FocusFrameNameBackground:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+            end
         end
 
         if RougeUI.db.AutoReady then
@@ -991,7 +1064,9 @@ e:SetScript("OnEvent", function(self, event)
 
     if event == "UPDATE_UI_WIDGET" then
         ChangeText(UIWidgetTopCenterContainerFrame)
-        C_Timer.After(10, function() self:UnregisterEvent("UPDATE_UI_WIDGET")  end)
+        C_Timer.After(10, function()
+            self:UnregisterEvent("UPDATE_UI_WIDGET")
+        end)
     end
 
     self:UnregisterEvent("PLAYER_LOGIN")

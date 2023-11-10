@@ -62,7 +62,9 @@ f:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
         if RougeUI.db.CombatIndicator then
             CreateCombatIndicatorForUnit(TargetFrame)
-            CreateCombatIndicatorForUnit(FocusFrame)
+            if FocusFrame then
+                CreateCombatIndicatorForUnit(FocusFrame)
+            end
         end
         self:UnregisterEvent("PLAYER_LOGIN")
         self:SetScript("OnEvent", nil)

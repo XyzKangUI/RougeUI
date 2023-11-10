@@ -1,6 +1,6 @@
 local _, RougeUI = ...
 local _G = getfenv(0)
-local IsAddOnLoaded = _G.IsAddOnLoaded
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bartender = IsAddOnLoaded("Bartender4")
 local dominos = IsAddOnLoaded("Dominos")
 local GetBindingKey, SetOverrideBindingClick = _G.GetBindingKey, _G.SetOverrideBindingClick
@@ -49,8 +49,8 @@ local function WAHK(button, ok)
             local onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
             SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
             SetOverrideBindingClick(wahk, true, key, wahk:GetName())
-            wahk:SetScript("OnMouseDown", function() if HasVehicleActionBar() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("PUSHED") else btn:SetButtonState("PUSHED") end end)
-            wahk:SetScript("OnMouseUp", function() if HasVehicleActionBar() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("NORMAL") else btn:SetButtonState("NORMAL") end end)
+            wahk:SetScript("OnMouseDown", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("PUSHED") else btn:SetButtonState("PUSHED") end end)
+            wahk:SetScript("OnMouseUp", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("NORMAL") else btn:SetButtonState("NORMAL") end end)
         else
             btn:RegisterForClicks("AnyDown", "AnyUp")
             local onclick = ([[ if down then

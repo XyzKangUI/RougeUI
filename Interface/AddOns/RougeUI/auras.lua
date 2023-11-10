@@ -11,83 +11,88 @@ local pairs = _G.pairs
 local MAX_TARGET_DEBUFFS = 16;
 local MAX_TARGET_BUFFS = 32;
 local mabs, mfloor = math.abs, math.floor
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
+local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
+local Enraged, Whitelist = {}, {}
 
-local Enraged = {
-    --    [5229] = true, -- Enrage (Druid)
-    [1719] = true, -- Recklessness
-    --    [12880] = true, -- Enrage (npc)
-    --    [14204] = true, -- Enrage (npc)
-    --    [14202] = true, -- Enrage (npc)
-    --    [14203] = true, -- Enrage (npc)
-    --    [14201] = true, -- Enrage (npc)
-    [18499] = true, -- Berseker Rage
-    --    [12292] = true, -- Death Wish
-    --    [2687] = true, -- Bloodrage
-    --    [29131] = true, -- Bloodrage
-    [48391] = true, -- Owlkin Frenzy
-    [49016] = true, -- Unholy Frenzy
-    [50636] = true, -- Tormented Roar (npc)
-    --    [51662] = true, -- Hunger for blood
-    [54508] = true, -- Demonic Empowerment
-    --    [57514] = true, -- Enrage (npc)
-    --    [57516] = true, -- Enrage
-    --    [57518] = true, -- Enrage
-    --    [57519] = true, -- Enrage
-    --    [57520] = true, -- Enrage
-    --    [57522] = true, -- Enrage
-    [63147] = true, -- Sara's Anger (npc)
-    [66759] = true, -- Frothing Rage (npc)
-    [62071] = true, -- Savage Roar
-    --    [51513] = true, -- Enrage
-    [60177] = true, -- Hfb (npc)
-    --    [57521] = true, -- Enrage
-    [63848] = true, -- Hfb (npc)
-    [52610] = true, -- Savage roar
-    [66759] = true, -- Frothing Rage
-}
+if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    Enraged = {
+        --    [5229] = true, -- Enrage (Druid)
+        [1719] = true, -- Recklessness
+        --    [12880] = true, -- Enrage (npc)
+        --    [14204] = true, -- Enrage (npc)
+        --    [14202] = true, -- Enrage (npc)
+        --    [14203] = true, -- Enrage (npc)
+        --    [14201] = true, -- Enrage (npc)
+        [18499] = true, -- Berseker Rage
+        --    [12292] = true, -- Death Wish
+        --    [2687] = true, -- Bloodrage
+        --    [29131] = true, -- Bloodrage
+        [48391] = true, -- Owlkin Frenzy
+        [49016] = true, -- Unholy Frenzy
+        [50636] = true, -- Tormented Roar (npc)
+        --    [51662] = true, -- Hunger for blood
+        [54508] = true, -- Demonic Empowerment
+        --    [57514] = true, -- Enrage (npc)
+        --    [57516] = true, -- Enrage
+        --    [57518] = true, -- Enrage
+        --    [57519] = true, -- Enrage
+        --    [57520] = true, -- Enrage
+        --    [57522] = true, -- Enrage
+        [63147] = true, -- Sara's Anger (npc)
+        [66759] = true, -- Frothing Rage (npc)
+        [62071] = true, -- Savage Roar
+        --    [51513] = true, -- Enrage
+        [60177] = true, -- Hfb (npc)
+        --    [57521] = true, -- Enrage
+        [63848] = true, -- Hfb (npc)
+        [52610] = true, -- Savage roar
+        [66759] = true, -- Frothing Rage
+    }
 
-local Whitelist = {
-    [GetSpellInfo(16188)] = true, -- Nature's Swiftness
-    [GetSpellInfo(12043)] = true, -- Presence of Mind
-    [GetSpellInfo(12042)] = true, -- Arcane Power
-    [GetSpellInfo(12472)] = true, -- Icy Veins
-    [GetSpellInfo(31884)] = true, -- Avenging Wrath
-    [GetSpellInfo(48066)] = true, -- Power Word: Shield
-    [GetSpellInfo(47986)] = true, -- Sacrifice
-    [GetSpellInfo(43039)] = true, -- Ice Barrier
-    [GetSpellInfo(22812)] = true, -- Barkskin
-    [GetSpellInfo(1044)] = true, -- Hand of Freedom
-    [GetSpellInfo(29166)] = true, -- Innervate
-    [GetSpellInfo(2825)] = true, -- Bloodlust
-    [GetSpellInfo(32182)] = true, -- Heroism
-    [GetSpellInfo(10060)] = true, -- Power Infusion
-    [GetSpellInfo(33206)] = true, -- Pain Supression
-    [GetSpellInfo(53312)] = true, -- Nature's Grasp
-    [GetSpellInfo(6346)] = true, -- Fear Ward
-    [GetSpellInfo(6940)] = true, -- Hand of Sacrifice
-    [GetSpellInfo(10278)] = true, -- Blessing of Protection
-    [GetSpellInfo(18708)] = true, -- Fel Domination
-    [GetSpellInfo(45438)] = true, -- Ice Block
-    [GetSpellInfo(642)] = true, -- Divine Shield
-    [GetSpellInfo(53601)] = true, -- Sacred Shield
-    [GetSpellInfo(54428)] = true, -- Divine Plea
-    [GetSpellInfo(66115)] = true, -- Hand of Freedom
-    [GetSpellInfo(498)] = true, -- Divine Protection
-    [GetSpellInfo(53563)] = true, -- Beacon of Light
-    [GetSpellInfo(63560)] = true, -- Ghoul Frenzy
-    [GetSpellInfo(31842)] = true, -- Divine illumination
-    [GetSpellInfo(57761)] = true, -- Fireball!
-    [GetSpellInfo(49284)] = true, -- Earth Shield
-    [GetSpellInfo(69369)] = true, -- Predator's Swiftness
-    [GetSpellInfo(64701)] = true, -- Elemental Mastery
-    [GetSpellInfo(44544)] = true, -- Fingers of frost
-    [GetSpellInfo(63167)] = true, -- Decimation
-    [GetSpellInfo(63244)] = true, -- Pyroclasm
-    [GetSpellInfo(34936)] = true, -- Backlash
-    [GetSpellInfo(65081)] = true, -- Body and Soul
-    [GetSpellInfo(54372)] = true, -- Nether Protection
+    Whitelist = {
+        [GetSpellInfo(16188)] = true, -- Nature's Swiftness
+        [GetSpellInfo(12043)] = true, -- Presence of Mind
+        [GetSpellInfo(12042)] = true, -- Arcane Power
+        [GetSpellInfo(12472)] = true, -- Icy Veins
+        [GetSpellInfo(31884)] = true, -- Avenging Wrath
+        [GetSpellInfo(48066)] = true, -- Power Word: Shield
+        [GetSpellInfo(47986)] = true, -- Sacrifice
+        [GetSpellInfo(43039)] = true, -- Ice Barrier
+        [GetSpellInfo(22812)] = true, -- Barkskin
+        [GetSpellInfo(1044)] = true, -- Hand of Freedom
+        [GetSpellInfo(29166)] = true, -- Innervate
+        [GetSpellInfo(2825)] = true, -- Bloodlust
+        [GetSpellInfo(32182)] = true, -- Heroism
+        [GetSpellInfo(10060)] = true, -- Power Infusion
+        [GetSpellInfo(33206)] = true, -- Pain Supression
+        [GetSpellInfo(53312)] = true, -- Nature's Grasp
+        [GetSpellInfo(6346)] = true, -- Fear Ward
+        [GetSpellInfo(6940)] = true, -- Hand of Sacrifice
+        [GetSpellInfo(10278)] = true, -- Blessing of Protection
+        [GetSpellInfo(18708)] = true, -- Fel Domination
+        [GetSpellInfo(45438)] = true, -- Ice Block
+        [GetSpellInfo(642)] = true, -- Divine Shield
+        [GetSpellInfo(53601)] = true, -- Sacred Shield
+        [GetSpellInfo(54428)] = true, -- Divine Plea
+        [GetSpellInfo(66115)] = true, -- Hand of Freedom
+        [GetSpellInfo(498)] = true, -- Divine Protection
+        [GetSpellInfo(53563)] = true, -- Beacon of Light
+        [GetSpellInfo(63560)] = true, -- Ghoul Frenzy
+        [GetSpellInfo(31842)] = true, -- Divine illumination
+        [GetSpellInfo(57761)] = true, -- Fireball!
+        [GetSpellInfo(49284)] = true, -- Earth Shield
+        [GetSpellInfo(69369)] = true, -- Predator's Swiftness
+        [GetSpellInfo(64701)] = true, -- Elemental Mastery
+        [GetSpellInfo(44544)] = true, -- Fingers of frost
+        [GetSpellInfo(63167)] = true, -- Decimation
+        [GetSpellInfo(63244)] = true, -- Pyroclasm
+        [GetSpellInfo(34936)] = true, -- Backlash
+        [GetSpellInfo(65081)] = true, -- Body and Soul
+        [GetSpellInfo(54372)] = true, -- Nether Protection
 
-};
+    }
+end
 
 local function RealWidth(frame, auraName, width)
     if not (frame.totFrame == _G.TargetFrameToT or frame.totFrame == _G.FocusFrameToT) then
@@ -317,38 +322,47 @@ local function Target_Update(frame)
     local _, _, class = UnitClass("player")
 
     for i = 1, MAX_TARGET_BUFFS do
-        local name, icon, count, _, duration, expirationTime, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, nil);
+        local name, icon, _, _, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, nil);
         if (name) then
             frameName = selfName .. "Buff" .. i
             buffFrame = _G[frameName]
             frameStealable = _G[frameName .. "Stealable"]
 
             if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
-                if RougeUI.db.HighlightDispellable then
-                    if isEnemy and (Whitelist[name] and isStealable) or ((class == 4 or class == 3) and (isEnemy and Enraged[spellId])) or spellId == 31821 or spellId == 49039 or spellId == 53659 then
-                        local buffSize = buffFrame:GetSize()
-                        frameStealable:Show()
-                        frameStealable:SetHeight(buffSize * 1.4)
-                        frameStealable:SetWidth(buffSize * 1.4)
+                local showHighlight = false
+                local r, g, b = 1, 1, 1
+
+                if RougeUI.db.HighlightDispellable and (WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC) then
+                    if isEnemy then
                         if Whitelist[name] and isStealable then
-                            frameStealable:SetVertexColor(1, 1, 1) -- White
-                        elseif (class == 4 or class == 3) and (isEnemy and Enraged[spellId]) then
-                            frameStealable:SetVertexColor(1, 0, 0) -- Red
+                            r, g, b = 1, 1, 1 -- White
+                            showHighlight = true
+                        elseif (class == 4 or class == 3) and Enraged[spellId] then
+                            r, g, b = 1, 0, 0 -- Red
+                            showHighlight = true
                         elseif spellId == 31821 then
-                            -- Highlight Aura mastery
-                            frameStealable:SetVertexColor(0, 0, 1) -- Blue
+                            r, g, b = 0, 0, 1 -- Blue
+                            showHighlight = true
                         elseif spellId == 49039 and (class == 5 or class == 2) then
-                            -- Highlight Lichborne for shackle/turn evil
-                            frameStealable:SetVertexColor(1, 0, 127 / 255) -- Pink
+                            r, g, b = 1, 0, 127 / 255 -- Pink
+                            showHighlight = true
                         elseif spellId == 53659 then
-                            frameStealable:SetVertexColor(52 / 255, 235 / 255, 146 / 255) -- Green
-                        else
-                            frameStealable:SetVertexColor(1, 1, 1) -- Normal (white)
+                            r, g, b = 52 / 255, 235 / 255, 146 / 255 -- Green
+                            showHighlight = true
                         end
-                    else
-                        frameStealable:SetVertexColor(1, 1, 1)
-                        frameStealable:Hide()
                     end
+                elseif isEnemy and isStealable and not RougeUI.db.HighlightDispellable then
+                    showHighlight = true
+                end
+
+                if showHighlight then
+                    local buffSize = buffFrame:GetSize()
+                    frameStealable:Show()
+                    frameStealable:SetHeight(buffSize * 1.14)
+                    frameStealable:SetWidth(buffSize * 1.14)
+                    frameStealable:SetVertexColor(r, g, b)
+                else
+                    frameStealable:Hide()
                 end
 
                 -- set the buff to be big if the buff is cast by the player or his pet

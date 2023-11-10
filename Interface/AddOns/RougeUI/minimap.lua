@@ -1,7 +1,8 @@
 local _, RougeUI = ...
-local IsAddOnLoaded, hooksecurefunc = IsAddOnLoaded, hooksecurefunc
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local GetMouseFocus, ToggleDropDownMenu = GetMouseFocus, ToggleDropDownMenu
 local Minimap_OnClick = Minimap_OnClick
+local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 
 local MM = CreateFrame("Frame")
 MM:RegisterEvent("PLAYER_LOGIN")
@@ -47,9 +48,11 @@ MM:SetScript("OnEvent", function(self)
             end
         end)
 
-        calendar:HookScript("OnClick", function()
-            calendar:SetAlpha(0)
-        end)
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            calendar:HookScript("OnClick", function()
+                calendar:SetAlpha(0)
+            end)
+        end
 
         MiniMapMailFrame:ClearAllPoints()
         MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
@@ -62,14 +65,16 @@ MM:SetScript("OnEvent", function(self)
         if IsAddOnLoaded("Leatrix_Plus") and (LeaPlusDB["MinimapModder"] == "On" and LeaPlusDB["CombineAddonButtons"] == "On") then
             return
         end
-        MiniMapTracking:Hide()
-        Minimap:SetScript("OnMouseUp", function(self, btn)
-            if btn == "RightButton" then
-                ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, "MiniMapTracking", 0, -5)
-            else
-                Minimap_OnClick(self)
-            end
-        end)
+        if MiniMapTracking then
+            MiniMapTracking:Hide()
+            Minimap:SetScript("OnMouseUp", function(self, btn)
+                if btn == "RightButton" then
+                    ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, "MiniMapTracking", 0, -5)
+                else
+                    Minimap_OnClick(self)
+                end
+            end)
+        end
     end
 end)
 
