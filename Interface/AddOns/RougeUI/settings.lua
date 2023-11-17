@@ -68,7 +68,8 @@ local stock = {
     KeyEcho = false,
     ClassNames = false,
     RangeIndicator = false,
-    EnergyTicker = false
+    EnergyTicker = false,
+    wahksfk = false
 }
 
 local f = CreateFrame("Frame")

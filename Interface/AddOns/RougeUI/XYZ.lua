@@ -93,8 +93,34 @@ local function WAHK(button, ok)
         SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
         SetOverrideBindingClick(wahk, true, key, wahk:GetName())
 
-        wahk:SetScript("OnMouseDown", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then local obtn = _G["OverrideActionBarButton" .. id] obtn:SetButtonState("PUSHED") if RougeUI.db.ButtonAnim then RougeUI.Animate(obtn) end else btn:SetButtonState("PUSHED") if RougeUI.db.ButtonAnim then RougeUI.Animate(btn) end end end)
-        wahk:SetScript("OnMouseUp", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("NORMAL") else btn:SetButtonState("NORMAL") end end)
+        wahk:SetScript("OnMouseDown", function()
+            if OverrideActionBar and OverrideActionBar:IsShown() and id then
+                local obtn = _G["OverrideActionBarButton" .. id]
+                obtn:SetButtonState("PUSHED")
+                if RougeUI.db.ButtonAnim then
+                    RougeUI.Animate(obtn)
+                end
+            else
+                btn:SetButtonState("PUSHED")
+                if RougeUI.db.ButtonAnim then
+                    RougeUI.Animate(btn)
+                end
+            end
+        end)
+        wahk:SetScript("OnMouseUp", function()
+            if OverrideActionBar and OverrideActionBar:IsShown() and id then
+                local obtn = _G["OverrideActionBarButton" .. id]
+                obtn:SetButtonState("NORMAL")
+                if RougeUI.db.wahksfk then
+                    RougeUI.Animate(obtn)
+                end
+            else
+                btn:SetButtonState("NORMAL")
+                if RougeUI.db.wahksfk then
+                    RougeUI.Animate(btn)
+                end
+            end
+        end)
     end
 end
 

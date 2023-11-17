@@ -862,12 +862,9 @@ local function ChangeText(frame)
         if region:IsObjectType("FontString") then
             region:SetJustifyH("LEFT")
             region:SetPoint("TOP")
-            if region:GetWidth() < 200 then
-                region:SetWidth(200)
-            end
             if not region.hooked then
                 hooksecurefunc(region, "SetPoint", function(self)
-                    if self.changed then
+                    if self.changed or InActiveBattlefield() then
                         return
                     end
                     self.changed = true

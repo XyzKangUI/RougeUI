@@ -45,14 +45,30 @@ local function AddElements(plate)
     end
 
     if RougeUI.db.ModPlates then
-        local sh = plate.selectionHighlight
-        sh:SetPoint("TOPLEFT", sh:GetParent(), "TOPLEFT", 1, -1)
-        sh:SetPoint("BOTTOMRIGHT", sh:GetParent(), "BOTTOMRIGHT", -1, 1)
-        if RougeUI.db.ArenaNumbers and not select(1, IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers then
+        if (RougeUI.db.ArenaNumbers and not IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers then
             plate.name:SetFont(STANDARD_TEXT_FONT, 8)
             plate.name:ClearAllPoints()
             plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
             plate.name:SetJustifyH("RIGHT")
+        end
+    end
+
+    if RougeUI.db.NoLevel then
+        local border = plate.healthBar.border:GetRegions()
+        if border then
+            border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")
+        end
+        if plate.LevelFrame then
+            plate.LevelFrame:Hide()
+        end
+        if plate.healthBar then
+            plate.healthBar:ClearAllPoints()
+            plate.healthBar:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 4, 4)
+            plate.healthBar:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -4, 4)
+        end
+        if plate.CastBar then
+            plate.CastBar:ClearAllPoints()
+            plate.CastBar:SetPoint("TOP", plate.healthBar, "BOTTOM", 8, -9)
         end
     end
 
