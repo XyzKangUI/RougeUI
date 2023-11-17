@@ -1,13 +1,41 @@
 local _, RougeUI = ...
-local _G = getfenv(0)
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bartender = IsAddOnLoaded("Bartender4")
 local dominos = IsAddOnLoaded("Dominos")
-local GetBindingKey, SetOverrideBindingClick = _G.GetBindingKey, _G.SetOverrideBindingClick
-local InCombatLockdown = _G.InCombatLockdown
-local SecureHandlerUnwrapScript = _G.SecureHandlerUnwrapScript
-local tonumber = _G.tonumber
+local tonumber, strmatch = tonumber, string.match
 local frame = CreateFrame("Frame")
+
+local buttonNames = {
+    ["ACTIONBUTTON"] = "ActionButton",
+    ["MULTIACTIONBAR1BUTTON"] = "MultiBarBottomLeftButton",
+    ["MULTIACTIONBAR2BUTTON"] = "MultiBarBottomRightButton",
+    ["MULTIACTIONBAR3BUTTON"] = "MultiBarRightButton",
+    ["MULTIACTIONBAR4BUTTON"] = "MultiBarLeftButton",
+    ["CLICK BT4Button"] = "BT4Button",
+    ["CLICK DominosActionButton"] = "DominosActionButton",
+}
+
+local function ConvertActionButtonName(name)
+    -- remove "CLICK "
+    name = name:gsub("^CLICK ", "")
+
+    -- remove ":Keybind"
+    name = name:gsub(":Keybind$", "")
+
+    if dominos then
+        if strmatch(name, "Dominos") then
+            name = name:gsub(":LeftButton", "")
+            name = name:gsub(":HOTKEY", "")
+        end
+    end
+
+    local button, buttonNumber = name:match("^(.-)(%d+)$")
+    if button and tonumber(buttonNumber) and buttonNames[button] then
+        name = buttonNames[button] .. buttonNumber
+    end
+
+    return name
+end
 
 local function WAHK(button, ok)
     if not button then
@@ -20,7 +48,6 @@ local function WAHK(button, ok)
     end
 
     local clickButton, id
-    local clk = tostring(button)
     if button:match("BT4Button") then
         clickButton = ("CLICK %s:LeftButton"):format(button)
     elseif button:match("DominosActionButton") then
@@ -33,32 +60,41 @@ local function WAHK(button, ok)
     end
 
     local key = GetBindingKey(clickButton)
-
-    if btn and dominos then
-        SecureHandlerUnwrapScript(btn, "OnClick")
+    if not key then
+        return
     end
 
-    if key and btn then
-        if ok then
-            if not id then
-                id = tonumber(button:match("(%d+)"))
-            end
-            local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
-            wahk:RegisterForClicks("AnyDown", "AnyUp")
-            wahk:SetAttribute("type", "macro")
-            local onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
-            SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
-            SetOverrideBindingClick(wahk, true, key, wahk:GetName())
-            wahk:SetScript("OnMouseDown", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("PUSHED") else btn:SetButtonState("PUSHED") end end)
-            wahk:SetScript("OnMouseUp", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("NORMAL") else btn:SetButtonState("NORMAL") end end)
-        else
-            btn:RegisterForClicks("AnyDown", "AnyUp")
-            local onclick = ([[ if down then
-        self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end
-    ]]):gsub("clk", clk), nil
-            SecureHandlerWrapScript(btn, "OnClick", btn, onclick)
-            SetOverrideBindingClick(btn, true, key, btn:GetName())
+    local action = GetBindingAction(key, true)
+
+    if action and (action ~= "") then
+        btn = _G[ConvertActionButtonName(action)]
+    end
+
+    if btn then
+        local btnName = btn:GetName()
+        local clk = tostring(btnName)
+
+        if not id then
+            id = tonumber(button:match("(%d+)"))
         end
+
+        local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
+        wahk:RegisterForClicks("AnyDown", "AnyUp")
+        wahk:SetAttribute("type", "macro")
+
+        local onclick
+        if ok then
+            onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
+        else
+            onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
+        end
+
+        ClearOverrideBindings(wahk)
+        SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
+        SetOverrideBindingClick(wahk, true, key, wahk:GetName())
+
+        wahk:SetScript("OnMouseDown", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then local obtn = _G["OverrideActionBarButton" .. id] obtn:SetButtonState("PUSHED") if RougeUI.db.ButtonAnim then RougeUI.Animate(obtn) end else btn:SetButtonState("PUSHED") if RougeUI.db.ButtonAnim then RougeUI.Animate(btn) end end end)
+        wahk:SetScript("OnMouseUp", function() if OverrideActionBar and OverrideActionBar:IsShown() and id then _G["OverrideActionBarButton" .. id]:SetButtonState("NORMAL") else btn:SetButtonState("NORMAL") end end)
     end
 end
 
@@ -91,13 +127,15 @@ frame:RegisterEvent("UPDATE_BINDINGS")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function(self, event, ...)
     if not RougeUI.db.KeyEcho then
-        -- stop copying my work, use the addon.
+        -- stop copying, use the addon.
         self:UnregisterAllEvents()
         self:SetScript("OnEvent", nil)
         return
     end
+
     if event == "PLAYER_REGEN_ENABLED" then
         self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     end
+
     C_Timer.After(1, UpdateBinds)
 end)

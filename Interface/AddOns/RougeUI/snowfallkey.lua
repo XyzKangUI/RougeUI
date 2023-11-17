@@ -4,13 +4,14 @@ local bt4 = IsAddOnLoaded("Bartender4")
 local dm = IsAddOnLoaded("Dominos")
 local CreateFrame, hooksecurefunc = CreateFrame, hooksecurefunc
 local GetActionButtonForID = GetActionButtonForID
-local frame, animation
+local wahk = false
 
-local function Animate(self)
+local function CreateAnim(self)
     if (not self:IsVisible() or (self:GetParent():GetAlpha() < .35) or (self:GetAlpha() < 1)) then
         return
     end
 
+    local frame
     if not frame then
         frame = CreateFrame("Frame")
         frame:SetFrameStrata("TOOLTIP")
@@ -22,7 +23,7 @@ local function Animate(self)
         texture:SetBlendMode("ADD")
         texture:SetDrawLayer("OVERLAY", 7)
 
-        animation = texture:CreateAnimationGroup()
+        local animation = texture:CreateAnimationGroup()
 
         local alpha = animation:CreateAnimation("Alpha")
         alpha:SetFromAlpha(0)
@@ -44,16 +45,32 @@ local function Animate(self)
         rotation:SetDegrees(90)
         rotation:SetDuration(.3)
         rotation:SetOrder(2)
+
+        self.sfk = animation
+        self.snowfall = frame
+    end
+end
+
+function RougeUI.Animate(self)
+    if not self.sfk and not self.snowfall then
+        CreateAnim(self)
     end
 
-    frame:SetAllPoints(self)
-    animation:Stop()
-    animation:Play()
+    local func = true
+    if wahk then
+        func = self:GetButtonState() == "PUSHED"
+    end
+
+    if func then
+        self.snowfall:SetAllPoints(self)
+        self.sfk:Stop()
+        self.sfk:Play()
+    end
 end
 
 local function AnimateClick(button)
     if button and not button.hooked then
-        button.AnimateThis = Animate
+        button.AnimateThis = RougeUI.Animate
         button:HookScript("OnClick", button.AnimateThis)
         button.hooked = true
     end
@@ -63,19 +80,19 @@ local function HookedDefaultBars()
     hooksecurefunc("ActionButtonDown", function(id)
         local button = GetActionButtonForID(id)
         if button then
-            Animate(button)
+            RougeUI.Animate(button)
         end
     end)
     hooksecurefunc("MultiActionButtonDown", function(name, id)
         local button = _G[name .. "Button" .. id]
         if button then
-            Animate(button)
+            RougeUI.Animate(button)
         end
     end)
     hooksecurefunc("PetActionButtonDown", function(id)
         local button = _G["PetActionButton" .. id]
         if button then
-            Animate(button)
+            RougeUI.Animate(button)
         end
     end)
 
@@ -115,11 +132,14 @@ end
 local CF = CreateFrame("Frame")
 CF:RegisterEvent("PLAYER_LOGIN")
 CF:SetScript("OnEvent", function(self)
-    if bt4 and dm then
-        return
-    end
-
-    if RougeUI.db.ButtonAnim then
+    self:UnregisterEvent("PLAYER_LOGIN")
+    self:SetScript("OnEvent", nil)
+    
+    if RougeUI.db.ButtonAnim and not (bt4 and dm) then
+        if RougeUI.db.KeyEcho then
+            wahk = true
+            return
+        end
         if bt4 then
             AnimateBartender()
         elseif dm then
@@ -129,6 +149,4 @@ CF:SetScript("OnEvent", function(self)
             HookedDefaultBars()
         end
     end
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:SetScript("OnEvent", nil)
 end)
