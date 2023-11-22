@@ -96,28 +96,36 @@ local function WAHK(button, ok)
         wahk:SetScript("OnMouseDown", function()
             if OverrideActionBar and OverrideActionBar:IsShown() and id then
                 local obtn = _G["OverrideActionBarButton" .. id]
-                obtn:SetButtonState("PUSHED")
-                if RougeUI.db.ButtonAnim then
-                    RougeUI.Animate(obtn)
+                if obtn then
+                    obtn:SetButtonState("PUSHED")
+                    if RougeUI.db.ButtonAnim then
+                        RougeUI.Animate(obtn)
+                    end
                 end
             else
-                btn:SetButtonState("PUSHED")
-                if RougeUI.db.ButtonAnim then
-                    RougeUI.Animate(btn)
+                if btn then
+                    btn:SetButtonState("PUSHED")
+                    if RougeUI.db.ButtonAnim then
+                        RougeUI.Animate(btn)
+                    end
                 end
             end
         end)
         wahk:SetScript("OnMouseUp", function()
             if OverrideActionBar and OverrideActionBar:IsShown() and id then
                 local obtn = _G["OverrideActionBarButton" .. id]
-                obtn:SetButtonState("NORMAL")
-                if RougeUI.db.wahksfk then
-                    RougeUI.Animate(obtn)
+                if obtn then
+                    obtn:SetButtonState("NORMAL")
+                    if RougeUI.db.wahksfk then
+                        RougeUI.Animate(obtn)
+                    end
                 end
             else
-                btn:SetButtonState("NORMAL")
-                if RougeUI.db.wahksfk then
-                    RougeUI.Animate(btn)
+                if btn then
+                    btn:SetButtonState("NORMAL")
+                    if RougeUI.db.wahksfk then
+                        RougeUI.Animate(btn)
+                    end
                 end
             end
         end)
