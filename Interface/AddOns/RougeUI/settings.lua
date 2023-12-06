@@ -731,7 +731,7 @@ function f:CreateGUI()
                 addon.db.HideAggro = value
             end)
             AggroHighlightButton:SetChecked(addon.db.HideAggro)
-            AggroHighlightButton:SetPoint("TOPLEFT", 10, -285)
+            AggroHighlightButton:SetPoint("TOPLEFT", 10, -320)
         end
 
         local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value)
@@ -751,6 +751,12 @@ function f:CreateGUI()
         end)
         HideMacroButton:SetChecked(addon.db.HideMacro)
         HideMacroButton:SetPoint("TOPLEFT", 10, -250)
+
+        local HideTotDebuffs = CheckBtn("Hide TargetOfTarget Debuffs", "Hides the 4 small ToT Debuffs", Panel.childPanel3, function(self, value)
+            addon.db.ToTDebuffs = value
+        end)
+        HideTotDebuffs:SetChecked(addon.db.ToTDebuffs)
+        HideTotDebuffs:SetPoint("TOPLEFT", 10, -285)
 
         local HideRoleButton = CheckBtn("Hide role icon on default raid frames", "Hides the role icon on blizzard raid frames", Panel.childPanel3, function(self, value)
             addon.db.roleIcon = value

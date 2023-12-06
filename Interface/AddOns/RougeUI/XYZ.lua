@@ -59,76 +59,86 @@ local function WAHK(button, ok)
         clickButton = buttonType or ("CLICK " .. button .. ":LeftButton")
     end
 
-    local key = GetBindingKey(clickButton)
+    local key, key2 = GetBindingKey(clickButton)
     if not key then
         return
     end
 
-    local action = GetBindingAction(key, true)
-
-    if action and (action ~= "") then
-        btn = _G[ConvertActionButtonName(action)]
+    local cacheKeys = {}
+    if key then
+        cacheKeys[key] = key
+    end
+    if key2 then
+        cacheKeys[key2] = key2
     end
 
-    if btn then
-        local btnName = btn:GetName()
-        local clk = tostring(btnName)
+    for v in pairs(cacheKeys) do
+        local action = GetBindingAction(v, true)
 
-        if not id then
-            id = tonumber(button:match("(%d+)"))
+        if action and (action ~= "") then
+            btn = _G[ConvertActionButtonName(action)]
         end
 
-        local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
-        wahk:RegisterForClicks("AnyDown", "AnyUp")
-        wahk:SetAttribute("type", "macro")
+        if btn then
+            local btnName = btn:GetName()
+            local clk = tostring(btnName)
 
-        local onclick
-        if ok then
-            onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
-        else
-            onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
+            if not id then
+                id = tonumber(button:match("(%d+)"))
+            end
+
+            local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
+            wahk:RegisterForClicks("AnyDown", "AnyUp")
+            wahk:SetAttribute("type", "macro")
+
+            local onclick
+            if ok then
+                onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
+            else
+                onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
+            end
+
+            ClearOverrideBindings(wahk)
+            SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
+            SetOverrideBindingClick(wahk, true, v, wahk:GetName())
+
+            wahk:SetScript("OnMouseDown", function()
+                if OverrideActionBar and OverrideActionBar:IsShown() and id then
+                    local obtn = _G["OverrideActionBarButton" .. id]
+                    if obtn then
+                        obtn:SetButtonState("PUSHED")
+                        if RougeUI.db.ButtonAnim then
+                            RougeUI.Animate(obtn)
+                        end
+                    end
+                else
+                    if btn then
+                        btn:SetButtonState("PUSHED")
+                        if RougeUI.db.ButtonAnim then
+                            RougeUI.Animate(btn)
+                        end
+                    end
+                end
+            end)
+            wahk:SetScript("OnMouseUp", function()
+                if OverrideActionBar and OverrideActionBar:IsShown() and id then
+                    local obtn = _G["OverrideActionBarButton" .. id]
+                    if obtn then
+                        obtn:SetButtonState("NORMAL")
+                        if RougeUI.db.wahksfk then
+                            RougeUI.Animate(obtn)
+                        end
+                    end
+                else
+                    if btn then
+                        btn:SetButtonState("NORMAL")
+                        if RougeUI.db.wahksfk then
+                            RougeUI.Animate(btn)
+                        end
+                    end
+                end
+            end)
         end
-
-        ClearOverrideBindings(wahk)
-        SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
-        SetOverrideBindingClick(wahk, true, key, wahk:GetName())
-
-        wahk:SetScript("OnMouseDown", function()
-            if OverrideActionBar and OverrideActionBar:IsShown() and id then
-                local obtn = _G["OverrideActionBarButton" .. id]
-                if obtn then
-                    obtn:SetButtonState("PUSHED")
-                    if RougeUI.db.ButtonAnim then
-                        RougeUI.Animate(obtn)
-                    end
-                end
-            else
-                if btn then
-                    btn:SetButtonState("PUSHED")
-                    if RougeUI.db.ButtonAnim then
-                        RougeUI.Animate(btn)
-                    end
-                end
-            end
-        end)
-        wahk:SetScript("OnMouseUp", function()
-            if OverrideActionBar and OverrideActionBar:IsShown() and id then
-                local obtn = _G["OverrideActionBarButton" .. id]
-                if obtn then
-                    obtn:SetButtonState("NORMAL")
-                    if RougeUI.db.wahksfk then
-                        RougeUI.Animate(obtn)
-                    end
-                end
-            else
-                if btn then
-                    btn:SetButtonState("NORMAL")
-                    if RougeUI.db.wahksfk then
-                        RougeUI.Animate(btn)
-                    end
-                end
-            end
-        end)
     end
 end
 

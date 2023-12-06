@@ -889,6 +889,19 @@ end
 e:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
 
+        if RougeUI.db.ToTDebuffs then
+            for _, totFrame in ipairs({ TargetFrameToT, FocusFrameToT }) do
+                -- totFrame:HookScript("OnShow", function()
+                for i = 1, 4 do
+                    local dbf = _G[totFrame:GetName() .. "Debuff" .. i]
+                    if dbf and dbf:GetAlpha() > 0 then
+                        dbf:SetAlpha(0)
+                    end
+                end
+            end
+            -- end)
+        end
+
         if RougeUI.db.ThickFrames then
             ApplyThickness()
         end
@@ -1068,3 +1081,4 @@ e:SetScript("OnEvent", function(self, event)
 
     self:UnregisterEvent("PLAYER_LOGIN")
 end)
+
