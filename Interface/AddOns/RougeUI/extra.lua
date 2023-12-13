@@ -244,7 +244,11 @@ local function colour(statusbar, unit)
                 local _, class = UnitClass(unit)
                 local c = RAID_CLASS_COLORS[class]
                 if c then
-                    statusbar:SetStatusBarColor(c.r, c.g, c.b)
+                    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                        statusbar:SetStatusBarColor(0.0, 0.44, 0.87)
+                    else
+                        statusbar:SetStatusBarColor(c.r, c.g, c.b)
+                    end
                 end
             elseif (RougeUI.db.GradientHP and UnitCanAttack("player", unit)) or not (RougeUI.db.ClassHP or RougeUI.db.unithp) then
                 RougeUI.RougeUIF:GradientColour(statusbar)
@@ -441,7 +445,11 @@ local function CheckClassification(self, forceNormalTexture)
         local _, class = UnitClass(self.unit)
         local c = RAID_CLASS_COLORS[class]
         if c and UnitIsPlayer(self.unit) then
-            self.name:SetVertexColor(c.r, c.g, c.b)
+            if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                self.name:SetVertexColor(0.0, 0.44, 0.87)
+            else
+                self.name:SetVertexColor(c.r, c.g, c.b)
+            end
         else
             self.name:SetVertexColor(1, 0.81960791349411, 0, 1)
         end
@@ -641,7 +649,11 @@ local function PlayerArtThick(self)
         local _, class = UnitClass("player")
         local c = RAID_CLASS_COLORS[class]
         if c then
-            self.name:SetVertexColor(c.r, c.g, c.b)
+            if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                self.name:SetVertexColor(0.0, 0.44, 0.87)
+            else
+                self.name:SetVertexColor(c.r, c.g, c.b)
+            end
         end
     end
 
@@ -856,8 +868,6 @@ local function ChangeText(frame)
     local regions = { frame:GetRegions() }
     local childFrames = { frame:GetChildren() }
 
-    frame:EnableMouse(false)
-
     for _, region in ipairs(regions) do
         if region:IsObjectType("FontString") then
             region:SetJustifyH("LEFT")
@@ -986,7 +996,11 @@ e:SetScript("OnEvent", function(self, event)
                     local _, class = UnitClass(self.unit)
                     local c = RAID_CLASS_COLORS[class]
                     if c then
-                        self.nameBackground:SetVertexColor(c.r, c.g, c.b)
+                        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                            self.nameBackground:SetVertexColor(0.0, 0.44, 0.87)
+                        else
+                            self.nameBackground:SetVertexColor(c.r, c.g, c.b)
+                        end
                     end
                 else
                     self.nameBackground:SetVertexColor(0, 0, 0, 0.5)
@@ -1003,7 +1017,11 @@ e:SetScript("OnEvent", function(self, event)
                 bg:SetPoint("BOTTOMRIGHT", PlayerFrameBackground, 0, 22)
                 bg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
                 if c then
-                    bg:SetVertexColor(c.r, c.g, c.b)
+                    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                        bg:SetVertexColor(0.0, 0.44, 0.87)
+                    else
+                        bg:SetVertexColor(c.r, c.g, c.b)
+                    end
                 end
                 PlayerFrame.bg = true
             end

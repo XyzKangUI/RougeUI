@@ -73,8 +73,6 @@ local function addBorder(button, drawLayer, dbf)
         border:SetDrawLayer(drawLayer or "BACKGROUND", -7)
         if not button.debuff then
             border:SetVertexColor(RougeUI.db.BuffVal, RougeUI.db.BuffVal, RougeUI.db.BuffVal)
-        elseif button.tempenchant then
-            border:SetVertexColor(.7, 0, 1)
         end
         border:ClearAllPoints()
         if RougeUI.db.Lorti then
@@ -134,7 +132,7 @@ local function BtnGlow(button)
     end
 end
 
-local function SkinBuffs(bu)
+local function SkinBuffs(bu, layer)
     if not bu or (bu and bu.styled) then
         return
     end
@@ -180,7 +178,7 @@ local function SkinBuffs(bu)
         bu.count:SetPoint("TOPRIGHT", 1, 0)
     end
 
-    addBorder(bu, "BACKGROUND", true)
+    addBorder(bu, layer or "BACKGROUND", true)
 
     bu.styled = true
 end
@@ -297,7 +295,7 @@ local function init()
     for i = 1, NUM_TEMP_ENCHANT_FRAMES do
         local bu = _G["TempEnchant" .. i]
         if (bu and not bu.styled) then
-            SkinBuffs(bu)
+            SkinBuffs(bu, "BORDER")
         end
     end
 end

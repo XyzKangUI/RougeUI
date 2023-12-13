@@ -1,6 +1,6 @@
 ## Interface: 11500
 ## Title: |cff009cffRougeUI-WOTLKC|r
-## Version: 3.48
+## Version: 3.49
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
@@ -20,3 +20,4 @@ snowfallkey.lua
 combofix.lua
 ticks.lua
 XYZ.lua
+blueShaman.lua
