@@ -1,5 +1,4 @@
 local Name, addon = ...
-local Title = select(2, GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$", "");
 local floor = math.floor
 local format = format
 local CreateFrame, _G = CreateFrame, _G
@@ -69,7 +68,8 @@ local stock = {
     ClassNames = false,
     RangeIndicator = false,
     EnergyTicker = false,
-    wahksfk = false
+    wahksfk = false,
+    EnemyTicker = false
 }
 
 local f = CreateFrame("Frame")
@@ -139,10 +139,11 @@ end
 function f:CreateGUI()
     local Panel = CreateFrame("Frame", "$parentRougeUI_Config", InterfaceOptionsPanelContainer)
     do
+        local Title = "|cff009cffRougeUI|r"
         Panel.name = Title
         local category
         if Settings then
-            category = Settings.RegisterCanvasLayoutCategory(Panel, "RougeUI")
+            category = Settings.RegisterCanvasLayoutCategory(Panel, Title)
             Settings.RegisterAddOnCategory(category)
         else
             InterfaceOptions_AddCategory(Panel)
@@ -552,6 +553,12 @@ function f:CreateGUI()
             end)
             EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
             EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
+        else
+            local EnemyTicksButton = CheckBtn("Enemy Tick Tracker", "Track your target's mana/energy ticks", Panel.childPanel2, function(self, value)
+                addon.db.EnemyTicker = value
+            end)
+            EnemyTicksButton:SetChecked(addon.db.EnemyTicker)
+            EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
         end
 
         if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
@@ -649,11 +656,11 @@ function f:CreateGUI()
         ComboFixButton:SetPoint("TOPLEFT", 350, -365)
 
         if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-            local EnemyTicksButton = CheckBtn("Energy Ticker", "Track your Energy Ticks on the manabar", Panel.childPanel2, function(self, value)
+            local EnemyTicksButton = CheckBtn("Personal energy ticker", "Track your mana/energy ticks on the manabar", Panel.childPanel2, function(self, value)
                 addon.db.EnergyTicker = value
             end)
             EnemyTicksButton:SetChecked(addon.db.EnergyTicker)
-            EnemyTicksButton:SetPoint("TOPLEFT", 350, -400)
+            EnemyTicksButton:SetPoint("TOPLEFT", 350, -280)
         else
             local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
                 addon.db.Slice = value

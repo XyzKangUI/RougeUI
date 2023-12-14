@@ -1,19 +1,22 @@
 local _, RougeUI = ...
-
-local events = {
-    "PLAYER_LOGIN",
-    "PLAYER_REGEN_DISABLED",
-    "PLAYER_REGEN_ENABLED",
-    "UPDATE_SHAPESHIFT_FORM",
-    "COMBAT_LOG_EVENT_UNFILTERED",
-    "UNIT_POWER_UPDATE"
-}
-
-local last_tick = GetTime()
-local last_value = 0
+local UnitPowerType = _G.UnitPowerType
+local pairs = _G.pairs
+local UnitExists, UnitIsUnit, UnitIsEnemy = _G.UnitExists, _G.UnitIsUnit, _G.UnitIsEnemy
+local UnitPower, UnitIsPlayer = _G.UnitPower, _G.UnitIsPlayer
+local CombatLogGetCurrentEventInfo = _G.CombatLogGetCurrentEventInfo;
+local COMBATLOG_FILTER_HOSTILE_PLAYERS, COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_HOSTILE_PLAYERS, _G.COMBATLOG_FILTER_ME
+local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
+local PlayerFrameManaBar, TargetFrameManaBar = _G.PlayerFrameManaBar, _G.TargetFrameManaBar
 local externalManaGainTimestamp = 0
-local TimeSinceLastUpdate = 0
-local ONUPDATE_INTERVAL = 0.01
+local gain = 0
+
+local eventRegistered = { ["SPELL_PERIODIC_ENERGIZE"] = true, ["SPELL_ENERGIZE"] = true, ["SPELL_CAST_SUCCESS"] = true }
+local powerTypes = { [0] = true, [3] = true }
+local energyValues = {}
+
+local function PowerType(unit)
+    return UnitPowerType(unit)
+end
 
 local function SetEnergyValue(self, value)
     local x = self:GetWidth()
@@ -26,110 +29,195 @@ local function SetEnergyValue(self, value)
 end
 
 local function OnUpdate(self, elapsed)
-    local time = GetTime()
-    local v = time - last_tick
-    TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
+    for unit in pairs(energyValues) do
+        if powerTypes[PowerType(unit)] and UnitExists(unit) and (UnitIsEnemy("player", unit) or unit == "player") and UnitIsPlayer(unit) then
 
-    if TimeSinceLastUpdate >= ONUPDATE_INTERVAL then
-        TimeSinceLastUpdate = 0
+            energyValues[unit].last_tick = energyValues[unit].last_tick + elapsed
 
-        if time >= last_tick + 2.02 then
-            last_tick = time
+            if (energyValues[unit].last_tick >= 2.02) and energyValues[unit].startTick then
+                energyValues[unit].last_tick = 0
+                energyValues[unit].validTick = false
+                if UnitIsUnit(unit, "target") and not (unit == "player" or unit == "target") then
+                    energyValues.target.last_tick = energyValues[unit].last_tick
+                    energyValues.target.startTick = energyValues[unit].startTick
+                end
+            end
+
+            if unit == "player" then
+                SetEnergyValue(PlayerFrameManaBar, energyValues[unit].last_tick)
+            elseif (unit ~= "player") then
+                if not UnitExists("playertarget") or UnitIsUnit(unit, "target") then
+                    energyValues.target.last_tick = energyValues[unit].last_tick
+                    energyValues.target.startTick = energyValues[unit].startTick
+                end
+                SetEnergyValue(TargetFrameManaBar, energyValues[unit].last_tick)
+            end
         end
-
-        SetEnergyValue(self:GetParent(), v)
     end
 end
 
-local function UpdateEnergy()
-    local energy = UnitPower("player", 3)
-    local maxenergy = UnitPowerMax("player", 3)
-    local time = GetTime()
-    local v = time - last_tick
-
-    if time - externalManaGainTimestamp < 0.02 then
-        externalManaGainTimestamp = 0
+local function UpdateEnergy(unit, powerType)
+    if not energyValues[unit] or not powerTypes[PowerType(unit)] then
         return
     end
 
-    if (((energy == last_value + 20 or energy == last_value + 21 or energy == last_value + 40 or energy == last_value + 41) and energy ~= maxenergy)) then
-        last_tick = time
+    local now = GetTime()
+    local energy = UnitPower(unit)
+    local energyInc = energy - energyValues[unit].last_value
+
+    if ((now - externalManaGainTimestamp) <= 0.02) and energyInc == gain then
+        externalManaGainTimestamp = 0
+        gain = 0
+        return
     end
 
-    last_value = energy
+    if (energyValues[unit].last_value == 0) then
+        energyValues[unit].last_value = energy
+        return
+    elseif energyInc == 0 then
+        return
+    end
+
+    local increment = (energy > energyValues[unit].last_value)
+    if powerType == "ENERGY" then
+        increment = (energy == energyValues[unit].last_value + 20 or
+                energy == energyValues[unit].last_value + 21 or
+                energy == energyValues[unit].last_value + 40 or energy == energyValues[unit].last_value + 41)
+    end
+
+    if increment and not energyValues[unit].validTick then
+        energyValues[unit].startTick = true
+        energyValues[unit].last_tick = now
+        energyValues[unit].validTick = true
+        if unit == "player" and (PlayerFrameManaBar.energy.spark:GetAlpha() < 1) then
+            PlayerFrameManaBar.energy.spark:SetAlpha(1)
+        elseif UnitIsUnit("target", unit) and (unit ~= "player") and (TargetFrameManaBar.energy.spark:GetAlpha() < 1) then
+            TargetFrameManaBar.energy.spark:SetAlpha(1)
+        end
+    end
+
+    energyValues[unit].last_value = energy
 end
 
-local function AddEnergy()
-    PlayerFrameManaBar.energy = CreateFrame("Statusbar", "PlayerFrameManaBar_energy", PlayerFrameManaBar)
-    PlayerFrameManaBar.energy.spark = PlayerFrameManaBar.energy:CreateTexture(nil, "OVERLAY")
-    PlayerFrameManaBar.energy.spark:SetTexture[[Interface\CastingBar\UI-CastingBar-Spark]]
-    PlayerFrameManaBar.energy.spark:SetSize(32, 32)
-    PlayerFrameManaBar.energy.spark:SetPoint("CENTER", PlayerFrameManaBar, 0, 0)
-    PlayerFrameManaBar.energy.spark:SetBlendMode("ADD")
-    PlayerFrameManaBar.energy.spark:SetAlpha(.4)
-
-    PlayerFrameManaBar.energy:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
-    if not PlayerFrameManaBar.energy:GetScript("OnUpdate") then
-        PlayerFrameManaBar.energy:SetScript("OnUpdate", OnUpdate)
+local function AddEnergy(frame)
+    if not frame.energy then
+        frame.energy = CreateFrame("Statusbar", nil, frame)
+        frame.energy.spark = frame.energy:CreateTexture(nil, "OVERLAY")
+        frame.energy.spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+        frame.energy.spark:SetSize(28, 28)
+        frame.energy.spark:SetPoint("CENTER", frame, 0, 0)
+        frame.energy.spark:SetBlendMode("ADD")
+        frame.energy.spark:SetAlpha(0)
     end
 end
 
-local eventRegistered = { SPELL_PERIODIC_ENERGIZE = true, SPELL_ENERGIZE = true, SPELL_CAST_SUCCESS = true }
-local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo;
-local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME;
 local function RealTick()
-    local _, eventType, _, _, _, sourceFlags, _, _, _, destFlags, _, spellID = CombatLogGetCurrentEventInfo()
-    if not (eventRegistered[eventType]) then return end
+    local _, eventType, _, _, _, sourceFlags, _, _, _, destFlags, _, spellID, _, _, amount = CombatLogGetCurrentEventInfo()
 
+    if not (eventRegistered[eventType]) then
+        return
+    end
+
+    local isDestEnemy = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
     local isDestPlayer = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_ME)
     local isSourcePlayer = CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_ME)
+    local now = GetTime()
 
-    if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE") then
-        if isDestPlayer then
-            externalManaGainTimestamp = GetTime()
-        end
+    if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE") and (isDestEnemy or (isDestPlayer and isSourcePlayer)) then
+        gain = amount
+        externalManaGainTimestamp = now
         return
     end
 
-    if eventType == "SPELL_CAST_SUCCESS" then
-        if isSourcePlayer and spellID == 13750 then
-            last_tick = GetTime()
-        end
+    if eventType == "SPELL_CAST_SUCCESS" and isSourcePlayer and spellID == 13750 then
+        energyValues["player"].last_tick = now
         return
     end
 end
 
-local OnEvent = function(self, event, ...)
-    local _, class = UnitClass("player")
-    if not ((RougeUI.db.EnergyTicker) and class == "ROGUE" or class == "DRUID") then
-        self:UnregisterAllEvents()
-        self:SetScript("OnEvent", nil)
-        return
-    end
 
+local e = CreateFrame("Frame")
+e:RegisterEvent("PLAYER_LOGIN")
+e:RegisterEvent("UNIT_POWER_UPDATE")
+e:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+e:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        AddEnergy()
-        self:UnregisterEvent("PLAYER_LOGIN")
-        if (class ~= "DRUID") then
-            self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
+        if not RougeUI.db.EnergyTicker and not RougeUI.db.EnemyTicker then
+            self:UnregisterAllEvents()
+            self:SetScript("OnEvent", nil)
+            return
         end
-    elseif event == "PLAYER_REGEN_DISABLED" then
-        PlayerFrameManaBar.energy.spark:SetAlpha(1)
-    elseif event == "PLAYER_REGEN_ENABLED" then
-        PlayerFrameManaBar.energy.spark:SetAlpha(.4)
-    elseif event == "UPDATE_SHAPESHIFT_FORM" and class == "DRUID" then
-        if (UnitPowerType("player") ~= 3) then
+
+        if RougeUI.db.EnergyTicker and powerTypes[PowerType("player")] then
+            AddEnergy(PlayerFrameManaBar)
+            energyValues["player"] = {
+                last_tick = 0,
+                last_value = 0,
+                startTick = false,
+                validTick = false,
+            }
+
+            local _, class = UnitClass("player")
+            if class == "DRUID" then
+                self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+            end
+        end
+        if RougeUI.db.EnemyTicker then
+            AddEnergy(TargetFrameManaBar)
+            energyValues["target"] = {
+                last_tick = 0,
+                last_value = 0,
+                startTick = false,
+                validTick = false,
+            }
+
+            for i = 1, 10 do
+                energyValues["nameplate" .. i] = {
+                    last_tick = 0,
+                    last_value = 0,
+                    startTick = false,
+                    validTick = false,
+                }
+            end
+
+            self:RegisterEvent("PLAYER_TARGET_CHANGED")
+            self:RegisterEvent("PLAYER_ENTERING_WORLD")
+        end
+        self:SetScript("OnUpdate", OnUpdate)
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        for unit in pairs(energyValues) do
+            energyValues[unit] = {
+                last_tick = 0,
+                last_value = 0,
+                startTick = false,
+                validTick = false,
+            }
+        end
+    elseif event == "UNIT_POWER_UPDATE" then
+        local unit = ...
+        if energyValues[unit] and ((UnitIsEnemy("player", unit) and UnitIsPlayer(unit)) or unit == "player") then
+            UpdateEnergy(...)
+        end
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        RealTick()
+    elseif event == "PLAYER_TARGET_CHANGED" then
+        if not powerTypes[PowerType("target")] or not UnitIsPlayer("target")
+                or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
+            TargetFrameManaBar.energy.spark:SetAlpha(0)
+            C_Timer.After(0.1, function()
+                if energyValues.target.startTick and powerTypes[PowerType("target")]
+                        and UnitIsPlayer("target") and UnitIsEnemy("player", "target") then
+                    TargetFrameManaBar.energy.spark:SetAlpha(1)
+                end
+            end)
+        else
+            TargetFrameManaBar.energy.spark:SetAlpha(1)
+        end
+    elseif event == "UPDATE_SHAPESHIFT_FORM" then
+        if (UnitPowerType("player") == 1) then
             PlayerFrameManaBar.energy.spark:SetAlpha(0)
         else
             PlayerFrameManaBar.energy.spark:SetAlpha(1)
         end
-    elseif event == "UNIT_POWER_UPDATE" then
-        UpdateEnergy()
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        RealTick()
     end
-end
-
-local  e = CreateFrame("Frame")
-for _, v in pairs(events) do e:RegisterEvent(v) end
-e:SetScript("OnEvent", OnEvent)
+end)

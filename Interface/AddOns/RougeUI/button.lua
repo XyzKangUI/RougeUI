@@ -1,7 +1,6 @@
 local _, RougeUI = ...
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local _G = getfenv(0)
 local ceil, mod = _G.math.ceil, _G.math.fmod
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
 local max = math.max

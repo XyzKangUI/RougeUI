@@ -6,6 +6,7 @@ local select, hooksecurefunc = select, hooksecurefunc
 local STANDARD_TEXT_FONT, IsActiveBattlefieldArena = STANDARD_TEXT_FONT, IsActiveBattlefieldArena
 local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local ClassicEra = false
 
 if GetCVar("nameplateShowOnlyNames") == "1" then
     return
@@ -40,10 +41,6 @@ local function NameToArenaNumber(plate)
 end
 
 local function AddElements(plate)
-    if plate:IsForbidden() then
-        return
-    end
-
     if RougeUI.db.ModPlates then
         if (RougeUI.db.ArenaNumbers and not IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers then
             plate.name:SetFont(STANDARD_TEXT_FONT, 8)
@@ -109,20 +106,21 @@ end
 
 local OnEvent = function(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
-        local base = ...
-        local namePlateFrameBase = GetNamePlateForUnit(base, true);
-        if not namePlateFrameBase then
+        local unit = ...
+        local namePlateFrameBase = GetNamePlateForUnit(unit, issecure());
+        if not namePlateFrameBase or namePlateFrameBase:IsForbidden() then
             return
         end
 
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            HidePlates(namePlateFrameBase, base)
+        if not ClassicEra then
+            HidePlates(namePlateFrameBase, unit)
         end
         AddElements(namePlateFrameBase.UnitFrame)
     elseif event == "ADDON_LOADED" then
         if RougeUI.db.ArenaNumbers then
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
         end
+        ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
         self:UnregisterEvent("ADDON_LOADED")
     end
 end

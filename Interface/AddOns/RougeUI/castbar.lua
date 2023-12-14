@@ -1,10 +1,5 @@
 local _, RougeUI = ...
-local _G = getfenv(0)
-local UnitCastingInfo = _G.UnitCastingInfo
-local UnitChannelInfo = _G.UnitChannelInfo
 local strformat, max = string.format, math.max
-local FocusFrame = FocusFrame
-
 
 local function PurpleKoolaid(statusbar)
     if (not statusbar or statusbar.disconnected) then
@@ -109,7 +104,7 @@ local function modstyle()
     cf.timer:SetFontObject("SystemFont_Shadow_Small")
     cf.timer:SetShadowColor(0, 0, 0)
     cf.timer:SetShadowOffset(1, -1)
-    cf.timer:SetPoint("RIGHT", cf, -2.5, 0)
+    cf.timer:SetPoint("RIGHT", cf, -2.5, 0.3)
     cf.Text:SetFontObject("Game11Font_o1")
     cf.timer:SetScale(1.15)
     cf.update = .1
@@ -128,21 +123,24 @@ cf.Border:SetPoint("TOP", 0, 26)
 cf.Flash:SetPoint("TOP", 0, 26)
 cf.BorderShield:SetPoint("TOP", 0, 26)
 
-local function c_OnUpdate_Hook(self, elapsed)
+local function TimerHook(self, elapsed)
     if not self.timer then
         return
     end
-    if self.update and self.update < elapsed then
+
+    self.update = (self.update or 0) - elapsed
+
+    if self.update <= 0 then
+        local remainingTime = 0
+
         if self.casting then
-            self.timer:SetText(strformat("%.1f", max(self.maxValue - self.value, 0)))
+            remainingTime = max(self.maxValue - self.value, 0)
         elseif self.channeling then
-            self.timer:SetText(strformat("%.1f", max(self.value, 0)))
-        else
-            self.timer:SetText("")
+            remainingTime = max(self.value, 0)
         end
-        self.update = .1
-    else
-        self.update = self.update - elapsed
+
+        self.timer:SetText(strformat("%.1f", remainingTime))
+        self.update = 0.1
     end
 end
 
@@ -171,7 +169,7 @@ FR:SetScript("OnEvent", function(self, event)
             modstyle()
             if FocusFrame then
                 FocusFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
-                    c_OnUpdate_Hook(self, elapsed)
+                    TimerHook(self, elapsed)
                     RougeUI.RougeUIF:GradientColour(self)
                     if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
                         self:SetStatusBarColor(216/255, 31/255, 42/255)
@@ -179,14 +177,14 @@ FR:SetScript("OnEvent", function(self, event)
                 end)
             end
             TargetFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
-                c_OnUpdate_Hook(self, elapsed)
+                TimerHook(self, elapsed)
                 RougeUI.RougeUIF:GradientColour(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
                     self:SetStatusBarColor(216/255, 31/255, 42/255)
                 end
             end)
             CastingBarFrame:HookScript("OnUpdate", function(self, elapsed)
-                c_OnUpdate_Hook(self, elapsed)
+                TimerHook(self, elapsed)
                 PurpleKoolaid(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
                     self:SetStatusBarColor(216/255, 31/255, 42/255)

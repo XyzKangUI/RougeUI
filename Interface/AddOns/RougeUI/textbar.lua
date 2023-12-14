@@ -4,10 +4,38 @@ local mfloor, tonumber, mceil = math.floor, tonumber, math.ceil
 local GetCVar, UnitIsDeadOrGhost = GetCVar, UnitIsDeadOrGhost
 local UnitExists = UnitExists
 local UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax = UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax
-local hooksecurefunc = hooksecurefunc
+local isClassic = false
 
 local function round(value)
     return mfloor(value + 0.5)
+end
+
+local function CreateText(name, parentName, point, x, y)
+    local fontString = TargetFrameTextureFrame:CreateFontString(parentName..name, nil, "TextStatusBarText")
+    fontString:SetPoint(point, TargetFrameTextureFrame, point, x, y)
+
+    return fontString
+end
+
+local function CreateStatusText()
+    if not TargetFrameHealthBar.TextString then
+        TargetFrameHealthBar.TextString = CreateText("Text", "TargetFrameHealthBar", "CENTER", -50, 3)
+    end
+    if not TargetFrameHealthBar.LeftText then
+        TargetFrameHealthBar.LeftText = CreateText("TextLeft", "TargetFrameHealthBar", "LEFT", 8, 3)
+    end
+    if not TargetFrameHealthBar.RightText then
+        TargetFrameHealthBar.RightText = CreateText("TextRight", "TargetFrameHealthBar", "RIGHT", -110, 3)
+    end
+    if not TargetFrameManaBar.TextString then
+        TargetFrameManaBar.TextString = CreateText("Text", "TargetFrameManaBar", "CENTER", -50, -8)
+    end
+    if not TargetFrameManaBar.LeftText then
+        TargetFrameManaBar.LeftText = CreateText("TextLeft", "TargetFrameManaBar", "LEFT", 8, -8)
+    end
+    if not TargetFrameManaBar.RightText then
+        TargetFrameManaBar.RightText = CreateText("TextRight", "TargetFrameManaBar", "RIGHT", -110, -8)
+    end
 end
 
 function RougeUI.RougeUIF:CusFonts()
@@ -115,12 +143,19 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
         local valueMaxDisplay = valueMax;
 
         local textDisplay = GetCVar("statusTextDisplay");
-        if (value and valueMax > 0 and ((textDisplay ~= "NUMERIC" and textDisplay ~= "NONE") or statusFrame.showPercentage) and not statusFrame.showNumeric) then
+        local showPercentage = statusFrame.showPercentage
+
+        if isClassic then
+            if not UnitIsPlayer(statusFrame.unit) and statusFrame.showPercentage then
+                showPercentage = false
+            end
+        end
+        if (value and valueMax > 0 and ((textDisplay ~= "NUMERIC" and textDisplay ~= "NONE") or showPercentage) and not statusFrame.showNumeric) then
             if (value == 0 and statusFrame.zeroText) then
                 textString:SetText(statusFrame.zeroText);
                 statusFrame.isZero = 1;
                 textString:Show();
-            elseif (textDisplay == "BOTH" and not statusFrame.showPercentage) then
+            elseif (textDisplay == "BOTH" and not showPercentage) then
                 if (statusFrame.LeftText and statusFrame.RightText) then
                     if (not statusFrame.powerToken or statusFrame.powerToken == "MANA") then
                         statusFrame.LeftText:SetText(mceil((value / valueMax) * 100) .. "%");
@@ -184,6 +219,11 @@ CF:RegisterEvent("PLAYER_LOGIN")
 CF:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" and (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
         hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+    end
+    isClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+    if isClassic and not IsAddOnLoaded("ModernTargetFrame") then
+        CreateStatusText()
+        RougeUI.RougeUIF:CusFonts()
     end
     self:UnregisterEvent("PLAYER_LOGIN")
     self:SetScript("OnEvent", nil)

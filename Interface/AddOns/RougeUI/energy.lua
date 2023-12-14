@@ -1,7 +1,6 @@
 local _, RougeUI = ...
 local EnemyOOC = {}
 EnemyOOC.U = {}
-local _G = getfenv(0)
 local UnitPowerType, UnitPower, UnitAffectingCombat = _G.UnitPowerType, _G.UnitPower, _G.UnitAffectingCombat
 local UnitCanAttack, UnitIsUnit, UnitGUID, UnitExists = _G.UnitCanAttack, _G.UnitIsUnit, _G.UnitGUID, _G.UnitExists
 local inArena = false
@@ -560,7 +559,7 @@ function EnemyOOC:Predict(unit, now)
 end
 
 function EnemyOOC.OnUpdate(self, elapsed)
-    for unit, _ in pairs(updateUnit) do
+    for unit in pairs(updateUnit) do
         if powerTypes[PowerType(unit)] and UnitExists(unit) then
             -- xx
 

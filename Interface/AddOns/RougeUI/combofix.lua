@@ -2,7 +2,7 @@ local _, RougeUI = ...
 local comboPoints = 0;
 local comboPointsCache = {};
 local targetGUID
-local UnitGUID, UnitCanAttack, UnitIsPlayer, GetComboPoints = UnitGUID, UnitCanAttack, UnitIsPlayer, GetComboPoints
+local UnitGUID, UnitIsPlayer, GetComboPoints = UnitGUID, UnitIsPlayer, GetComboPoints
 local COMBOFRAME_FADE_IN = 0;
 local COMBOFRAME_HIGHLIGHT_FADE_IN = 0;
 local COMBOFRAMELAST_NUM_POINTS = 0;

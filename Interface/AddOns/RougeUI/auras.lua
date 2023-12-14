@@ -1,5 +1,4 @@
 local _, RougeUI = ...
-local _G = getfenv(0)
 local AURA_OFFSET_Y = 1
 local AURA_START_X = 5
 local AURA_START_Y = 32
@@ -11,9 +10,9 @@ local pairs = _G.pairs
 local MAX_TARGET_DEBUFFS = 16;
 local MAX_TARGET_BUFFS = 32;
 local mabs, mfloor = math.abs, math.floor
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 local Enraged, Whitelist = {}, {}
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 
 if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
     Enraged = {

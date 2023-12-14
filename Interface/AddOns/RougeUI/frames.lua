@@ -1,9 +1,7 @@
 local _, RougeUI = ...
-local _G = getfenv(0)
 local pairs = _G.pairs
-local doneInit
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
+local doneInit
 
 local function FrameColour()
     for _, v in pairs({
@@ -747,8 +745,12 @@ local function NewVariables()
     end
 
     -- Scoreboard
-    local a, b, c, d, e, f, _, _, _, _, _, l = WorldStateScoreFrame:GetRegions()
-    for _, v in pairs({ a, b, c, d, e, f, l }) do
+    local a, b, c, d, e, f, _, h, _, _, _, l = WorldStateScoreFrame:GetRegions()
+    local wscf = { a, b, c, d, e, f, l }
+    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+        wscf = { a, b, c, d, e, f, h }
+    end
+    for _, v in pairs(wscf) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end

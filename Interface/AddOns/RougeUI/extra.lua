@@ -1,6 +1,4 @@
 local _, RougeUI = ...
-local _G = getfenv(0)
-local hooksecurefunc = hooksecurefunc
 local pairs = pairs
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local GetSpellInfo = GetSpellInfo
@@ -15,7 +13,7 @@ local gsub, format = string.gsub, string.format
 local floor, fmod = math.floor, math.fmod
 local GetClassColorObj, GetMouseFocus = GetClassColorObj, GetMouseFocus
 local FocusFrame = _G.FocusFrame
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
+local isClassicEra = false
 
 local addonlist = {
     ["EasyFrames"] = true,
@@ -70,10 +68,10 @@ end
 local function HideFrameTitles(groupIndex)
     local frame
 
-    if not groupIndex then
-        frame = _G["CompactPartyFrameTitle"]
-    else
+    if groupIndex and groupIndex > 0 then
         frame = _G["CompactRaidGroup" .. groupIndex .. "Title"]
+    else
+        frame = _G["CompactPartyFrameTitle"]
     end
 
     if frame then
@@ -96,6 +94,9 @@ local function ColorScoreBoard()
 
             if text and filename then
                 local color = GetClassColorObj(filename)
+                if isClassicEra and (filename == "SHAMAN") then
+                    color = CreateColor(0.0, 0.44, 0.87)
+                end
                 ScoreBoard.name.text:SetText(color:WrapTextInColorCode(text))
             end
         end
@@ -244,7 +245,7 @@ local function colour(statusbar, unit)
                 local _, class = UnitClass(unit)
                 local c = RAID_CLASS_COLORS[class]
                 if c then
-                    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                    if isClassicEra and class == "SHAMAN" then
                         statusbar:SetStatusBarColor(0.0, 0.44, 0.87)
                     else
                         statusbar:SetStatusBarColor(c.r, c.g, c.b)
@@ -445,10 +446,13 @@ local function CheckClassification(self, forceNormalTexture)
         local _, class = UnitClass(self.unit)
         local c = RAID_CLASS_COLORS[class]
         if c and UnitIsPlayer(self.unit) then
-            if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+            if isClassicEra and class == "SHAMAN" then
                 self.name:SetVertexColor(0.0, 0.44, 0.87)
             else
                 self.name:SetVertexColor(c.r, c.g, c.b)
+            end
+            if RougeUI.db.ClassBG then
+                self.name:SetFontObject("SystemFont_Outline_Small")
             end
         else
             self.name:SetVertexColor(1, 0.81960791349411, 0, 1)
@@ -460,7 +464,7 @@ local function CheckClassification(self, forceNormalTexture)
         if self.threatIndicator then
             self.threatIndicator:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\ui-targetingframe-flash")
         end
-        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and IsAddOnLoaded("ModernTargetFrame") then
+        if isClassicEra and IsAddOnLoaded("ModernTargetFrame") then
             for i = 1, TargetFrame:GetNumRegions() do
                 local region = select(i, TargetFrame:GetRegions())
                 if region:IsObjectType("Texture") and not region:GetName() then
@@ -594,45 +598,19 @@ local function SpellQueueFix()
     end
 end
 
+local buttonNames = { "ActionButton", "MultiBarBottomRightButton", "MultiBarBottomLeftButton",
+                      "MultiBarRightButton", "MultiBarLeftButton", "PetActionButton" }
+
 local function HideHotkeys()
-    if RougeUI.db.HideHotkey then
+    for _, buttonName in pairs(buttonNames) do
         for i = 1, 12 do
-            if _G["ActionButton" .. i .. "HotKey"] then
-                _G["ActionButton" .. i .. "HotKey"]:SetAlpha(0)
+            local hotKey = _G[buttonName .. i .. "HotKey"]
+            if hotKey and RougeUI.db.HideHotkey then
+                hotKey:SetAlpha(0)
             end
-            if _G["MultiBarBottomRightButton" .. i .. "HotKey"] then
-                _G["MultiBarBottomRightButton" .. i .. "HotKey"]:SetAlpha(0)
-            end
-            if _G["MultiBarBottomLeftButton" .. i .. "HotKey"] then
-                _G["MultiBarBottomLeftButton" .. i .. "HotKey"]:SetAlpha(0)
-            end
-            if _G["MultiBarRightButton" .. i .. "HotKey"] then
-                _G["MultiBarRightButton" .. i .. "HotKey"]:SetAlpha(0)
-            end
-            if _G["MultiBarLeftButton" .. i .. "HotKey"] then
-                _G["MultiBarLeftButton" .. i .. "HotKey"]:SetAlpha(0)
-            end
-            if _G["PetActionButton" .. i .. "HotKey"] then
-                _G["PetActionButton" .. i .. "HotKey"]:SetAlpha(0)
-            end
-        end
-    end
-    if RougeUI.db.HideMacro then
-        for i = 1, 12 do
-            if _G["ActionButton" .. i .. "Name"] then
-                _G["ActionButton" .. i .. "Name"]:SetAlpha(0)
-            end
-            if _G["MultiBarBottomRightButton" .. i .. "Name"] then
-                _G["MultiBarBottomRightButton" .. i .. "Name"]:SetAlpha(0)
-            end
-            if _G["MultiBarBottomLeftButton" .. i .. "Name"] then
-                _G["MultiBarBottomLeftButton" .. i .. "Name"]:SetAlpha(0)
-            end
-            if _G["MultiBarRightButton" .. i .. "Name"] then
-                _G["MultiBarRightButton" .. i .. "Name"]:SetAlpha(0)
-            end
-            if _G["MultiBarLeftButton" .. i .. "Name"] then
-                _G["MultiBarLeftButton" .. i .. "Name"]:SetAlpha(0)
+            local name = _G[buttonName .. i .. "Name"]
+            if name and RougeUI.db.HideMacro then
+                name:SetAlpha(0)
             end
         end
     end
@@ -649,10 +627,13 @@ local function PlayerArtThick(self)
         local _, class = UnitClass("player")
         local c = RAID_CLASS_COLORS[class]
         if c then
-            if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+            if isClassicEra and class == "SHAMAN" then
                 self.name:SetVertexColor(0.0, 0.44, 0.87)
             else
                 self.name:SetVertexColor(c.r, c.g, c.b)
+            end
+            if RougeUI.db.ClassBG then
+                self.name:SetFontObject("SystemFont_Outline_Small")
             end
         end
     end
@@ -899,6 +880,8 @@ end
 e:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
 
+        isClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+
         if RougeUI.db.ToTDebuffs then
             for _, totFrame in ipairs({ TargetFrameToT, FocusFrameToT }) do
                 -- totFrame:HookScript("OnShow", function()
@@ -942,7 +925,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.ScoreBoard then
             hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
         end
-        if RougeUI.db.HideGlows then
+        if RougeUI.db.HideGlows and not RougeUI.db.ThickFrames then
             hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
         end
         if RougeUI.db.HideIndicator then
@@ -950,13 +933,14 @@ e:SetScript("OnEvent", function(self, event)
             hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
         end
         if RougeUI.db.HideTitles then
-            hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
+            if not RougeUI.db.ThickFrames then
+                hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
+            end
             hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
             hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
-            --PlayerLeaderIcon:SetAlpha(0)
-            --TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
-            --TargetFrameTextureFrameLeaderIcon:SetAlpha(0)
-            --FocusFrameTextureFrameLeaderIcon:SetAlpha(0)
+            for i = 0, 8 do
+                HideFrameTitles(i)
+            end
         end
         if RougeUI.db.pimp then
             hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
@@ -965,7 +949,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.HideAggro then
             if CompactUnitFrame_UpdateAggroHighlight then
                 hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
-                    if self.aggroHighlight then
+                    if self.aggroHighlight and (self.aggroHighlight:GetAlpha() > 0) then
                         self.aggroHighlight:SetAlpha(0)
                         return
                     end
@@ -975,7 +959,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.roleIcon then
             hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
                 if not frame.roleIcon then
-                    return ;
+                    return
                 end
 
                 if frame.roleIcon:IsShown() and (frame.roleIcon:GetAlpha() > 0) then
@@ -996,7 +980,7 @@ e:SetScript("OnEvent", function(self, event)
                     local _, class = UnitClass(self.unit)
                     local c = RAID_CLASS_COLORS[class]
                     if c then
-                        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                        if isClassicEra and class == "SHAMAN" then
                             self.nameBackground:SetVertexColor(0.0, 0.44, 0.87)
                         else
                             self.nameBackground:SetVertexColor(c.r, c.g, c.b)
@@ -1017,7 +1001,7 @@ e:SetScript("OnEvent", function(self, event)
                 bg:SetPoint("BOTTOMRIGHT", PlayerFrameBackground, 0, 22)
                 bg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
                 if c then
-                    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and class == "SHAMAN" then
+                    if isClassicEra and class == "SHAMAN" then
                         bg:SetVertexColor(0.0, 0.44, 0.87)
                     else
                         bg:SetVertexColor(c.r, c.g, c.b)
