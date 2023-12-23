@@ -182,7 +182,6 @@ frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-frame:RegisterEvent("GLYPH_UPDATED")
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
         for _, plate in pairs(plates) do
@@ -196,8 +195,6 @@ frame:SetScript("OnEvent", function(self, event, ...)
         local _, _, class = UnitClass("player")
         if (class == 7 or class == 9) then
             GlyphCheck()
-        else
-            self:UnregisterEvent("GLYPH_UPDATED")
         end
     elseif event == "PLAYER_LOGIN" then
         if not RougeUI.db.PSTrack then
@@ -207,6 +204,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
         end
         local _, _, class = UnitClass("player")
         if (class == 7 or class == 9) then
+            frame:RegisterEvent("GLYPH_UPDATED")
             GlyphCheck()
         end
         self:UnregisterEvent("PLAYER_LOGIN")
@@ -214,7 +212,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
         local unit = ...
         local namePlateFrameBase = C_NamePlate.GetNamePlateForUnit(unit, issecure())
         local guid = UnitGUID(unit)
-        if unit and namePlateFrameBase then
+        if (unit and namePlateFrameBase) and not namePlateFrameBase:IsForbidden() then
             UpdateIndicator(guid)
         end
     end

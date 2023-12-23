@@ -3,12 +3,9 @@
 
 local _, RougeUI = ...
 local smoothing = {}
-local pairs = pairs
-local floor = math.floor
+local floor, next = math.floor, next
 local mabs = math.abs
 local UnitGUID = UnitGUID
-local TARGET_FPS = 60
-local AMOUNT = .33
 local smoothframe = CreateFrame("Frame")
 
 local barstosmooth = {
@@ -20,13 +17,13 @@ local barstosmooth = {
     FocusFrameManaBar = "focus",
 }
 
-local function clamp(v, min, max)
-    min = min or 0
+local function clamp(v, max)
+    local min = 0
     max = max or 1
 
-    if v > max then
+    if v >= max then
         return max
-    elseif v < min then
+    elseif v <= min then
         return min
     end
 
@@ -38,7 +35,7 @@ local function lerp(startValue, endValue, amount)
 end
 
 local function isCloseEnough(new, target, range)
-    if range > 0 then
+    if range > 0.0 then
         return mabs((new - target) / range) <= 0.001
     end
 
@@ -47,38 +44,47 @@ end
 
 local function AnimationTick(_, elapsed)
     for unitFrame, info in next, smoothing do
-        local newValue = lerp(unitFrame._value, info, clamp(AMOUNT * elapsed * TARGET_FPS))
-
-        if isCloseEnough(newValue, info, unitFrame._max - unitFrame._min) then
-            newValue = info
-            smoothing[unitFrame] = nil
-        end
-
+        local newValue = lerp(unitFrame._value, info, clamp(.33 * elapsed * 60))
         unitFrame:SetValue_(floor(newValue))
         unitFrame._value = newValue
+
+        if not unitFrame:IsVisible() or isCloseEnough(newValue, info, unitFrame._max) then
+            if smoothing[unitFrame] then
+                unitFrame:SetValue_(smoothing[unitFrame])
+                unitFrame._value = smoothing[unitFrame]
+
+                smoothing[unitFrame] = nil
+            end
+
+            if not next(smoothing) then
+                smoothframe:SetScript("OnUpdate", nil)
+            end
+        end
     end
 end
 
 local function SetSmoothedValue(self, value)
-    value = tonumber(value)
     self.finalValue = value
+    local guid = UnitGUID(self.unit)
 
-    if self.unit then
-        local guid = UnitGUID(self.unit)
+    if not self:IsVisible() or isCloseEnough(self._value, value, self._max) or (self.unit and guid ~= self.guid) then
         if guid ~= self.guid then
-            smoothing[self] = nil
-            self:SetValue_(floor(value))
+            self.guid = guid
         end
-        self.guid = guid
+        smoothing[self] = nil
+        self:SetValue_(floor(value))
+        self._value = self:GetValue()
+        return
     end
 
-    self._value = self:GetValue()
-    smoothing[self] = clamp(value, self._min, self._max)
+    smoothing[self] = clamp(value, self._max)
+
+    if not smoothframe:GetScript("OnUpdate") then
+        smoothframe:SetScript("OnUpdate", AnimationTick)
+    end
 end
 
 local function SmoothSetValue(self, min, max)
-    min, max = tonumber(min), tonumber(max)
-
     self:SetMinMaxValues_(min, max)
 
     if self._max and self._max ~= max then
@@ -99,13 +105,12 @@ local function SmoothSetValue(self, min, max)
         end
     end
 
-    self._min = min
     self._max = max
 end
 
-
 local function SmoothBar(bar)
-    bar._min, bar._max = bar:GetMinMaxValues()
+    local _
+    _, bar._max = bar:GetMinMaxValues()
     bar._value = bar:GetValue()
 
     if not bar.SetValue_ then
@@ -118,26 +123,16 @@ local function SmoothBar(bar)
     end
 end
 
-local function onUpdate()
-    for _, plate in pairs(C_NamePlate.GetNamePlates(true)) do
-        if not plate:IsForbidden() and plate:IsVisible() and plate.UnitFrame:IsShown() then
-            SmoothBar(plate.UnitFrame.healthBar)
-        end
-    end
-    AnimationTick()
-end
-
 local function init()
-    for k,v in pairs (barstosmooth) do
-        if _G[k] then
-            SmoothBar(_G[k])
-            _G[k]:HookScript("OnHide", function()
-                _G[k].guid = nil;
-                _G[k].max_ = nil
-                _G[k].min_ = nil
+    for k, v in pairs(barstosmooth) do
+        local statusbar = _G[k]
+        if statusbar then
+            SmoothBar(statusbar)
+            statusbar:HookScript("OnHide", function(self)
+                self.guid, self.max_ = nil, nil
             end)
             if v ~= "" then
-                _G[k].unit = v
+                statusbar.unit = v
             end
         end
     end

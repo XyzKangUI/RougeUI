@@ -3,11 +3,9 @@ local ceil, mod = _G.math.ceil, _G.math.fmod
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
-local max = math.max
-
-if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
-    return
-end
+local floor, strformat, max = _G.math.floor, _G.string.format, _G.math.max
+local startTicker, buffButtons = nil, {}
+local conflictingAddons = false
 
 local backdrop = {
     bgFile = nil,
@@ -131,8 +129,62 @@ local function BtnGlow(button)
     end
 end
 
+local function TimeFormat(time)
+    local h, m, s, text
+
+    if time <= 0 then
+        text = ""
+    elseif time < 3600 and time > 60 then
+        h = floor(time / 3600)
+        m = floor((time % 3600) / 60 + 0.99)
+        s = time % 60
+        text = strformat("|r%d|rm", m)
+    elseif time > 5 and time < 60 then
+        m = floor(time / 60)
+        s = time % 60
+        if RougeUI.db.Roug or RougeUI.db.Modern then
+            text = m == 0 and strformat("|cffffffff%d|r", s) or ""
+        else
+            text = m == 0 and strformat("|cffffffff%d|r|cffffffffs|r", s) or ""
+        end
+    elseif time < 5 then
+        m = floor(time / 60)
+        s = time % 60
+        if RougeUI.db.Roug or RougeUI.db.Modern then
+            text = m == 0 and strformat("|cffffffff%.1f|r", s) or ""
+        else
+            text = m == 0 and strformat("|cffffffff%d|r|cffffffffs|r", s) or ""
+        end
+    else
+        h = floor(time / 3600 + 0.99)
+        text = strformat("|r%d|rh", h)
+    end
+
+    return text
+end
+
 local function SkinBuffs(bu, layer)
     if not bu or (bu and bu.styled) then
+        return
+    end
+
+    if conflictingAddons then
+        if not buffButtons[bu] then
+            buffButtons[bu] = bu
+        end
+        if not startTicker then
+            startTicker = C_Timer.NewTicker(0.1, function()
+                for _, button in pairs(buffButtons) do
+                    if button.timeLeft then
+                        button.duration:SetText(TimeFormat(button.timeLeft))
+                    end
+                end
+            end)
+        end
+    end
+
+    if not (RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern) then
+        bu.styled = true
         return
     end
 
@@ -434,13 +486,27 @@ local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        if not IsAddOnLoaded("SimpleAuraFilter") then
-            hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
-            hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
+        if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
+            self:UnregisterEvent("PLAYER_LOGIN")
+            self:SetScript("OnEvent", nil)
+            return
         end
 
-        if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
-            init()
+        conflictingAddons = not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers"))
+
+        if not IsAddOnLoaded("SimpleAuraFilter") and (RougeUI.db.BuffsRow and RougeUI.db.BuffsRow < 10) then
+            C_Timer.After(1, function()
+                hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
+                hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
+            end)
+        end
+
+        if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.TimerGap then
+            if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
+                init()
+                HookAuras()
+            end
+
             hooksecurefunc("AuraButton_Update", function(self, index)
                 local button = _G[self .. index]
                 if button and not button.styled then
@@ -450,13 +516,12 @@ e3:SetScript("OnEvent", function(self, event)
                     BtnGlow(button)
                 end
             end)
-            hooksecurefunc("ActionButton_ShowGrid", function(btn)
-                if btn then
-                    _G[btn:GetName() .. "NormalTexture"]:SetVertexColor(1, 1, 1, 1)
-                end
-            end)
-            HookAuras()
+
+            if conflictingAddons then
+                AuraButton_UpdateDuration = function() return end -- :O
+            end
         end
+
         self:UnregisterEvent("PLAYER_LOGIN")
         self:SetScript("OnEvent", nil)
     end

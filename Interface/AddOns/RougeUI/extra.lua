@@ -3,68 +3,23 @@ local pairs = pairs
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local GetSpellInfo = GetSpellInfo
 local GetNetStats = GetNetStats
-local IsInInstance = IsInInstance
+local IsInInstance, IsDesaturated = IsInInstance, IsDesaturated
 local GetBattlefieldScore = GetBattlefieldScore
 local UnitClass, UnitExists, UnitCanAttack, GetUnitName = UnitClass, UnitExists, UnitCanAttack, GetUnitName
 local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification
 local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied
 local ConsoleExec, RAID_CLASS_COLORS = ConsoleExec, RAID_CLASS_COLORS
 local gsub, format = string.gsub, string.format
-local floor, fmod = math.floor, math.fmod
+local mfloor, mceil = math.floor, math.ceil
 local GetClassColorObj, GetMouseFocus = GetClassColorObj, GetMouseFocus
 local FocusFrame = _G.FocusFrame
 local isClassicEra = false
-
-local addonlist = {
-    ["EasyFrames"] = true,
-    ["whoaThickFrames_WotLK"] = true,
-    ["whoaUnitFrames_WotLK"] = true,
-    ["TextureScript"] = true,
-    ["SUI"] = true,
-    ["RiizUI"] = true
-}
 
 -- Hide MultiGroupFrame icons showing as Party(+BG) leader
 local mg = PlayerPlayTime:GetParent().MultiGroupFrame
 hooksecurefunc(mg, "Show", mg.Hide)
 
--- Remove gap in buff timers & color the format
-local function TimeFormat(button, time)
-    local duration = _G[button:GetName() .. "Duration"]
-    local h, m, s, text
-
-    if time <= 0 then
-        text = ""
-    elseif time < 3600 and time > 60 then
-        h = floor(time / 3600)
-        m = floor(fmod(time, 3600) / 60 + 1)
-        s = fmod(time, 60)
-        text = duration:SetFormattedText("|r%d|rm", m)
-    elseif time > 5 and time < 60 then
-        m = floor(time / 60)
-        s = fmod(time, 60)
-        if RougeUI.db.Roug or RougeUI.db.Modern then
-            text = m == 0 and duration:SetFormattedText("|r%d|r", s)
-        else
-            text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
-        end
-    elseif time < 5 then
-        m = floor(time / 60)
-        s = fmod(time, 60)
-        if RougeUI.db.Roug or RougeUI.db.Modern then
-            text = m == 0 and duration:SetFormattedText("|r%.1f|r", s)
-        else
-            text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
-        end
-    else
-        h = floor(time / 3600 + 1)
-        text = duration:SetFormattedText("|r%d|rh", h)
-    end
-    return text
-end
-
 -- Hide Raid frame titles
-
 local function HideFrameTitles(groupIndex)
     local frame
 
@@ -158,7 +113,6 @@ local function HideGlows()
 end
 
 -- Remove server name from raid frames
-
 hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
     local _, instanceType = IsInInstance()
     local name = frame.name
@@ -172,7 +126,6 @@ hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
 end)
 
 -- Hide / Show mouseover raidframe
-
 local manager = CompactRaidFrameManager
 manager:SetAlpha(0)
 local function FindParent(frame, target)
@@ -716,12 +669,11 @@ end
 local function ApplyThickness()
     PlayerFrame.name:ClearAllPoints()
     PlayerFrame.name:SetPoint("TOP", PlayerFrameHealthBar, 0, 15)
-    PlayerStatusTexture:SetTexture()
+    PlayerStatusTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\UI-Player-Status2");
     PlayerRestGlow:SetAlpha(0)
     hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
     hooksecurefunc("PlayerFrame_ToVehicleArt", VehicleArtThick)
     hooksecurefunc("PetFrame_Update", PetArtThick)
-    hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
 end
 
 local events = {
@@ -794,51 +746,72 @@ end
 
 local IsUsableAction, GetActionCount, IsConsumableAction = IsUsableAction, GetActionCount, IsConsumableAction
 local IsStackableAction, IsActionInRange, RANGE_INDICATOR = IsStackableAction, IsActionInRange, RANGE_INDICATOR
-local function Usable(button)
+
+local function Usable(button, r, g, b, a)
     local action = button.action
-    local isUsable, notEnoughMana = IsUsableAction(action)
     local icon = button.icon
+
+    if not action or not icon then
+        return
+    end
+
+    local isUsable, notEnoughMana = IsUsableAction(action)
     local count = GetActionCount(action)
 
     if isUsable then
-        icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-        icon:SetDesaturated(false)
-    elseif notEnoughMana then
-        icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
-        icon:SetDesaturated(true)
-    elseif (IsConsumableAction(action) or IsStackableAction(action)) and count == 0 then
-        icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
-        icon:SetDesaturated(true)
-    else
-        if UnitExists("target") or UnitExists("focus") then
-            icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
-            icon:SetDesaturated(true)
-        else
+       -- if (r ~= 1.0 or g ~= 1.0 or b ~= 1.0 or a ~= 1.0) or icon:IsDesaturated() then
             icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
             icon:SetDesaturated(false)
+      --  end
+    elseif notEnoughMana then
+       -- if ((mfloor(r * 100) / 100) ~= 0.3 or (mfloor(g * 100) / 100) ~= 0.3 or (mfloor(b * 100) / 100) ~= 0.3 or a ~= 1.0) or not icon:IsDesaturated() then
+            icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
+            icon:SetDesaturated(true)
+       -- end
+    elseif (IsConsumableAction(action) or IsStackableAction(action)) and count == 0 then
+        if not icon:IsDesaturated() then
+            icon:SetDesaturated(true)
+        end
+    else
+        if UnitExists("target") or UnitExists("focus") then
+           -- if ((mfloor(r * 100) / 100) ~= 0.4 or (mfloor(g * 100) / 100) ~= 0.4 or (mfloor(b * 100) / 100) ~= 0.4 or a ~= 1.0) or not icon:IsDesaturated() then
+                icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
+                icon:SetDesaturated(true)
+          --  end
+        else
+         --   if r ~= 1.0 or b ~= 1.0 or g ~= 1.0 or a ~= 1.0 then
+                icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+                icon:SetDesaturated(false)
+          --  end
         end
     end
 end
 
-local function RangeIndicator(self)
-    local _, oom = IsUsableAction(self.action)
-    local valid = IsActionInRange(self.action);
-    local checksRange = (valid ~= nil);
-    local inRange = checksRange and valid;
+local function RangeIndicator(self, checksRange, inRange)
+    if self and not self:IsVisible() then
+        return
+    end
 
-    if self.HotKey and self.HotKey:GetText() == RANGE_INDICATOR then
-        self.HotKey:Hide()
+    if checksRange == nil and inRange == nil then
+        local valid = IsActionInRange(self.action);
+        checksRange = (valid ~= nil)
+        inRange = checksRange and valid;
+    end
+
+    local r, g, b, a = self.icon:GetVertexColor()
+
+    if self.HotKey and self.HotKey:GetText() == RANGE_INDICATOR and self.HotKey:GetAlpha() > 0 then
+        self.HotKey:SetAlpha(0)
     end
     if checksRange and not inRange then
-        if oom then
-            self.icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
-            self.icon:SetDesaturated(true)
-        else
+       -- if r ~= 1.0 or ((mceil(g * 100) / 100) ~= 0.35 or (mceil(b * 100) / 100) ~= 0.35 or (mceil(a * 100) / 100) ~= 0.75) or not self.icon:IsDesaturated() then
             self.icon:SetVertexColor(1.0, 0.35, 0.35, 0.75)
             self.icon:SetDesaturated(true)
-        end
+            self.HotKey:SetAlpha(1.0, 0.35, 0.35, 0.75)
+       -- end
     else
-        Usable(self)
+        self.HotKey:SetAlpha(1.0, 1.0, 1.0, 1.0)
+        Usable(self, r, g, b, a)
     end
 end
 
@@ -905,12 +878,6 @@ e:SetScript("OnEvent", function(self, event)
             hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
         end
 
-        if RougeUI.db.TimerGap or RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
-            if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
-                hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
-            end
-        end
-
         if (RougeUI.db.ClassHP or RougeUI.db.GradientHP or RougeUI.db.unithp) then
             hooksecurefunc("UnitFrameHealthBar_Update", colour)
             hooksecurefunc("HealthBar_OnValueChanged", function(self)
@@ -925,7 +892,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.ScoreBoard then
             hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
         end
-        if RougeUI.db.HideGlows and not RougeUI.db.ThickFrames then
+        if RougeUI.db.HideGlows then
             hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
         end
         if RougeUI.db.HideIndicator then
@@ -1033,14 +1000,8 @@ e:SetScript("OnEvent", function(self, event)
         end
 
         if RougeUI.db.RangeIndicator and not (IsAddOnLoaded("Bartender4") or IsAddOnLoaded("tullaRange")) then
-            hooksecurefunc("ActionButton_OnUpdate", RangeIndicator)
-        end
-
-        for addons in pairs(addonlist) do
-            if IsAddOnLoaded(addons) then
-                self:UnregisterEvent("PLAYER_LOGIN")
-                return
-            end
+            hooksecurefunc("ActionButton_UpdateRangeIndicator", RangeIndicator)
+            hooksecurefunc("ActionButton_UpdateUsable", RangeIndicator)
         end
 
         OnLoad()
@@ -1083,4 +1044,3 @@ e:SetScript("OnEvent", function(self, event)
 
     self:UnregisterEvent("PLAYER_LOGIN")
 end)
-

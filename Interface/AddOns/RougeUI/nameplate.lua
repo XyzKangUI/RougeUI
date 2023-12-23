@@ -8,10 +8,6 @@ local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local ClassicEra = false
 
-if GetCVar("nameplateShowOnlyNames") == "1" then
-    return
-end
-
 local function NameToArenaNumber(plate)
     if plate:IsForbidden() then
         return
@@ -116,16 +112,20 @@ local OnEvent = function(self, event, ...)
             HidePlates(namePlateFrameBase, unit)
         end
         AddElements(namePlateFrameBase.UnitFrame)
-    elseif event == "ADDON_LOADED" then
+    elseif event == "PLAYER_LOGIN" then
+        if GetCVar("nameplateShowOnlyNames") == "1" then
+            self:UnregisterAllEvents()
+            return
+        end
         if RougeUI.db.ArenaNumbers then
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
         end
         ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-        self:UnregisterEvent("ADDON_LOADED")
+        self:UnregisterEvent("PLAYER_LOGIN")
     end
 end
 
 local e = CreateFrame("Frame")
 e:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-e:RegisterEvent("ADDON_LOADED")
+e:RegisterEvent("PLAYER_LOGIN")
 e:SetScript('OnEvent', OnEvent)

@@ -46,7 +46,20 @@ f:SetScript("OnEvent", function(self, event, addon)
             return
         end
 
-        HookFrames()
+        hooksecurefunc("WhoList_Update", function()
+            local whoOffset = FauxScrollFrame_GetOffset(WhoListScrollFrame)
+            local whoIndex, class
+            for i = 1, WHOS_TO_DISPLAY, 1 do
+                whoIndex = whoOffset + i
+                local info = C_FriendList.GetWhoInfo(whoIndex)
+                if info then
+                    class = info.filename
+                end
+                if class == "SHAMAN" then
+                    _G["WhoFrameButton" .. i .. "Class"]:SetTextColor(0.0, 0.44, 0.87)
+                end
+            end
+        end)
 
         DropDownList1Button1NormalText:HookScript("OnShow", function()
             local text = DropDownList1Button1NormalText:GetText()
@@ -115,7 +128,7 @@ f:SetScript("OnEvent", function(self, event, addon)
                         local c = RAID_CLASS_COLORS[class]
                         if c then
                             if class == "SHAMAN" then
-                                c.r , c.g, c.b = 0, 0.44, 0.87
+                                c.r, c.g, c.b = 0, 0.44, 0.87
                             end
                             self:SetUnitColor(unit, c.r, c.g, c.b, 1)
                         end
@@ -136,7 +149,7 @@ f:SetScript("OnEvent", function(self, event, addon)
                             local c = RAID_CLASS_COLORS[class]
                             if c then
                                 if class == "SHAMAN" then
-                                    c.r , c.g, c.b = 0, 0.44, 0.87
+                                    c.r, c.g, c.b = 0, 0.44, 0.87
                                 end
                                 self:SetUnitColor(unit, c.r, c.g, c.b, 1)
                             end

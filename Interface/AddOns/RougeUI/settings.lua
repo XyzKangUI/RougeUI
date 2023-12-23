@@ -45,11 +45,11 @@ local stock = {
     HideIndicator = true,
     Abbreviate = false,
     ModPlates = true,
-    AuraRow = 108,
+    AuraRow = 122,
     BuffAlpha = false,
     ButtonAnim = false,
     PartyText = false,
-    BuffSizer = false,
+    BuffSizer = true,
     GoldElite = false,
     RareElite = false,
     Rare = false,
@@ -228,37 +228,55 @@ function f:CreateGUI()
         ClassPortraitButton:SetChecked(addon.db.Class_Portrait)
         ClassPortraitButton:SetPoint("TOPLEFT", 10, -70)
 
-        local ClassHPButton = CheckBtn("Enable Class Colored HealthBar", "Enabling this will change the green healthBar color to the class color", Panel.childPanel4, function(self, value)
+        local ClassHPButton, GradientHPButton, UnitHPButton
+        ClassHPButton = CheckBtn("Enable Class Colored HealthBar", "Enabling this will change the green healthBar color to the class color", Panel.childPanel4, function(self, value)
             addon.db.ClassHP = value
+            addon.db.GradientHP = false
+            addon.db.unithp = false
+            GradientHPButton:SetChecked(addon.db.GradientHP)
+            UnitHPButton:SetChecked(addon.db.unithp)
         end)
         ClassHPButton:SetChecked(addon.db.ClassHP)
         ClassHPButton:SetPoint("TOPLEFT", 10, -75)
 
-        local GradientHPButton = CheckBtn("Enable Gradient HealthBar", "This changes the healthBar color from green > yellow > orange > red based on the current percentage", Panel.childPanel4, function(self, value)
+        GradientHPButton = CheckBtn("Enable Gradient HealthBar", "This changes the healthBar color from green > yellow > orange > red based on the current percentage", Panel.childPanel4, function(self, value)
             addon.db.GradientHP = value
+            addon.db.ClassHP = false
+            addon.db.unithp = false
+            ClassHPButton:SetChecked(addon.db.ClassHP)
+            UnitHPButton:SetChecked(addon.db.unithp)
         end)
         GradientHPButton:SetChecked(addon.db.GradientHP)
         GradientHPButton:SetPoint("TOPLEFT", 10, -110)
 
-        local UnitHPButton = CheckBtn("Color HealthBar by Unit's Reaction", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value)
+        UnitHPButton = CheckBtn("Color HealthBar by Unit's Reaction", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value)
             addon.db.unithp = value
+            addon.db.ClassHP = false
+            addon.db.GradientHP = false
+            ClassHPButton:SetChecked(addon.db.ClassHP)
+            GradientHPButton:SetChecked(addon.db.GradientHP)
         end)
         UnitHPButton:SetChecked(addon.db.unithp)
         UnitHPButton:SetPoint("TOPLEFT", 10, -145)
 
         CreateText(Panel.childPanel1, 10, -210, "StatusText")
 
-        local ShortNumericButton = CheckBtn("Display HP/Mana Text as '10k'", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value)
+        local ShortNumericButton , AbbButton
+        ShortNumericButton = CheckBtn("Display HP/Mana Text as '10k'", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value)
             addon.db.ShortNumeric = value
+            addon.db.Abbreviate = false
+            AbbButton:SetChecked(addon.db.Abbreviate)
         end)
         ShortNumericButton:SetChecked(addon.db.ShortNumeric)
         ShortNumericButton:SetPoint("TOPLEFT", 10, -245)
 
-        local ShortNumericButton = CheckBtn("Display only CURRENT HP/Mana Text", "This will show the HP/Mana StatusText as CURRENT value instead of CURRENT / MAX", Panel.childPanel1, function(self, value)
+        AbbButton = CheckBtn("Display only CURRENT HP/Mana Text", "This will show the HP/Mana StatusText as CURRENT value instead of CURRENT / MAX", Panel.childPanel1, function(self, value)
             addon.db.Abbreviate = value
+            addon.db.ShortNumeric = false
+            ShortNumericButton:SetChecked(addon.db.ShortNumeric)
         end)
-        ShortNumericButton:SetChecked(addon.db.Abbreviate)
-        ShortNumericButton:SetPoint("TOPLEFT", 10, -280)
+        AbbButton:SetChecked(addon.db.Abbreviate)
+        AbbButton:SetPoint("TOPLEFT", 10, -280)
 
         local PartyTextButton = CheckBtn("Show HP/Mana Text on PartyFrames", "This will show the HP/Mana StatusText on party1-4", Panel.childPanel1, function(self, value)
             addon.db.PartyText = value
@@ -292,15 +310,33 @@ function f:CreateGUI()
         ClassOutlines:SetChecked(addon.db.classoutline)
         ClassOutlines:SetPoint("TOPLEFT", 10, -105)
 
-        local ClassBG = CheckBtn("Class Colored Name Background", "Adds a class colored texture behind the UnitFrame name", Panel.childPanel1, function(self, value)
+        local ClassBG, Transparent
+        ClassBG = CheckBtn("Class Colored Name Background", "Adds a class colored texture behind the UnitFrame name", Panel.childPanel1, function(self, value)
             if addon.db.ThickFrames then
                 UIErrorsFrame:AddMessage("This cannot be enabled with big frames", 1, 0, 0)
+                self:SetChecked(false)
             else
                 addon.db.ClassBG = value
+                Transparent:SetChecked(false)
+                addon.db.transparent = false
+                if addon.db.ClassBG then
+                    if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["ClassColFrames"] == "On" then
+                        UIErrorsFrame:AddMessage("Don't forget to disable Class colored frames in Leatrix Plus", 1, 0, 0)
+                        print("Don't forget to disable Class colored frames in Leatrix Plus")
+                    end
+                end
             end
         end)
         ClassBG:SetChecked(addon.db.ClassBG)
         ClassBG:SetPoint("TOPLEFT", 10, -140)
+
+        Transparent = CheckBtn("Transparent name background", nil, Panel.childPanel1, function(self, value)
+            addon.db.transparent = value
+            addon.db.ClassBG = false
+            ClassBG:SetChecked(false)
+        end)
+        Transparent:SetChecked(addon.db.transparent)
+        Transparent:SetPoint("TOPLEFT", 350, -140)
 
         local ClassCNames = CheckBtn("Class Colored Names", "Color names to their class color", Panel.childPanel1, function(self, value)
             addon.db.ClassNames = value
@@ -311,16 +347,15 @@ function f:CreateGUI()
         local ThickFrame = CheckBtn("Enable Big Frames", "Enable this for big (thick) UnitFrames", Panel.childPanel1, function(self, value)
             addon.db.ThickFrames = value
             addon.db.ClassBG = false
+            if addon.db.ThickFrames then
+                if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["ClassColFrames"] == "On" then
+                    UIErrorsFrame:AddMessage("Don't forget to disable Class colored frames in Leatrix Plus", 1, 0, 0)
+                    print("Don't forget to disable Class colored frames in Leatrix Plus")
+                end
+            end
         end)
         ThickFrame:SetChecked(addon.db.ThickFrames)
         ThickFrame:SetPoint("TOPLEFT", 350, -105)
-
-        local Transparent = CheckBtn("Transparent name background", nil, Panel.childPanel1, function(self, value)
-            addon.db.transparent = value
-            addon.db.ClassBG = false
-        end)
-        Transparent:SetChecked(addon.db.transparent)
-        Transparent:SetPoint("TOPLEFT", 350, -140)
 
         local Nolvl = CheckBtn("Hide level text on frames", nil, Panel.childPanel1, function(self, value)
             addon.db.NoLevel = value
@@ -485,8 +520,15 @@ function f:CreateGUI()
                 BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(BuffsRow)))
                 BuffValueSlider:SetValueStep(1)
                 BuffValueSlider:SetObeyStepOnDrag(true);
+                local origValue, msgPrinted = 10, false
+                local origAnchor = _G.BuffFrame_UpdateAllBuffAnchors
                 BuffValueSlider:SetScript("OnValueChanged", function(_, value)
                     BuffValueSlider.text:SetText("Buffs Per Row: " .. RoundNumbers(addon.db.BuffsRow, 1))
+                    if origValue == addon.db.BuffsRow and value ~= 10 and not msgPrinted
+                            and origAnchor == _G.BuffFrame_UpdateAllBuffAnchors then
+                        print(Title .. ": Changed default BuffsRow value. Don't forget to /reload")
+                        msgPrinted = true
+                    end
                     addon.db.BuffsRow = value
                 end)
             end
@@ -676,14 +718,20 @@ function f:CreateGUI()
         CastTimerButton:SetChecked(addon.db.CastTimer)
         CastTimerButton:SetPoint("TOPLEFT", 10, -40)
 
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
+        local HighlightDispellable
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+        HighlightDispellable = CheckBtn("Highlight Magic Buffs", "Higlights enemy magic buffs", Panel.childPanel2, function(self, value)
                 addon.db.HighlightDispellable = value
                 addon.db.BuffSizer = true
             end)
-            HighlightDispellable:SetChecked(addon.db.HighlightDispellable)
-            HighlightDispellable:SetPoint("TOPLEFT", 10, -285)
+        else
+            HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
+                addon.db.HighlightDispellable = value
+                addon.db.BuffSizer = true
+            end)
         end
+        HighlightDispellable:SetChecked(addon.db.HighlightDispellable)
+        HighlightDispellable:SetPoint("TOPLEFT", 10, -285)
 
         local TimerButton = CheckBtn("Remove space indentation from buffs", "When enabled (De)buffs will display the time as '1s' instead of '1 s'", Panel.childPanel2, function(self, value)
             addon.db.TimerGap = value
@@ -773,20 +821,33 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel1, 350, -215, "Player Chain")
 
-        local EliteChain = CheckBtn("Gold Elite PlayerFrame", "Show a `Gold Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+        local EliteChain, RareChain, RareElite
+        EliteChain = CheckBtn("Gold Elite PlayerFrame", "Show a `Gold Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
             addon.db.GoldElite = value
+            addon.db.Rare = false
+            addon.db.RareElite = false
+            RareChain:SetChecked(false)
+            RareElite:SetChecked(false)
         end)
         EliteChain:SetChecked(addon.db.GoldElite)
         EliteChain:SetPoint("TOPLEFT", 350, -250)
 
-        local RareChain = CheckBtn("Rare PlayerFrame", "Show a `Rare` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+        RareChain = CheckBtn("Rare PlayerFrame", "Show a `Rare` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
             addon.db.Rare = value
+            addon.db.GoldElite = false
+            addon.db.RareElite = false
+            RareElite:SetChecked(false)
+            EliteChain:SetChecked(false)
         end)
         RareChain:SetChecked(addon.db.Rare)
         RareChain:SetPoint("TOPLEFT", 350, -285)
 
-        local RareElite = CheckBtn("Rare Elite PlayerFrame", "Show a `Rare Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+        RareElite = CheckBtn("Rare Elite PlayerFrame", "Show a `Rare Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
             addon.db.RareElite = value
+            addon.db.Rare = false
+            addon.db.GoldElite = false
+            RareChain:SetChecked(false)
+            EliteChain:SetChecked(false)
         end)
         RareElite:SetChecked(addon.db.RareElite)
         RareElite:SetPoint("TOPLEFT", 350, -320)

@@ -11,7 +11,6 @@ local externalManaGainTimestamp = 0
 local gain = 0
 
 local eventRegistered = { ["SPELL_PERIODIC_ENERGIZE"] = true, ["SPELL_ENERGIZE"] = true, ["SPELL_CAST_SUCCESS"] = true }
-local powerTypes = { [0] = true, [3] = true }
 local energyValues = {}
 
 local function PowerType(unit)
@@ -30,7 +29,7 @@ end
 
 local function OnUpdate(self, elapsed)
     for unit in pairs(energyValues) do
-        if powerTypes[PowerType(unit)] and UnitExists(unit) and (UnitIsEnemy("player", unit) or unit == "player") and UnitIsPlayer(unit) then
+        if UnitExists(unit) and (UnitIsEnemy("player", unit) or unit == "player") and UnitIsPlayer(unit) then
 
             energyValues[unit].last_tick = energyValues[unit].last_tick + elapsed
 
@@ -57,7 +56,7 @@ local function OnUpdate(self, elapsed)
 end
 
 local function UpdateEnergy(unit, powerType)
-    if not energyValues[unit] or not powerTypes[PowerType(unit)] then
+    if not energyValues[unit] or not (powerType == "ENERGY" or powerType == "RAGE" or powerType == "MANA") then
         return
     end
 
@@ -78,11 +77,15 @@ local function UpdateEnergy(unit, powerType)
         return
     end
 
-    local increment = (energy > energyValues[unit].last_value)
+    local increment
     if powerType == "ENERGY" then
         increment = (energy == energyValues[unit].last_value + 20 or
                 energy == energyValues[unit].last_value + 21 or
                 energy == energyValues[unit].last_value + 40 or energy == energyValues[unit].last_value + 41)
+    elseif powerType == "RAGE" and not UnitAffectingCombat(unit) then
+        increment = (energyInc == -2 or energyInc == -1 or energyInc == -3)
+    elseif powerType == "MANA" then
+        increment = (energy > energyValues[unit].last_value)
     end
 
     if increment and not energyValues[unit].validTick then
@@ -148,7 +151,7 @@ e:SetScript("OnEvent", function(self, event, ...)
             return
         end
 
-        if RougeUI.db.EnergyTicker and powerTypes[PowerType("player")] then
+        if RougeUI.db.EnergyTicker then
             AddEnergy(PlayerFrameManaBar)
             energyValues["player"] = {
                 last_tick = 0,
@@ -157,8 +160,7 @@ e:SetScript("OnEvent", function(self, event, ...)
                 validTick = false,
             }
 
-            local _, class = UnitClass("player")
-            if class == "DRUID" then
+            if select(2, UnitClass("player")) == "DRUID" then
                 self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
             end
         end
@@ -201,12 +203,12 @@ e:SetScript("OnEvent", function(self, event, ...)
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         RealTick()
     elseif event == "PLAYER_TARGET_CHANGED" then
-        if not powerTypes[PowerType("target")] or not UnitIsPlayer("target")
+        if not UnitIsPlayer("target")
                 or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
             TargetFrameManaBar.energy.spark:SetAlpha(0)
             C_Timer.After(0.1, function()
-                if energyValues.target.startTick and powerTypes[PowerType("target")]
-                        and UnitIsPlayer("target") and UnitIsEnemy("player", "target") then
+                if energyValues.target.startTick and UnitIsPlayer("target")
+                        and UnitIsEnemy("player", "target") then
                     TargetFrameManaBar.energy.spark:SetAlpha(1)
                 end
             end)
