@@ -357,17 +357,19 @@ local function FrameColour()
 
     -- TokenFrame
 
-    local a, b, c, d = TokenFrame:GetRegions()
-    for _, v in pairs({ a, b, c, d }) do
-        if v then
-            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    if TokenFrame then
+        local a, b, c, d = TokenFrame:GetRegions()
+        for _, v in pairs({ a, b, c, d }) do
+            if v then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
         end
-    end
 
-    for i = 1, 20 do
-        local vertex = _G["TokenFrameContainerButton" .. i .. "Stripe"]
-        if vertex then
-            vertex:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        for i = 1, 20 do
+            local vertex = _G["TokenFrameContainerButton" .. i .. "Stripe"]
+            if vertex then
+                vertex:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
         end
     end
 
@@ -900,10 +902,12 @@ local function BlizzFrames(addon)
             end
         end
 
-        local vectors = { PlayerTalentFramePointsBar:GetRegions() }
-        for i = 1, 4 do
-            if vectors[i] then
-                vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        if PlayerTalentFramePointsBar then
+            local vectors = { PlayerTalentFramePointsBar:GetRegions() }
+            for i = 1, 4 do
+                if vectors[i] then
+                    vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
             end
         end
 

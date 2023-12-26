@@ -337,7 +337,7 @@ local function Target_Update(frame)
             if isClassic then
                 if (not buffFrame) then
                     if (not icon) then
-                        break 
+                        break
                     else
                         buffFrame = CreateFrame("Button", frameName, frame, "TargetBuffFrameTemplate")
                         buffFrame.unit = frame.unit
@@ -430,7 +430,7 @@ local function Target_Update(frame)
                 end
             end
         else
-            break 
+            break
         end
     end
 
@@ -454,7 +454,7 @@ local function Target_Update(frame)
                 end
             end
         else
-            break 
+            break
         end
         index = index + 1
     end
@@ -468,17 +468,10 @@ local function Target_Update(frame)
 
     frame.spellbarAnchor = nil
     local maxRowWidth = RougeUI.db.AuraRow
-    if (UnitIsFriend("player", frame.unit)) then
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
-    else
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
-    end
+    -- update buff positions
+    TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
+    -- update debuff positions
+    TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
     -- update the spell bar position
     if (frame.spellbar) then
         New_Target_Spellbar_AdjustPosition(frame.spellbar)
@@ -498,9 +491,8 @@ end
 
 function RougeUI.RougeUIF:HookAuras()
     if not IsAddOnLoaded("DeBuffFilter") then
-        -- hooksecurefunc("TargetFrame_UpdateAuraPositions", TargetBuffSize)
-        hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
         hooksecurefunc("TargetFrame_UpdateAuras", Target_Update)
+        hooksecurefunc("Target_Spellbar_AdjustPosition", New_Target_Spellbar_AdjustPosition)
     end
 end
 

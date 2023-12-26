@@ -811,6 +811,11 @@ local function RangeIndicator(self, checksRange, inRange)
        -- end
     else
         self.HotKey:SetAlpha(1.0, 1.0, 1.0, 1.0)
+        if self:GetName():match("PetActionButton%d") then
+            self.icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+            self.icon:SetDesaturated(false)
+            return
+        end
         Usable(self, r, g, b, a)
     end
 end

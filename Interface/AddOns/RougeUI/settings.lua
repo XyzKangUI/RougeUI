@@ -69,7 +69,8 @@ local stock = {
     RangeIndicator = false,
     EnergyTicker = false,
     wahksfk = false,
-    EnemyTicker = false
+    EnemyTicker = false,
+    modtheme = false
 }
 
 local f = CreateFrame("Frame")
@@ -371,24 +372,80 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel5, 350, -40, "Theme's")
 
-        local LortiTheme = CheckBtn("Lorti Theme", "This will theme the UI to look like Lorti", Panel.childPanel5, function(self, value)
+        local name = "BuffColSlider"
+        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+        BuffColSlider:SetMinMaxValues(0, 1)
+        BuffColSlider:SetPoint("TOPLEFT", 25, -300)
+        if addon.db.Modern or addon.db.modtheme then
+            BuffColSlider:Show()
+        else
+            BuffColSlider:Hide()
+        end
+        BuffColSlider.text = _G[name .. "Text"]
+        BuffColSlider.textLow = _G[name .. "Low"]
+        BuffColSlider.textHigh = _G[name .. "High"]
+        BuffColSlider.minValue, BuffColSlider.maxValue = BuffColSlider:GetMinMaxValues()
+        BuffColSlider.textLow:SetText(floor(BuffColSlider.minValue))
+        BuffColSlider.textHigh:SetText(floor(BuffColSlider.maxValue))
+        BuffColSlider:SetValue(addon.db.BuffVal)
+        BuffColSlider.text:SetText("Theme's Border Brightness: " .. format("%.f", BuffColSlider:GetValue(addon.db.BuffVal)))
+        BuffColSlider:SetValueStep(0.05)
+        BuffColSlider:SetObeyStepOnDrag(true);
+        BuffColSlider:SetScript("OnValueChanged", function(_, value)
+            BuffColSlider.text:SetText("Theme's Border Brightness: " .. RoundNumbers(addon.db.BuffVal, 0.05))
+            addon.db.BuffVal = value
+        end)
+
+        local LortiTheme, RougTheme, ModernTheme, Modtheme
+        LortiTheme = CheckBtn("Lorti Theme", "This will theme the UI to look like Lorti", Panel.childPanel5, function(self, value)
             addon.db.Lorti = value
+            addon.db.Roug = false
+            addon.db.Modern = false
+            addon.db.modtheme = false
+            RougTheme:SetChecked(addon.db.Roug)
+            ModernTheme:SetChecked(addon.db.Modern)
+            Modtheme:SetChecked(addon.db.modtheme)
         end)
         LortiTheme:SetChecked(addon.db.Lorti)
         LortiTheme:SetPoint("TOPLEFT", 350, -105)
 
-        local RougTheme = CheckBtn("RougeUI Theme", nil, Panel.childPanel5, function(self, value)
+        RougTheme = CheckBtn("RougeUI Theme", nil, Panel.childPanel5, function(self, value)
             addon.db.Roug = value
+            addon.db.Lorti = false
+            addon.db.Modern = false
+            addon.db.modtheme = false
+            LortiTheme:SetChecked(addon.db.Lorti)
+            ModernTheme:SetChecked(addon.db.Modern)
+            Modtheme:SetChecked(addon.db.modtheme)
         end)
         RougTheme:SetChecked(addon.db.Roug)
         RougTheme:SetPoint("TOPLEFT", 350, -70)
 
-        local ModernTheme = CheckBtn("Minimalist Theme", nil, Panel.childPanel5, function(self, value)
+        ModernTheme = CheckBtn("Minimalist Theme", nil, Panel.childPanel5, function(self, value)
             addon.db.Modern = value
+            addon.db.Roug = false
+            addon.db.Lorti = false
+            addon.db.modtheme = false
+            RougTheme:SetChecked(addon.db.Roug)
+            LortiTheme:SetChecked(addon.db.Lorti)
+            Modtheme:SetChecked(addon.db.modtheme)
             BuffColSlider:Show()
         end)
         ModernTheme:SetChecked(addon.db.Modern)
         ModernTheme:SetPoint("TOPLEFT", 350, -140)
+
+        Modtheme = CheckBtn("ModUI Theme", nil, Panel.childPanel5, function(self, value)
+            addon.db.modtheme = value
+            addon.db.Roug = false
+            addon.db.Lorti = false
+            addon.db.Modern = false
+            RougTheme:SetChecked(addon.db.Roug)
+            LortiTheme:SetChecked(addon.db.Lorti)
+            ModernTheme:SetChecked(addon.db.Modern)
+            BuffColSlider:Show()
+        end)
+        Modtheme:SetChecked(addon.db.modtheme)
+        Modtheme:SetPoint("TOPLEFT", 350, -175)
 
         local name = "FontSizeSlider"
         local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
@@ -401,7 +458,7 @@ function f:CreateGUI()
         FontSizeSlider.textLow:SetText(FontSizeSlider.minValue)
         FontSizeSlider.textHigh:SetText(FontSizeSlider.maxValue)
         FontSizeSlider:SetValue(addon.db.HPFontSize)
-        FontSizeSlider.text:SetText("HP Font Size " .. FontSizeSlider:GetValue(HealthFontSize))
+        FontSizeSlider.text:SetText("HP Font Size " .. FontSizeSlider:GetValue(addon.db.HPFontSize))
         FontSizeSlider:SetValueStep(1)
         FontSizeSlider:SetObeyStepOnDrag(true);
         FontSizeSlider:SetScript("OnValueChanged", function(self)
@@ -421,7 +478,7 @@ function f:CreateGUI()
         MFontSizeSlider.textLow:SetText(MFontSizeSlider.minValue)
         MFontSizeSlider.textHigh:SetText(MFontSizeSlider.maxValue)
         MFontSizeSlider:SetValue(addon.db.ManaFontSize)
-        MFontSizeSlider.text:SetText("Mana Font Size " .. MFontSizeSlider:GetValue(ManaFontSize))
+        MFontSizeSlider.text:SetText("Mana Font Size " .. MFontSizeSlider:GetValue(addon.db.ManaFontSize))
         MFontSizeSlider:SetValueStep(1)
         MFontSizeSlider:SetObeyStepOnDrag(true);
         MFontSizeSlider:SetScript("OnValueChanged", function(self)
@@ -446,13 +503,13 @@ function f:CreateGUI()
         TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
         TargetPlayerBuffSizeSlider.textHigh:SetText(TargetPlayerBuffSizeSlider.maxValue)
         TargetPlayerBuffSizeSlider:SetValue(addon.db.SelfSize)
-        TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(SelfSize)));
+        TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(addon.db.SelfSize)));
         TargetPlayerBuffSizeSlider:SetValueStep(1)
         TargetPlayerBuffSizeSlider:SetObeyStepOnDrag(true);
         TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.SelfSize ~= value then
                 addon.db.SelfSize = value;
-                TargetPlayerBuffSizeSliderText:SetText("Personal (De)buff Size: " .. RoundNumbers(addon.db.SelfSize, 1))
+                TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. RoundNumbers(addon.db.SelfSize, 1))
                 addon.RougeUIF:SetCustomBuffSize()
             end
         end)
@@ -474,12 +531,12 @@ function f:CreateGUI()
         TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
         TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
         TargetBuffSizeSlider:SetValue(addon.db.OtherBuffSize)
-        TargetBuffSizeSlider.text:SetText("Target Aura Size: " .. format("%.f", TargetBuffSizeSlider:GetValue(OtherBuffSize)));
+        TargetBuffSizeSlider.text:SetText("Target Aura Size: " .. format("%.f", TargetBuffSizeSlider:GetValue(addon.db.OtherBuffSize)));
         TargetBuffSizeSlider:SetObeyStepOnDrag(true);
         TargetBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.OtherBuffSize ~= value then
                 addon.db.OtherBuffSize = value;
-                TargetBuffSizeSliderText:SetText("Target Buff Size: " .. RoundNumbers(addon.db.OtherBuffSize, 1))
+                TargetBuffSizeSlider.text:SetText("Target Buff Size: " .. RoundNumbers(addon.db.OtherBuffSize, 1))
                 addon.RougeUIF:SetCustomBuffSize()
             end
         end)
@@ -495,7 +552,7 @@ function f:CreateGUI()
         ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
         ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
         ColorValueSlider:SetValue(addon.db.Colval)
-        ColorValueSlider.text:SetText("UI Brightness: " .. format("%.2f", ColorValueSlider:GetValue(Colval)))
+        ColorValueSlider.text:SetText("UI Brightness: " .. format("%.2f", ColorValueSlider:GetValue(addon.db.Colval)))
         ColorValueSlider:SetValueStep(0.05)
         ColorValueSlider:SetObeyStepOnDrag(true);
         ColorValueSlider:SetScript("OnValueChanged", function(_, value)
@@ -517,7 +574,7 @@ function f:CreateGUI()
                 BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
                 BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
                 BuffValueSlider:SetValue(addon.db.BuffsRow)
-                BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(BuffsRow)))
+                BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(addon.db.BuffsRow)))
                 BuffValueSlider:SetValueStep(1)
                 BuffValueSlider:SetObeyStepOnDrag(true);
                 local origValue, msgPrinted = 10, false
@@ -532,30 +589,6 @@ function f:CreateGUI()
                     addon.db.BuffsRow = value
                 end)
             end
-        end)
-
-        local name = "BuffColSlider"
-        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
-        BuffColSlider:SetMinMaxValues(0, 1)
-        BuffColSlider:SetPoint("TOPLEFT", 25, -300)
-        if addon.db.Modern then
-            BuffColSlider:Show()
-        else
-            BuffColSlider:Hide()
-        end
-        BuffColSlider.text = _G[name .. "Text"]
-        BuffColSlider.textLow = _G[name .. "Low"]
-        BuffColSlider.textHigh = _G[name .. "High"]
-        BuffColSlider.minValue, BuffColSlider.maxValue = BuffColSlider:GetMinMaxValues()
-        BuffColSlider.textLow:SetText(floor(BuffColSlider.minValue))
-        BuffColSlider.textHigh:SetText(floor(BuffColSlider.maxValue))
-        BuffColSlider:SetValue(addon.db.BuffVal)
-        BuffColSlider.text:SetText("Theme's Border Brightness: " .. format("%.f", BuffColSlider:GetValue(BuffVal)))
-        BuffColSlider:SetValueStep(0.05)
-        BuffColSlider:SetObeyStepOnDrag(true);
-        BuffColSlider:SetScript("OnValueChanged", function(_, value)
-            BuffColSlider.text:SetText("Theme's Border Brightness: " .. RoundNumbers(addon.db.BuffVal, 0.05))
-            addon.db.BuffVal = value
         end)
 
         local names = "AuraRowSlider"
@@ -575,12 +608,12 @@ function f:CreateGUI()
         AuraRowSlider.textLow:SetText(floor(AuraRowSlider.minValue))
         AuraRowSlider.textHigh:SetText(floor(AuraRowSlider.maxValue))
         AuraRowSlider:SetValue(addon.db.AuraRow)
-        AuraRowSlider.text:SetText("Aura Row Width Size: " .. format("%.f", AuraRowSlider:GetValue(AuraRow)));
+        AuraRowSlider.text:SetText("Aura Row Width Size: " .. format("%.f", AuraRowSlider:GetValue(addon.db.AuraRow)));
         AuraRowSlider:SetObeyStepOnDrag(true);
         AuraRowSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.AuraRow ~= value then
                 addon.db.AuraRow = value;
-                AuraRowSliderText:SetText("Increase to fit more Aura's per row: " .. RoundNumbers(addon.db.AuraRow, 1))
+                AuraRowSlider.text:SetText("Aura Row Width Size: " .. RoundNumbers(addon.db.AuraRow, 1))
                 addon.RougeUIF:SetCustomBuffSize()
             end
         end)

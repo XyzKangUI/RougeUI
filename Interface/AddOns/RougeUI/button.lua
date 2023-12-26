@@ -6,6 +6,7 @@ local bartender4 = IsAddOnLoaded("Bartender4")
 local floor, strformat, max = _G.math.floor, _G.string.format, _G.math.max
 local startTicker, buffButtons = nil, {}
 local conflictingAddons = false
+local GetWeaponEnchantInfo, pairs = GetWeaponEnchantInfo, _G.pairs
 
 local backdrop = {
     bgFile = nil,
@@ -64,6 +65,12 @@ local function addBorder(button, drawLayer, dbf)
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\exp")
             end
+        elseif RougeUI.db.modtheme then
+            if button.debuff then
+                border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\modd")
+            else
+                border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\mod")
+            end
         end
 
         border:SetTexCoord(0, 1, 0, 1)
@@ -78,6 +85,11 @@ local function addBorder(button, drawLayer, dbf)
             if button.tempenchant then
                 border:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
                 border:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
+                if RougeUI.db.modtheme then
+                    border:SetVertexColor(1, 0, 1)
+                elseif RougeUI.db.Modern then
+                    border:SetVertexColor(0.7, 0.3, 1)
+                end
             else
                 border:SetPoint("TOPLEFT", button, "TOPLEFT", -1, 1)
                 border:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, -1)
@@ -107,7 +119,6 @@ local function addBorder(button, drawLayer, dbf)
 end
 
 local function BtnGlow(button)
-    local bg
     local name = button:GetName()
     local border = _G[name .. "Border"]
 
@@ -138,12 +149,18 @@ local function TimeFormat(time)
         h = floor(time / 3600)
         m = floor((time % 3600) / 60 + 0.99)
         s = time % 60
-        text = strformat("|r%d|rm", m)
+        if RougeUI.db.modtheme then
+            text = strformat("|cffffffff%d|rm", m)
+        else
+            text = strformat("|r%d|rm", m)
+        end
     elseif time > 5 and time < 60 then
         m = floor(time / 60)
         s = time % 60
         if RougeUI.db.Roug or RougeUI.db.Modern then
             text = m == 0 and strformat("|cffffffff%d|r", s) or ""
+        elseif RougeUI.db.modtheme then
+            text = m == 0 and strformat("|cffffffff%d|rs", s) or ""
         else
             text = m == 0 and strformat("|cffffffff%d|r|cffffffffs|r", s) or ""
         end
@@ -157,7 +174,11 @@ local function TimeFormat(time)
         end
     else
         h = floor(time / 3600 + 0.99)
-        text = strformat("|r%d|rh", h)
+        if RougeUI.db.modtheme then
+            text = strformat("|cffffffff%d|rh", h)
+        else
+            text = strformat("|r%d|rh", h)
+        end
     end
 
     return text
@@ -175,15 +196,35 @@ local function SkinBuffs(bu, layer)
         if not startTicker then
             startTicker = C_Timer.NewTicker(0.1, function()
                 for _, button in pairs(buffButtons) do
+                    local temp1, temp2 = TempEnchant1, TempEnchant2
+                    if button and (button == temp1 or button == temp2) then
+                        local hasMH, mhexpire, _, _, hasOH, ohexpire = GetWeaponEnchantInfo()
+                        if button == temp1 then
+                            if hasMH and hasOH then
+                                button.timeLeft = (ohexpire or 0) / 1000
+                            elseif hasMH and not hasOH then
+                                button.timeLeft = (mhexpire or 0) / 1000
+                            elseif hasOH and not hasMH then
+                                button.timeLeft = (ohexpire or 0) / 1000
+                            end
+                        elseif button == temp2 and hasMH and hasOH then
+                            button.timeLeft = (mhexpire or 0) / 1000
+                        end
+                    end
                     if button.timeLeft then
+                        if not button.duration:IsShown() then
+                            button.duration:Show()
+                        end
                         button.duration:SetText(TimeFormat(button.timeLeft))
+                    else
+                        button.duration:Hide()
                     end
                 end
             end)
         end
     end
 
-    if not (RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern) then
+    if not (RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme) then
         bu.styled = true
         return
     end
@@ -194,9 +235,17 @@ local function SkinBuffs(bu, layer)
     if icon then
         if name:match("Debuff") and not RougeUI.db.Lorti then
             icon:SetTexCoord(0.06, 0.94, 0.06, 0.94)
+            if RougeUI.db.modtheme then
+                icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
+                icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
+            end
         else
-            if RougeUI.db.Lorti then
-                icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+            if RougeUI.db.Lorti or RougeUI.db.modtheme then
+                if RougeUI.db.Lorti then
+                    icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+                else
+                    icon:SetTexCoord(0.04, 0.96, 0.04, 0.96)
+                end
                 icon:ClearAllPoints()
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
                 icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
@@ -222,7 +271,7 @@ local function SkinBuffs(bu, layer)
         end
     end
 
-    if bu.count then
+    if bu.count and not RougeUI.db.modtheme then
         bu.count:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
         bu.count:SetShadowOffset(0, 0)
         bu.count:ClearAllPoints()
@@ -256,7 +305,7 @@ local function styleActionButton(bu)
     end
 
     if ic then
-        if RougeUI.db.Lorti then
+        if RougeUI.db.Lorti or RougeUI.db.modtheme then
             ic:SetTexCoord(0, 1, 0, 1)
         else
             ic:SetTexCoord(0.06, 0.94, 0.06, 0.94)
@@ -264,7 +313,7 @@ local function styleActionButton(bu)
     end
 
     if not bartender4 then
-        if RougeUI.db.Lorti then
+        if RougeUI.db.Lorti or RougeUI.db.modtheme then
             ho:ClearAllPoints()
             ho:SetPoint("TOPRIGHT", bu, -1, -3)
             ho:SetPoint("TOPLEFT", bu, -1, -3)
@@ -285,6 +334,11 @@ local function styleActionButton(bu)
     end
 
     addBorder(bu, "BACKGROUND")
+
+    if RougeUI.db.modtheme then
+        bu.border:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 2)
+        bu.border:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 2, -2)
+    end
 
     if RougeUI.db.Lorti then
         bu:SetPushedTexture("Interface\\AddOns\\RougeUI\\textures\\art\\pushed")
@@ -347,60 +401,60 @@ local function init()
         local bu = _G["TempEnchant" .. i]
         if (bu and not bu.styled) then
             SkinBuffs(bu, "BORDER")
+            if IsAddOnLoaded("TemporaryWeaponEnchant") and RougeUI.db.modtheme then
+                bu.border:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 2)
+                bu.border:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 2, -2)
+            end
         end
     end
 end
 
 local function HookAuras()
-    hooksecurefunc("TargetFrame_UpdateAuras", function()
+    hooksecurefunc("TargetFrame_UpdateAuras", function(self)
+        local selfName = self:GetName()
+
+        if not self or not selfName then
+            return
+        end
+
         for i = 1, 32 do
-            local bu = _G["TargetFrameBuff" .. i]
+            local bu = _G[selfName .. "Buff" .. i]
             if bu then
                 if not bu.skin then
                     addBorder(bu)
-                    _G["TargetFrameBuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
+                    local icon = _G[selfName .. "Buff" .. i .. "Icon"]
+                    if RougeUI.db.modtheme then
+                        icon:SetTexCoord(.03, .97, .03, .97)
+                        icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
+                        icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
+                        bu.border:SetAllPoints(bu)
+                    else
+                        icon:SetTexCoord(.1, .9, .1, .9)
+                    end
                     bu.skin = true
                 end
             else
                 break
             end
         end
+
         for i = 1, 16 do
-            local bu = _G["TargetFrameDebuff" .. i]
+            local bu = _G[selfName .. "Debuff" .. i]
             if bu then
                 if not bu.skin then
                     addBorder(bu)
-                    _G["TargetFrameDebuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
+                    local icon = _G[selfName .. "Debuff" .. i .. "Icon"]
+                    if RougeUI.db.modtheme then
+                        icon:SetTexCoord(.03, .97, .03, .97)
+                        icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
+                        icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
+                    else
+                        icon:SetTexCoord(.1, .9, .1, .9)
+                    end
                     bu.skin = true
                 end
             else
                 break
-            end
-        end
-        if FocusFrame then
-            for i = 1, 32 do
-                local bu = _G["FocusFrameBuff" .. i]
-                if bu then
-                    if not bu.skin then
-                        addBorder(bu)
-                        _G["FocusFrameBuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
-                        bu.skin = true
-                    end
-                else
-                    break
-                end
-            end
-            for i = 1, 16 do
-                local bu = _G["FocusFrameDebuff" .. i]
-                if bu then
-                    if not bu.skin then
-                        addBorder(bu)
-                        _G["FocusFrameDebuff" .. i .. "Icon"]:SetTexCoord(.1, .9, .1, .9)
-                        bu.skin = true
-                    end
-                else
-                    break
-                end
             end
         end
     end)
@@ -501,8 +555,8 @@ e3:SetScript("OnEvent", function(self, event)
             end)
         end
 
-        if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.TimerGap then
-            if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
+        if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme or RougeUI.db.TimerGap then
+            if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme then
                 init()
                 HookAuras()
             end
@@ -518,7 +572,9 @@ e3:SetScript("OnEvent", function(self, event)
             end)
 
             if conflictingAddons then
-                AuraButton_UpdateDuration = function() return end -- :O
+                AuraButton_UpdateDuration = function()
+                    return
+                end -- :O
             end
         end
 
