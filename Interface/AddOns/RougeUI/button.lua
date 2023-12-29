@@ -3,10 +3,7 @@ local ceil, mod = _G.math.ceil, _G.math.fmod
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
-local floor, strformat, max = _G.math.floor, _G.string.format, _G.math.max
-local startTicker, buffButtons = nil, {}
-local conflictingAddons = false
-local GetWeaponEnchantInfo, pairs = GetWeaponEnchantInfo, _G.pairs
+local floor, max = _G.math.floor, _G.math.max
 
 local backdrop = {
     bgFile = nil,
@@ -140,44 +137,55 @@ local function BtnGlow(button)
     end
 end
 
-local function TimeFormat(time)
+local function TimeFormat(button, time)
+    local duration = button.duration
     local h, m, s, text
+
+    if not duration or not time then
+        return
+    end
 
     if time <= 0 then
         text = ""
     elseif time < 3600 and time > 60 then
         h = floor(time / 3600)
-        m = floor((time % 3600) / 60 + 0.99)
-        s = time % 60
+        m = floor(mod(time, 3600) / 60 + 0.99)
+        s = mod(time, 60)
         if RougeUI.db.modtheme then
-            text = strformat("|cffffffff%d|rm", m)
+            text = duration:SetFormattedText("|cffffffff%d|rm", m)
         else
-            text = strformat("|r%d|rm", m)
+            text = duration:SetFormattedText("|r%d|rm", m)
         end
     elseif time > 5 and time < 60 then
         m = floor(time / 60)
-        s = time % 60
+        s = mod(time, 60)
         if RougeUI.db.Roug or RougeUI.db.Modern then
-            text = m == 0 and strformat("|cffffffff%d|r", s) or ""
-        elseif RougeUI.db.modtheme then
-            text = m == 0 and strformat("|cffffffff%d|rs", s) or ""
+            text = m == 0 and duration:SetFormattedText("|r%d|r", s)
         else
-            text = m == 0 and strformat("|cffffffff%d|r|cffffffffs|r", s) or ""
+            if RougeUI.db.modtheme then
+                text = m == 0 and duration:SetFormattedText("|cffffffff%d|rs", s)
+            else
+                text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
+            end
         end
     elseif time < 5 then
         m = floor(time / 60)
-        s = time % 60
+        s = mod(time, 60)
         if RougeUI.db.Roug or RougeUI.db.Modern then
-            text = m == 0 and strformat("|cffffffff%.1f|r", s) or ""
+            text = m == 0 and duration:SetFormattedText("|r%.1f|r", s)
         else
-            text = m == 0 and strformat("|cffffffff%d|r|cffffffffs|r", s) or ""
+            if RougeUI.db.modtheme then
+                text = m == 0 and duration:SetFormattedText("|cffffffff%d|rs", s)
+            else
+                text = m == 0 and duration:SetFormattedText("|r%d|rs", s)
+            end
         end
     else
         h = floor(time / 3600 + 0.99)
         if RougeUI.db.modtheme then
-            text = strformat("|cffffffff%d|rh", h)
+            text = duration:SetFormattedText("|cffffffff%d|rh", h)
         else
-            text = strformat("|r%d|rh", h)
+            text = duration:SetFormattedText("|r%d|rh", h)
         end
     end
 
@@ -186,46 +194,6 @@ end
 
 local function SkinBuffs(bu, layer)
     if not bu or (bu and bu.styled) then
-        return
-    end
-
-    if conflictingAddons then
-        if not buffButtons[bu] then
-            buffButtons[bu] = bu
-        end
-        if not startTicker then
-            startTicker = C_Timer.NewTicker(0.1, function()
-                for _, button in pairs(buffButtons) do
-                    local temp1, temp2 = TempEnchant1, TempEnchant2
-                    if button and (button == temp1 or button == temp2) then
-                        local hasMH, mhexpire, _, _, hasOH, ohexpire = GetWeaponEnchantInfo()
-                        if button == temp1 then
-                            if hasMH and hasOH then
-                                button.timeLeft = (ohexpire or 0) / 1000
-                            elseif hasMH and not hasOH then
-                                button.timeLeft = (mhexpire or 0) / 1000
-                            elseif hasOH and not hasMH then
-                                button.timeLeft = (ohexpire or 0) / 1000
-                            end
-                        elseif button == temp2 and hasMH and hasOH then
-                            button.timeLeft = (mhexpire or 0) / 1000
-                        end
-                    end
-                    if button.timeLeft then
-                        if not button.duration:IsShown() then
-                            button.duration:Show()
-                        end
-                        button.duration:SetText(TimeFormat(button.timeLeft))
-                    else
-                        button.duration:Hide()
-                    end
-                end
-            end)
-        end
-    end
-
-    if not (RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme) then
-        bu.styled = true
         return
     end
 
@@ -540,14 +508,6 @@ local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
-            self:UnregisterEvent("PLAYER_LOGIN")
-            self:SetScript("OnEvent", nil)
-            return
-        end
-
-        conflictingAddons = not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers"))
-
         if not IsAddOnLoaded("SimpleAuraFilter") and (RougeUI.db.BuffsRow and RougeUI.db.BuffsRow < 10) then
             C_Timer.After(1, function()
                 hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
@@ -556,25 +516,29 @@ e3:SetScript("OnEvent", function(self, event)
         end
 
         if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme or RougeUI.db.TimerGap then
-            if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme then
-                init()
-                HookAuras()
+            if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
+                hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
             end
 
-            hooksecurefunc("AuraButton_Update", function(self, index)
-                local button = _G[self .. index]
-                if button and not button.styled then
-                    SkinBuffs(button)
-                end
-                if button and RougeUI.db.Roug then
-                    BtnGlow(button)
-                end
-            end)
-
-            if conflictingAddons then
-                AuraButton_UpdateDuration = function()
+            if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme then
+                if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
+                    self:UnregisterEvent("PLAYER_LOGIN")
+                    self:SetScript("OnEvent", nil)
                     return
-                end -- :O
+                end
+
+                init()
+                HookAuras()
+
+                hooksecurefunc("AuraButton_Update", function(self, index)
+                    local button = _G[self .. index]
+                    if button and not button.styled then
+                        SkinBuffs(button)
+                    end
+                    if button and RougeUI.db.Roug then
+                        BtnGlow(button)
+                    end
+                end)
             end
         end
 
