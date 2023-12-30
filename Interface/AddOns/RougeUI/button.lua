@@ -40,7 +40,7 @@ local function addBorder(button, drawLayer, dbf)
     if button.debuff or button.tempenchant then
         border = _G[name .. "Border"]
     else
-        border = button:CreateTexture(nil, drawLayer or "BACKGROUND", nil, -7)
+        border = button:CreateTexture(nil, drawLayer or "BACKGROUND")
     end
 
     if button and border then
@@ -71,7 +71,7 @@ local function addBorder(button, drawLayer, dbf)
         end
 
         border:SetTexCoord(0, 1, 0, 1)
-        border:SetDrawLayer(drawLayer or "BACKGROUND", -7)
+        border:SetDrawLayer(drawLayer or "BACKGROUND", 5)
         if not button.debuff then
             border:SetVertexColor(RougeUI.db.BuffVal, RougeUI.db.BuffVal, RougeUI.db.BuffVal)
         end
@@ -101,13 +101,8 @@ local function addBorder(button, drawLayer, dbf)
             return
         end
         local bg = CreateFrame("Frame", nil, button, BackdropTemplateMixin and "BackdropTemplate")
-        if RougeUI.db.Roug then
-            bg:SetPoint("TOPLEFT", button, "TOPLEFT", -4, 4)
-            bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 4, -4)
-        else
-            bg:SetPoint("TOPLEFT", button, "TOPLEFT", -5, 5)
-            bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 5, -5)
-        end
+        bg:SetPoint("TOPLEFT", button, "TOPLEFT", -4, 4)
+        bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 4, -4)
         bg:SetFrameLevel(max(button:GetFrameLevel() - 1, 0))
         bg:SetBackdrop(backdrop)
         bg:SetBackdropBorderColor(0.05, 0.05, 0.05)
@@ -119,8 +114,10 @@ local function BtnGlow(button)
     local name = button:GetName()
     local border = _G[name .. "Border"]
 
-    if name:match("Debuff") then
+    if name and name:match("Debuff") then
         button.debuff = true
+    else
+        return
     end
 
     if not button.bg and button.debuff then
@@ -192,7 +189,7 @@ local function TimeFormat(button, time)
     return text
 end
 
-local function SkinBuffs(bu, layer)
+local function SkinBuffs(bu)
     if not bu or (bu and bu.styled) then
         return
     end
@@ -208,12 +205,14 @@ local function SkinBuffs(bu, layer)
                 icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
             end
         else
-            if RougeUI.db.Lorti or RougeUI.db.modtheme then
-                if RougeUI.db.Lorti then
-                    icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-                else
-                    icon:SetTexCoord(0.04, 0.96, 0.04, 0.96)
-                end
+            if RougeUI.db.Lorti then
+                icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+                icon:ClearAllPoints()
+                icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 1, -1)
+                icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -1, 1)
+                icon:SetDrawLayer("BACKGROUND", -8)
+            elseif RougeUI.db.modtheme then
+                icon:SetTexCoord(0.04, 0.96, 0.04, 0.96)
                 icon:ClearAllPoints()
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
                 icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
@@ -227,14 +226,14 @@ local function SkinBuffs(bu, layer)
 
     if RougeUI.db.Lorti then
         bu:SetSize(28, 28)
-        bu.duration:SetFont(STANDARD_TEXT_FONT, 11, "THINOUTLINE")
+        bu.duration:SetFont(STANDARD_TEXT_FONT, 11, "OUTLINE")
         bu.duration:ClearAllPoints()
         bu.duration:SetPoint("BOTTOM", 1, 0)
     else
         bu.duration:ClearAllPoints()
         bu.duration:SetPoint("CENTER", bu, "BOTTOM", 0, -6.5)
         if RougeUI.db.Roug or RougeUI.db.Modern then
-            bu.duration:SetFont(STANDARD_TEXT_FONT, 9.5, "THINOUTLINE")
+            bu.duration:SetFont(STANDARD_TEXT_FONT, 9.5, "OUTLINE")
             bu.duration:SetShadowOffset(0, 0)
         end
     end
@@ -246,7 +245,7 @@ local function SkinBuffs(bu, layer)
         bu.count:SetPoint("TOPRIGHT", 1, 0)
     end
 
-    addBorder(bu, layer or "BACKGROUND", true)
+    addBorder(bu, "BACKGROUND", true)
 
     bu.styled = true
 end
@@ -257,7 +256,6 @@ local function styleActionButton(bu)
     end
 
     local name = bu:GetName()
-    local ho = _G[name .. "HotKey"]
     local fbg = _G[name .. "FloatingBG"]
     local fob = _G[name .. "FlyoutBorder"]
     local fobs = _G[name .. "FlyoutBorderShadow"]
@@ -275,19 +273,19 @@ local function styleActionButton(bu)
     if ic then
         if RougeUI.db.Lorti or RougeUI.db.modtheme then
             ic:SetTexCoord(0, 1, 0, 1)
+            if RougeUI.db.Lorti then
+                if name and name:match("Stance") then
+                    ic:SetTexCoord(0, 1, 0, 1)
+                    ic:SetPoint("TOPLEFT", bu, "TOPLEFT", 0, 0)
+                    ic:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 0, 0)
+                else
+                    ic:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+                    ic:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
+                    ic:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
+                end
+            end
         else
             ic:SetTexCoord(0.06, 0.94, 0.06, 0.94)
-        end
-    end
-
-    if not bartender4 then
-        if RougeUI.db.Lorti or RougeUI.db.modtheme then
-            ho:ClearAllPoints()
-            ho:SetPoint("TOPRIGHT", bu, -1, -3)
-            ho:SetPoint("TOPLEFT", bu, -1, -3)
-        else
-            ho:ClearAllPoints()
-            ho:SetPoint("TOPRIGHT", bu, 1, -2)
         end
     end
 
@@ -368,7 +366,7 @@ local function init()
     for i = 1, NUM_TEMP_ENCHANT_FRAMES do
         local bu = _G["TempEnchant" .. i]
         if (bu and not bu.styled) then
-            SkinBuffs(bu, "BORDER")
+            SkinBuffs(bu)
             if IsAddOnLoaded("TemporaryWeaponEnchant") and RougeUI.db.modtheme then
                 bu.border:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 2)
                 bu.border:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 2, -2)
@@ -426,6 +424,39 @@ local function HookAuras()
             end
         end
     end)
+
+    if not bartender4 then
+        if RougeUI.db.Lorti then
+            hooksecurefunc("ActionButton_Update", function(self)
+                local action = self.action
+                local border = self.Border
+                if border then
+                    if IsEquippedAction(action) then
+                        border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss_grey")
+                        border:SetSize(36, 36)
+                        border:SetVertexColor(0.499, 0.999, 0.499, 1)
+                        border:Show()
+                    else
+                        border:Hide()
+                    end
+                end
+            end)
+        end
+
+        hooksecurefunc("ActionButton_UpdateHotkeys", function(self)
+            local hotkey = self.HotKey
+            if hotkey then
+                hotkey:ClearAllPoints()
+                hotkey:SetSize(36, 10)
+                if RougeUI.db.Lorti or RougeUI.db.modtheme then
+                    hotkey:SetPoint("TOPRIGHT", self, -1, -3)
+                    hotkey:SetPoint("TOPLEFT", self, -1, -3)
+                else
+                    hotkey:SetPoint("TOPLEFT", -2, -2)
+                end
+            end
+        end)
+    end
 end
 
 local function BuffAnchor()

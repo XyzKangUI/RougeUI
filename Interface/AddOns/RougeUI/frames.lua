@@ -683,6 +683,12 @@ local function FrameColour()
             end
         end
     end
+
+    for _, v in pairs({ComboPoint1, ComboPoint2, ComboPoint3, ComboPoint4, ComboPoint5}) do
+        if v then
+            v:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
 end
 
 local function NewVariables()
@@ -990,8 +996,12 @@ local function BlizzFrames(addon)
 
     -- Tradeskill
     if addon == "Blizzard_TradeSkillUI" then
-        local _, b, c, d, e, f, _, h, i = TradeSkillFrame:GetRegions()
-        for _, v in pairs({ b, c, d, e, f, h, i }) do
+        local _, b, c, d, e, f, g, h, i, j = TradeSkillFrame:GetRegions()
+        local tsui = { b, c, d, e, f, h, i }
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            tsui = { b, c, d, e, g, h, i, j }
+        end
+        for _, v in pairs(tsui) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
@@ -1091,23 +1101,6 @@ local function BlizzFrames(addon)
                 if vectors[i] then
                     vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
-            end
-        end
-    end
-
-    -- Dungeon finder
-    if addon == "Blizzard_LookingForGroupUI" and GetBuildInfo() == "3.4.2" then
-        local a, b, c = LFGListingFrame:GetRegions()
-        for _, v in pairs({ a, b, c }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-
-        local a, b, c, d = LFGBrowseFrame:GetRegions()
-        for _, v in pairs({ a, b, c, d }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
     end
