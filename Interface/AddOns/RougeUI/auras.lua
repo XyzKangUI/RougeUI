@@ -324,11 +324,11 @@ local function Target_Update(frame)
     local _, _, class = UnitClass("player")
 
     for i = 1, MAX_TARGET_BUFFS do
-        local name, icon, count, _, duration, expirationTime, caster, isStealable, spellId
+        local name, icon, count, debuffType, duration, expirationTime, caster, isStealable, spellId
         if isClassic then
-            name, icon, count, _, duration, expirationTime, caster, isStealable, _, spellId = LibClassicDurations:UnitAura(frame.unit, i, "HELPFUL")
+            name, icon, count, debuffType, duration, expirationTime, caster, isStealable, _, spellId = LibClassicDurations:UnitAura(frame.unit, i, "HELPFUL")
         else
-            name, icon, _, _, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, "HELPFUL")
+            name, icon, _, debuffType, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, "HELPFUL")
         end
         if (name) then
             frameName = selfName .. "Buff" .. (i)
@@ -395,7 +395,7 @@ local function Target_Update(frame)
                             showHighlight = true
                         end
                     end
-                elseif (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and RougeUI.db.HighlightDispellable and isEnemy then
+                elseif (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and RougeUI.db.HighlightDispellable and isEnemy and debuffType == "Magic" then
                     showHighlight = true
                 elseif isEnemy and isStealable and not RougeUI.db.HighlightDispellable then
                     showHighlight = true
@@ -409,8 +409,8 @@ local function Target_Update(frame)
                         buffSize = RougeUI.db.SelfSize
                     end
                     frameStealable:Show()
-                    frameStealable:SetHeight(buffSize * 1.24)
-                    frameStealable:SetWidth(buffSize * 1.24)
+                    frameStealable:SetHeight(buffSize * 1.2)
+                    frameStealable:SetWidth(buffSize * 1.2)
                     frameStealable:SetVertexColor(r, g, b)
                 else
                     frameStealable:Hide()

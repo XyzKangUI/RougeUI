@@ -43,24 +43,30 @@ local function addBorder(button, drawLayer, dbf)
         border = button:CreateTexture(nil, drawLayer or "BACKGROUND")
     end
 
+    local stealable = _G[name .. "Stealable"]
+    local customStealable = false
+
     if button and border then
         if RougeUI.db.Lorti then
             if button.debuff and dbf then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss2")
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss")
+                customStealable = true
             end
         elseif RougeUI.db.Roug then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\debuff")
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\rouge")
+                customStealable = true
             end
         elseif RougeUI.db.Modern then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\expdebuff")
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\exp")
+                customStealable = true
             end
         elseif RougeUI.db.modtheme then
             if button.debuff then
@@ -68,6 +74,10 @@ local function addBorder(button, drawLayer, dbf)
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\mod")
             end
+        end
+
+        if stealable and customStealable then
+            stealable:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\Rouge-Stealable")
         end
 
         border:SetTexCoord(0, 1, 0, 1)
