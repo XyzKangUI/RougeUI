@@ -275,9 +275,11 @@ local function styleActionButton(bu)
 
     if nt then
         nt:SetTexture(nil)
+        nt:SetAlpha(0)
     end
     if nt2 then
         nt2:SetTexture(nil)
+        nt2:SetAlpha(0)
     end
 
     if ic then
@@ -309,8 +311,6 @@ local function styleActionButton(bu)
         fobs:SetTexture(nil)
     end
 
-    addBorder(bu, "BACKGROUND")
-
     if RougeUI.db.modtheme then
         bu.border:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 2)
         bu.border:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 2, -2)
@@ -319,6 +319,8 @@ local function styleActionButton(bu)
     if RougeUI.db.Lorti then
         bu:SetPushedTexture("Interface\\AddOns\\RougeUI\\textures\\art\\pushed")
     end
+
+    addBorder(bu, "BACKGROUND")
 
     bu.styled = true
 end
@@ -331,6 +333,10 @@ local function init()
         styleActionButton(_G["MultiBarLeftButton" .. i])
         styleActionButton(_G["MultiBarBottomLeftButton" .. i])
         styleActionButton(_G["MultiBarBottomRightButton" .. i])
+    end
+
+    for i = 1, NUM_PET_ACTION_SLOTS do
+        styleActionButton(_G["PetActionButton" .. i])
     end
 
     for i = 1, 6 do
