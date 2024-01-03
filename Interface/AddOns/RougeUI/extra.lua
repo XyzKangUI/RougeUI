@@ -1,18 +1,11 @@
 local _, RougeUI = ...
-local pairs = pairs
+local pairs, gsub = pairs, string.gsub
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local GetSpellInfo = GetSpellInfo
-local GetNetStats = GetNetStats
 local IsInInstance, IsDesaturated = IsInInstance, IsDesaturated
-local GetBattlefieldScore = GetBattlefieldScore
 local UnitClass, UnitExists, UnitCanAttack, GetUnitName = UnitClass, UnitExists, UnitCanAttack, GetUnitName
 local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification
 local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied
-local ConsoleExec, RAID_CLASS_COLORS = ConsoleExec, RAID_CLASS_COLORS
-local gsub, format = string.gsub, string.format
-local mfloor, mceil = math.floor, math.ceil
-local GetClassColorObj, GetMouseFocus = GetClassColorObj, GetMouseFocus
-local FocusFrame = _G.FocusFrame
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local isClassicEra = false
 
 -- Hide MultiGroupFrame icons showing as Party(+BG) leader

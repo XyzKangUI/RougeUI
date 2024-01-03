@@ -1,8 +1,4 @@
 local _, RougeUI = ...
-local UnitAffectingCombat, IsActiveBattlefieldArena = UnitAffectingCombat, IsActiveBattlefieldArena
-local UnitIsUnit, UnitExists, UnitClass = UnitIsUnit, UnitExists, UnitClass
-local UnitClassification, UnitDetailedThreatSituation = UnitClassification, UnitDetailedThreatSituation
-local SecureButton_GetUnit = SecureButton_GetUnit
 local Indicator = {}
 
 local function InCombat(unit)

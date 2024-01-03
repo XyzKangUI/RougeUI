@@ -2,11 +2,9 @@ local _, RougeUI = ...
 local comboPoints = 0;
 local comboPointsCache = {};
 local targetGUID
-local UnitGUID, UnitIsPlayer, GetComboPoints = UnitGUID, UnitIsPlayer, GetComboPoints
 local COMBOFRAME_FADE_IN = 0;
 local COMBOFRAME_HIGHLIGHT_FADE_IN = 0;
 local COMBOFRAMELAST_NUM_POINTS = 0;
-local UnitIsPossessed = UnitIsPossessed
 
 local function ComboUpdate(self)
     if (not self.maxComboPoints) then

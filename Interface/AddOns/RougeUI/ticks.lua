@@ -1,21 +1,13 @@
 local _, RougeUI = ...
-local UnitPowerType = _G.UnitPowerType
 local pairs = _G.pairs
 local UnitExists, UnitIsUnit, UnitIsEnemy = _G.UnitExists, _G.UnitIsUnit, _G.UnitIsEnemy
 local UnitPower, UnitIsPlayer = _G.UnitPower, _G.UnitIsPlayer
-local CombatLogGetCurrentEventInfo = _G.CombatLogGetCurrentEventInfo;
-local COMBATLOG_FILTER_HOSTILE_PLAYERS, COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_HOSTILE_PLAYERS, _G.COMBATLOG_FILTER_ME
-local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
 local PlayerFrameManaBar, TargetFrameManaBar = _G.PlayerFrameManaBar, _G.TargetFrameManaBar
 local externalManaGainTimestamp = 0
 local gain = 0
 
 local eventRegistered = { ["SPELL_PERIODIC_ENERGIZE"] = true, ["SPELL_ENERGIZE"] = true, ["SPELL_CAST_SUCCESS"] = true }
 local energyValues = {}
-
-local function PowerType(unit)
-    return UnitPowerType(unit)
-end
 
 local function SetEnergyValue(self, value)
     local x = self:GetWidth()

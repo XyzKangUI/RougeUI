@@ -1,8 +1,5 @@
 local _, RougeUI = ...
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local GetMouseFocus, ToggleDropDownMenu = GetMouseFocus, ToggleDropDownMenu
-local Minimap_OnClick = Minimap_OnClick
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 
 local MM = CreateFrame("Frame")
 MM:RegisterEvent("PLAYER_LOGIN")

@@ -1,20 +1,13 @@
 local _, RougeUI = ...
 local AURA_OFFSET_Y = 1
-local AURA_START_X = 5
-local AURA_START_Y = 32
-local OFFSET_X = 3
-local GetSpellInfo, hooksecurefunc, UnitIsFriend = _G.GetSpellInfo, _G.hooksecurefunc, _G.UnitIsFriend
+local UnitIsFriend = _G.UnitIsFriend
 local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy, _G.UnitClass
 local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
-local pairs = _G.pairs
-local MAX_TARGET_DEBUFFS = 16
-local MAX_TARGET_BUFFS = 32
-local mabs, mfloor = math.abs, math.floor
+local mabs, mfloor, pairs = math.abs, math.floor, _G.pairs
 local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 local Enraged, Whitelist = {}, {}
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local isClassic
-local LibClassicDurations
+local isClassic, LibClassicDurations
 
 if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
     Enraged = {
@@ -207,7 +200,7 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
     else
         point = "TOP"
         relativePoint = "BOTTOM"
-        startY = AURA_START_Y
+        startY = 32
         auraOffsetY = AURA_OFFSET_Y
     end
 
@@ -215,11 +208,22 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
     if (index == 1) then
         if (UnitIsFriend("player", self.unit) or numDebuffs == 0) then
             -- unit is friendly or there are no debuffs...buffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", AURA_START_X, startY)
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
         else
+            -- Fix circular dependency i've created
+            local _, a = self.debuffs:GetPoint()
+            if a then
+                local _, b = a:GetPoint()
+                if b == self.buffs then
+                    self.debuffs:ClearAllPoints()
+                    self.debuffs:SetPoint(point .. "LEFT", self, point .. "LEFT", 0, 0)
+                    self.debuffs:SetPoint(relativePoint .. "LEFT", self, relativePoint .. "LEFT", 0, -auraOffsetY)
+                end
+            end
             -- unit is not friendly and we have debuffs...buffs start on bottom
             buff:SetPoint(point .. "LEFT", self.debuffs, relativePoint .. "LEFT", 0, -offsetY)
         end
+
         self.buffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0)
         self.buffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
         self.spellbarAnchor = buff
@@ -254,7 +258,7 @@ local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBu
     else
         point = "TOP"
         relativePoint = "BOTTOM"
-        startY = AURA_START_Y
+        startY = 32
         auraOffsetY = AURA_OFFSET_Y
     end
 
@@ -264,7 +268,7 @@ local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBu
             buff:SetPoint(point .. "LEFT", self.buffs, relativePoint .. "LEFT", 0, -offsetY)
         else
             -- unit is not friendly or there are no buffs...debuffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", AURA_START_X, startY)
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
         end
         self.debuffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0)
         self.debuffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
@@ -323,7 +327,7 @@ local function Target_Update(frame)
     local isEnemy = UnitIsEnemy("player", frame.unit)
     local _, _, class = UnitClass("player")
 
-    for i = 1, MAX_TARGET_BUFFS do
+    for i = 1, 32 do
         local name, icon, count, debuffType, duration, expirationTime, caster, isStealable, spellId
         if isClassic then
             name, icon, count, debuffType, duration, expirationTime, caster, isStealable, _, spellId = LibClassicDurations:UnitAura(frame.unit, i, "HELPFUL")
@@ -370,7 +374,7 @@ local function Target_Update(frame)
                         expirationTime = expirationTimeNew
                     end
                     CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
-
+                    frameCooldown:SetDrawEdge(false)
                 end
 
                 local showHighlight = false
@@ -439,7 +443,7 @@ local function Target_Update(frame)
     local frameNum = 1
     local index = 1
 
-    local maxDebuffs = frame.maxDebuffs or MAX_TARGET_DEBUFFS
+    local maxDebuffs = frame.maxDebuffs or 16
     while (frameNum <= maxDebuffs and index <= maxDebuffs) do
         local debuffName, icon, count, debuffType, duration, expirationTime, caster, _, _, _, _, _, casterIsPlayer, nameplateShowAll = UnitDebuff(frame.unit, index, "INCLUDE_NAME_PLATE_ONLY")
         if (debuffName) then
@@ -468,10 +472,17 @@ local function Target_Update(frame)
 
     frame.spellbarAnchor = nil
     local maxRowWidth = RougeUI.db.AuraRow
-    -- update buff positions
-    TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
-    -- update debuff positions
-    TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X, mirrorAurasVertically)
+    if UnitIsFriend("player", frame.unit) then
+        -- update buff positions
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+        -- update debuff positions
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+    else
+        -- update debuff positions
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+        -- update buff positions
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+    end
     -- update the spell bar position
     if (frame.spellbar) then
         New_Target_Spellbar_AdjustPosition(frame.spellbar)
@@ -510,7 +521,4 @@ FF:SetScript("OnEvent", function(self)
             end)
         end
     end
-
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:SetScript("OnEvent", nil)
 end)

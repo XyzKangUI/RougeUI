@@ -3,7 +3,6 @@ local plates = {}
 local cacheUnit = {}
 local unitID = { "target", "arena1", "arena2", "arena3" }
 local ipairs, mceil = ipairs, math.ceil
-local UnitGUID, UnitClass = UnitGUID, UnitClass
 local CombatLog_Object_IsA, COMBATLOG_FILTER_HOSTILE_PLAYERS = CombatLog_Object_IsA, COMBATLOG_FILTER_HOSTILE_PLAYERS
 local glyphHex = nil
 

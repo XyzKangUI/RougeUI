@@ -1,8 +1,7 @@
 local _, RougeUI = ...
 local FontType = STANDARD_TEXT_FONT
 local mfloor, tonumber, mceil = math.floor, tonumber, math.ceil
-local GetCVar, UnitIsDeadOrGhost = GetCVar, UnitIsDeadOrGhost
-local UnitExists = UnitExists
+local GetCVar, UnitIsDeadOrGhost, UnitExists = GetCVar, UnitIsDeadOrGhost, UnitExists
 local UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax = UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax
 local isClassic = false
 

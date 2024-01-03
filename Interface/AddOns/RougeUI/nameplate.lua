@@ -1,9 +1,7 @@
 local _, RougeUI = ...
-local str_split = string.split
-local UnitGUID = UnitGUID
-local U = UnitIsUnit
-local select, hooksecurefunc = select, hooksecurefunc
-local STANDARD_TEXT_FONT, IsActiveBattlefieldArena = STANDARD_TEXT_FONT, IsActiveBattlefieldArena
+local str_split, select = string.split, select
+local UnitGUID, U = UnitGUID, UnitIsUnit
+local IsActiveBattlefieldArena = IsActiveBattlefieldArena
 local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local ClassicEra = false

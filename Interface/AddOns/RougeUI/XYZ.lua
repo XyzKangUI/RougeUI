@@ -2,7 +2,6 @@ local _, RougeUI = ...
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bartender = IsAddOnLoaded("Bartender4")
 local dominos = IsAddOnLoaded("Dominos")
-local tonumber, strmatch = tonumber, string.match
 local frame = CreateFrame("Frame")
 
 local buttonNames = {
