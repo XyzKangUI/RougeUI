@@ -1,9 +1,6 @@
 local _, RougeUI = ...
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bt4 = IsAddOnLoaded("Bartender4")
 local dm = IsAddOnLoaded("Dominos")
-local CreateFrame = CreateFrame
-local GetActionButtonForID = GetActionButtonForID
 local wahk = false
 
 local function CreateAnim(self)
@@ -20,8 +17,7 @@ local function CreateAnim(self)
     local animation = texture:CreateAnimationGroup()
 
     local alpha = animation:CreateAnimation("Alpha")
-    alpha:SetFromAlpha(0)
-    alpha:SetToAlpha(1)
+    alpha:SetChange(1);
     alpha:SetDuration(0)
     alpha:SetOrder(1)
 
@@ -76,7 +72,15 @@ end
 
 local function HookedDefaultBars()
     hooksecurefunc("ActionButtonDown", function(id)
-        local button = GetActionButtonForID(id)
+        local button;
+        if ( VehicleMenuBar:IsShown() and id <= VEHICLE_MAX_ACTIONBUTTONS ) then
+            button = _G["VehicleMenuBarActionButton"..id];
+        elseif ( BonusActionBarFrame:IsShown() ) then
+            button = _G["BonusActionButton"..id];
+        else
+            button = _G["ActionButton"..id];
+        end
+
         if button then
             RougeUI.Animate(button)
         end

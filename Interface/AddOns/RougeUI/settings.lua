@@ -1,10 +1,6 @@
 local Name, addon = ...
 local floor = math.floor
-local format = format
-local CreateFrame, _G = CreateFrame, _G
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 addon.RougeUIF = {}
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 
 local function RoundNumbers(val, valStep)
     return floor(val / valStep) * valStep
@@ -14,7 +10,6 @@ local stock = {
     Class_Portrait = false,
     ClassHP = true,
     GradientHP = false,
-    FastKeyPress = true,
     ShortNumeric = true,
     ManaFontSize = 11,
     HPFontSize = 11,
@@ -32,9 +27,7 @@ local stock = {
     retab = false,
     Colval = 0.25,
     ArenaNumbers = false,
-    SQFix = false,
     classoutline = false,
-    HideAggro = true,
     unithp = false,
     Stance = false,
     HideHotkey = false,
@@ -56,13 +49,11 @@ local stock = {
     Lorti = false,
     Roug = false,
     Modern = false,
-    BuffsRow = 10,
     BuffVal = 1.0,
     PSTrack = false,
     cfix = false,
     roleIcon = false,
     transparent = true,
-    Slice = false,
     NoLevel = false,
     KeyEcho = false,
     ClassNames = false,
@@ -262,7 +253,7 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel1, 10, -210, "StatusText")
 
-        local ShortNumericButton , AbbButton
+        local ShortNumericButton, AbbButton
         ShortNumericButton = CheckBtn("Display HP/Mana Text as '10k'", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value)
             addon.db.ShortNumeric = value
             addon.db.Abbreviate = false
@@ -278,12 +269,6 @@ function f:CreateGUI()
         end)
         AbbButton:SetChecked(addon.db.Abbreviate)
         AbbButton:SetPoint("TOPLEFT", 10, -280)
-
-        local PartyTextButton = CheckBtn("Show HP/Mana Text on PartyFrames", "This will show the HP/Mana StatusText on party1-4", Panel.childPanel1, function(self, value)
-            addon.db.PartyText = value
-        end)
-        PartyTextButton:SetChecked(addon.db.PartyText)
-        PartyTextButton:SetPoint("TOPLEFT", 10, -315)
 
         CreateText(Panel.childPanel1, 350, -40, "Misc")
 
@@ -364,12 +349,6 @@ function f:CreateGUI()
         Nolvl:SetChecked(addon.db.NoLevel)
         Nolvl:SetPoint("TOPLEFT", 350, -175)
 
-        local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
-            addon.db.ModPlates = value
-        end)
-        ModPlates:SetChecked(addon.db.ModPlates)
-        ModPlates:SetPoint("TOPLEFT", 10, -75)
-
         CreateText(Panel.childPanel5, 350, -40, "Theme's")
 
         local name = "BuffColSlider"
@@ -390,7 +369,6 @@ function f:CreateGUI()
         BuffColSlider:SetValue(addon.db.BuffVal)
         BuffColSlider.text:SetText("Theme's Border Brightness: " .. format("%.f", BuffColSlider:GetValue(addon.db.BuffVal)))
         BuffColSlider:SetValueStep(0.05)
-        BuffColSlider:SetObeyStepOnDrag(true);
         BuffColSlider:SetScript("OnValueChanged", function(_, value)
             BuffColSlider.text:SetText("Theme's Border Brightness: " .. RoundNumbers(addon.db.BuffVal, 0.05))
             addon.db.BuffVal = value
@@ -460,7 +438,6 @@ function f:CreateGUI()
         FontSizeSlider:SetValue(addon.db.HPFontSize)
         FontSizeSlider.text:SetText("HP Font Size " .. FontSizeSlider:GetValue(addon.db.HPFontSize))
         FontSizeSlider:SetValueStep(1)
-        FontSizeSlider:SetObeyStepOnDrag(true);
         FontSizeSlider:SetScript("OnValueChanged", function(self)
             self.text:SetText("HP Font Size: " .. self:GetValue(addon.db.HPFontSize))
             addon.db.HPFontSize = self:GetValue()
@@ -480,7 +457,6 @@ function f:CreateGUI()
         MFontSizeSlider:SetValue(addon.db.ManaFontSize)
         MFontSizeSlider.text:SetText("Mana Font Size " .. MFontSizeSlider:GetValue(addon.db.ManaFontSize))
         MFontSizeSlider:SetValueStep(1)
-        MFontSizeSlider:SetObeyStepOnDrag(true);
         MFontSizeSlider:SetScript("OnValueChanged", function(self)
             self.text:SetText("Mana Font Size: " .. self:GetValue(addon.db.ManaFontSize))
             addon.db.ManaFontSize = self:GetValue()
@@ -505,7 +481,6 @@ function f:CreateGUI()
         TargetPlayerBuffSizeSlider:SetValue(addon.db.SelfSize)
         TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(addon.db.SelfSize)));
         TargetPlayerBuffSizeSlider:SetValueStep(1)
-        TargetPlayerBuffSizeSlider:SetObeyStepOnDrag(true);
         TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.SelfSize ~= value then
                 addon.db.SelfSize = value;
@@ -532,7 +507,6 @@ function f:CreateGUI()
         TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
         TargetBuffSizeSlider:SetValue(addon.db.OtherBuffSize)
         TargetBuffSizeSlider.text:SetText("Target Aura Size: " .. format("%.f", TargetBuffSizeSlider:GetValue(addon.db.OtherBuffSize)));
-        TargetBuffSizeSlider:SetObeyStepOnDrag(true);
         TargetBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.OtherBuffSize ~= value then
                 addon.db.OtherBuffSize = value;
@@ -554,41 +528,10 @@ function f:CreateGUI()
         ColorValueSlider:SetValue(addon.db.Colval)
         ColorValueSlider.text:SetText("UI Brightness: " .. format("%.2f", ColorValueSlider:GetValue(addon.db.Colval)))
         ColorValueSlider:SetValueStep(0.05)
-        ColorValueSlider:SetObeyStepOnDrag(true);
         ColorValueSlider:SetScript("OnValueChanged", function(_, value)
             ColorValueSlider.text:SetText("UI Brightness: " .. RoundNumbers(addon.db.Colval, 0.05))
             addon.db.Colval = value
             addon.RougeUIF:ChangeFrameColors()
-        end)
-
-        C_Timer.After(1, function()
-            if not IsAddOnLoaded("SimpleAuraFilter") then
-                local name = "BuffValueSlider"
-                local BuffValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
-                BuffValueSlider:SetMinMaxValues(2, 10)
-                BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
-                BuffValueSlider.text = _G[name .. "Text"]
-                BuffValueSlider.textLow = _G[name .. "Low"]
-                BuffValueSlider.textHigh = _G[name .. "High"]
-                BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
-                BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
-                BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
-                BuffValueSlider:SetValue(addon.db.BuffsRow)
-                BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(addon.db.BuffsRow)))
-                BuffValueSlider:SetValueStep(1)
-                BuffValueSlider:SetObeyStepOnDrag(true);
-                local origValue, msgPrinted = 10, false
-                local origAnchor = _G.BuffFrame_UpdateAllBuffAnchors
-                BuffValueSlider:SetScript("OnValueChanged", function(_, value)
-                    BuffValueSlider.text:SetText("Buffs Per Row: " .. RoundNumbers(addon.db.BuffsRow, 1))
-                    if origValue == addon.db.BuffsRow and value ~= 10 and not msgPrinted
-                            and origAnchor == _G.BuffFrame_UpdateAllBuffAnchors then
-                        print(Title .. ": Changed default BuffsRow value. Don't forget to /reload")
-                        msgPrinted = true
-                    end
-                    addon.db.BuffsRow = value
-                end)
-            end
         end)
 
         local names = "AuraRowSlider"
@@ -609,7 +552,6 @@ function f:CreateGUI()
         AuraRowSlider.textHigh:SetText(floor(AuraRowSlider.maxValue))
         AuraRowSlider:SetValue(addon.db.AuraRow)
         AuraRowSlider.text:SetText("Aura Row Width Size: " .. format("%.f", AuraRowSlider:GetValue(addon.db.AuraRow)));
-        AuraRowSlider:SetObeyStepOnDrag(true);
         AuraRowSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.AuraRow ~= value then
                 addon.db.AuraRow = value;
@@ -622,41 +564,23 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel2, 10, -40, "PvP Tweaks")
 
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value)
-                addon.db.EnemyTicks = value
-            end)
-            EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
-            EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
-        else
-            local EnemyTicksButton = CheckBtn("Enemy Tick Tracker", "Track your target's mana/energy ticks", Panel.childPanel2, function(self, value)
-                addon.db.EnemyTicker = value
-            end)
-            EnemyTicksButton:SetChecked(addon.db.EnemyTicker)
-            EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
-        end
+        local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value)
+            addon.db.EnemyTicks = value
+        end)
+        EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
+        EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
 
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local PSTrackBtn = CheckBtn("CC Absorb Tracker", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default Blizzard nameplate", Panel.childPanel2, function(self, value)
-                addon.db.PSTrack = value
-            end)
-            PSTrackBtn:SetChecked(addon.db.PSTrack)
-            PSTrackBtn:SetPoint("TOPLEFT", 10, -210)
-        end
+        local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value)
+            addon.db.ArenaNumbers = value
+        end)
+        ArenaNumbersButton:SetChecked(addon.db.ArenaNumbers)
+        ArenaNumbersButton:SetPoint("TOPLEFT", 10, -175)
 
         local CombatIndicatorButton = CheckBtn("Combat Indicator", "Displays a Combat icon next to Target-/FocusFrame when they enter combat or send pet", Panel.childPanel2, function(self, value)
             addon.db.CombatIndicator = value
         end)
         CombatIndicatorButton:SetChecked(addon.db.CombatIndicator)
         CombatIndicatorButton:SetPoint("TOPLEFT", 10, -70)
-
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value)
-                addon.db.ArenaNumbers = value
-            end)
-            ArenaNumbersButton:SetChecked(addon.db.ArenaNumbers)
-            ArenaNumbersButton:SetPoint("TOPLEFT", 10, -175)
-        end
 
         local ScoreBoardButton = CheckBtn("Class colored PvP Scoreboard", "Color names on the PvP Scoreboard by class", Panel.childPanel2, function(self, value)
             addon.db.ScoreBoard = value
@@ -668,82 +592,37 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel2, 350, -40, "Misc")
 
-        local FastKeyPressButton = CheckBtn("Activate spells on key down", "Enabling this will trigger your spells on pressing keys down instead of on releasing them", Panel.childPanel2, function(self, value)
-            addon.db.FastKeyPress = value
+        local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
+            addon.db.RETabBinder = value
         end)
-        FastKeyPressButton:SetChecked(addon.db.FastKeyPress)
-        FastKeyPressButton:SetPoint("TOPLEFT", 350, -70)
-        FastKeyPressButton:RegisterEvent("PLAYER_LOGIN")
-        FastKeyPressButton:SetScript("OnEvent", function(self, event, ...)
-            if (event == "PLAYER_LOGIN") then
-                if addon.db.FastKeyPress and (GetCVarBool("ActionButtonUseKeyDown") ~= true) then
-                    SetCVar("ActionButtonUseKeyDown", 1)
-                end
-                self:UnregisterEvent("PLAYER_LOGIN")
-                self:SetScript("OnEvent", nil)
-            end
-        end)
-
-        local SpellQueueWindow = CheckBtn("Auto-adjust SpellQueue Window", "Automatically changes SpellQueue value based on current latency", Panel.childPanel2, function(self, value)
-            addon.db.SQFix = value
-        end)
-        SpellQueueWindow:SetChecked(addon.db.SQFix)
-        SpellQueueWindow:SetPoint("TOPLEFT", 350, -105)
-
-        local AutoReadyButton = CheckBtn("Auto accept raid ready check", "When enabled it will automatically accept any readychecks. Warning: Don't AFK or enable when queueing arena with a random", Panel.childPanel2, function(self, value)
-            addon.db.AutoReady = value
-        end)
-        AutoReadyButton:SetChecked(addon.db.AutoReady)
-        AutoReadyButton:SetPoint("TOPLEFT", 350, -140)
-
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
-                addon.db.RETabBinder = value
-            end)
-            Retab:SetChecked(addon.db.RETabBinder)
-            Retab:SetPoint("TOPLEFT", 350, -280)
-        end
+        Retab:SetChecked(addon.db.RETabBinder)
+        Retab:SetPoint("TOPLEFT", 350, -140)
 
         local ButtonAnim = CheckBtn("Animated Keypress (SnowFallKeyPress)", "Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
             addon.db.ButtonAnim = value
         end)
         ButtonAnim:SetChecked(addon.db.ButtonAnim)
-        ButtonAnim:SetPoint("TOPLEFT", 350, -210)
+        ButtonAnim:SetPoint("TOPLEFT", 350, -175)
 
         local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
             addon.db.KeyEcho = value
         end)
         Echo:SetChecked(addon.db.KeyEcho)
-        Echo:SetPoint("TOPLEFT", 350, -245)
+        Echo:SetPoint("TOPLEFT", 350, -105)
 
         local Echo = CheckBtn("Actionbar Range Indicator", "Color your actionbuttons when out of range or oom", Panel.childPanel2, function(self, value)
             addon.db.RangeIndicator = value
         end)
         Echo:SetChecked(addon.db.RangeIndicator)
-        Echo:SetPoint("TOPLEFT", 350, -175)
+        Echo:SetPoint("TOPLEFT", 350, -70)
 
-        CreateText(Panel.childPanel2, 350, -330, "Rogue Specific")
+        CreateText(Panel.childPanel2, 350, -255, "Rogue Specific")
 
         local ComboFixButton = CheckBtn("ComboFrame Fix", "This change will allow you to see combo points on mind controlled enemy players", Panel.childPanel2, function(self, value)
             addon.db.cfix = value
         end)
         ComboFixButton:SetChecked(addon.db.cfix)
-        ComboFixButton:SetPoint("TOPLEFT", 350, -365)
-
-        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-            local EnemyTicksButton = CheckBtn("Personal energy ticker", "Track your mana/energy ticks on the manabar", Panel.childPanel2, function(self, value)
-                addon.db.EnergyTicker = value
-            end)
-            EnemyTicksButton:SetChecked(addon.db.EnergyTicker)
-            EnemyTicksButton:SetPoint("TOPLEFT", 350, -280)
-        else
-            local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
-                addon.db.Slice = value
-            end)
-            SliceButton:SetChecked(addon.db.Slice)
-            SliceButton:SetPoint("TOPLEFT", 350, -400)
-        end
-
+        ComboFixButton:SetPoint("TOPLEFT", 350, -285)
 
         local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
             addon.db.CastTimer = value
@@ -751,18 +630,16 @@ function f:CreateGUI()
         CastTimerButton:SetChecked(addon.db.CastTimer)
         CastTimerButton:SetPoint("TOPLEFT", 10, -40)
 
-        local HighlightDispellable
-        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-        HighlightDispellable = CheckBtn("Highlight Magic Buffs", "Higlights enemy magic buffs", Panel.childPanel2, function(self, value)
-                addon.db.HighlightDispellable = value
-                addon.db.BuffSizer = true
-            end)
-        else
-            HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
-                addon.db.HighlightDispellable = value
-                addon.db.BuffSizer = true
-            end)
-        end
+        local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
+            addon.db.ModPlates = value
+        end)
+        ModPlates:SetChecked(addon.db.ModPlates)
+        ModPlates:SetPoint("TOPLEFT", 10, -75)
+
+        local HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
+            addon.db.HighlightDispellable = value
+            addon.db.BuffSizer = true
+        end)
         HighlightDispellable:SetChecked(addon.db.HighlightDispellable)
         HighlightDispellable:SetPoint("TOPLEFT", 10, -285)
 
@@ -808,49 +685,29 @@ function f:CreateGUI()
         HideIndicatorButton:SetChecked(addon.db.HideIndicator)
         HideIndicatorButton:SetPoint("TOPLEFT", 10, -75)
 
-        local HideTitlesButton = CheckBtn("Hide Group/Raid text", "Hides the Group/Raid text showing on top of frames", Panel.childPanel3, function(self, value)
-            addon.db.HideTitles = value
-        end)
-        HideTitlesButton:SetChecked(addon.db.HideTitles)
-        HideTitlesButton:SetPoint("TOPLEFT", 10, -110)
-
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local AggroHighlightButton = CheckBtn("Hide Aggro highlight on default raid frames", "Hides the red texture that appears on raid frames when someone has aggro", Panel.childPanel3, function(self, value)
-                addon.db.HideAggro = value
-            end)
-            AggroHighlightButton:SetChecked(addon.db.HideAggro)
-            AggroHighlightButton:SetPoint("TOPLEFT", 10, -320)
-        end
-
         local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value)
             addon.db.Stance = value
         end)
         HideStanceButton:SetChecked(addon.db.Stance)
-        HideStanceButton:SetPoint("TOPLEFT", 10, -180)
+        HideStanceButton:SetPoint("TOPLEFT", 10, -110)
 
         local HideHotkeyButton = CheckBtn("Hide Hotkey text on default actionbar", "Hides the keybinding text displayed", Panel.childPanel3, function(self, value)
             addon.db.HideHotkey = value
         end)
         HideHotkeyButton:SetChecked(addon.db.HideHotkey)
-        HideHotkeyButton:SetPoint("TOPLEFT", 10, -215)
+        HideHotkeyButton:SetPoint("TOPLEFT", 10, -145)
 
         local HideMacroButton = CheckBtn("Hide macro text on default actionbar", "Hides the macro name displayed on icons", Panel.childPanel3, function(self, value)
             addon.db.HideMacro = value
         end)
         HideMacroButton:SetChecked(addon.db.HideMacro)
-        HideMacroButton:SetPoint("TOPLEFT", 10, -250)
+        HideMacroButton:SetPoint("TOPLEFT", 10, -180)
 
         local HideTotDebuffs = CheckBtn("Hide TargetOfTarget Debuffs", "Hides the 4 small ToT Debuffs", Panel.childPanel3, function(self, value)
             addon.db.ToTDebuffs = value
         end)
         HideTotDebuffs:SetChecked(addon.db.ToTDebuffs)
-        HideTotDebuffs:SetPoint("TOPLEFT", 10, -285)
-
-        local HideRoleButton = CheckBtn("Hide role icon on default raid frames", "Hides the role icon on blizzard raid frames", Panel.childPanel3, function(self, value)
-            addon.db.roleIcon = value
-        end)
-        HideRoleButton:SetChecked(addon.db.roleIcon)
-        HideRoleButton:SetPoint("TOPLEFT", 10, -145)
+        HideTotDebuffs:SetPoint("TOPLEFT", 10, -215)
 
         CreateText(Panel.childPanel1, 350, -215, "Player Chain")
 

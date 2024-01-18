@@ -1,6 +1,5 @@
 local _, RougeUI = ...
 local ceil, mod = _G.math.ceil, _G.math.fmod
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
 local floor, max = _G.math.floor, _G.math.max
@@ -40,7 +39,7 @@ local function addBorder(button, drawLayer, dbf)
     if button.debuff or button.tempenchant then
         border = _G[name .. "Border"]
     else
-        border = button:CreateTexture(nil, drawLayer or "BACKGROUND")
+        border = button:CreateTexture(name.."NewBorder", drawLayer or "BACKGROUND")
     end
 
     local stealable = _G[name .. "Stealable"]
@@ -81,7 +80,7 @@ local function addBorder(button, drawLayer, dbf)
         end
 
         border:SetTexCoord(0, 1, 0, 1)
-        border:SetDrawLayer(drawLayer or "BACKGROUND", 5)
+        border:SetDrawLayer(drawLayer or "BACKGROUND", 7)
         if not button.debuff then
             border:SetVertexColor(RougeUI.db.BuffVal, RougeUI.db.BuffVal, RougeUI.db.BuffVal)
         end
@@ -207,7 +206,10 @@ local function SkinBuffs(bu)
     local name = bu:GetName()
     local icon = _G[name .. "Icon"]
 
+    bu.styled = true
+
     if icon then
+        icon:SetDrawLayer("BACKGROUND", -8)
         if name:match("Debuff") and not RougeUI.db.Lorti then
             icon:SetTexCoord(0.06, 0.94, 0.06, 0.94)
             if RougeUI.db.modtheme then
@@ -227,7 +229,7 @@ local function SkinBuffs(bu)
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
                 icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
             else
-                icon:SetTexCoord(0.03, 0.97, 0.03, 0.97)
+                icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
             end
         end
     end
@@ -255,15 +257,15 @@ local function SkinBuffs(bu)
         bu.count:SetPoint("TOPRIGHT", 1, 0)
     end
 
-    addBorder(bu, "BACKGROUND", true)
-
-    bu.styled = true
+    addBorder(bu, "OVERLAY", true)
 end
 
 local function styleActionButton(bu)
     if not bu or (bu and bu.styled) then
         return
     end
+
+    bu.styled = true
 
     local name = bu:GetName()
     local fbg = _G[name .. "FloatingBG"]
@@ -272,6 +274,12 @@ local function styleActionButton(bu)
     local ic = _G[name .. "Icon"]
     local nt = _G[name .. "NormalTexture"]
     local nt2 = _G[name .. "NormalTexture2"]
+    local bo = _G[name .. "Border"]
+    local ho = _G[name .. "HotKey"]
+
+    bu.SetNormalTexture = function()
+        return
+    end
 
     if nt then
         nt:SetTexture(nil)
@@ -283,6 +291,7 @@ local function styleActionButton(bu)
     end
 
     if ic then
+        ic:SetDrawLayer("BACKGROUND", -8)
         if RougeUI.db.Lorti or RougeUI.db.modtheme then
             ic:SetTexCoord(0, 1, 0, 1)
             if RougeUI.db.Lorti then
@@ -297,7 +306,7 @@ local function styleActionButton(bu)
                 end
             end
         else
-            ic:SetTexCoord(0.06, 0.94, 0.06, 0.94)
+            ic:SetTexCoord(0.07, 0.93, 0.07, 0.93)
         end
     end
 
@@ -311,18 +320,16 @@ local function styleActionButton(bu)
         fobs:SetTexture(nil)
     end
 
-    if RougeUI.db.modtheme then
-        bu.border:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 2)
-        bu.border:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 2, -2)
-    end
-
     if RougeUI.db.Lorti then
         bu:SetPushedTexture("Interface\\AddOns\\RougeUI\\textures\\art\\pushed")
     end
 
-    addBorder(bu, "BACKGROUND")
-
-    bu.styled = true
+    ho:SetDrawLayer("OVERLAY", 7)
+    if RougeUI.db.modtheme then
+        addBorder(bu, "OVERLAY")
+    else
+        addBorder(bu, "BACKGROUND")
+    end
 end
 
 local function init()
@@ -339,10 +346,6 @@ local function init()
         styleActionButton(_G["PetActionButton" .. i])
     end
 
-    for i = 1, 6 do
-        styleActionButton(_G["OverrideActionBarButton" .. i])
-    end
-
     if dominos then
         for i = 1, 120 do
             styleActionButton(_G["DominosActionButton" .. i])
@@ -353,33 +356,30 @@ local function init()
         for i = 1, 120 do
             styleActionButton(_G["BT4Button" .. i])
         end
-        if GetNumShapeshiftForms() ~= 0 then
-            for i = 1, GetNumShapeshiftForms() do
-                styleActionButton(_G["BT4StanceButton" .. i])
-            end
-        end
     end
 
     for i = 1, 7 do
-        local bu = _G["StanceButton" .. i]
+        local bu = _G["ShapeshiftButton" .. i]
         styleActionButton(bu)
     end
 
     -- Castbar
     local tf = CreateFrame("Frame", nil, TargetFrameSpellBar, BackdropTemplateMixin and "BackdropTemplate")
     addBorder(tf, "OVERLAY")
-    tf:SetAllPoints(TargetFrameSpellBar.Icon)
-    TargetFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    local icon = _G["TargetFrameSpellBarIcon"]
+    tf:SetAllPoints(icon)
+    icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
     if FocusFrameSpellBar then
         local ff = CreateFrame("Frame", nil, FocusFrameSpellBar, BackdropTemplateMixin and "BackdropTemplate")
         addBorder(ff, "OVERLAY")
-        ff:SetAllPoints(FocusFrameSpellBar.Icon)
-        FocusFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+        local icon = _G["FocusFrameSpellBarIcon"]
+        ff:SetAllPoints(icon)
+        icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
     end
 
     -- TempEnchantFrame
-    for i = 1, NUM_TEMP_ENCHANT_FRAMES do
+    for i = 1, 3 do
         local bu = _G["TempEnchant" .. i]
         if (bu and not bu.styled) then
             SkinBuffs(bu)
@@ -442,22 +442,28 @@ local function HookAuras()
     end)
 
     if not bartender4 then
-        if RougeUI.db.Lorti then
             hooksecurefunc("ActionButton_Update", function(self)
+                styleActionButton(self)
+
                 local action = self.action
-                local border = self.Border
+                local border = _G[self:GetName() .. "Border"]
+                local newBorder = _G[self:GetName() .. "NewBorder"]
                 if border then
                     if IsEquippedAction(action) then
-                        border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss_grey")
-                        border:SetSize(36, 36)
-                        border:SetVertexColor(0.499, 0.999, 0.499, 1)
+                        if newBorder then
+                            newBorder:SetDrawLayer("BACKGROUND")
+                        end
                         border:Show()
+                        if RougeUI.db.Lorti then
+                            border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss_grey")
+                            border:SetSize(36, 36)
+                            border:SetVertexColor(0.499, 0.999, 0.499, 1)
+                        end
                     else
                         border:Hide()
                     end
                 end
             end)
-        end
 
         hooksecurefunc("ActionButton_UpdateHotkeys", function(self)
             local hotkey = self.HotKey
@@ -475,93 +481,10 @@ local function HookAuras()
     end
 end
 
-local function BuffAnchor()
-    local buff, previousBuff, aboveBuff, index
-    local numBuffs = 0;
-    local numAuraRows = 0;
-    local slack = BuffFrame.numEnchants;
-    if (BuffFrame.numConsolidated > 0) then
-        slack = slack + 1;    -- one icon for all consolidated buffs
-    end
-    local BUFFS_PER_ROW = RougeUI.db.BuffsRow
-
-    for i = 1, BUFF_ACTUAL_DISPLAY do
-        buff = _G["BuffButton" .. i];
-        if not buff.consolidated then
-            numBuffs = numBuffs + 1;
-            index = numBuffs + slack;
-
-            buff:ClearAllPoints();
-            if ((index > 1) and (mod(index, BUFFS_PER_ROW) == 1)) then
-                -- New row
-                numAuraRows = numAuraRows + 1;
-                if (index == BUFFS_PER_ROW + 1) then
-                    buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING - 3); --xx
-                else
-                    buff:SetPoint("TOPRIGHT", aboveBuff, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING);
-                end
-                aboveBuff = buff;
-            elseif (index == 1) then
-                numAuraRows = 1;
-                buff:SetPoint("TOPRIGHT", BuffFrame, "TOPRIGHT", 0, 0);
-                aboveBuff = buff;
-            else
-                if (numBuffs == 1) then
-                    if (BuffFrame.numEnchants > 0) then
-                        buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", BUFF_HORIZ_SPACING, 0);
-                        aboveBuff = TemporaryEnchantFrame;
-                    else
-                        buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "TOPLEFT", BUFF_HORIZ_SPACING, 0);
-                    end
-                else
-                    buff:SetPoint("RIGHT", previousBuff, "LEFT", BUFF_HORIZ_SPACING, 0); -- spacing
-                end
-            end
-            previousBuff = buff;
-        end
-    end
-end
-
-local function DebuffAnchor(buttonName, index)
-    local numBuffs = BUFF_ACTUAL_DISPLAY + BuffFrame.numEnchants;
-    local BUFFS_PER_ROW = RougeUI.db.BuffsRow
-
-    if (BuffFrame.numConsolidated > 0) then
-        numBuffs = numBuffs - BuffFrame.numConsolidated + 1;
-    end
-
-    local rows = ceil(numBuffs / BUFFS_PER_ROW);
-    local buff = _G[buttonName .. index];
-    local offsetY
-
-    buff:ClearAllPoints()
-    -- Position debuffs
-    if ((index > 1) and (mod(index, BUFFS_PER_ROW) == 1)) then
-        -- New row
-        buff:SetPoint("TOP", _G[buttonName .. (index - BUFFS_PER_ROW)], "BOTTOM", 0, -BUFF_ROW_SPACING);
-    elseif (index == 1) then
-        if (rows < 2) then
-            offsetY = 1 * ((2 * BUFF_ROW_SPACING) + 30);
-        else
-            offsetY = rows * (BUFF_ROW_SPACING + 30);
-        end
-        buff:SetPoint("TOPRIGHT", BuffFrame, "BOTTOMRIGHT", 0, -offsetY);
-    else
-        buff:SetPoint("RIGHT", _G[buttonName .. (index - 1)], "LEFT", -6, 0);
-    end
-end
-
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        if not IsAddOnLoaded("SimpleAuraFilter") and (RougeUI.db.BuffsRow and RougeUI.db.BuffsRow < 10) then
-            C_Timer.After(1, function()
-                hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
-                hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
-            end)
-        end
-
         if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme or RougeUI.db.TimerGap then
             if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
@@ -575,21 +498,19 @@ e3:SetScript("OnEvent", function(self, event)
                 end
 
                 init()
-                HookAuras()
-
                 hooksecurefunc("AuraButton_Update", function(self, index)
                     local button = _G[self .. index]
-                    if button and not button.styled then
+                    if button then
                         SkinBuffs(button)
                     end
                     if button and RougeUI.db.Roug then
                         BtnGlow(button)
                     end
                 end)
+                HookAuras()
             end
         end
 
         self:UnregisterEvent("PLAYER_LOGIN")
-        self:SetScript("OnEvent", nil)
     end
 end)

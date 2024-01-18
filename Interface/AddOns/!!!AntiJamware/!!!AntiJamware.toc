@@ -1,0 +1,6 @@
+## Interface: 30300
+## Interface-Wrath: 30403
+## Author: Xyz
+## Notes: discord.gg/CtxPasSQnQ
+## Title: !!!AntiJamware
+AS.lua

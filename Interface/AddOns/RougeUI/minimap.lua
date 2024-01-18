@@ -2,7 +2,6 @@ local _, RougeUI = ...
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local GetMouseFocus, ToggleDropDownMenu = GetMouseFocus, ToggleDropDownMenu
 local Minimap_OnClick = Minimap_OnClick
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 
 local MM = CreateFrame("Frame")
 MM:RegisterEvent("PLAYER_LOGIN")
@@ -13,10 +12,13 @@ MM:SetScript("OnEvent", function(self)
             MinimapToggleButton,
             MinimapZoomIn,
             MinimapZoomOut,
+            MiniMapWorldMapButton,
         }) do
             v:Hide()
         end
-        select(1, TimeManagerClockButton:GetRegions()):SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        C_Timer.After(0.2, function()
+            select(1, TimeManagerClockButton:GetRegions()):SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end)
 
         Minimap:EnableMouseWheel(true)
         Minimap:SetScript('OnMouseWheel', function(self, delta)
@@ -57,14 +59,8 @@ MM:SetScript("OnEvent", function(self)
         MiniMapMailFrame:ClearAllPoints()
         MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
 
-        MinimapZoneText:ClearAllPoints()
-        MinimapZoneText:SetPoint("TOPLEFT", "MinimapZoneTextButton", "TOPLEFT", 8, 0)
-
         self:UnregisterEvent("PLAYER_LOGIN")
 
-        if IsAddOnLoaded("Leatrix_Plus") and (LeaPlusDB["MinimapModder"] == "On" and LeaPlusDB["CombineAddonButtons"] == "On") then
-            return
-        end
         if MiniMapTracking then
             MiniMapTracking:Hide()
             Minimap:SetScript("OnMouseUp", function(self, btn)
@@ -78,5 +74,4 @@ MM:SetScript("OnEvent", function(self)
     end
 end)
 
-hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)
 hooksecurefunc(MinimapNorthTag, "Show", MinimapNorthTag.Hide)

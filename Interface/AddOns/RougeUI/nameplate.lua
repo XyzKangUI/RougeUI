@@ -1,131 +1,83 @@
 local _, RougeUI = ...
-local str_split = string.split
-local UnitGUID = UnitGUID
-local U = UnitIsUnit
-local select, hooksecurefunc = select, hooksecurefunc
-local STANDARD_TEXT_FONT, IsActiveBattlefieldArena = STANDARD_TEXT_FONT, IsActiveBattlefieldArena
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local ClassicEra = false
+local floor, select, tonumber = math.floor, select, tonumber
+local UnitName, STANDARD_TEXT_FONT = UnitName, STANDARD_TEXT_FONT
+local IsInInstance, GetNumArenaOpponents = IsInInstance, GetNumArenaOpponents
+local UnitCanAttack = UnitCanAttack
+local interval = 0.1
+local time = 0
 
-local function NameToArenaNumber(plate)
-    if plate:IsForbidden() then
-        return
+local function AddElements(plate, time)
+    local _, border, _, _, _, _, name, levelText = plate:GetRegions()
+
+    if plate:IsMouseOver() then
+        if UnitCanAttack("player", "mouseover") then
+            name:SetTextColor(1, 0, 0)
+        else
+            name:SetTextColor(1, 0.82, 0)
+        end
+    else
+        name:SetTextColor(1, 1, 1)
     end
 
-    if plate.unit:find("nameplate") then
-        if select(1, IsActiveBattlefieldArena()) then
-            for i = 1, 5 do
-                if U(plate.unit, "arena" .. i) then
-                    plate.name:SetText(i)
-                    plate.name:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
-                    plate.name:ClearAllPoints()
-                    plate.name:SetPoint("BOTTOM", plate.healthBar.border, "TOP", 0, 2)
-                    plate.name:SetJustifyH("CENTER")
-                    break
-                else
-                    if RougeUI.db.ModPlates then
-                        plate.name:SetFont(STANDARD_TEXT_FONT, 8)
-                        plate.name:ClearAllPoints()
-                        plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
-                        plate.name:SetJustifyH("RIGHT")
-                    end
+    if time >= interval then
+        time = 0
+
+        if not plate.skinned then
+            border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            plate.skinned = true
+        end
+
+        if RougeUI.db.ModPlates then
+            name:SetFont(STANDARD_TEXT_FONT, 9)
+            name:ClearAllPoints()
+            name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
+            name:SetJustifyH("RIGHT")
+            levelText:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+        end
+
+        local _, type = IsInInstance()
+        if RougeUI.db.ArenaNumbers and type == "arena" then
+            for i = 1, GetNumArenaOpponents() do
+                local text = name:GetText()
+                if UnitName("arena" .. i) == text then
+                    name:SetText(i)
+                end
+                local nr = tonumber(text)
+                if nr then
+                    name:SetText(nr)
+                    name:ClearAllPoints()
+                    name:SetPoint("BOTTOM", plate, "TOP", 0, -15)
+                    name:SetJustifyH("CENTER")
+                    name:SetFont(STANDARD_TEXT_FONT, 16, "OUTLINE")
+                    levelText:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
                 end
             end
         end
     end
 end
 
-local function AddElements(plate)
-    if RougeUI.db.ModPlates then
-        if (RougeUI.db.ArenaNumbers and not IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers then
-            plate.name:SetFont(STANDARD_TEXT_FONT, 8)
-            plate.name:ClearAllPoints()
-            plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
-            plate.name:SetJustifyH("RIGHT")
-        end
-    end
+local function onUpdate(self, elapsed)
+    local plates = WorldFrame:GetNumChildren()
 
-    if RougeUI.db.NoLevel then
-        local border = plate.healthBar.border:GetRegions()
-        if border then
-            border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")
-        end
-        if plate.LevelFrame then
-            plate.LevelFrame:Hide()
-        end
-        if plate.healthBar then
-            plate.healthBar:ClearAllPoints()
-            plate.healthBar:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 4, 4)
-            plate.healthBar:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -4, 4)
-        end
-        if plate.CastBar then
-            plate.CastBar:ClearAllPoints()
-            plate.CastBar:SetPoint("TOP", plate.healthBar, "BOTTOM", 8, -9)
-        end
-    end
+    time = time + elapsed
 
-    for _, v in pairs({ plate.healthBar.border:GetRegions() }) do
-        if v then
-            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    for i = 1, plates do
+        local plate = select(i, WorldFrame:GetChildren())
+        local _, region = plate:GetRegions()
+        if region and region:GetObjectType() == "Texture" and region:GetTexture() == "Interface\\Tooltips\\Nameplate-Border" then
+            AddElements(plate, time)
         end
-    end
-    if plate.CastBar and plate.CastBar.Border then
-        plate.CastBar.Border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 end
 
-local function NiceOne(self)
-    if self and self.Text and not self:IsForbidden() then
-        self.Text:SetFont(STANDARD_TEXT_FONT, 8)
-        self.Text:Show()
-    end
-end
-if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-    hooksecurefunc("Nameplate_CastBar_AdjustPosition", NiceOne)
-end
-
--- Modification of Knall's genius pet script. Ty <3
-local function HidePlates(plate, unit)
-    if plate:IsForbidden() then
+local frame = CreateFrame("Frame")
+frame:RegisterEvent("PLAYER_LOGIN")
+frame:SetScript("OnEvent", function()
+    if not (GetCVarBool("nameplateShowEnemies") or GetCVarBool("nameplateShowFriends")) then
         return
     end
 
-    local _, _, _, _, _, npcId = str_split("-", UnitGUID(unit))
-    -- Hide feral spirit, treants, army of the dead, snake trap, mirror image, underbelly croc, Crashin' Thrashin' Robot
-    if npcId == "29264" or npcId == "1964" or npcId == "24207" or npcId == "19833" or npcId == "19921" or npcId == "31216" or npcId == "32441" or npcId == "17299" then
-        plate.UnitFrame:Hide()
-    else
-        plate.UnitFrame:Show()
+    if RougeUI.db.ModPlates or RougeUI.db.Colval < 1 then
+        frame:SetScript("OnUpdate", onUpdate)
     end
-end
-
-local OnEvent = function(self, event, ...)
-    if event == "NAME_PLATE_UNIT_ADDED" then
-        local unit = ...
-        local namePlateFrameBase = GetNamePlateForUnit(unit, issecure());
-        if not namePlateFrameBase or namePlateFrameBase:IsForbidden() then
-            return
-        end
-
-        if not ClassicEra then
-            HidePlates(namePlateFrameBase, unit)
-        end
-        AddElements(namePlateFrameBase.UnitFrame)
-    elseif event == "PLAYER_LOGIN" then
-        if GetCVar("nameplateShowOnlyNames") == "1" then
-            self:UnregisterAllEvents()
-            return
-        end
-        if RougeUI.db.ArenaNumbers then
-            hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
-        end
-        ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-        self:UnregisterEvent("PLAYER_LOGIN")
-    end
-end
-
-local e = CreateFrame("Frame")
-e:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-e:RegisterEvent("PLAYER_LOGIN")
-e:SetScript('OnEvent', OnEvent)
+end)

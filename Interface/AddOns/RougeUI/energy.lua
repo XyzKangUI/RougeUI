@@ -599,7 +599,7 @@ function EnemyOOC.OnUpdate(self, elapsed)
     end
 end
 
-function EnemyOOC:UNIT_POWER_UPDATE(unit, type)
+function EnemyOOC:UNIT_POWERUPDATE(unit, event)
     if not energyValues[unit] or not powerTypes[PowerType(unit)] then
         return
     end
@@ -614,17 +614,17 @@ function EnemyOOC:UNIT_POWER_UPDATE(unit, type)
         return
     end
 
-    if ((energyValues[unit].last_value == 0) and (type == "ENERGY" or type == "MANA")) then
+    if ((energyValues[unit].last_value == 0) and (event == "UNIT_ENERGY" or event == "UNIT_MANA")) then
         energyValues[unit].last_value = energy
         return
-    elseif (type == "RAGE" or type == "RUNIC_POWER") and not (energyInc == -2 or energyInc == -1 or energyInc == -3) then
+    elseif (event == "UNIT_RANGE" or event == "UNIT_RUNIC_POWER") and not (energyInc == -2 or energyInc == -1 or energyInc == -3) then
         energyValues[unit].last_value = energy
         return
     elseif energyInc == 0 then
         return
     end
 
-    if ((energy > energyValues[unit].last_value) or (type == "RAGE" or type == "RUNIC_POWER")) and not energyValues[unit].validTick then
+    if ((energy > energyValues[unit].last_value) or (event == "UNIT_RAGE" or event == "UNIT_RUNIC_POWER")) and not energyValues[unit].validTick then
         --print(type, energy > energyValues[unit].last_value, unit, energyInc)
         energyValues[unit].startTick = true
         energyValues[unit].last_tick = now
@@ -678,8 +678,9 @@ local eventRegistered = {
     ["DAMAGE_SPLIT"] = true,
 }
 
-function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
-    local _, eventType, _, sourceGUID, _, sourceFlags, _, destGUID, _, destFlags, _, spellID, _, _, amount = CombatLogGetCurrentEventInfo()
+-- 3.3.5 pserver have their own combat mechanism, i cba figure it all out. They should adapt to blizz like logic instead.
+function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED(...)
+    local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, _, amount = ...
 
     if not (eventRegistered[eventType]) then
         return
@@ -808,36 +809,6 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     end
 end
 
-function EnemyOOC:UNIT_SPELLCAST_SUCCEEDED(unit, a, b, spellID)
-    if not updateUnit[unit] then
-        return
-    end
-
-    -- stealth/vanish fallback
-    if spellID == 26889 or spellID == 1784 or spellID == 58984 or spellID == 5215 then
-        if running[unit] then
-            running[unit] = false
-        end
-    end
-
-    if spellID == 2764 or spellID == 3018 then
-        local guid = UnitGUID(unit)
-        self:ResetTimer(guid)
-    end
-end
-
-local failSpellIDs = {[5171] = true, [6774] = true, [48674] = true, [48673] = true, [26679] = true}
-function EnemyOOC:UNIT_SPELLCAST_FAILED(unit, a, b, spellID)
-    if not updateUnit[unit] then
-        return
-    end
-
-    -- UNIT_POWER_UPDATE event can be forcefully triggered by this event. We don't want that
-    if failSpellIDs[spellID] then
-        energyValues[unit].validTick = true
-    end
-end
-
 function EnemyOOC:PLAYER_ENTERING_WORLD()
     inArena = IsInArena()
 
@@ -852,20 +823,22 @@ function EnemyOOC:PLAYER_ENTERING_WORLD()
         end
         EnemyOOC.event:RegisterEvent("PLAYER_TARGET_CHANGED")
         EnemyOOC.event:RegisterEvent("PLAYER_FOCUS_CHANGED")
-        EnemyOOC.event:RegisterEvent("UNIT_POWER_UPDATE")
+        EnemyOOC.event:RegisterEvent("UNIT_MANA")
+        EnemyOOC.event:RegisterEvent("UNIT_ENERGY")
+        EnemyOOC.event:RegisterEvent("UNIT_RAGE")
+        EnemyOOC.event:RegisterEvent("UNIT_RUNIC_POWER")
         EnemyOOC.event:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         EnemyOOC.event:RegisterEvent("UNIT_FLAGS")
-        EnemyOOC.event:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-        EnemyOOC.event:RegisterEvent("UNIT_SPELLCAST_FAILED")
         EnemyOOC.event:SetScript("OnUpdate", EnemyOOC.OnUpdate)
     else
         EnemyOOC.event:UnregisterEvent("PLAYER_TARGET_CHANGED")
         EnemyOOC.event:UnregisterEvent("PLAYER_FOCUS_CHANGED")
-        EnemyOOC.event:UnregisterEvent("UNIT_POWER_UPDATE")
+        EnemyOOC.event:UnregisterEvent("UNIT_MANA")
+        EnemyOOC.event:UnregisterEvent("UNIT_ENERGY")
+        EnemyOOC.event:UnregisterEvent("UNIT_RAGE")
+        EnemyOOC.event:UnregisterEvent("UNIT_RUNIC_POWER")
         EnemyOOC.event:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         EnemyOOC.event:UnregisterEvent("UNIT_FLAGS")
-        EnemyOOC.event:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-        EnemyOOC.event:UnregisterEvent("UNIT_SPELLCAST_FAILED")
         EnemyOOC.event:SetScript("OnUpdate", nil)
         expirationTime = {}
         oocTime = {}
@@ -957,6 +930,8 @@ EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
                 EnemyOOC.U["focus"].texture:SetAlpha(0)
             end
         end
+    elseif event == "UNIT_ENERGY" or event == "UNIT_MANA" or event == "UNIT_RAGE" or event == "UNIT_RUNIC_POWER" then
+        EnemyOOC:UNIT_POWERUPDATE(..., event)
     else
         EnemyOOC[event](EnemyOOC, ...)
     end

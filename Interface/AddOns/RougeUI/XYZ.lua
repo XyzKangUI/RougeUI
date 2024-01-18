@@ -1,5 +1,4 @@
 local _, RougeUI = ...
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bartender = IsAddOnLoaded("Bartender4")
 local dominos = IsAddOnLoaded("Dominos")
 local tonumber, strmatch = tonumber, string.match
@@ -93,7 +92,7 @@ local function WAHK(button, ok)
 
             local onclick
             if ok then
-                onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
+                onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] VehicleMenuBarActionButton" .. id .. "; [bonusbar:1/2/3] BonusActionButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] VehicleMenuBarActionButton" .. id .. "; [bonusbar:1/2/3] BonusActionButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
             else
                 onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
             end

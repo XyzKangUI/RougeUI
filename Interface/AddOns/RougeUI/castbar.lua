@@ -30,8 +30,31 @@ local function PurpleKoolaid(statusbar)
     statusbar:SetStatusBarColor(r, g, b)
 end
 
-local function modstyle()
-    local t = TargetFrameSpellBar
+local function modstyle(frame)
+    local t = frame
+    local selfName = frame:GetName()
+    local Border = _G[selfName .. "Border"]
+    local Icon = _G[selfName .. "Icon"]
+    local Text = _G[selfName .. "Text"]
+    local Spark = _G[selfName .. "Spark"]
+    local Flash = _G[selfName .. "Flash"]
+    local BorderShield = _G[selfName .. "BorderShield"]
+
+    if frame == CastingBarFrame then
+        Border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Border-Small")
+        Flash:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Flash-Small")
+        Spark:SetAlpha(0.7)
+        Spark:SetHeight(40)
+        Text:SetFontObject("SystemFont_Outline_Small")
+        frame.timer = frame:CreateFontString(nil, "OVERLAY")
+        frame.timer:SetFontObject("SystemFont_Shadow_Small")
+        frame.timer:SetShadowColor(0, 0, 0)
+        frame.timer:SetShadowOffset(1, -1)
+        frame.timer:SetPoint("RIGHT", frame, -2.5, 0.3)
+        frame.update = .1
+        return
+    end
+
     t.timer = t:CreateFontString(nil, "OVERLAY")
     t.timer:SetFontObject("SystemFont_Shadow_Small")
     t.timer:SetShadowColor(0, 0, 0)
@@ -39,89 +62,31 @@ local function modstyle()
     t.timer:SetPoint("RIGHT", t, -2.5, 0)
     t.update = .1
 
-    t.Text:SetFontObject("Game11Font_o1")
+    Text:SetFontObject("SystemFont_Outline_Small")
     t:SetWidth(142)
     t:SetHeight(10)
-    t.Border:SetHeight(50)
-    t.Border:SetWidth(190)
-    t.Border:ClearAllPoints()
-    t.Border:SetPoint("TOPLEFT", t, "TOPLEFT", -24, 20)
-    t.Icon:SetHeight(16)
-    t.Icon:SetWidth(16)
-    t.Icon:ClearAllPoints()
-    t.Icon:SetPoint("RIGHT", t, "LEFT", -5, 0)
-    t.Text:ClearAllPoints()
-    t.Text:SetPoint("TOPLEFT", t, "BOTTOMLEFT", 2, -5)
-    t.Text:SetJustifyH("LEFT")
-    t.Text:SetShadowOffset(0, 0)
-    t.Spark:SetAlpha(0.7)
-    t.Flash:SetHeight(50)
-    t.Flash:SetWidth(190)
-    t.Flash:SetPoint("TOPLEFT", t, "TOPLEFT", -24, 20)
+    Border:SetHeight(50)
+    Border:SetWidth(190)
+    Border:ClearAllPoints()
+    Border:SetPoint("TOPLEFT", t, "TOPLEFT", -24, 20)
+    Icon:SetHeight(16)
+    Icon:SetWidth(16)
+    Icon:ClearAllPoints()
+    Icon:SetPoint("RIGHT", t, "LEFT", -5, 0)
+    Text:ClearAllPoints()
+    Text:SetPoint("TOPLEFT", t, "BOTTOMLEFT", 2, -5)
+    Text:SetJustifyH("LEFT")
+    Text:SetShadowOffset(0, 0)
+    Spark:SetAlpha(0.7)
+    Flash:SetHeight(50)
+    Flash:SetWidth(190)
+    Flash:SetPoint("TOPLEFT", t, "TOPLEFT", -24, 20)
+    BorderShield:ClearAllPoints()
+    BorderShield:SetPoint("TOP", frame, -2, 20)
 
-    t.Border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Border-Small")
-    t.Flash:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Flash-Small")
-
-    if FocusFrame then
-        local f = FocusFrameSpellBar
-        f.timer = f:CreateFontString(nil, "OVERLAY")
-        f.timer:SetFontObject("SystemFont_Shadow_Small")
-        f.timer:SetShadowColor(0, 0, 0)
-        f.timer:SetShadowOffset(1, -1)
-        f.timer:SetPoint("RIGHT", f, -2.5, 0)
-        f.update = .1
-
-        f.Text:SetFontObject("Game11Font_o1")
-        f:SetWidth(142)
-        f:SetHeight(10)
-        f.Border:SetHeight(50)
-        f.Border:SetWidth(190)
-        f.Border:ClearAllPoints()
-        f.Border:SetPoint("TOPLEFT", f, "TOPLEFT", -24, 20)
-        f.Icon:SetHeight(16)
-        f.Icon:SetWidth(16)
-        f.Icon:ClearAllPoints()
-        f.Icon:SetPoint("RIGHT", f, "LEFT", -5, 0)
-        f.Text:ClearAllPoints()
-        f.Text:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 2, -5)
-        f.Text:SetJustifyH("LEFT")
-        f.Text:SetShadowOffset(0, 0)
-        f.Spark:SetAlpha(0.7)
-        f.Flash:SetHeight(50)
-        f.Flash:SetWidth(190)
-        f.Flash:SetPoint("TOPLEFT", f, "TOPLEFT", -24, 20)
-
-        f.Border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Border-Small")
-        f.Flash:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Flash-Small")
-    end
-
-    local cf = CastingBarFrame
-    cf.Border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Border-Small")
-    cf.Flash:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Flash-Small")
-    cf.Spark:SetAlpha(0.7)
-    cf.Spark:SetHeight(40)
-    cf.timer = cf:CreateFontString(nil, "OVERLAY")
-    cf.timer:SetFontObject("SystemFont_Shadow_Small")
-    cf.timer:SetShadowColor(0, 0, 0)
-    cf.timer:SetShadowOffset(1, -1)
-    cf.timer:SetPoint("RIGHT", cf, -2.5, 0.3)
-    cf.Text:SetFontObject("Game11Font_o1")
-    cf.timer:SetScale(1.15)
-    cf.update = .1
+    Border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Border-Small.blp")
+    Flash:SetTexture("Interface\\AddOns\\RougeUI\\textures\\UI-CastingBar-Flash-Small.blp")
 end
-
-local cf = CastingBarFrame
-cf.Border:SetTexture("Interface\\CastingBar\\UI-CastingBar-Border-Small")
-cf.Flash:SetTexture("Interface\\CastingBar\\UI-CastingBar-Flash-Small")
-cf.Spark:SetHeight(50)
-cf.Text:ClearAllPoints()
-cf.Text:SetPoint("CENTER", 0, 1)
-cf.Border:SetWidth(cf.Border:GetWidth() + 4)
-cf.Flash:SetWidth(cf.Flash:GetWidth() + 4)
-cf.BorderShield:SetWidth(cf.BorderShield:GetWidth() + 4)
-cf.Border:SetPoint("TOP", 0, 26)
-cf.Flash:SetPoint("TOP", 0, 26)
-cf.BorderShield:SetPoint("TOP", 0, 26)
 
 local function TimerHook(self, elapsed)
     if not self.timer then
@@ -161,18 +126,39 @@ local function ClassColors(self)
     end
 end
 
+local Border = CastingBarFrameBorder
+local BorderShield = CastingBarFrameBorderShield
+local Text = CastingBarFrameText
+local Spark = CastingBarFrameSpark
+local Flash = CastingBarFrameFlash
+Border:SetTexture("Interface\\CastingBar\\UI-CastingBar-Border-Small")
+Flash:SetTexture("Interface\\CastingBar\\UI-CastingBar-Flash-Small")
+Spark:SetHeight(50)
+Text:ClearAllPoints()
+Text:SetPoint("CENTER", 0, 1)
+Border:SetWidth(Border:GetWidth() + 4)
+Flash:SetWidth(Flash:GetWidth() + 4)
+BorderShield:SetWidth(BorderShield:GetWidth() + 4)
+Border:SetPoint("TOP", 0, 26)
+Flash:SetPoint("TOP", 0, 26)
+BorderShield:SetPoint("TOP", 0, 26)
+
 local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
         if RougeUI.db.CastTimer then
-            modstyle()
+            C_Timer.After(5, function()
+                modstyle(TargetFrameSpellBar)
+                modstyle(FocusFrameSpellBar)
+                modstyle(CastingBarFrame)
+            end)
             if FocusFrame then
                 FocusFrameSpellBar:HookScript("OnUpdate", function(self, elapsed)
                     TimerHook(self, elapsed)
                     RougeUI.RougeUIF:GradientColour(self)
                     if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
-                        self:SetStatusBarColor(216/255, 31/255, 42/255)
+                        self:SetStatusBarColor(216 / 255, 31 / 255, 42 / 255)
                     end
                 end)
             end
@@ -180,14 +166,14 @@ FR:SetScript("OnEvent", function(self, event)
                 TimerHook(self, elapsed)
                 RougeUI.RougeUIF:GradientColour(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
-                    self:SetStatusBarColor(216/255, 31/255, 42/255)
+                    self:SetStatusBarColor(216 / 255, 31 / 255, 42 / 255)
                 end
             end)
             CastingBarFrame:HookScript("OnUpdate", function(self, elapsed)
                 TimerHook(self, elapsed)
                 PurpleKoolaid(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
-                    self:SetStatusBarColor(216/255, 31/255, 42/255)
+                    self:SetStatusBarColor(216 / 255, 31 / 255, 42 / 255)
                 end
             end)
         end

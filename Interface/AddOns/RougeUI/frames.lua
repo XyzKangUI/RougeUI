@@ -1,7 +1,5 @@
 local _, RougeUI = ...
 local pairs = _G.pairs
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local doneInit
 
 local function FrameColour()
     for _, v in pairs({
@@ -38,14 +36,6 @@ local function FrameColour()
         MainMenuXPBarTexture2,
         MainMenuXPBarTexture3,
         MainMenuXPBarTexture4,
-        ReputationWatchBar.StatusBar.WatchBarTexture0,
-        ReputationWatchBar.StatusBar.WatchBarTexture1,
-        ReputationWatchBar.StatusBar.WatchBarTexture2,
-        ReputationWatchBar.StatusBar.WatchBarTexture3,
-        ReputationWatchBar.StatusBar.XPBarTexture0,
-        ReputationWatchBar.StatusBar.XPBarTexture1,
-        ReputationWatchBar.StatusBar.XPBarTexture2,
-        ReputationWatchBar.StatusBar.XPBarTexture3,
         MinimapBorder,
         MirrorTimer1Border,
         MirrorTimer2Border,
@@ -55,31 +45,31 @@ local function FrameColour()
         MiniMapBattlefieldBorder,
         MiniMapMailBorder,
         MiniMapBorderTop,
-        CastingBarFrame.Border,
-        TargetFrameSpellBar.Border,
+        CastingBarFrameBorder,
+        TargetFrameSpellBarBorder,
         Rune1BorderTexture,
         Rune2BorderTexture,
         Rune3BorderTexture,
         Rune4BorderTexture,
         Rune5BorderTexture,
         Rune6BorderTexture,
+        BonusActionBarTexture0,
+        BonusActionBarTexture1,
     }) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
 
-    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         for _, v in pairs({
             FocusFrameToTTextureFrameTexture,
             FocusFrameTextureFrameTexture,
-            FocusFrameSpellBar.Border,
+            FocusFrameSpellBarBorder,
         }) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
-    end
 
     CHAT_FONT_HEIGHTS = { 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 }
 
@@ -181,43 +171,6 @@ local function FrameColour()
         DropDownList2MenuBackdrop.TopEdge,
         DropDownList2MenuBackdrop.TopLeftCorner,
         DropDownList2MenuBackdrop.TopRightCorner,
-        ContainerFrame1BackgroundTop,
-        ContainerFrame1BackgroundMiddle1,
-        ContainerFrame1BackgroundBottom,
-        ContainerFrame2BackgroundTop,
-        ContainerFrame2BackgroundMiddle1,
-        ContainerFrame2BackgroundBottom,
-        ContainerFrame3BackgroundTop,
-        ContainerFrame3BackgroundMiddle1,
-        ContainerFrame3BackgroundBottom,
-        ContainerFrame4BackgroundTop,
-        ContainerFrame4BackgroundMiddle1,
-        ContainerFrame4BackgroundBottom,
-        ContainerFrame5BackgroundTop,
-        ContainerFrame5BackgroundMiddle1,
-        ContainerFrame5BackgroundBottom,
-        ContainerFrame6BackgroundTop,
-        ContainerFrame6BackgroundMiddle1,
-        ContainerFrame6BackgroundBottom,
-        ContainerFrame7BackgroundTop,
-        ContainerFrame7BackgroundMiddle1,
-        ContainerFrame7BackgroundBottom,
-        ContainerFrame8BackgroundTop,
-        ContainerFrame8BackgroundMiddle1,
-        ContainerFrame8BackgroundBottom,
-        ContainerFrame9BackgroundTop,
-        ContainerFrame9BackgroundMiddle1,
-        ContainerFrame9BackgroundBottom,
-        ContainerFrame10BackgroundTop,
-        ContainerFrame10BackgroundMiddle1,
-        ContainerFrame10BackgroundBottom,
-        ContainerFrame11BackgroundTop,
-        ContainerFrame11BackgroundMiddle1,
-        ContainerFrame11BackgroundBottom,
-        ContainerFrame12BackgroundTop,
-        ContainerFrame12BackgroundMiddle1,
-        ContainerFrame12BackgroundBottom,
-        MerchantFrameInsetInsetBottomBorder,
         TradeFrameBg,
         TradeFrameBottomBorder,
         TradeFrameButtonBottomBorder,
@@ -233,14 +186,6 @@ local function FrameColour()
         TradeFramePortraitFrame,
         TradeRecipientPortraitFrame,
         TradeRecipientBotLeftCorner,
-        PVPReadyDialog.BottomEdge,
-        PVPReadyDialog.BottomLeftCorner,
-        PVPReadyDialog.BottomRightCorner,
-        PVPReadyDialog.LeftEdge,
-        PVPReadyDialog.RightEdge,
-        PVPReadyDialog.TopEdge,
-        PVPReadyDialog.TopLeftCorner,
-        PVPReadyDialog.TopRightCorner,
         MailFrameBg,
         MailFrameBotLeftCorner,
         MailFrameBotRightCorner,
@@ -255,9 +200,6 @@ local function FrameColour()
         MailFrameTopBorder,
         MailFrameTopLeftCorner,
         MailFrameTopRightCorner,
-        MailFrameInsetInsetBottomBorder,
-        MailFrameInsetInsetBotLeftCorner,
-        MailFrameInsetInsetBotRightCorner,
         LootFrameBg,
         LootFrameRightBorder,
         LootFrameLeftBorder,
@@ -267,14 +209,6 @@ local function FrameColour()
         LootFrameTopLeftCorner,
         LootFrameBotRightCorner,
         LootFrameBotLeftCorner,
-        LootFrameInsetInsetTopRightCorner,
-        LootFrameInsetInsetTopLeftCorner,
-        LootFrameInsetInsetBotRightCorner,
-        LootFrameInsetInsetBotLeftCorner,
-        LootFrameInsetInsetRightBorder,
-        LootFrameInsetInsetLeftBorder,
-        LootFrameInsetInsetTopBorder,
-        LootFrameInsetInsetBottomBorder,
         LootFramePortraitFrame,
         MerchantFrameTitleBg,
         MerchantFrameTopBorder,
@@ -287,6 +221,15 @@ local function FrameColour()
     }) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
+
+    for i = 1, 12 do
+        for _, v in ipairs({ "BackgroundTop", "BackgroundMiddle1", "BackgroundMiddle2", "BackgroundBottom" }) do
+            local container = _G["ContainerFrame" .. i .. v]
+            if container then
+                container:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
         end
     end
 
@@ -655,21 +598,8 @@ local function FrameColour()
                     region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
             end
-            for _, region in pairs({ LFDParentFrameInset:GetRegions() }) do
-                if region and region:IsObjectType("Texture") then
-                    region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-                end
-            end
-            for _, region in pairs({ LFGListFrame.CategorySelection.Inset:GetRegions() }) do
-                if region and region:IsObjectType("Texture") then
-                    region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-                end
-            end
             LFDQueueFrameFindGroupButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             LFDQueueFrameFindGroupButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVEFrameLeftInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVEFrameLeftInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVEFrameLeftInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             LFGListFrame.CategorySelection.FindGroupButton.LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             LFGListFrame.CategorySelection.StartGroupButton.RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVEFramePortrait:SetVertexColor(1, 1, 1)
@@ -684,7 +614,7 @@ local function FrameColour()
         end
     end
 
-    for _, v in pairs({ComboPoint1, ComboPoint2, ComboPoint3, ComboPoint4, ComboPoint5}) do
+    for _, v in pairs({ ComboPoint1, ComboPoint2, ComboPoint3, ComboPoint4, ComboPoint5 }) do
         if v then
             v:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
@@ -726,11 +656,6 @@ local function NewVariables()
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
-        if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
-            b:SetVertexColor(1, 1, 1)
-            d:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            f:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        end
     end
 
     if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["EnhanceQuestLog"] == "On" then
@@ -747,12 +672,6 @@ local function NewVariables()
         QuestLogFrame.Material:SetHeight(511)
         QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
         QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
-    end
-
-    if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
-        QuestLogFrame.Material:SetWidth(510)
-        QuestLogFrame.Material:SetHeight(398)
-        QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame)
     end
 
     for _, v in pairs({
@@ -803,9 +722,6 @@ local function NewVariables()
     -- Scoreboard
     local a, b, c, d, e, f, _, h, _, _, _, l = WorldStateScoreFrame:GetRegions()
     local wscf = { a, b, c, d, e, f, l }
-    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-        wscf = { a, b, c, d, e, f, h }
-    end
     for _, v in pairs(wscf) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
@@ -834,8 +750,6 @@ local function NewVariables()
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
-
-    doneInit = true
 end
 
 local function BlizzFrames(addon)
@@ -859,68 +773,6 @@ local function BlizzFrames(addon)
         for i = 1, 13 do
             if vectors[i] then
                 vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-    end
-
-    if addon == "Blizzard_BindingUI" then
-        -- KeyBindingFrame
-        local vectors = { KeyBindingFrame:GetRegions() }
-        for i = 1, 1 do
-            if vectors[i] then
-                vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-
-        for i = 1, 10 do
-            local vectors = { KeyBindingFrame.header:GetRegions() }
-            if vectors[i] then
-                vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-
-        for _, v in pairs({
-            KeyBindingFrame.BottomEdge,
-            KeyBindingFrame.TopEdge,
-            KeyBindingFrame.LeftEdge,
-            KeyBindingFrame.RightEdge,
-            KeyBindingFrame.BottomLeftCorner,
-            KeyBindingFrame.TopLeftCorner,
-            KeyBindingFrame.BottomRightCorner,
-            KeyBindingFrame.TopRightCorner,
-            KeyBindingFrameBottomBorder,
-            KeyBindingFrameTopBorder,
-            KeyBindingFrameRightBorder,
-            KeyBindingFrameLeftBorder,
-            KeyBindingFrameBottomLeftCorner,
-            KeyBindingFrameBottomRightCorner,
-            KeyBindingFrameTopLeftCorner,
-            KeyBindingFrameTopRightCorner,
-        }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-    end
-
-    if addon == "Blizzard_TimeManager" then
-        for _, v in pairs({ StopwatchFrame:GetRegions() }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-
-        local a, b, c = StopwatchTabFrame:GetRegions()
-        for _, v in pairs({ a, b, c }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-
-        local a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r = TimeManagerFrame:GetRegions()
-        for _, v in pairs({ a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q, r }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
     end
@@ -998,9 +850,6 @@ local function BlizzFrames(addon)
     if addon == "Blizzard_TradeSkillUI" then
         local _, b, c, d, e, f, g, h, i, j = TradeSkillFrame:GetRegions()
         local tsui = { b, c, d, e, f, h, i }
-        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-            tsui = { b, c, d, e, g, h, i, j }
-        end
         for _, v in pairs(tsui) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
@@ -1178,35 +1027,13 @@ local function BlizzFrames(addon)
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
-        for _, v in pairs({ MountJournal.RightInset:GetRegions() }) do
-            if v and v:IsObjectType("Texture") then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-        for _, v in pairs({ MountJournal.LeftInset:GetRegions() }) do
-            if v and v:IsObjectType("Texture") then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
         for _, v in pairs({ PetJournal:GetRegions() }) do
-            if v and v:IsObjectType("Texture") then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-        for _, v in pairs({ PetJournalRightInset:GetRegions() }) do
-            if v and v:IsObjectType("Texture") then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
-        end
-        for _, v in pairs({ PetJournalLeftInset:GetRegions() }) do
             if v and v:IsObjectType("Texture") then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
         CollectionsJournalTitleText:SetVertexColor(1, 1, 1)
         CollectionsJournalPortrait:SetVertexColor(1, 1, 1)
-        MountJournalInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        MountJournalInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 end
 
@@ -1215,14 +1042,8 @@ local Framecolor = CreateFrame("Frame")
 Framecolor:RegisterEvent("ADDON_LOADED")
 Framecolor:SetScript("OnEvent", function(self, event, addon)
     if event == "ADDON_LOADED" and addon == "RougeUI" then
-        if RougeUI.db.Colval < 1 then
-            FrameColour()
-            NewVariables()
-        end
-        if doneInit then
-            self:UnregisterEvent("ADDON_LOADED")
-            self:SetScript("OnEvent", nil)
-        end
+        FrameColour()
+        NewVariables()
     end
 end)
 
@@ -1230,9 +1051,7 @@ local Blizz = CreateFrame("Frame")
 Blizz:RegisterEvent("ADDON_LOADED")
 Blizz:SetScript("OnEvent", function(_, event, addon)
     if event == "ADDON_LOADED" then
-        if RougeUI.db.Colval < 1 then
-            BlizzFrames(addon)
-        end
+        BlizzFrames(addon)
     end
 end)
 
