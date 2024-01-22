@@ -1,3 +1,4 @@
+local _, RougeUI = ...
 local RE = CreateFrame("Frame")
 RE:RegisterEvent("PLAYER_ENTERING_WORLD")
 
