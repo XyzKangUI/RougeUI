@@ -126,6 +126,21 @@ local function FrameColour()
         AddonListTopRightCorner,
         AddonListBtnCornerLeft,
         AddonListBtnCornerRight,
+        AddonListButtonBottomBorder,
+        AddonListInsetInsetTopBorder,
+        AddonListInsetInsetTopRightCorner,
+        AddonListInsetInsetRightBorder,
+        AddonListInsetInsetBotRightCorner,
+        AddonListInsetInsetBottomBorder,
+        AddonListInsetInsetBotLeftCorner,
+        AddonListInsetInsetLeftBorder,
+        AddonListEnableAllButton_RightSeparator,
+        AddonListDisableAllButton_RightSeparator,
+        AddonListOkayButton_LeftSeparator,
+        AddonListCancelButton_LeftSeparator,
+        AddonCharacterDropDownLeft,
+        AddonCharacterDropDownMiddle,
+        AddonCharacterDropDownRight,
         AddonListBg,
         AddonListTitleBg,
         ExhaustionTickNormal,
@@ -287,6 +302,55 @@ local function FrameColour()
     }) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
+
+    -- Main MainMenu
+    local gmbutton = {
+        GameMenuButtonHelp = {GameMenuButtonHelp.Left, GameMenuButtonHelp.Middle, GameMenuButtonHelp.Right},
+        GameMenuButtonStore = {GameMenuButtonStore.Left, GameMenuButtonStore.Middle, GameMenuButtonStore.Right},
+        GameMenuButtonOptions = {GameMenuButtonOptions.Left, GameMenuButtonOptions.Middle, GameMenuButtonOptions.Right},
+        GameMenuButtonMacros = {GameMenuButtonMacros.Left, GameMenuButtonMacros.Middle, GameMenuButtonMacros.Right},
+        GameMenuButtonAddons = {GameMenuButtonAddons.Left, GameMenuButtonAddons.Middle, GameMenuButtonAddons.Right},
+        GameMenuButtonLogout = {GameMenuButtonLogout.Left, GameMenuButtonLogout.Middle, GameMenuButtonLogout.Right},
+        GameMenuButtonQuit = {GameMenuButtonQuit.Left, GameMenuButtonQuit.Middle, GameMenuButtonQuit.Right},
+        GameMenuButtonContinue = {GameMenuButtonContinue.Left, GameMenuButtonContinue.Middle, GameMenuButtonContinue.Right},
+        GameMenuButtonRatings = {GameMenuButtonRatings.Left, GameMenuButtonRatings.Middle, GameMenuButtonRatings.Right}
+    }
+
+    for _, v in pairs(gmbutton) do
+        for _, j in pairs(v) do
+            j:SetDesaturation(1 - RougeUI.db.Colval)
+            j:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            if RougeUI.db.Colval < 0.8 then
+                j:SetDesaturated(true)
+            end
+        end
+    end
+
+    -- SettingsPanel
+    for _, v in pairs({
+        SettingsPanel.bg,
+        SettingsPanel.Bg.TopSection,
+        SettingsPanel.Bg.BottomEdge,
+        SettingsPanel.Bg.BottomRight,
+        SettingsPanel.Bg.BottomLeft,
+        SettingsPanel.NineSlice.TopEdge,
+        SettingsPanel.NineSlice.BottomEdge,
+        SettingsPanel.NineSlice.LeftEdge,
+        SettingsPanel.NineSlice.RightEdge,
+        SettingsPanel.NineSlice.TopLeftCorner,
+        SettingsPanel.NineSlice.TopRightCorner,
+        SettingsPanel.NineSlice.BottomLeftCorner,
+        SettingsPanel.NineSlice.BottomRightCorner,
+        SettingsPanel.SearchBox.Left,
+        SettingsPanel.SearchBox.Middle,
+        SettingsPanel.SearchBox.Right,
+    }) do
+        v:SetDesaturation(1 - RougeUI.db.Colval)
+        v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        if RougeUI.db.Colval < 0.8 then
+            v:SetDesaturated(true)
         end
     end
 

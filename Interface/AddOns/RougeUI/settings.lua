@@ -70,7 +70,8 @@ local stock = {
     EnergyTicker = false,
     wahksfk = false,
     EnemyTicker = false,
-    modtheme = false
+    modtheme = false,
+    OmniCC = false,
 }
 
 local f = CreateFrame("Frame")
@@ -369,6 +370,19 @@ function f:CreateGUI()
         end)
         ModPlates:SetChecked(addon.db.ModPlates)
         ModPlates:SetPoint("TOPLEFT", 10, -75)
+
+
+        local OmniTimers = CheckBtn("OmniCC Buff Timers", "Disable Blizzard's buff timers and use OmniCC instead", Panel.childPanel5, function(self, value)
+            if not IsAddOnLoaded("OmniCC") then
+                UIErrorsFrame:AddMessage("To enable this option you have to enable OmniCC first", 1, 0, 0)
+                self:SetChecked(false)
+                addon.db.OmniCC = false
+                return
+            end
+            addon.db.OmniCC = value
+        end)
+        OmniTimers:SetChecked(addon.db.OmniCC)
+        OmniTimers:SetPoint("TOPLEFT", 10, -110)
 
         CreateText(Panel.childPanel5, 350, -40, "Theme's")
 

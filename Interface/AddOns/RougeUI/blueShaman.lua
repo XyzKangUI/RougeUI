@@ -41,6 +41,19 @@ f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" then
+        hooksecurefunc("CompactUnitFrame_UpdateHealthColor", function(frame)
+            if not frame.unit or frame:IsForbidden() then
+                return
+            end
+
+            if UnitIsConnected(frame.unit) and UnitIsPlayer(frame.unit) and frame.optionTable.useClassColors then
+                local _, class = UnitClass(frame.unit)
+                if class == "SHAMAN" then
+                    frame.healthBar:SetStatusBarColor(0, 0.44, 0.87)
+                end
+            end
+        end)
+
         if UnitFactionGroup("player") == "Alliance" then
             self:UnregisterAllEvents()
             return
@@ -66,19 +79,6 @@ f:SetScript("OnEvent", function(self, event, addon)
             if text:find("cfff58cba") then
                 local newText = string.gsub(text, "|cfff58cba", "|cff0070de")
                 DropDownList1Button1NormalText:SetText(newText)
-            end
-        end)
-
-        hooksecurefunc("CompactUnitFrame_UpdateHealthColor", function(frame)
-            if not frame.unit or frame:IsForbidden() then
-                return
-            end
-
-            if UnitIsConnected(frame.unit) and UnitIsPlayer(frame.unit) and frame.optionTable.useClassColors then
-                local _, class = UnitClass(frame.unit)
-                if class == "SHAMAN" then
-                    frame.healthBar:SetStatusBarColor(0, 0.44, 0.87)
-                end
             end
         end)
 

@@ -1,6 +1,6 @@
 ## Interface: 30403
 ## Title: |cff009cffRougeUI-WOTLKC|r
-## Version: 3.57
+## Version: 3.58
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
