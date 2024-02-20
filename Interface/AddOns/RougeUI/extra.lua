@@ -752,30 +752,30 @@ local function Usable(button, r, g, b, a)
     local count = GetActionCount(action)
 
     if isUsable then
-       -- if (r ~= 1.0 or g ~= 1.0 or b ~= 1.0 or a ~= 1.0) or icon:IsDesaturated() then
-            icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-            icon:SetDesaturated(false)
-      --  end
+        -- if (r ~= 1.0 or g ~= 1.0 or b ~= 1.0 or a ~= 1.0) or icon:IsDesaturated() then
+        icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+        icon:SetDesaturated(false)
+        --  end
     elseif notEnoughMana then
-       -- if ((mfloor(r * 100) / 100) ~= 0.3 or (mfloor(g * 100) / 100) ~= 0.3 or (mfloor(b * 100) / 100) ~= 0.3 or a ~= 1.0) or not icon:IsDesaturated() then
-            icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
-            icon:SetDesaturated(true)
-       -- end
+        -- if ((mfloor(r * 100) / 100) ~= 0.3 or (mfloor(g * 100) / 100) ~= 0.3 or (mfloor(b * 100) / 100) ~= 0.3 or a ~= 1.0) or not icon:IsDesaturated() then
+        icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
+        icon:SetDesaturated(true)
+        -- end
     elseif (IsConsumableAction(action) or IsStackableAction(action)) and count == 0 then
         if not icon:IsDesaturated() then
             icon:SetDesaturated(true)
         end
     else
         if UnitExists("target") or UnitExists("focus") then
-           -- if ((mfloor(r * 100) / 100) ~= 0.4 or (mfloor(g * 100) / 100) ~= 0.4 or (mfloor(b * 100) / 100) ~= 0.4 or a ~= 1.0) or not icon:IsDesaturated() then
-                icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
-                icon:SetDesaturated(true)
-          --  end
+            -- if ((mfloor(r * 100) / 100) ~= 0.4 or (mfloor(g * 100) / 100) ~= 0.4 or (mfloor(b * 100) / 100) ~= 0.4 or a ~= 1.0) or not icon:IsDesaturated() then
+            icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
+            icon:SetDesaturated(true)
+            --  end
         else
-         --   if r ~= 1.0 or b ~= 1.0 or g ~= 1.0 or a ~= 1.0 then
-                icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-                icon:SetDesaturated(false)
-          --  end
+            --   if r ~= 1.0 or b ~= 1.0 or g ~= 1.0 or a ~= 1.0 then
+            icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+            icon:SetDesaturated(false)
+            --  end
         end
     end
 end
@@ -793,17 +793,12 @@ local function RangeIndicator(self, checksRange, inRange)
 
     local r, g, b, a = self.icon:GetVertexColor()
 
-    if self.HotKey and self.HotKey:GetText() == RANGE_INDICATOR and self.HotKey:GetAlpha() > 0 then
-        self.HotKey:SetAlpha(0)
-    end
     if checksRange and not inRange then
-       -- if r ~= 1.0 or ((mceil(g * 100) / 100) ~= 0.35 or (mceil(b * 100) / 100) ~= 0.35 or (mceil(a * 100) / 100) ~= 0.75) or not self.icon:IsDesaturated() then
-            self.icon:SetVertexColor(1.0, 0.35, 0.35, 0.75)
-            self.icon:SetDesaturated(true)
-            self.HotKey:SetAlpha(1.0, 0.35, 0.35, 0.75)
-       -- end
+        -- if r ~= 1.0 or ((mceil(g * 100) / 100) ~= 0.35 or (mceil(b * 100) / 100) ~= 0.35 or (mceil(a * 100) / 100) ~= 0.75) or not self.icon:IsDesaturated() then
+        self.icon:SetVertexColor(1.0, 0.35, 0.35, 0.75)
+        self.icon:SetDesaturated(true)
+        -- end
     else
-        self.HotKey:SetAlpha(1.0, 1.0, 1.0, 1.0)
         if self:GetName():match("PetActionButton%d") then
             self.icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
             self.icon:SetDesaturated(false)
@@ -1042,3 +1037,4 @@ e:SetScript("OnEvent", function(self, event)
 
     self:UnregisterEvent("PLAYER_LOGIN")
 end)
+

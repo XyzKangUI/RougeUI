@@ -379,11 +379,16 @@ local function Target_Update(frame)
 
                 local showHighlight = false
                 local r, g, b = 1, 1, 1
+                local modifier = 1.2
+
+                if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
+                    r, g, b = 1, 1, 0.75
+                    modifier = 2.2
+                end
 
                 if RougeUI.db.HighlightDispellable and (WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC) then
                     if isEnemy then
                         if Whitelist[name] and isStealable then
-                            r, g, b = 1, 1, 1 -- White
                             showHighlight = true
                         elseif (class == 4 or class == 3) and Enraged[spellId] then
                             r, g, b = 1, 0, 0 -- Red
@@ -413,8 +418,8 @@ local function Target_Update(frame)
                         buffSize = RougeUI.db.SelfSize
                     end
                     frameStealable:Show()
-                    frameStealable:SetHeight(buffSize * 1.2)
-                    frameStealable:SetWidth(buffSize * 1.2)
+                    frameStealable:SetHeight(buffSize * modifier)
+                    frameStealable:SetWidth(buffSize * modifier)
                     frameStealable:SetVertexColor(r, g, b)
                 else
                     frameStealable:Hide()
