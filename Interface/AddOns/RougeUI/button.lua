@@ -79,7 +79,6 @@ local function addBorder(button, drawLayer, dbf)
             --stealable:SetAtlas("newplayertutorial-drag-slotblue") -- doesn't exist on 3.4.0 lets add 2mb
             stealable:SetTexture("Interface\\AddOns\\RougeUI\\textures\\newexp")
             stealable:SetTexCoord(0.338379, 0.412598, 0.680664, 0.829102)
-            stealable:SetDesaturated(true)
         end
 
         border:SetTexCoord(0, 1, 0, 1)

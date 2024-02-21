@@ -7,7 +7,7 @@ local mabs, mfloor, pairs = math.abs, math.floor, _G.pairs
 local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 local Enraged, Whitelist = {}, {}
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local isClassic, LibClassicDurations
+local isClassic
 
 if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
     Enraged = {
@@ -330,7 +330,10 @@ local function Target_Update(frame)
     for i = 1, 32 do
         local name, icon, count, debuffType, duration, expirationTime, caster, isStealable, spellId
         if isClassic then
-            name, icon, count, debuffType, duration, expirationTime, caster, isStealable, _, spellId = LibClassicDurations:UnitAura(frame.unit, i, "HELPFUL")
+            local auras = C_UnitAuras.GetAuraDataByIndex(frame.unit, i, "HELPFUL")
+            if auras then
+                name, icon, count, debuffType, duration, expirationTime, caster, isStealable, spellId = auras.name, auras.icon, auras.applications, auras.dispelName, auras.duration, auras.expirationTime, auras.sourceUnit, auras.isStealable, auras.spellId
+            end
         else
             name, icon, _, debuffType, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, "HELPFUL")
         end
@@ -359,7 +362,7 @@ local function Target_Update(frame)
 
                     -- set the count
                     frameCount = _G[frameName .. "Count"]
-                    if (count > 1 and frame.showAuraCount) then
+                    if count and (count > 1 and frame.showAuraCount) then
                         frameCount:SetText(count)
                         frameCount:Show()
                     else
@@ -368,11 +371,6 @@ local function Target_Update(frame)
 
                     -- Handle cooldowns
                     frameCooldown = _G[frameName .. "Cooldown"]
-                    local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(frame.unit, spellId, caster)
-                    if duration == 0 and durationNew then
-                        duration = durationNew
-                        expirationTime = expirationTimeNew
-                    end
                     CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
                     frameCooldown:SetDrawEdge(false)
                 end
@@ -421,6 +419,9 @@ local function Target_Update(frame)
                     frameStealable:SetHeight(buffSize * modifier)
                     frameStealable:SetWidth(buffSize * modifier)
                     frameStealable:SetVertexColor(r, g, b)
+                    if modifier == 2.2 then
+                        frameStealable:SetDesaturated(true)
+                    end
                 else
                     frameStealable:Hide()
                 end
@@ -434,7 +435,7 @@ local function Target_Update(frame)
                     buffFrame:Show()
                 end
             else
-                if isClassic then
+                if isClassic and buffFrame then
                     buffFrame:Hide()
                 end
             end
@@ -517,13 +518,6 @@ FF:RegisterEvent("PLAYER_LOGIN")
 FF:SetScript("OnEvent", function(self)
     if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
         RougeUI.RougeUIF:HookAuras()
-        isClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and IsAddOnLoaded("LibClassicDurations")
-        if isClassic then
-            LibClassicDurations = LibStub("LibClassicDurations")
-            LibClassicDurations:Register("RougeUI")
-            LibClassicDurations.RegisterCallback(RougeUI, "UNIT_BUFF", function(event, unit)
-                TargetFrame_UpdateAuras(TargetFrame)
-            end)
-        end
+        isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
     end
 end)
