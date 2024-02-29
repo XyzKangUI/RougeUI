@@ -161,10 +161,130 @@ local function ClassColors(self)
     end
 end
 
+local spellDurations = {
+    [GetSpellInfo(605)] = 60, -- Mind Control
+    [GetSpellInfo(1949)] = 15, -- Hellfire
+    [GetSpellInfo(16914)] = 10, -- Hurricane
+    [GetSpellInfo(10)] = 8, -- Blizzard
+    [GetSpellInfo(15407)] = 3, -- Mind Flay
+    [GetSpellInfo(413259)] = 5, -- Mind Sear
+    [GetSpellInfo(437169)] = 120, -- Portal of Summoning
+    [GetSpellInfo(412510)] = 3, -- Mass Regeneration
+    [GetSpellInfo(401417)] = 3, -- Regeneration
+    [GetSpellInfo(698)] = 5, -- Ritual of summoning
+    [GetSpellInfo(402174)] = 2, -- Penance
+    [GetSpellInfo(1515)] = 20, -- Tame Beast
+    [GetSpellInfo(5740)] = 8, -- Rain of Fire
+    [GetSpellInfo(1002)] = 60, -- Eye of the beast
+    [GetSpellInfo(6197)] = 60, -- Eagle eye
+    [GetSpellInfo(18540)] = 10, -- Ritual of doom
+    [GetSpellInfo(435167)] = 10, -- Miniaturized Combustion Chamber
+    [GetSpellInfo(1120)] = 15, -- Drain Soul
+    [GetSpellInfo(8989)] = 10, -- Whirlwind
+    [GetSpellInfo(2096)] = 60, -- Mind Vision
+    [GetSpellInfo(12051)] = 8, -- Evocation
+    [GetSpellInfo(438714)] = 10, -- Furnace Surge
+    [GetSpellInfo(7290)] = 10, -- Soul Siphon
+    [GetSpellInfo(433797)] = 7, -- Bladestorm
+    [GetSpellInfo(5138)] = 5, -- Drain Mana
+    [GetSpellInfo(746)] = 6, -- First Aid
+    [GetSpellInfo(1009)] = 5, -- Savage Pummel
+    [GetSpellInfo(1510)] = 6, -- Volley
+    [GetSpellInfo(10797)] = 6, -- Starshards
+    [GetSpellInfo(136)] = 5, -- Mend Pet
+    [GetSpellInfo(755)] = 10, -- Health Funnel
+    [GetSpellInfo(17767)] = 10, -- Consume Shadows
+    [GetSpellInfo(740)] = 10, -- Tranquility
+    [GetSpellInfo(6358)] = 1.5, -- Seduction
+    [GetSpellInfo(6196)] = 60, -- Far Sight
+    [GetSpellInfo(126)] = 60, -- Eye of Kilrogg
+    [GetSpellInfo(7620)] = 30, -- Fishing
+    [GetSpellInfo(401460)] = 1.5, -- Rapid Regeneration
+    [GetSpellInfo(429820)] = 10, -- Starfall
+    [GetSpellInfo(13278)] = 4, -- Gnomish Death Ray
+    [GetSpellInfo(20577)] = 10, -- Cannibalize
+    -- Arcane missiles (lets see if matching works, because of diff time per rank)
+}
+
 local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and not IsAddOnLoaded("ClassicCastbars") then
+            hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, unit, _, spellId)
+                if (unit ~= self.unit) then
+                    return
+                end
+
+                if event == "UNIT_SPELLCAST_CHANNEL_START" then
+                    local name, _, icon = GetSpellInfo(spellId)
+                    local duration, startTime, endTime, now = spellDurations[name], nil, nil, GetTime()
+                    local desc = GetSpellDescription(spellId)
+
+                    if UnitIsUnit("target", "player") then
+                        name, _, icon, startTime, endTime, _, _, spellId = UnitChannelInfo("player")
+                        duration = 0
+                    end
+
+                    if not name then
+                        self:Hide()
+                        return
+                    end
+
+                    if not duration then
+                        if desc == "" or desc == nil then
+                            local spell = Spell:CreateFromSpellID(spellId)
+                            spell:ContinueOnSpellLoad(function()
+                                name, icon, desc = spell:GetSpellName(), spell:GetSpellTexture(), spell:GetSpellDescription()
+                            end)
+                        end
+
+                        if not (desc == "" or desc == nil) then
+                            duration = tonumber(desc:match("[Ll]asts%s-(%d+)%s-([Ss]econds?|[Ss]ec)")) or tonumber(desc:match("for%s-(%d+)%s-sec")) or tonumber(desc:match("over%s-(%d+)%s-sec"))
+                        else
+                            return
+                        end
+                    end
+
+                    if (name and duration) then
+                        local startColor = CastingBarFrame_GetEffectiveStartColor(self, true)
+                        if self.flashColorSameAsStart then
+                            self.Flash:SetVertexColor(startColor:GetRGB())
+                        else
+                            self.Flash:SetVertexColor(1, 1, 1)
+                        end
+                        self:SetStatusBarColor(startColor:GetRGB())
+                        if not endTime then
+                            startTime = now * 1000
+                            endTime = startTime + (duration * 1000)
+                        end
+                        self.value = (endTime / 1000) - now
+                        self.maxValue = (endTime - startTime) / 1000
+                        self:SetMinMaxValues(0, self.maxValue)
+                        self:SetValue(self.value)
+
+                        if self.Text then
+                            self.Text:SetText(name)
+                        end
+                        if self.Icon then
+                            if not icon or (icon == 136235) then
+                                icon = 0
+                            end
+                            self.Icon:SetTexture(icon)
+                        end
+                        CastingBarFrame_ApplyAlpha(self, 1.0)
+                        self.holdTime = 0
+                        self.casting = nil
+                        self.channeling = true
+                        self.fadeOut = nil
+                        self.spellActive = spellId
+                        if self.showCastbar then
+                            self:Show()
+                        end
+                    end
+                end
+            end)
+        end
         if RougeUI.db.CastTimer then
             modstyle()
             if FocusFrame then
