@@ -38,6 +38,10 @@ local function CreateStatusText()
 end
 
 function RougeUI.RougeUIF:CusFonts()
+    if not RougeUI.db.defaultFont then
+        FontType = PlayerFrameHealthBarText:GetFont()
+    end
+
     if PlayerFrameHealthBar and PlayerFrameHealthBar.TextString then
         PlayerFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
         PlayerFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")

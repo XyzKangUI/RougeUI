@@ -16,8 +16,8 @@ local stock = {
     GradientHP = false,
     FastKeyPress = true,
     ShortNumeric = true,
-    ManaFontSize = 11,
-    HPFontSize = 11,
+    ManaFontSize = 14,
+    HPFontSize = 14,
     SelfSize = 23,
     OtherBuffSize = 23,
     HighlightDispellable = false,
@@ -72,6 +72,7 @@ local stock = {
     EnemyTicker = false,
     modtheme = false,
     OmniCC = false,
+    defaultFont = true,
 }
 
 local f = CreateFrame("Frame")
@@ -286,6 +287,12 @@ function f:CreateGUI()
         PartyTextButton:SetChecked(addon.db.PartyText)
         PartyTextButton:SetPoint("TOPLEFT", 10, -315)
 
+        local defaultFontButton = CheckBtn("Retail statusText font", "This changes the WoW font to a retail look", Panel.childPanel1, function(self, value)
+            addon.db.defaultFont = value
+        end)
+        defaultFontButton:SetChecked(addon.db.defaultFont)
+        defaultFontButton:SetPoint("TOPLEFT", 10, -350)
+
         CreateText(Panel.childPanel1, 350, -40, "Misc")
 
         local FadeIconButton = CheckBtn("Fade out PvP Icon", "Enabling this will set the PvP Icon's transparency at 35%", Panel.childPanel1, function(self, value)
@@ -463,7 +470,7 @@ function f:CreateGUI()
 
         local name = "FontSizeSlider"
         local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
-        FontSizeSlider:SetPoint("TOPLEFT", 20, -400)
+        FontSizeSlider:SetPoint("TOPLEFT", 20, -410)
         FontSizeSlider.textLow = _G[name .. "Low"]
         FontSizeSlider.textHigh = _G[name .. "High"]
         FontSizeSlider.text = _G[name .. "Text"]
@@ -483,7 +490,7 @@ function f:CreateGUI()
 
         local name = "MFontSizeSlider"
         local MFontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
-        MFontSizeSlider:SetPoint("TOPLEFT", 20, -460)
+        MFontSizeSlider:SetPoint("TOPLEFT", 20, -470)
         MFontSizeSlider.textLow = _G[name .. "Low"]
         MFontSizeSlider.textHigh = _G[name .. "High"]
         MFontSizeSlider.text = _G[name .. "Text"]

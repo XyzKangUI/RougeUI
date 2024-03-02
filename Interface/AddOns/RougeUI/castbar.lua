@@ -203,7 +203,17 @@ local spellDurations = {
     [GetSpellInfo(429820)] = 10, -- Starfall
     [GetSpellInfo(13278)] = 4, -- Gnomish Death Ray
     [GetSpellInfo(20577)] = 10, -- Cannibalize
-    -- Arcane missiles (lets see if matching works, because of diff time per rank)
+}
+
+local missileId = {
+    [5143] = 3,
+    [8417] = 5,
+    [25345] = 5,
+    [5145] = 5,
+    [10212] = 5,
+    [8416] = 5,
+    [5144] = 4,
+    [10211] = 5,
 }
 
 local FR = CreateFrame("Frame")
@@ -218,9 +228,9 @@ FR:SetScript("OnEvent", function(self, event)
 
                 if event == "UNIT_SPELLCAST_CHANNEL_START" then
                     local name, _, icon = GetSpellInfo(spellId)
-                    local duration, startTime, endTime, now = spellDurations[name], nil, nil, GetTime()
+                    local duration, startTime, endTime, now = spellDurations[name] or missileId[spellId], nil, nil, GetTime()
                     local desc = GetSpellDescription(spellId)
-
+                    
                     if UnitIsUnit("target", "player") then
                         name, _, icon, startTime, endTime, _, _, spellId = UnitChannelInfo("player")
                         duration = 0
