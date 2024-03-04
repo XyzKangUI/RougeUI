@@ -1,13 +1,12 @@
 local _, RougeUI = ...
-local AURA_OFFSET_Y = 1
-local UnitIsFriend = _G.UnitIsFriend
-local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy, _G.UnitClass
+local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy
 local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
-local mabs, mfloor, pairs = math.abs, math.floor, _G.pairs
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
+local UnitClass, UnitIsFriend = _G.UnitClass, _G.UnitIsFriend
+local isClassic, LibClassicDurations = ...
+local mabs, mfloor = math.abs, math.floor
 local Enraged, Whitelist = {}, {}
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local isClassic, LibClassicDurations
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns and C_AddOns.IsAddOnLoaded
+local AURA_OFFSET_Y = 1
 
 if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
     Enraged = {
@@ -94,7 +93,7 @@ local function RealWidth(frame, auraName, width)
     end
 
     local x1 = frame.totFrame:GetLeft()
-    local x2 = _G[auraName .. "1"]:GetLeft()
+    local x2 = _G[auraName .. "1"] and _G[auraName .. "1"]:GetLeft() or nil
     if not x1 or not x2 then
         return frame.TOT_AURA_ROW_WIDTH
     end
@@ -368,10 +367,12 @@ local function Target_Update(frame)
 
                     -- Handle cooldowns
                     frameCooldown = _G[frameName .. "Cooldown"]
-                    local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(frame.unit, spellId, caster)
-                    if duration == 0 and durationNew then
-                        duration = durationNew
-                        expirationTime = expirationTimeNew
+                    if LibClassicDurations and LibClassicDurations.GetAuraDurationByUnitDirect then
+                        local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnitDirect(frame.unit, spellId, caster)
+                        if duration == 0 and durationNew then
+                            duration = durationNew
+                            expirationTime = expirationTimeNew
+                        end
                     end
                     CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
                     frameCooldown:SetDrawEdge(false)
@@ -520,7 +521,7 @@ FF:RegisterEvent("PLAYER_LOGIN")
 FF:SetScript("OnEvent", function(self)
     if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
         RougeUI.RougeUIF:HookAuras()
-        isClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+        if WOW_PROJECT_CLASSIC == WOW_PROJECT_CLASSIC then isClassic = true return end
         if isClassic then
             LibClassicDurations = LibStub("LibClassicDurations")
             LibClassicDurations:Register("RougeUI")

@@ -4,3 +4,5 @@ Interface/AddOns/RougeUI/Libs/core.lua
 Interface/AddOns/RougeUI/Libs/LibClassicDurations.xml
 Interface/AddOns/RougeUI/Libs/npcAbilities.lua
 Interface/AddOns/RougeUI/Libs/diminishingReturns.lua
+Interface/AddOns/RougeUI/Libs/LibStub/LibStub.lua
+Interface/AddOns/RougeUI/Libs/LibStub/CallbackHandler-1.0.lua
