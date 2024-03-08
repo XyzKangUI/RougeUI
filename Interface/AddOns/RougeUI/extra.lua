@@ -839,6 +839,17 @@ local function ChangeText(frame)
     end
 end
 
+local conflictingAddons = {
+    "BuffSizer",
+    "ClassicAuraDurations",
+    "DarkModeUI",
+    "EasyFrames",
+    "LargerSelfAuras",
+    "RiizUI",
+    "TextureScript",
+    "SUI",
+}
+
 local e = CreateFrame("Frame")
 for _, v in pairs(events) do
     e:RegisterEvent(v)
@@ -847,6 +858,12 @@ e:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
 
         isClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+
+        for _, v in ipairs(conflictingAddons) do
+            if IsAddOnLoaded(v) then
+                ChatFrame1:AddMessage("|cff009cffRougeUI:|r disable |cffffff00" .. v .. "|r to avoid bugs.")
+            end
+        end
 
         if RougeUI.db.ToTDebuffs then
             for _, totFrame in ipairs({ TargetFrameToT, FocusFrameToT }) do

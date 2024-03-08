@@ -2,90 +2,95 @@ local _, RougeUI = ...
 local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy
 local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
 local UnitClass, UnitIsFriend = _G.UnitClass, _G.UnitIsFriend
-local isClassic, LibClassicDurations = ...
+local _, LibClassicDurations = ...
+local isClassic
 local mabs, mfloor = math.abs, math.floor
-local Enraged, Whitelist = {}, {}
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns and C_AddOns.IsAddOnLoaded
 local AURA_OFFSET_Y = 1
 
-if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-    Enraged = {
-        --    [5229] = true, -- Enrage (Druid)
-        [1719] = true, -- Recklessness
-        --    [12880] = true, -- Enrage (npc)
-        --    [14204] = true, -- Enrage (npc)
-        --    [14202] = true, -- Enrage (npc)
-        --    [14203] = true, -- Enrage (npc)
-        --    [14201] = true, -- Enrage (npc)
-        [18499] = true, -- Berseker Rage
-        --    [12292] = true, -- Death Wish
-        --    [2687] = true, -- Bloodrage
-        --    [29131] = true, -- Bloodrage
-        [48391] = true, -- Owlkin Frenzy
-        [49016] = true, -- Unholy Frenzy
-        [50636] = true, -- Tormented Roar (npc)
-        --    [51662] = true, -- Hunger for blood
-        [54508] = true, -- Demonic Empowerment
-        --    [57514] = true, -- Enrage (npc)
-        --    [57516] = true, -- Enrage
-        --    [57518] = true, -- Enrage
-        --    [57519] = true, -- Enrage
-        --    [57520] = true, -- Enrage
-        --    [57522] = true, -- Enrage
-        [63147] = true, -- Sara's Anger (npc)
-        [66759] = true, -- Frothing Rage (npc)
-        [62071] = true, -- Savage Roar
-        --    [51513] = true, -- Enrage
-        [60177] = true, -- Hfb (npc)
-        --    [57521] = true, -- Enrage
-        [63848] = true, -- Hfb (npc)
-        [52610] = true, -- Savage roar
-        [66759] = true, -- Frothing Rage
-    }
+local Enraged = {
+    --[5229] = true, -- Enrage (Druid)
+    [1719] = true, -- Recklessness
+    --[12880] = true, -- Enrage (npc)
+    --[14204] = true, -- Enrage (npc)
+    --[14202] = true, -- Enrage (npc)
+    --[14203] = true, -- Enrage (npc)
+    --[14201] = true, -- Enrage (npc)
+    [18499] = true, -- Berseker Rage
+    --[12292] = true, -- Death Wish
+    --[2687] = true, -- Bloodrage
+    --[29131] = true, -- Bloodrage
+    [48391] = true, -- Owlkin Frenzy
+    [49016] = true, -- Unholy Frenzy
+    [50636] = true, -- Tormented Roar (npc)
+    --[51662] = true, -- Hunger for blood
+    [54508] = true, -- Demonic Empowerment
+    --[57514] = true, -- Enrage (npc)
+    --[57516] = true, -- Enrage
+    --[57518] = true, -- Enrage
+    --[57519] = true, -- Enrage
+    --[57520] = true, -- Enrage
+    --[57522] = true, -- Enrage
+    [63147] = true, -- Sara's Anger (npc)
+    [66759] = true, -- Frothing Rage (npc)
+    [62071] = true, -- Savage Roar
+    --[51513] = true, -- Enrage
+    [60177] = true, -- Hfb (npc)
+    --[57521] = true, -- Enrage
+    [63848] = true, -- Hfb (npc)
+    [52610] = true, -- Savage roar
+    [66759] = true, -- Frothing Rage
+}
 
-    Whitelist = {
-        [GetSpellInfo(16188)] = true, -- Nature's Swiftness
-        [GetSpellInfo(12043)] = true, -- Presence of Mind
-        [GetSpellInfo(12042)] = true, -- Arcane Power
-        [GetSpellInfo(12472)] = true, -- Icy Veins
-        [GetSpellInfo(31884)] = true, -- Avenging Wrath
-        [GetSpellInfo(48066)] = true, -- Power Word: Shield
-        [GetSpellInfo(47986)] = true, -- Sacrifice
-        [GetSpellInfo(43039)] = true, -- Ice Barrier
-        [GetSpellInfo(22812)] = true, -- Barkskin
-        [GetSpellInfo(1044)] = true, -- Hand of Freedom
-        [GetSpellInfo(29166)] = true, -- Innervate
-        [GetSpellInfo(2825)] = true, -- Bloodlust
-        [GetSpellInfo(32182)] = true, -- Heroism
-        [GetSpellInfo(10060)] = true, -- Power Infusion
-        [GetSpellInfo(33206)] = true, -- Pain Supression
-        [GetSpellInfo(53312)] = true, -- Nature's Grasp
-        [GetSpellInfo(6346)] = true, -- Fear Ward
-        [GetSpellInfo(6940)] = true, -- Hand of Sacrifice
-        [GetSpellInfo(10278)] = true, -- Blessing of Protection
-        [GetSpellInfo(18708)] = true, -- Fel Domination
-        [GetSpellInfo(45438)] = true, -- Ice Block
-        [GetSpellInfo(642)] = true, -- Divine Shield
-        [GetSpellInfo(53601)] = true, -- Sacred Shield
-        [GetSpellInfo(54428)] = true, -- Divine Plea
-        [GetSpellInfo(66115)] = true, -- Hand of Freedom
-        [GetSpellInfo(498)] = true, -- Divine Protection
-        [GetSpellInfo(53563)] = true, -- Beacon of Light
-        [GetSpellInfo(63560)] = true, -- Ghoul Frenzy
-        [GetSpellInfo(31842)] = true, -- Divine illumination
-        [GetSpellInfo(57761)] = true, -- Fireball!
-        [GetSpellInfo(49284)] = true, -- Earth Shield
-        [GetSpellInfo(69369)] = true, -- Predator's Swiftness
-        [GetSpellInfo(64701)] = true, -- Elemental Mastery
-        [GetSpellInfo(44544)] = true, -- Fingers of frost
-        [GetSpellInfo(63167)] = true, -- Decimation
-        [GetSpellInfo(63244)] = true, -- Pyroclasm
-        [GetSpellInfo(34936)] = true, -- Backlash
-        [GetSpellInfo(65081)] = true, -- Body and Soul
-        [GetSpellInfo(54372)] = true, -- Nether Protection
+local Whitelist = {
+    [16188] = true, -- Nature's Swiftness
+    [12043] = true, -- Presence of Mind
+    [12042] = true, -- Arcane Power
+    [12472] = true, -- Icy Veins
+    [31884] = true, -- Avenging Wrath
+    [48066] = true, -- Power Word: Shield
+    [47986] = true, -- Sacrifice
+    [43039] = true, -- Ice Barrier
+    [22812] = true, -- Barkskin
+    [1044] = true, -- Hand of Freedom
+    [29166] = true, -- Innervate
+    [2825] = true, -- Bloodlust
+    [32182] = true, -- Heroism
+    [10060] = true, -- Power Infusion
+    [33206] = true, -- Pain Supression
+    [53312] = true, -- Nature's Grasp
+    [6346] = true, -- Fear Ward
+    [6940] = true, -- Hand of Sacrifice
+    [10278] = true, -- Blessing of Protection
+    [18708] = true, -- Fel Domination
+    [45438] = true, -- Ice Block
+    [642] = true, -- Divine Shield
+    [53601] = true, -- Sacred Shield
+    [54428] = true, -- Divine Plea
+    [66115] = true, -- Hand of Freedom
+    [498] = true, -- Divine Protection
+    [53563] = true, -- Beacon of Light
+    [63560] = true, -- Ghoul Frenzy
+    [31842] = true, -- Divine illumination
+    [57761] = true, -- Fireball!
+    [49284] = true, -- Earth Shield
+    [69369] = true, -- Predator's Swiftness
+    [64701] = true, -- Elemental Mastery
+    [44544] = true, -- Fingers of frost
+    [63167] = true, -- Decimation
+    [63244] = true, -- Pyroclasm
+    [34936] = true, -- Backlash
+    [65081] = true, -- Body and Soul
+    [54372] = true  -- Nether Protection
+}
 
-    }
-end
+local whitelistMetatable = {
+    __index = function(tbl, key)
+        local name = GetSpellInfo(key)
+        return name
+    end
+}
+setmetatable(Whitelist, whitelistMetatable)
 
 local function RealWidth(frame, auraName, width)
     if not (frame.totFrame == _G.TargetFrameToT or frame.totFrame == _G.FocusFrameToT) then
@@ -521,7 +526,7 @@ FF:RegisterEvent("PLAYER_LOGIN")
 FF:SetScript("OnEvent", function(self)
     if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
         RougeUI.RougeUIF:HookAuras()
-        if WOW_PROJECT_CLASSIC == WOW_PROJECT_CLASSIC then isClassic = true return end
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then isClassic = true return end
         if isClassic then
             LibClassicDurations = LibStub("LibClassicDurations")
             LibClassicDurations:Register("RougeUI")

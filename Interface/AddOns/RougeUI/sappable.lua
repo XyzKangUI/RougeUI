@@ -53,10 +53,9 @@ local classHealth = {
 }
 
 -- Do all damaging trinket procs count or only pendulum of telluric currents?
-local bustedSpells = {
-    [GetSpellInfo(58381)] = true, -- Mind Flay
-    [GetSpellInfo(63675)] = true, -- Improved Devouring Plague
-}
+local bustedSpells = {}
+if GetSpellInfo(58381) then bustedSpells[GetSpellInfo(58381)] = true end
+if GetSpellInfo(63675) then bustedSpells[GetSpellInfo(63675)] = true end
 
 local function GlyphCheck()
     for i = 1, 6 do

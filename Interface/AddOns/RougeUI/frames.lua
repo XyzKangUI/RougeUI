@@ -1,7 +1,6 @@
 local _, RougeUI = ...
 local pairs = _G.pairs
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local doneInit
 
 local function FrameColour()
     for _, v in pairs({
@@ -685,7 +684,7 @@ local function FrameColour()
         GameTooltip:SetBackdropBorderColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 
-    if GetBuildInfo() == "3.4.3" then
+    if GetBuildInfo() >= "3.4.3" then
         -- Blizz lack of quality control
         MainMenuExpBar:SetSize(1034, 13);
         MainMenuXPBarTexture0:SetSize(262, 10);
@@ -898,8 +897,6 @@ local function NewVariables()
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
-
-    doneInit = true
 end
 
 local function BlizzFrames(addon)
@@ -1275,28 +1272,15 @@ local function BlizzFrames(addon)
 end
 
 local Framecolor = CreateFrame("Frame")
-
 Framecolor:RegisterEvent("ADDON_LOADED")
 Framecolor:SetScript("OnEvent", function(self, event, addon)
-    if event == "ADDON_LOADED" and addon == "RougeUI" then
+    if addon == "RougeUI" then
         if RougeUI.db.Colval < 1 then
             FrameColour()
             NewVariables()
         end
-        if doneInit then
-            self:UnregisterEvent("ADDON_LOADED")
-            self:SetScript("OnEvent", nil)
-        end
-    end
-end)
-
-local Blizz = CreateFrame("Frame")
-Blizz:RegisterEvent("ADDON_LOADED")
-Blizz:SetScript("OnEvent", function(_, event, addon)
-    if event == "ADDON_LOADED" then
-        if RougeUI.db.Colval < 1 then
-            BlizzFrames(addon)
-        end
+    else
+        BlizzFrames(addon)
     end
 end)
 

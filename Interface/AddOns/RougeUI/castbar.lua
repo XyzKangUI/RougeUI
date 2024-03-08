@@ -161,49 +161,53 @@ local function ClassColors(self)
     end
 end
 
-local spellDurations = {
-    [GetSpellInfo(605)] = 60, -- Mind Control
-    [GetSpellInfo(1949)] = 15, -- Hellfire
-    [GetSpellInfo(16914)] = 10, -- Hurricane
-    [GetSpellInfo(10)] = 8, -- Blizzard
-    [GetSpellInfo(15407)] = 3, -- Mind Flay
-    [GetSpellInfo(413259)] = 5, -- Mind Sear
-    [GetSpellInfo(437169)] = 120, -- Portal of Summoning
-    [GetSpellInfo(412510)] = 3, -- Mass Regeneration
-    [GetSpellInfo(401417)] = 3, -- Regeneration
-    [GetSpellInfo(698)] = 5, -- Ritual of summoning
-    [GetSpellInfo(402174)] = 2, -- Penance
-    [GetSpellInfo(1515)] = 20, -- Tame Beast
-    [GetSpellInfo(5740)] = 8, -- Rain of Fire
-    [GetSpellInfo(1002)] = 60, -- Eye of the beast
-    [GetSpellInfo(6197)] = 60, -- Eagle eye
-    [GetSpellInfo(18540)] = 10, -- Ritual of doom
-    [GetSpellInfo(435167)] = 10, -- Miniaturized Combustion Chamber
-    [GetSpellInfo(1120)] = 15, -- Drain Soul
-    [GetSpellInfo(8989)] = 10, -- Whirlwind
-    [GetSpellInfo(2096)] = 60, -- Mind Vision
-    [GetSpellInfo(12051)] = 8, -- Evocation
-    [GetSpellInfo(438714)] = 10, -- Furnace Surge
-    [GetSpellInfo(7290)] = 10, -- Soul Siphon
-    [GetSpellInfo(433797)] = 7, -- Bladestorm
-    [GetSpellInfo(5138)] = 5, -- Drain Mana
-    [GetSpellInfo(746)] = 6, -- First Aid
-    [GetSpellInfo(1009)] = 5, -- Savage Pummel
-    [GetSpellInfo(1510)] = 6, -- Volley
-    [GetSpellInfo(10797)] = 6, -- Starshards
-    [GetSpellInfo(136)] = 5, -- Mend Pet
-    [GetSpellInfo(755)] = 10, -- Health Funnel
-    [GetSpellInfo(17767)] = 10, -- Consume Shadows
-    [GetSpellInfo(740)] = 10, -- Tranquility
-    [GetSpellInfo(6358)] = 1.5, -- Seduction
-    [GetSpellInfo(6196)] = 60, -- Far Sight
-    [GetSpellInfo(126)] = 60, -- Eye of Kilrogg
-    [GetSpellInfo(7620)] = 30, -- Fishing
-    [GetSpellInfo(401460)] = 1.5, -- Rapid Regeneration
-    [GetSpellInfo(429820)] = 10, -- Starfall
-    [GetSpellInfo(13278)] = 4, -- Gnomish Death Ray
-    [GetSpellInfo(20577)] = 10, -- Cannibalize
-}
+local spellDurations = {}
+local isSoD = C_Seasons and (C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfDiscovery)
+if isSoD then
+    spellDurations = {
+        [GetSpellInfo(605)] = 60, -- Mind Control
+        [GetSpellInfo(1949)] = 15, -- Hellfire
+        [GetSpellInfo(16914)] = 10, -- Hurricane
+        [GetSpellInfo(10)] = 8, -- Blizzard
+        [GetSpellInfo(15407)] = 3, -- Mind Flay
+        [GetSpellInfo(413259)] = 5, -- Mind Sear
+        [GetSpellInfo(437169)] = 120, -- Portal of Summoning
+        [GetSpellInfo(412510)] = 3, -- Mass Regeneration
+        [GetSpellInfo(401417)] = 3, -- Regeneration
+        [GetSpellInfo(698)] = 5, -- Ritual of summoning
+        [GetSpellInfo(402174)] = 2, -- Penance
+        [GetSpellInfo(1515)] = 20, -- Tame Beast
+        [GetSpellInfo(5740)] = 8, -- Rain of Fire
+        [GetSpellInfo(1002)] = 60, -- Eye of the beast
+        [GetSpellInfo(6197)] = 60, -- Eagle eye
+        [GetSpellInfo(18540)] = 10, -- Ritual of doom
+        [GetSpellInfo(435167)] = 10, -- Miniaturized Combustion Chamber
+        [GetSpellInfo(1120)] = 15, -- Drain Soul
+        [GetSpellInfo(8989)] = 10, -- Whirlwind
+        [GetSpellInfo(2096)] = 60, -- Mind Vision
+        [GetSpellInfo(12051)] = 8, -- Evocation
+        [GetSpellInfo(438714)] = 10, -- Furnace Surge
+        [GetSpellInfo(7290)] = 10, -- Soul Siphon
+        [GetSpellInfo(433797)] = 7, -- Bladestorm
+        [GetSpellInfo(5138)] = 5, -- Drain Mana
+        [GetSpellInfo(746)] = 6, -- First Aid
+        [GetSpellInfo(1009)] = 5, -- Savage Pummel
+        [GetSpellInfo(1510)] = 6, -- Volley
+        [GetSpellInfo(10797)] = 6, -- Starshards
+        [GetSpellInfo(136)] = 5, -- Mend Pet
+        [GetSpellInfo(755)] = 10, -- Health Funnel
+        [GetSpellInfo(17767)] = 10, -- Consume Shadows
+        [GetSpellInfo(740)] = 10, -- Tranquility
+        [GetSpellInfo(6358)] = 1.5, -- Seduction
+        [GetSpellInfo(6196)] = 60, -- Far Sight
+        [GetSpellInfo(126)] = 60, -- Eye of Kilrogg
+        [GetSpellInfo(7620)] = 30, -- Fishing
+        [GetSpellInfo(401460)] = 1.5, -- Rapid Regeneration
+        [GetSpellInfo(429820)] = 10, -- Starfall
+        [GetSpellInfo(13278)] = 4, -- Gnomish Death Ray
+        [GetSpellInfo(20577)] = 10, -- Cannibalize
+    }
+end
 
 local missileId = {
     [5143] = 3,
@@ -220,7 +224,7 @@ local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
-        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and not IsAddOnLoaded("ClassicCastbars") then
+        if isSoD and not IsAddOnLoaded("ClassicCastbars") then
             hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, unit, _, spellId)
                 if (unit ~= self.unit) then
                     return
@@ -230,7 +234,7 @@ FR:SetScript("OnEvent", function(self, event)
                     local name, _, icon = GetSpellInfo(spellId)
                     local duration, startTime, endTime, now = spellDurations[name] or missileId[spellId], nil, nil, GetTime()
                     local desc = GetSpellDescription(spellId)
-                    
+
                     if UnitIsUnit("target", "player") then
                         name, _, icon, startTime, endTime, _, _, spellId = UnitChannelInfo("player")
                         duration = 0
@@ -302,7 +306,7 @@ FR:SetScript("OnEvent", function(self, event)
                     TimerHook(self, elapsed)
                     RougeUI.RougeUIF:GradientColour(self)
                     if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
-                        self:SetStatusBarColor(216/255, 31/255, 42/255)
+                        self:SetStatusBarColor(216 / 255, 31 / 255, 42 / 255)
                     end
                 end)
             end
@@ -310,14 +314,14 @@ FR:SetScript("OnEvent", function(self, event)
                 TimerHook(self, elapsed)
                 RougeUI.RougeUIF:GradientColour(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
-                    self:SetStatusBarColor(216/255, 31/255, 42/255)
+                    self:SetStatusBarColor(216 / 255, 31 / 255, 42 / 255)
                 end
             end)
             CastingBarFrame:HookScript("OnUpdate", function(self, elapsed)
                 TimerHook(self, elapsed)
                 PurpleKoolaid(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
-                    self:SetStatusBarColor(216/255, 31/255, 42/255)
+                    self:SetStatusBarColor(216 / 255, 31 / 255, 42 / 255)
                 end
             end)
         end
