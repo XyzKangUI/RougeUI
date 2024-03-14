@@ -1,6 +1,6 @@
 ## Interface: 11501
 ## Title: |cff009cffRougeUI-Classic|r
-## Version: 3.65
+## Version: 3.66
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 

@@ -357,6 +357,18 @@ local function Target_Update(frame)
                 if isClassic then
                     buffFrame:SetID(i)
 
+                    if isEnemy and UnitBuff(frame.unit, i, "HELPFUL") == nil then
+                        buffFrame:SetScript("OnEnter", function(self)
+                            GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 15, -25);
+                            GameTooltip:SetSpellByID(spellId)
+                            GameTooltip:Show()
+                        end)
+
+                        buffFrame:SetScript("OnLeave", function(self)
+                            GameTooltip:Hide()
+                        end)
+                    end
+
                     -- set the icon
                     frameIcon = _G[frameName .. "Icon"]
                     frameIcon:SetTexture(icon)

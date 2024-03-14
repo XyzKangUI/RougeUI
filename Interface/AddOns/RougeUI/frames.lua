@@ -306,15 +306,15 @@ local function FrameColour()
 
     -- Main MainMenu
     local gmbutton = {
-        GameMenuButtonHelp = {GameMenuButtonHelp.Left, GameMenuButtonHelp.Middle, GameMenuButtonHelp.Right},
-        GameMenuButtonStore = {GameMenuButtonStore.Left, GameMenuButtonStore.Middle, GameMenuButtonStore.Right},
-        GameMenuButtonOptions = {GameMenuButtonOptions.Left, GameMenuButtonOptions.Middle, GameMenuButtonOptions.Right},
-        GameMenuButtonMacros = {GameMenuButtonMacros.Left, GameMenuButtonMacros.Middle, GameMenuButtonMacros.Right},
-        GameMenuButtonAddons = {GameMenuButtonAddons.Left, GameMenuButtonAddons.Middle, GameMenuButtonAddons.Right},
-        GameMenuButtonLogout = {GameMenuButtonLogout.Left, GameMenuButtonLogout.Middle, GameMenuButtonLogout.Right},
-        GameMenuButtonQuit = {GameMenuButtonQuit.Left, GameMenuButtonQuit.Middle, GameMenuButtonQuit.Right},
-        GameMenuButtonContinue = {GameMenuButtonContinue.Left, GameMenuButtonContinue.Middle, GameMenuButtonContinue.Right},
-        GameMenuButtonRatings = {GameMenuButtonRatings.Left, GameMenuButtonRatings.Middle, GameMenuButtonRatings.Right}
+        GameMenuButtonHelp = { GameMenuButtonHelp.Left, GameMenuButtonHelp.Middle, GameMenuButtonHelp.Right },
+        GameMenuButtonStore = { GameMenuButtonStore.Left, GameMenuButtonStore.Middle, GameMenuButtonStore.Right },
+        GameMenuButtonOptions = { GameMenuButtonOptions.Left, GameMenuButtonOptions.Middle, GameMenuButtonOptions.Right },
+        GameMenuButtonMacros = { GameMenuButtonMacros.Left, GameMenuButtonMacros.Middle, GameMenuButtonMacros.Right },
+        GameMenuButtonAddons = { GameMenuButtonAddons.Left, GameMenuButtonAddons.Middle, GameMenuButtonAddons.Right },
+        GameMenuButtonLogout = { GameMenuButtonLogout.Left, GameMenuButtonLogout.Middle, GameMenuButtonLogout.Right },
+        GameMenuButtonQuit = { GameMenuButtonQuit.Left, GameMenuButtonQuit.Middle, GameMenuButtonQuit.Right },
+        GameMenuButtonContinue = { GameMenuButtonContinue.Left, GameMenuButtonContinue.Middle, GameMenuButtonContinue.Right },
+        GameMenuButtonRatings = { GameMenuButtonRatings.Left, GameMenuButtonRatings.Middle, GameMenuButtonRatings.Right }
     }
 
     for _, v in pairs(gmbutton) do
@@ -747,7 +747,7 @@ local function FrameColour()
         end
     end
 
-    for _, v in pairs({ComboPoint1, ComboPoint2, ComboPoint3, ComboPoint4, ComboPoint5}) do
+    for _, v in pairs({ ComboPoint1, ComboPoint2, ComboPoint3, ComboPoint4, ComboPoint5 }) do
         if v then
             v:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
@@ -764,16 +764,28 @@ local function NewVariables()
     end
 
     -- SpellBookFrame
+    local build = GetBuildInfo()
     if SpellBookFrame then
-        local _, a, b, c, d = SpellBookFrame:GetRegions()
-        for _, v in pairs({ a, b, c, d }) do
+        local _, a, b, c, d, e, f, _, _, i, j, k, l, m, n, o, p = SpellBookFrame:GetRegions()
+        local vars = {}
+        if build >= "4.4.0" then
+            vars = { a, c, d, e, f, i, j, k, l, m, n, o, p }
+            SpellBookFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            SpellBookFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            SpellBookFrameInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            SpellBookFrameInsetInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            SpellBookFrameInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        else
+            vars = { a, b, c, d }
+        end
+        for _, v in pairs(vars) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
     end
 
-    if not SpellBookFrame.Material then
+    if not SpellBookFrame.Material and GetBuildInfo() < "4.4.0" then
         SpellBookFrame.Material = SpellBookFrame:CreateTexture(nil, "OVERLAY", nil, 7)
         SpellBookFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
         SpellBookFrame.Material:SetWidth(547)
@@ -1010,10 +1022,80 @@ local function BlizzFrames(addon)
     -- Talentframe
 
     if addon == "Blizzard_TalentUI" then
+        local k, j = 2, 6
+        if GetBuildInfo() >= "4.4.0" then
+            k, j = 1, 25
+        end
         local vectors = { PlayerTalentFrame:GetRegions() }
-        for i = 2, 6 do
+        for i = k, j do
             if vectors[i] then
                 vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+
+        if GetBuildInfo() >= "4.4.0" then
+
+            if PlayerTalentFrameTitleText then
+                PlayerTalentFrameTitleText:SetVertexColor(1, 0.8196079134911, 0)
+            end
+
+            if PlayerTalentFramePortrait then
+                PlayerTalentFramePortrait:SetVertexColor(1, 1, 1)
+            end
+
+            if PlayerTalentFrameInsetInsetBottomBorder then
+                PlayerTalentFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInsetInsetRightBorder then
+                PlayerTalentFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInsetInsetLeftBorder then
+                PlayerTalentFrameInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInsetInsetTopBorder then
+                PlayerTalentFrameInsetInsetTopBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInsetInsetTopRightCorner then
+                PlayerTalentFrameInsetInsetTopRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInsetInsetTopLeftCorner then
+                PlayerTalentFrameInsetInsetTopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            for i = 1, 3 do
+                local panel = _G["PlayerTalentFramePanel" .. i]
+                if panel then
+                    panel.TopBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    panel.RightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    panel.LeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    panel.BottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    panel.TopRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    panel.BotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    panel.BotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    panel.TopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
+            end
+
+            if PlayerTalentFramePanel1HeaderIconSecondaryBorder then
+                PlayerTalentFramePanel1HeaderIconSecondaryBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                PlayerTalentFramePanel1HeaderBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                PlayerTalentFramePanel1HeaderBackground:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+
+            end
+            if PlayerTalentFramePanel2HeaderIconSecondaryBorder then
+                PlayerTalentFramePanel2HeaderIconSecondaryBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                PlayerTalentFramePanel2HeaderBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                PlayerTalentFramePanel2HeaderBackground:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PlayerTalentFramePanel3HeaderIconSecondaryBorder then
+                PlayerTalentFramePanel3HeaderIconSecondaryBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                PlayerTalentFramePanel3HeaderBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                PlayerTalentFramePanel3HeaderBackground:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
 

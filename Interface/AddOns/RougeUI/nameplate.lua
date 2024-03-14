@@ -101,7 +101,7 @@ end
 local OnEvent = function(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...
-        local namePlateFrameBase = GetNamePlateForUnit(unit, issecure());
+        local namePlateFrameBase = GetNamePlateForUnit(unit, false);
         if not namePlateFrameBase or namePlateFrameBase:IsForbidden() then
             return
         end
