@@ -328,28 +328,30 @@ local function FrameColour()
     end
 
     -- SettingsPanel
-    for _, v in pairs({
-        SettingsPanel.bg,
-        SettingsPanel.Bg.TopSection,
-        SettingsPanel.Bg.BottomEdge,
-        SettingsPanel.Bg.BottomRight,
-        SettingsPanel.Bg.BottomLeft,
-        SettingsPanel.NineSlice.TopEdge,
-        SettingsPanel.NineSlice.BottomEdge,
-        SettingsPanel.NineSlice.LeftEdge,
-        SettingsPanel.NineSlice.RightEdge,
-        SettingsPanel.NineSlice.TopLeftCorner,
-        SettingsPanel.NineSlice.TopRightCorner,
-        SettingsPanel.NineSlice.BottomLeftCorner,
-        SettingsPanel.NineSlice.BottomRightCorner,
-        SettingsPanel.SearchBox.Left,
-        SettingsPanel.SearchBox.Middle,
-        SettingsPanel.SearchBox.Right,
-    }) do
-        v:SetDesaturation(1 - RougeUI.db.Colval)
-        v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        if RougeUI.db.Colval < 0.8 then
-            v:SetDesaturated(true)
+    if SettingsPanel then
+        for _, v in pairs({
+            SettingsPanel.bg,
+            SettingsPanel.Bg.TopSection,
+            SettingsPanel.Bg.BottomEdge,
+            SettingsPanel.Bg.BottomRight,
+            SettingsPanel.Bg.BottomLeft,
+            SettingsPanel.NineSlice.TopEdge,
+            SettingsPanel.NineSlice.BottomEdge,
+            SettingsPanel.NineSlice.LeftEdge,
+            SettingsPanel.NineSlice.RightEdge,
+            SettingsPanel.NineSlice.TopLeftCorner,
+            SettingsPanel.NineSlice.TopRightCorner,
+            SettingsPanel.NineSlice.BottomLeftCorner,
+            SettingsPanel.NineSlice.BottomRightCorner,
+            SettingsPanel.SearchBox.Left,
+            SettingsPanel.SearchBox.Middle,
+            SettingsPanel.SearchBox.Right,
+        }) do
+            v:SetDesaturation(1 - RougeUI.db.Colval)
+            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            if RougeUI.db.Colval < 0.8 then
+                v:SetDesaturated(true)
+            end
         end
     end
 

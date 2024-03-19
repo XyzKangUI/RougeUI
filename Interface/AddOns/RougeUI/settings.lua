@@ -234,10 +234,6 @@ function f:CreateGUI()
         local ClassHPButton, GradientHPButton, UnitHPButton
         ClassHPButton = CheckBtn("Enable Class Colored HealthBar", "Enabling this will change the green healthBar color to the class color", Panel.childPanel4, function(self, value)
             addon.db.ClassHP = value
-            addon.db.GradientHP = false
-            addon.db.unithp = false
-            GradientHPButton:SetChecked(addon.db.GradientHP)
-            UnitHPButton:SetChecked(addon.db.unithp)
         end)
         ClassHPButton:SetChecked(addon.db.ClassHP)
         ClassHPButton:SetPoint("TOPLEFT", 10, -75)
@@ -254,10 +250,6 @@ function f:CreateGUI()
 
         UnitHPButton = CheckBtn("Color HealthBar by Unit's Reaction", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value)
             addon.db.unithp = value
-            addon.db.ClassHP = false
-            addon.db.GradientHP = false
-            ClassHPButton:SetChecked(addon.db.ClassHP)
-            GradientHPButton:SetChecked(addon.db.GradientHP)
         end)
         UnitHPButton:SetChecked(addon.db.unithp)
         UnitHPButton:SetPoint("TOPLEFT", 10, -145)

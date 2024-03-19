@@ -119,32 +119,12 @@ f:SetScript("OnEvent", function(self, event, addon)
         end
 
         if IsAddOnLoaded("Leatrix_Maps") then
-            local WorldMapUnitPin, firstRun
+            local WorldMapUnitPin
             if LeaMapsDB["UseClassIcons"] == "On" then
                 for pin in WorldMapFrame:EnumeratePinsByTemplate("GroupMembersPinTemplate") do
                     WorldMapUnitPin = pin
-                    hooksecurefunc(WorldMapUnitPin, "SetAppearanceField", function(self, unit)
-                        local _, class = UnitClass(unit)
-                        local c = RAID_CLASS_COLORS[class]
-                        if c then
-                            if class == "SHAMAN" then
-                                c.r, c.g, c.b = 0, 0.44, 0.87
-                            end
-                            self:SetUnitColor(unit, c.r, c.g, c.b, 1)
-                        end
-                    end)
-                end
-            end
-
-            if (not BattlefieldMapFrame) then
-                BattlefieldMap_LoadUI()
-            end
-
-            for pin in BattlefieldMapFrame:EnumerateAllPins() do
-                if pin.UpdateAppearanceData then
-                    if firstRun then
-                        firstRun = true
-                        hooksecurefunc(pin, "SetAppearanceField", function(self, unit)
+                    hooksecurefunc(WorldMapUnitPin, "SetUnitAppearanceInternal", function(self, timeNow, unit, appearanceData)
+                        if appearanceData.shouldShow and appearanceData.useClassColor then
                             local _, class = UnitClass(unit)
                             local c = RAID_CLASS_COLORS[class]
                             if c then
@@ -153,8 +133,8 @@ f:SetScript("OnEvent", function(self, event, addon)
                                 end
                                 self:SetUnitColor(unit, c.r, c.g, c.b, 1)
                             end
-                        end)
-                    end
+                        end
+                    end)
                 end
             end
         end

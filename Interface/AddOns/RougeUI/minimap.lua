@@ -51,17 +51,18 @@ MM:SetScript("OnEvent", function(self)
             end)
         end
 
-        MiniMapMailFrame:ClearAllPoints()
-        MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
-
         MinimapZoneText:ClearAllPoints()
         MinimapZoneText:SetPoint("TOPLEFT", "MinimapZoneTextButton", "TOPLEFT", 8, 0)
 
         self:UnregisterEvent("PLAYER_LOGIN")
 
-        if IsAddOnLoaded("Leatrix_Plus") and (LeaPlusDB["MinimapModder"] == "On" and LeaPlusDB["CombineAddonButtons"] == "On") then
+        if IsAddOnLoaded("Leatrix_Plus") and (LeaPlusDB["MinimapModder"] == "On" and (LeaPlusDB["CombineAddonButtons"] == "On") or LeaPlusDB["SquareMinimap"] == "On") then
             return
         end
+
+        MiniMapMailFrame:ClearAllPoints()
+        MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
+
         if MiniMapTracking then
             MiniMapTracking:Hide()
             Minimap:SetScript("OnMouseUp", function(self, btn)

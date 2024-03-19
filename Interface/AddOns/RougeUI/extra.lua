@@ -673,7 +673,6 @@ local events = {
     "PLAYER_LOGIN",
     "PLAYER_ENTERING_WORLD",
     "ZONE_CHANGED_NEW_AREA",
-    "UPDATE_UI_WIDGET"
 }
 
 local function GetActionButton(slot)
@@ -808,37 +807,6 @@ local function RangeIndicator(self, checksRange, inRange)
     end
 end
 
-local function ChangeText(frame)
-    if not frame then
-        return
-    end
-    local regions = { frame:GetRegions() }
-    local childFrames = { frame:GetChildren() }
-
-    for _, region in ipairs(regions) do
-        if region:IsObjectType("FontString") then
-            region:SetJustifyH("LEFT")
-            region:SetPoint("TOP")
-            if not region.hooked then
-                hooksecurefunc(region, "SetPoint", function(self)
-                    if self.changed or InActiveBattlefield() then
-                        return
-                    end
-                    self.changed = true
-                    self:SetJustifyH("LEFT")
-                    self:SetPoint("TOP")
-                    self.changed = false
-                end)
-                region.hooked = true
-            end
-        end
-    end
-
-    for _, childFrame in ipairs(childFrames) do
-        ChangeText(childFrame)
-    end
-end
-
 local conflictingAddons = {
     "BuffSizer",
     "ClassicAuraDurations",
@@ -881,8 +849,6 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.ThickFrames then
             ApplyThickness()
         end
-
-        ChangeText(UIWidgetTopCenterContainerFrame)
 
         if RougeUI.db.NoLevel or RougeUI.db.ThickFrames or RougeUI.db.GoldElite or RougeUI.db.RareElite or RougeUI.db.Rare or RougeUI.db.ClassNames then
             hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
@@ -1043,13 +1009,6 @@ e:SetScript("OnEvent", function(self, event)
         SpellQueueFix()
     else
         self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
-    end
-
-    if event == "UPDATE_UI_WIDGET" then
-        ChangeText(UIWidgetTopCenterContainerFrame)
-        C_Timer.After(10, function()
-            self:UnregisterEvent("UPDATE_UI_WIDGET")
-        end)
     end
 
     self:UnregisterEvent("PLAYER_LOGIN")
