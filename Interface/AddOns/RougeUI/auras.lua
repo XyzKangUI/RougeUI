@@ -1,9 +1,8 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy
 local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
 local UnitClass, UnitIsFriend = _G.UnitClass, _G.UnitIsFriend
-local _, LibClassicDurations = ...
-local isClassic
+local isClassic, LibClassicDurations
 local mabs, mfloor = math.abs, math.floor
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns and C_AddOns.IsAddOnLoaded
 local AURA_OFFSET_Y = 1
@@ -384,8 +383,8 @@ local function Target_Update(frame)
 
                     -- Handle cooldowns
                     frameCooldown = _G[frameName .. "Cooldown"]
-                    if LibClassicDurations and LibClassicDurations.GetAuraDurationByUnitDirect then
-                        local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnitDirect(frame.unit, spellId, caster)
+                    if LibClassicDurations then
+                        local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(frame.unit, spellId, caster)
                         if duration == 0 and durationNew then
                             duration = durationNew
                             expirationTime = expirationTimeNew
@@ -538,10 +537,12 @@ FF:RegisterEvent("PLAYER_LOGIN")
 FF:SetScript("OnEvent", function(self)
     if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
         RougeUI.RougeUIF:HookAuras()
-        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then isClassic = true return end
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            isClassic = true
+        end
         if isClassic then
-            LibClassicDurations = LibStub("LibClassicDurations")
-            LibClassicDurations:Register("RougeUI")
+            LibClassicDurations = LibStub("LibClassicDurations", true)
+            LibClassicDurations:RegisterFrame(addonName)
             LibClassicDurations.RegisterCallback(RougeUI, "UNIT_BUFF", function(event, unit)
                 TargetFrame_UpdateAuras(TargetFrame)
             end)

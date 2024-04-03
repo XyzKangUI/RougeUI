@@ -206,6 +206,10 @@ if isSoD then
         [GetSpellInfo(429820)] = 10, -- Starfall
         [GetSpellInfo(13278)] = 4, -- Gnomish Death Ray
         [GetSpellInfo(20577)] = 10, -- Cannibalize
+        [GetSpellInfo(447548)] = 10, -- Twisted Tranquility
+        [GetSpellInfo(446101)] = 30, -- Atal'ai Blood Ceremony
+        [GetSpellInfo(446586)] = 3, -- Dizzying Spin
+        [GetSpellInfo(449431)] = 8, -- Starfall
     }
 end
 
@@ -246,15 +250,15 @@ FR:SetScript("OnEvent", function(self, event)
                     end
 
                     if not duration then
-                        if desc == "" or desc == nil then
-                            local spell = Spell:CreateFromSpellID(spellId)
-                            spell:ContinueOnSpellLoad(function()
-                                name, icon, desc = spell:GetSpellName(), spell:GetSpellTexture(), spell:GetSpellDescription()
-                            end)
-                        end
-
-                        if not (desc == "" or desc == nil) then
-                            duration = tonumber(desc:match("[Ll]asts%s-(%d+)%s-([Ss]econds?|[Ss]ec)")) or tonumber(desc:match("for%s-(%d+)%s-sec")) or tonumber(desc:match("over%s-(%d+)%s-sec"))
+                        if desc and desc ~= "" then
+                            local highestSec = 0
+                            for dur in desc:gmatch("(%d+)%s-[Ss]ec") do
+                                local val = tonumber(dur)
+                                if val and val > highestSec then
+                                    highestSec = val
+                                end
+                            end
+                            duration = (highestSec and highestSec > 0) and highestSec or nil
                         else
                             return
                         end
