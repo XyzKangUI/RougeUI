@@ -383,13 +383,6 @@ local function Target_Update(frame)
 
                     -- Handle cooldowns
                     frameCooldown = _G[frameName .. "Cooldown"]
-                    if LibClassicDurations then
-                        local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(frame.unit, spellId, caster)
-                        if duration == 0 and durationNew then
-                            duration = durationNew
-                            expirationTime = expirationTimeNew
-                        end
-                    end
                     CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
                     frameCooldown:SetDrawEdge(false)
                 end
