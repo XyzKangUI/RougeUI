@@ -56,14 +56,22 @@ function RougeUI.RougeUIF:CusFonts()
 
     if PetFrameHealthBar and PetFrameHealthBar.TextString then
         PetFrameHealthBar.TextString:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
-        PetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
-        PetFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
+        if PetFrameHealthBar.LeftText then
+            PetFrameHealthBar.LeftText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
+        end
+        if PetFrameHealthBar.RightText then
+            PetFrameHealthBar.RightText:SetFont(FontType, RougeUI.db.HPFontSize - 2, "OUTLINE")
+        end
     end
 
     if PetFrameManaBar and PetFrameManaBar.TextString then
         PetFrameManaBar.TextString:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
-        PetFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
-        PetFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
+        if PetFrameManaBar.LeftText then
+            PetFrameManaBar.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
+        end
+        if PetFrameManaBar.RightText then
+            PetFrameManaBar.RightText:SetFont(FontType, RougeUI.db.ManaFontSize - 2, "OUTLINE")
+        end
     end
 
     if TargetFrameHealthBar and TargetFrameHealthBar.TextString then
@@ -194,7 +202,7 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
                 textString:SetText(statusFrame.prefix .. " " .. valueDisplay .. " / " .. valueMaxDisplay);
             else
                 if RougeUI.db.Abbreviate or RougeUI.db.ShortNumeric then
-                    if (value > 1e5) then
+                    if (value > 1e7) then
                         textString:SetFormattedText("%s || %.0f%%", true_format(value), 100 * value / valueMax);
                     else
                         textString:SetText(true_format(value))

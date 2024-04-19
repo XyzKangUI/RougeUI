@@ -24,32 +24,32 @@ local eventRegistered = {
 }
 
 local PF = {
-    [8122] = true,
+    [8122] = true, -- Psychic Scream
     [8124] = true,
     [10888] = true,
     [10890] = true,
-    [5782] = true,
+    [5782] = true, -- Fear
     [6213] = true,
     [6215] = true,
-    [5484] = true,
+    [5484] = true, -- Howl of Terror
     [17928] = true,
     [5246] = true, -- Intimidating Shout
     [51514] = true, -- Hex
     [10326] = true -- Turn Evil
 }
 
--- https://wowwiki-archive.fandom.com/wiki/Base_health
+-- Base Health lvl 85
 local classHealth = {
-    [1] = 8121, -- Warrior
-    [2] = 6934, -- Paladin
-    [3] = 7324, -- Hunter
-    [4] = 7604, -- Rogue
-    [5] = 6960, -- Priest
-    [6] = 8121, -- Death Knight
-    [7] = 7604, -- Shaman
-    [8] = 6963, -- Mage
-    [9] = 7164, -- Warlock
-    [11] = 7417, -- Druid
+    [1] = 43285, -- Warrior
+    [2] = 43285, -- Paladin
+    [3] = 39037, -- Hunter
+    [4] = 40529, -- Rogue
+    [5] = 43285, -- Priest
+    [6] = 43285, -- Death Knight
+    [7] = 37097, -- Shaman
+    [8] = 37113, -- Mage
+    [9] = 38184, -- Warlock
+    [11] = 39533, -- Druid
 }
 
 -- Do all damaging trinket procs count or only pendulum of telluric currents?
@@ -189,22 +189,22 @@ frame:SetScript("OnEvent", function(self, event, ...)
         cacheUnit = {}
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         CLEU()
-    elseif event == "GLYPH_UPDATED" then
-        local _, _, class = UnitClass("player")
-        if (class == 7 or class == 9) then
-            GlyphCheck()
-        end
+    --elseif event == "GLYPH_UPDATED" then
+    --    local _, _, class = UnitClass("player")
+    --    if (class == 7 or class == 9) then
+    --        GlyphCheck()
+    --    end
     elseif event == "PLAYER_LOGIN" then
         if not RougeUI.db.PSTrack then
             self:UnregisterAllEvents()
             self:SetScript("OnEvent", nil)
             return
         end
-        local _, _, class = UnitClass("player")
-        if (class == 7 or class == 9) then
-            frame:RegisterEvent("GLYPH_UPDATED")
-            GlyphCheck()
-        end
+        --local _, _, class = UnitClass("player")
+        --if (class == 7 or class == 9) then
+        --    frame:RegisterEvent("GLYPH_UPDATED")
+        --    GlyphCheck()
+        --end
         self:UnregisterEvent("PLAYER_LOGIN")
     elseif event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...

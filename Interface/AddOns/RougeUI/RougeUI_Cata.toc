@@ -1,6 +1,6 @@
-## Interface: 30403
-## Title: |cff009cffRougeUI-WOTLKC|r
-## Version: 3.70
+## Interface: 40400
+## Title: |cff009cffRougeUI-Cataclysm|r
+## Version: 3.71
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 

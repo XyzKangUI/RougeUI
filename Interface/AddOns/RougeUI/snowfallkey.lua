@@ -122,7 +122,7 @@ local function AnimateBartender()
 end
 
 local function AnimateDominos()
-    for i = 1, 120 do
+    for i = 1, 168 do
         AnimateClick(_G["DominosActionButton" .. i])
     end
 end

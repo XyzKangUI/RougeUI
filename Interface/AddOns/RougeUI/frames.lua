@@ -405,12 +405,27 @@ local function FrameColour()
 
     -- Paperdoll
 
+    if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+        if CharacterFrame then
+            for _, v in ipairs({CharacterFrame:GetRegions()}) do
+                if v:IsObjectType("Texture") then
+                    v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
+            end
+        end
+
+        CharacterFramePortrait:SetVertexColor(1,1,1)
+    end
+
     if PaperDollFrame then
         local a, b, c, d, _, e = PaperDollFrame:GetRegions()
         for _, v in pairs({ a, b, c, d, e }) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
+        end
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+            a:SetVertexColor(1, 1, 1)
         end
     end
 
@@ -483,10 +498,21 @@ local function FrameColour()
     -- PvPFrame
 
     if PVPFrame then
-        local _, _, c, d, e, f, g, h = PVPFrame:GetRegions()
-        for _, v in pairs({ c, d, e, f, g, h }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+            for _, v in pairs({PVPFrame:GetRegions()}) do
+                if v:IsObjectType("Texture") then
+                    v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
+            end
+            PVPFramePortrait:SetVertexColor(1, 1, 1)
+            PVPFrameLeftButton_RightSeparator:SetAlpha(0)
+            PVPFrameRightButton_LeftSeparator:SetAlpha(0)
+        else
+            local _, _, c, d, e, f, g, h = PVPFrame:GetRegions()
+            for _, v in pairs({ c, d, e, f, g, h }) do
+                if v then
+                    v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
             end
         end
     end
@@ -770,7 +796,7 @@ local function NewVariables()
     if SpellBookFrame then
         local _, a, b, c, d, e, f, _, _, i, j, k, l, m, n, o, p = SpellBookFrame:GetRegions()
         local vars = {}
-        if build >= "4.4.0" then
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
             vars = { a, c, d, e, f, i, j, k, l, m, n, o, p }
             SpellBookFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             SpellBookFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
@@ -787,7 +813,7 @@ local function NewVariables()
         end
     end
 
-    if not SpellBookFrame.Material and GetBuildInfo() < "4.4.0" then
+    if not SpellBookFrame.Material and WOW_PROJECT_ID ~= WOW_PROJECT_CATACLYSM_CLASSIC then
         SpellBookFrame.Material = SpellBookFrame:CreateTexture(nil, "OVERLAY", nil, 7)
         SpellBookFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
         SpellBookFrame.Material:SetWidth(547)
@@ -1025,7 +1051,7 @@ local function BlizzFrames(addon)
 
     if addon == "Blizzard_TalentUI" then
         local k, j = 2, 6
-        if GetBuildInfo() >= "4.4.0" then
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
             k, j = 1, 25
         end
         local vectors = { PlayerTalentFrame:GetRegions() }
@@ -1035,7 +1061,9 @@ local function BlizzFrames(addon)
             end
         end
 
-        if GetBuildInfo() >= "4.4.0" then
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+            PlayerTalentFrameToggleSummariesButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            PlayerTalentFrameToggleSummariesButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
 
             if PlayerTalentFrameTitleText then
                 PlayerTalentFrameTitleText:SetVertexColor(1, 0.8196079134911, 0)
@@ -1353,6 +1381,24 @@ local function BlizzFrames(addon)
         MountJournalInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         MountJournalInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
+
+    if addon == "Blizzard_Communities" then
+        for _, v in pairs({CommunitiesFrame:GetRegions()}) do
+            if v:IsObjectType("Texture") then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+    end
+
+    if addon == "Blizzard_EncounterJournal" then
+        for _, v in pairs({EncounterJournal:GetRegions()}) do
+            if v:IsObjectType("Texture") then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+        EncounterJournalPortrait:SetVertexColor(1, 1, 1)
+    end
+
 end
 
 local Framecolor = CreateFrame("Frame")
