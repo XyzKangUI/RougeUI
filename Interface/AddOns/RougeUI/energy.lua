@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local EnemyOOC = {}
 EnemyOOC.U = {}
 local UnitPowerType, UnitPower, UnitAffectingCombat = _G.UnitPowerType, _G.UnitPower, _G.UnitAffectingCombat
@@ -32,7 +32,7 @@ local updateUnit = {
     ["arena5"] = true
 }
 
-local powerTypes = { [0] = true, [3] = true, [1] = true, [6] = true }
+local powerTypes = { [0] = true, [3] = true, [1] = true, [6] = true, [2] = true }
 
 local energyValues = {
     arena1 = {
@@ -224,6 +224,32 @@ EnemyOOC.Quirks = {
     [25711] = true, -- Forbearance
     [642] = true, -- Divine Shield
     [10278] = true, -- Hand of Protection
+    [79140] = true, -- Vendetta
+    [44461] = true, -- Living Bomb (the proc doesn't reset combat, bug?)
+    [413843] = true, -- Ignite
+    [73981] = true, -- Redirect
+    [55095] = true, -- Frost Fever
+    [50435] = true, -- Chillbains
+    [81326] = true, -- Brittle Bones
+    [81281] = true, -- Fungal Growth
+    [53652] = true, -- Beacon of Light (Words of Glory and Light of Dawn keep combat)
+    [86678] = true, -- Guardian (Holy)
+    --[82327] = true, -- Holy Radiance
+    [86273] = true, -- Illuminated healing
+    [98021] = true, -- Spirit Link Totem
+    [7001] = true, -- Lightwell Renew
+    [81269] = true, -- Efflorescence
+    [81262] = true, -- Efflorescence
+    [76577] = true, -- Smoke Bomb
+    [88611] = true, -- Smoke Bomb
+    [2094] = true, -- Blind
+    [413764] = true, -- Deep wound
+    [43100] = true, -- Deep wound
+    [23256] = true, -- Deep wound
+    [46857] = true, -- Trauma
+    [82676] = true, -- Ring of Frost
+    [82691] = true, -- Ring of Frost
+    [87023] = true, -- Cauterize
 };
 
 EnemyOOC.Channeling = {
@@ -310,10 +336,11 @@ EnemyOOC.Pets = {
 
 EnemyOOC.Refreshes = {
     [3600] = true, -- Eartbind totem
-    [55095] = true, -- Frost Fever
     [55078] = true, -- Blood Plague
     [50510] = true, -- Crypt Fever
-    [51735] = true -- Ebon Plague
+    [55095] = true, -- Frost Fever
+    [51735] = true, -- Ebon Plague
+    [65142] = true, -- Ebon Plague
 };
 
 -- This list is for spells that we need to track because they either fire no cast_success (or have an unknown destguid)
@@ -432,7 +459,7 @@ EnemyOOC.Directdamage = {
     [33933] = true, -- Blast Wave r7
     [42944] = true, -- Blast Wave r8
     [42945] = true, -- Blast Wave r9
-    --	[44461] = true, -- Living Bomb r1 (the proc resets combat)
+    [44461] = true, -- Living Bomb r1 (the proc resets combat)
     --	[55361] = true, -- Living Bomb r2
     --	[55362] = true, -- Living Bomb r3
     [7268] = true, -- Arcane Missiles r1
@@ -460,6 +487,10 @@ EnemyOOC.Directdamage = {
     [47501] = true, -- Thunder clap r8
     [47502] = true, -- Thunder clap r9
     [8349] = true, -- Fire nova
+    [77478] = true, -- Earthquake
+    [82739] = true, -- Flame orb
+    [84721] = true, -- Frostfire Orb
+    --[88751] = true, -- Wild Mushroom: Detonate
 };
 
 local function CreateIcon(unit, frame)
@@ -614,7 +645,7 @@ function EnemyOOC:UNIT_POWER_UPDATE(unit, type)
         return
     end
 
-    if ((energyValues[unit].last_value == 0) and (type == "ENERGY" or type == "MANA")) then
+    if ((energyValues[unit].last_value == 0) and (type == "ENERGY" or type == "MANA" or type == "FOCUS")) then
         energyValues[unit].last_value = energy
         return
     elseif (type == "RAGE" or type == "RUNIC_POWER") and not (energyInc == -2 or energyInc == -1 or energyInc == -3) then
@@ -694,6 +725,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     local isEnemyPet = CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_UNITS)
     local isDestHostile = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_UNITS)
     local isUnknown = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_UNKNOWN_UNITS)
+    local GuardianPet = bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_GUARDIAN) > 0 and isEnemyPet
 
     if (not isDestEnemy and not isSourceEnemy and not isEnemyPet) then
         return
@@ -717,6 +749,16 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     -- Pet attacks keep the summoner in combat, while some pet cd's do not (mind blowing logic).
     -- The entire duration of "Seduction" the warlock does not drop combat. That means ooc is 8+ sec which will bug timer.
     if (isEnemyPet and spellID ~= 6358 and (not (eventType == "SWING_DAMAGE" or eventType == "SPELL_DAMAGE") or self.Pets[spellID])) then
+        return
+    end
+
+    -- Ret paladin Guardian or Warlock Doomguard don't keep player in combat
+    if GuardianPet and (eventType == "SWING_DAMAGE" or spellID == 85692) then
+        return
+    end
+
+    -- Shadowy Apparitions only refresh combat on dest.
+    if spellID == 87532 and isSourceEnemy then
         return
     end
 
@@ -777,11 +819,6 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
         end
     end
 
-    -- Locks always have to be exceptional
-    if ((eventType == "SPELL_PERIODIC_LEECH" or eventType == "SPELL_AURA_APPLIED") and spellID == 5138) then
-        return
-    end
-
     -- Feral charge (bear) affects only source's combat state.
     if (isDestEnemy or isDestHostile) and spellID == 16979 then
         return
@@ -826,7 +863,7 @@ function EnemyOOC:UNIT_SPELLCAST_SUCCEEDED(unit, a, b, spellID)
     end
 end
 
-local failSpellIDs = {[5171] = true, [6774] = true, [48674] = true, [48673] = true, [26679] = true}
+local failSpellIDs = { [5171] = true, [6774] = true, [48674] = true, [48673] = true, [26679] = true }
 function EnemyOOC:UNIT_SPELLCAST_FAILED(unit, a, b, spellID)
     if not updateUnit[unit] then
         return
@@ -910,19 +947,15 @@ function EnemyOOC:UpdateText(unit)
 end
 
 EnemyOOC.event = CreateFrame("Frame")
-EnemyOOC.event:RegisterEvent("PLAYER_LOGIN")
-EnemyOOC.event:RegisterEvent("PLAYER_ENTERING_WORLD")
+EnemyOOC.event:RegisterEvent("ADDON_LOADED")
 EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
-    if event == "PLAYER_LOGIN" then
-        if not RougeUI.db.EnemyTicks then
-            self:UnregisterAllEvents()
-            self:SetScript("OnEvent", nil)
-            return  
+    if event == "ADDON_LOADED" and ... == addonName then
+        if RougeUI.db.EnemyTicks then
+            CreateIcon("target", TargetFrame)
+            CreateIcon("focus", FocusFrame)
+            indicator = RougeUI.db.CombatIndicator
+            self:RegisterEvent("PLAYER_ENTERING_WORLD")
         end
-        CreateIcon("target", TargetFrame)
-        CreateIcon("focus", FocusFrame)
-        indicator = RougeUI.db.CombatIndicator
-        self:UnregisterEvent("PLAYER_LOGIN")
     elseif event == "PLAYER_TARGET_CHANGED" then
         if powerTypes[PowerType("target")] and UnitAffectingCombat("target") and UnitCanAttack("player", "target") and UnitIsPlayer("target") then
             -- xx
@@ -958,7 +991,9 @@ EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
             end
         end
     else
-        EnemyOOC[event](EnemyOOC, ...)
+        if EnemyOOC[event] then
+            EnemyOOC[event](EnemyOOC, ...)
+        end
     end
 end)
 

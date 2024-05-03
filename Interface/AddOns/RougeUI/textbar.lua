@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local FontType = STANDARD_TEXT_FONT
 local mfloor, tonumber, mceil = math.floor, tonumber, math.ceil
 local GetCVar, UnitIsDeadOrGhost, UnitExists = GetCVar, UnitIsDeadOrGhost, UnitExists
@@ -10,7 +10,7 @@ local function round(value)
 end
 
 local function CreateText(name, parentName, point, x, y)
-    local fontString = TargetFrameTextureFrame:CreateFontString(parentName..name, nil, "TextStatusBarText")
+    local fontString = TargetFrameTextureFrame:CreateFontString(parentName .. name, nil, "TextStatusBarText")
     fontString:SetPoint(point, TargetFrameTextureFrame, point, x, y)
 
     return fontString
@@ -95,9 +95,9 @@ function RougeUI.RougeUIF:CusFonts()
     end
 
     for i = 1, 5 do
-        if _G["ArenaEnemyFrame"..i] then
-            local hp = _G["ArenaEnemyFrame"..i.."HealthBar"]
-            local mana = _G["ArenaEnemyFrame"..i.."ManaBar"]
+        if _G["ArenaEnemyFrame" .. i] then
+            local hp = _G["ArenaEnemyFrame" .. i .. "HealthBar"]
+            local mana = _G["ArenaEnemyFrame" .. i .. "ManaBar"]
             hp.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
             hp.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
             hp.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
@@ -225,21 +225,6 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
     end
 end
 
-local CF = CreateFrame("Frame")
-CF:RegisterEvent("PLAYER_LOGIN")
-CF:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_LOGIN" and (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
-        hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
-    end
-    isClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-    if isClassic and not IsAddOnLoaded("ModernTargetFrame") then
-        CreateStatusText()
-        RougeUI.RougeUIF:CusFonts()
-    end
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:SetScript("OnEvent", nil)
-end);
-
 local function PartyStatusBarText()
     if not PartyText then
         for i = 1, 4, 1 do
@@ -293,37 +278,42 @@ local function UpdatePartyHealth(unit)
 end
 
 local PW = CreateFrame("Frame")
-PW:RegisterEvent("PLAYER_LOGIN")
-PW:RegisterEvent("UNIT_HEALTH_FREQUENT")
-PW:RegisterEvent("UNIT_POWER_FREQUENT")
+PW:RegisterEvent("ADDON_LOADED")
 PW:SetScript("OnEvent", function(self, event, unit)
-    if not RougeUI.db.PartyText then
-        self:UnregisterAllEvents()
-        self:SetScript("OnEvent", nil)
-        return
-    end
+    if event == "ADDON_LOADED" and unit == addonName then
+        if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
+            hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+        end
+        isClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+        if isClassic and not IsAddOnLoaded("ModernTargetFrame") then
+            CreateStatusText()
+            RougeUI.RougeUIF:CusFonts()
+        end
 
-    if event == "PLAYER_LOGIN" then
-        hooksecurefunc("PartyMemberFrame_UpdateMember", function(self)
-            local i = self:GetID()
-            if UnitExists("party" .. i) then
-                UpdatePartyMana("party" .. i)
-                UpdatePartyHealth("party" .. i)
-            end
-        end)
-        PartyStatusBarText()
-        self:UnregisterEvent("PLAYER_LOGIN")
-    end
+        if RougeUI.db.PartyText then
+            hooksecurefunc("PartyMemberFrame_UpdateMember", function(self)
+                local i = self:GetID()
+                if UnitExists("party" .. i) then
+                    UpdatePartyMana("party" .. i)
+                    UpdatePartyHealth("party" .. i)
+                end
+            end)
+            PartyStatusBarText()
 
-    if not (unit == "party1" or unit == "party2" or unit == "party3" or unit == "party4") then
-        return
-    end
-
-    if event == "UNIT_HEALTH_FREQUENT" then
+            PW:RegisterEvent("UNIT_HEALTH_FREQUENT")
+            PW:RegisterEvent("UNIT_POWER_FREQUENT")
+        end
+    elseif event == "UNIT_HEALTH_FREQUENT" then
+        if not (unit == "party1" or unit == "party2" or unit == "party3" or unit == "party4") then
+            return
+        end
         if UnitExists(unit) then
             UpdatePartyHealth(unit);
         end
     elseif event == "UNIT_POWER_FREQUENT" then
+        if not (unit == "party1" or unit == "party2" or unit == "party3" or unit == "party4") then
+            return
+        end
         if UnitExists(unit) then
             UpdatePartyMana(unit)
         end

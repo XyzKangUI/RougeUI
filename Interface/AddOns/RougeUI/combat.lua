@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local Indicator = {}
 
 local function InCombat(unit)
@@ -10,7 +10,7 @@ local function InCombat(unit)
         if (IsActiveBattlefieldArena() and not (class == 1 or class == 2 or class == 4 or class == 11)) then
             for i = 1, 5, 1 do
                 if UnitExists("arenapet" .. i .. "target") or UnitDetailedThreatSituation("player", "arenapet" .. i) or
-                        UnitDetailedThreatSituation("party"..i, "arenapet" .. i) then
+                        UnitDetailedThreatSituation("party" .. i, "arenapet" .. i) then
                     if UnitIsUnit(unit, "arena" .. i) then
                         return true
                     end
@@ -53,16 +53,12 @@ local function CreateCombatIndicatorForUnit(frame)
 end
 
 local f = CreateFrame("Frame")
-f:RegisterEvent("PLAYER_LOGIN")
-f:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_LOGIN" then
-        if RougeUI.db.CombatIndicator then
-            CreateCombatIndicatorForUnit(TargetFrame)
-            if FocusFrame then
-                CreateCombatIndicatorForUnit(FocusFrame)
-            end
+f:RegisterEvent("ADDON_LOADED")
+f:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" and RougeUI.db.CombatIndicator and (... == addonName) then
+        CreateCombatIndicatorForUnit(TargetFrame)
+        if FocusFrame then
+            CreateCombatIndicatorForUnit(FocusFrame)
         end
-        self:UnregisterEvent("PLAYER_LOGIN")
-        self:SetScript("OnEvent", nil)
     end
 end)

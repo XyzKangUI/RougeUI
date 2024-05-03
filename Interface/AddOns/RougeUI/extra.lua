@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local pairs, gsub = pairs, string.gsub
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local IsInInstance, IsDesaturated = IsInInstance, IsDesaturated
@@ -649,14 +649,22 @@ local function PetArtThick()
     PetFrameHealthBar.TextString:SetPoint("CENTER", PetFrameHealthBar, "CENTER", 0, -0.5)
     PetFrameManaBar.TextString:ClearAllPoints()
     PetFrameManaBar.TextString:SetPoint("CENTER", PetFrameManaBar, "CENTER", 0, 0)
-    PetFrameHealthBarTextLeft:ClearAllPoints()
-    PetFrameHealthBarTextLeft:SetPoint("TOPLEFT", 45, -18)
-    PetFrameHealthBarTextRight:ClearAllPoints()
-    PetFrameHealthBarTextRight:SetPoint("TOPRIGHT", -14, -18)
-    PetFrameManaBarTextLeft:ClearAllPoints()
-    PetFrameManaBarTextLeft:SetPoint("LEFT", 45, -7)
-    PetFrameManaBarTextRight:ClearAllPoints()
-    PetFrameManaBarTextRight:SetPoint("RIGHT", -14, -7)
+    if PetFrameHealthBarTextLeft then
+        PetFrameHealthBarTextLeft:ClearAllPoints()
+        PetFrameHealthBarTextLeft:SetPoint("TOPLEFT", 45, -18)
+    end
+    if PetFrameHealthBarTextRight then
+        PetFrameHealthBarTextRight:ClearAllPoints()
+        PetFrameHealthBarTextRight:SetPoint("TOPRIGHT", -14, -18)
+    end
+    if PetFrameManaBarTextLeft then
+        PetFrameManaBarTextLeft:ClearAllPoints()
+        PetFrameManaBarTextLeft:SetPoint("LEFT", 45, -7)
+    end
+    if PetFrameManaBarTextRight then
+        PetFrameManaBarTextRight:ClearAllPoints()
+        PetFrameManaBarTextRight:SetPoint("RIGHT", -14, -7)
+    end
 end
 
 local function ApplyThickness()
@@ -668,12 +676,6 @@ local function ApplyThickness()
     hooksecurefunc("PlayerFrame_ToVehicleArt", VehicleArtThick)
     hooksecurefunc("PetFrame_Update", PetArtThick)
 end
-
-local events = {
-    "PLAYER_LOGIN",
-    "PLAYER_ENTERING_WORLD",
-    "ZONE_CHANGED_NEW_AREA",
-}
 
 local function GetActionButton(slot)
     local name
@@ -819,11 +821,16 @@ local conflictingAddons = {
 }
 
 local e = CreateFrame("Frame")
-for _, v in pairs(events) do
-    e:RegisterEvent(v)
-end
-e:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_LOGIN" then
+e:RegisterEvent("ADDON_LOADED")
+e:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" and ... == addonName then
+        if RougeUI.db.FadeIcon or RougeUI.db.SQFix or RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
+            self:RegisterEvent("PLAYER_ENTERING_WORLD")
+        end
+
+        if RougeUI.db.SQFix then
+            self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+        end
 
         isClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
@@ -985,9 +992,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.ThickFrames or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3) or RougeUI.db.ClassNames then
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
-    end
-
-    if event == "PLAYER_ENTERING_WORLD" then
+    elseif event == "PLAYER_ENTERING_WORLD" then
         if RougeUI.db.FadeIcon then
             PvPIcon()
         end
@@ -999,18 +1004,8 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
             HideHotkeys()
         end
-
-        if not RougeUI.db.FadeIcon and not RougeUI.db.SQFix and not RougeUI.db.HideHotkey and not RougeUI.db.HideMacro then
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-        end
-    end
-
-    if event == "ZONE_CHANGED_NEW_AREA" and RougeUI.db.SQFix then
+    elseif event == "ZONE_CHANGED_NEW_AREA" then
         SpellQueueFix()
-    else
-        self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
     end
-
-    self:UnregisterEvent("PLAYER_LOGIN")
 end)
 

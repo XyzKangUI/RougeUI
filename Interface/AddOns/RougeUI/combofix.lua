@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local comboPoints = 0;
 local comboPointsCache = {};
 local targetGUID
@@ -68,21 +68,31 @@ local function ComboUpdate(self)
 end
 
 local CF = CreateFrame("Frame")
-CF:RegisterEvent("PLAYER_LOGIN")
-CF:RegisterEvent("PLAYER_ENTERING_WORLD")
-CF:RegisterEvent("UNIT_POWER_UPDATE")
-
+CF:RegisterEvent("ADDON_LOADED")
 CF:SetScript("OnEvent", function(self, event, ...)
-    if event == "PLAYER_LOGIN" then
-        if not RougeUI.db.cfix then
-            self:UnregisterAllEvents()
-            self:SetScript("OnEvent", nil)
+    if event == "ADDON_LOADED" and (... == addonName) and RougeUI.db.cfix then
+        local _, _, class = UnitClass("player")
+        if not (class == 4 or class == 11) then
             return
         end
+
+        self:RegisterEvent("PLAYER_ENTERING_WORLD")
+        self:RegisterEvent("UNIT_POWER_UPDATE")
+        self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED")
         hooksecurefunc("ComboFrame_Update", ComboUpdate)
     elseif event == "PLAYER_ENTERING_WORLD" then
         comboPointsCache = {}
     elseif event == "UNIT_POWER_UPDATE" then
         ComboFrame_Update(ComboFrame)
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        local _, _, spellId = ...
+        if spellId == 73981 or spellId == 14183 then
+            local timer = C_Timer.NewTicker(0, function(self)
+                if GetComboPoints("player", "target") ~= comboPoints then
+                    ComboFrame_Update(ComboFrame)
+                    self:Cancel()
+                end
+            end)
+        end
     end
 end)

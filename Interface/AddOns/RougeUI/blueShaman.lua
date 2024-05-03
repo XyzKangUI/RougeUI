@@ -4,7 +4,7 @@ local blueShaman = { r = 0.0, g = 0.44, b = 0.87, colorStr = "ff0070de" }
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("ADDON_LOADED")
-f:SetScript("OnEvent", function(self, event, addon)
+f:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         if IsAddOnLoaded("!WeWantBlueShamans") then
             self:UnregisterAllEvents()
@@ -92,7 +92,7 @@ f:SetScript("OnEvent", function(self, event, addon)
                 }))
             end
         end
-    elseif event == "ADDON_LOADED" and addon == "Blizzard_RaidUI" then
+    elseif event == "ADDON_LOADED" and ... == "Blizzard_RaidUI" then
         -- RaidGroupButtons
         hooksecurefunc("RaidGroupFrame_Update", function()
             local isRaid = IsInRaid();

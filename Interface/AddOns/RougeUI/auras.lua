@@ -10,13 +10,13 @@ local AURA_OFFSET_Y = 1
 local Enraged = {
     --[5229] = true, -- Enrage (Druid)
     [1719] = true, -- Recklessness
-    --[12880] = true, -- Enrage (npc)
+    [12880] = true, -- Enrage
     --[14204] = true, -- Enrage (npc)
     --[14202] = true, -- Enrage (npc)
     --[14203] = true, -- Enrage (npc)
     --[14201] = true, -- Enrage (npc)
     [18499] = true, -- Berseker Rage
-    --[12292] = true, -- Death Wish
+    [12292] = true, -- Death Wish
     --[2687] = true, -- Bloodrage
     --[29131] = true, -- Bloodrage
     [48391] = true, -- Owlkin Frenzy
@@ -24,10 +24,10 @@ local Enraged = {
     [50636] = true, -- Tormented Roar (npc)
     --[51662] = true, -- Hunger for blood
     [54508] = true, -- Demonic Empowerment
-    --[57514] = true, -- Enrage (npc)
+    [57514] = true, -- Enrage
     --[57516] = true, -- Enrage
-    --[57518] = true, -- Enrage
-    --[57519] = true, -- Enrage
+    [57518] = true, -- Enrage
+    [57519] = true, -- Enrage
     --[57520] = true, -- Enrage
     --[57522] = true, -- Enrage
     [63147] = true, -- Sara's Anger (npc)
@@ -39,6 +39,16 @@ local Enraged = {
     [63848] = true, -- Hfb (npc)
     [52610] = true, -- Savage roar
     [66759] = true, -- Frothing Rage
+    [81017] = true, -- Stampede
+    [81022] = true, -- Stampede
+    [81016] = true, -- Stampede
+    [81021] = true, -- Stampede
+    [77238] = true, -- Charged Fists
+    [69052] = true, -- Unholy Frenzy
+    [55462] = true, -- Storm's Fury
+    [76691] = true, -- Vengeance
+    [91668] = true, -- Unstable Strength
+    [81772] = true, -- Overtime
 }
 
 local Whitelist = {
@@ -47,9 +57,8 @@ local Whitelist = {
     [12042] = true, -- Arcane Power
     [12472] = true, -- Icy Veins
     [31884] = true, -- Avenging Wrath
-    [48066] = true, -- Power Word: Shield
-    [47986] = true, -- Sacrifice
-    [43039] = true, -- Ice Barrier
+    [17] = true, -- Power Word: Shield
+    [7812] = true, -- Sacrifice
     [22812] = true, -- Barkskin
     [1044] = true, -- Hand of Freedom
     [29166] = true, -- Innervate
@@ -57,30 +66,55 @@ local Whitelist = {
     [32182] = true, -- Heroism
     [10060] = true, -- Power Infusion
     [33206] = true, -- Pain Supression
-    [53312] = true, -- Nature's Grasp
+    [16689] = true, -- Nature's Grasp
     [6346] = true, -- Fear Ward
     [6940] = true, -- Hand of Sacrifice
-    [10278] = true, -- Blessing of Protection
+    [1022] = true, -- Blessing of Protection
     [18708] = true, -- Fel Domination
     [45438] = true, -- Ice Block
     [642] = true, -- Divine Shield
-    [53601] = true, -- Sacred Shield
+    [96263] = true, -- Sacred Shield
     [54428] = true, -- Divine Plea
     [66115] = true, -- Hand of Freedom
-    [498] = true, -- Divine Protection
-    [53563] = true, -- Beacon of Light
-    [63560] = true, -- Ghoul Frenzy
-    [31842] = true, -- Divine illumination
+    [31842] = true, -- Divine Favor
     [57761] = true, -- Fireball!
-    [49284] = true, -- Earth Shield
+    [974] = true, -- Earth Shield
     [69369] = true, -- Predator's Swiftness
     [64701] = true, -- Elemental Mastery
-    [44544] = true, -- Fingers of frost
     [63167] = true, -- Decimation
-    [63244] = true, -- Pyroclasm
     [34936] = true, -- Backlash
     [65081] = true, -- Body and Soul
-    [54372] = true  -- Nether Protection
+    [54372] = true, -- Nether Protection
+    [80353] = true, -- Time Warp
+    [85767] = true, -- Dark Intent
+    [90355] = true, -- Ancient Hysteria
+    [79462] = true, -- Demon Soul: Felguard
+    [79459] = true, -- Demon Soul: Imp
+    [79460] = true, -- Demon Soul: Felhnter
+    [79464] = true, -- Demon Soul: Voidwalker
+    [79463] = true, -- Demon Soul: Succubus
+    [81700] = true, -- Archangel
+    [87153] = true, -- Dark Archangel
+    [79206] = true, -- Spiritwalker's Grace
+    [89485] = true, -- Inner Focus
+    [93400] = true, -- Shooting Stars
+    [98864] = true, -- Ice Barrier
+    [91711] = true, -- Nether Ward
+    [80341] = true, -- Ignite Flesh
+    [79967] = true, -- Holy Shield
+    [83559] = true, -- Posthaste
+    [73718] = true, -- Conductivity
+    [76591] = true, -- Aura of Arcane Haste
+    [84469] = true, -- Fel Immolate
+    [88023] = true, -- Shroud of Gold
+    [96844] = true, -- Frostburn Formula
+    [74372] = true, -- Veil Sky
+    [83567] = true, -- Sparkling Sands
+    [85521] = true, -- Vile Aegis
+    [91624] = true, -- Enhance Magic
+    [76061] = true, -- Dark Blessing
+    [100394] = true, -- Draw Magic
+    [102259] = true, -- Sheen of Elune
 }
 
 local whitelistMetatable = {
@@ -409,9 +443,6 @@ local function Target_Update(frame)
                         elseif spellId == 49039 and (class == 5 or class == 2) then
                             r, g, b = 1, 0, 127 / 255 -- Pink
                             showHighlight = true
-                        elseif spellId == 53659 then
-                            r, g, b = 52 / 255, 235 / 255, 146 / 255 -- Green
-                            showHighlight = true
                         end
                     end
                 elseif (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and RougeUI.db.HighlightDispellable and isEnemy and debuffType == "Magic" then
@@ -463,12 +494,20 @@ local function Target_Update(frame)
 
     local maxDebuffs = frame.maxDebuffs or 16
     while (frameNum <= maxDebuffs and index <= maxDebuffs) do
-        local debuffName, icon, count, debuffType, duration, expirationTime, caster, _, _, _, _, _, casterIsPlayer, nameplateShowAll = UnitDebuff(frame.unit, index, "INCLUDE_NAME_PLATE_ONLY")
+        local debuffName, icon, count, debuffType, duration, expirationTime, caster, _, _, spellId, _, _, casterIsPlayer, nameplateShowAll = UnitDebuff(frame.unit, index, "INCLUDE_NAME_PLATE_ONLY")
         if (debuffName) then
             if (TargetFrame_ShouldShowDebuffs(frame.unit, caster, nameplateShowAll, casterIsPlayer)) then
                 frameName = selfName .. "Debuff" .. frameNum
                 buffFrame = _G[frameName]
                 if (icon) then
+
+                    local guid = caster and UnitGUID(caster) or nil
+                    if spellId == 88611 and RougeUI.bombExpireTime and guid then
+                        duration = RougeUI.bombExpireTime[guid] and 6 or 0
+                        expirationTime = RougeUI.bombExpireTime[guid] or 0
+                        frameCooldown = _G[frameName.."Cooldown"];
+                        CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
+                    end
                     -- set the debuff to be big if the buff is cast by the player or his pet
                     numDebuffs = numDebuffs + 1
                     largeDebuffList[numDebuffs] = ShouldAuraBeLarge(caster)
@@ -526,19 +565,21 @@ function RougeUI.RougeUIF:HookAuras()
 end
 
 local FF = CreateFrame("Frame")
-FF:RegisterEvent("PLAYER_LOGIN")
-FF:SetScript("OnEvent", function(self)
-    if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
-        RougeUI.RougeUIF:HookAuras()
-        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-            isClassic = true
-        end
-        if isClassic then
-            LibClassicDurations = LibStub("LibClassicDurations", true)
-            LibClassicDurations:RegisterFrame(addonName)
-            LibClassicDurations.RegisterCallback(RougeUI, "UNIT_BUFF", function(event, unit)
-                TargetFrame_UpdateAuras(TargetFrame)
-            end)
+FF:RegisterEvent("ADDON_LOADED")
+FF:SetScript("OnEvent", function(self, fireEvent, name)
+    if fireEvent == "ADDON_LOADED" and name == addonName then
+        if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
+            RougeUI.RougeUIF:HookAuras()
+            if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+                isClassic = true
+            end
+            if isClassic then
+                LibClassicDurations = LibStub("LibClassicDurations", true)
+                LibClassicDurations:RegisterFrame(addonName)
+                LibClassicDurations.RegisterCallback(RougeUI, "UNIT_BUFF", function(event, unit)
+                    TargetFrame_UpdateAuras(TargetFrame)
+                end)
+            end
         end
     end
 end)

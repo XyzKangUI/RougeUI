@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bt4 = IsAddOnLoaded("Bartender4")
 local dm = IsAddOnLoaded("Dominos")
@@ -41,7 +41,7 @@ local function CreateAnim(self)
     rotation:SetOrder(2)
 
     frame:SetAllPoints(self)
-    
+
     self.sfk = animation
     self.snowfall = frame
 end
@@ -128,16 +128,15 @@ local function AnimateDominos()
 end
 
 local CF = CreateFrame("Frame")
-CF:RegisterEvent("PLAYER_LOGIN")
-CF:SetScript("OnEvent", function(self)
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:SetScript("OnEvent", nil)
+CF:RegisterEvent("ADDON_LOADED")
+CF:SetScript("OnEvent", function(self, event, ...)
+    if ... == addonName and RougeUI.db.ButtonAnim and not (bt4 and dm) then
 
-    if RougeUI.db.ButtonAnim and not (bt4 and dm) then
         if RougeUI.db.KeyEcho then
             wahk = true
             return
         end
+
         if bt4 then
             AnimateBartender()
         elseif dm then

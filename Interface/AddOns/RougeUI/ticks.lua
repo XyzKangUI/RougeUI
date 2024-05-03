@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local pairs, GetManaRegen, m_abs = _G.pairs, _G.GetManaRegen, math.abs
 local UnitExists, UnitIsUnit, UnitIsEnemy = _G.UnitExists, _G.UnitIsUnit, _G.UnitIsEnemy
 local UnitPower, UnitIsPlayer = _G.UnitPower, _G.UnitIsPlayer
@@ -112,34 +112,28 @@ local function UpdateEnergy(unit, powerType)
     elseif powerType == "RAGE" and not UnitAffectingCombat(unit) then
         increment = (energyInc == -2 or energyInc == -1 or energyInc == -3)
     elseif powerType == "MANA" then
-        if ignoreTicks[energyInc] then
+        increment = (energy > energyValues[unit].last_value)
+
+        -- Ignore these ticks (hope it ain't disruptive)
+        local percentageGain = math.floor((energyInc / UnitPowerMax(unit)) * 100)
+        if percentageGain == 10 or percentageGain == 6 or ignoreTicks[energyInc] or C_UnitAuras.GetPlayerAuraBySpellID(425336) then
             increment = false
         end
 
         if unit == "player" then
-            local base, casting = GetManaRegen()
-            local tick = base * 2
-            if AuraUtil.FindAuraByName(GetSpellInfo(1137), "player") or (energyInc > 2) and (energy > energyValues[unit].last_value) and (m_abs(energyInc - tick) < 1) then
-                increment = true
+            local _, casting = GetManaRegen()
+            if AuraUtil.FindAuraByName(GetSpellInfo(1137), "player") then
+                energyValues[unit].tickRate = 2.02
                 possibleFSR = false
-            else
-                increment = false
-                if (energy < energyValues[unit].last_value) and not possibleFSR and (casting < 0.05) then
-                    possibleFSR = true
-                end
-            end
-        else
-            -- Ignore these ticks (hope it ain't disruptive)
-            local percentageGain = math.floor((energyInc / UnitPowerMax(unit)) * 100)
-            if percentageGain == 5 or percentageGain == 10 or percentageGain == 6 then
-                increment = false
-            else
-                increment = (energy > energyValues[unit].last_value)
+            elseif energyInc < 1 and not increment and casting < 0.05 then
+                possibleFSR = true
             end
         end
     end
 
-    if increment and not energyValues[unit].validTick then
+    energyValues[unit].last_value = energy
+
+    if increment and not energyValues[unit].validTick and energyValues[unit].tickRate == 2.02 then
         possibleFSR = false
         energyValues[unit].startTick = true
         energyValues[unit].validTick = true
@@ -151,8 +145,6 @@ local function UpdateEnergy(unit, powerType)
             TargetFrameManaBar.energy.spark:SetAlpha(1)
         end
     end
-
-    energyValues[unit].last_value = energy
 end
 
 local function RealTick()
@@ -183,53 +175,22 @@ local function RealTick()
 end
 
 local e = CreateFrame("Frame")
-e:RegisterEvent("PLAYER_LOGIN")
-e:RegisterEvent("UNIT_POWER_UPDATE")
-e:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-e:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+e:RegisterEvent("ADDON_LOADED")
 e:SetScript("OnEvent", function(self, event, ...)
-    if event == "PLAYER_LOGIN" then
-        if not RougeUI.db.EnergyTicker and not RougeUI.db.EnemyTicker then
-            self:UnregisterAllEvents()
-            self:SetScript("OnEvent", nil)
-            return
-        end
-
-        if UnitPowerType("player") ~= 0 then
-            self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-        end
-
-        if RougeUI.db.EnergyTicker then
-            AddEnergy(PlayerFrameManaBar)
-            energyValues["player"] = {
-                last_tick = 0,
-                last_value = 0,
-                startTick = false,
-                validTick = false,
-                tickRate = 2.02,
-            }
-
+    if event == "ADDON_LOADED" and ... == addonName then
+        if RougeUI.db.EnergyTicker or RougeUI.db.EnemyTicker then
             local _, class = UnitClass("player")
             if UnitPowerType("player") ~= 0 and class ~= "DRUID" then
-                self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+                if self:IsEventRegistered("UNIT_SPELLCAST_SUCCEEDED") then
+                    self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+                end
+            else
+                self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
             end
 
-            if class == "DRUID" then
-                self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-            end
-        end
-        if RougeUI.db.EnemyTicker then
-            AddEnergy(TargetFrameManaBar)
-            energyValues["target"] = {
-                last_tick = 0,
-                last_value = 0,
-                startTick = false,
-                validTick = false,
-                tickRate = 2.02,
-            }
-
-            for i = 1, 10 do
-                energyValues["nameplate" .. i] = {
+            if RougeUI.db.EnergyTicker then
+                AddEnergy(PlayerFrameManaBar)
+                energyValues["player"] = {
                     last_tick = 0,
                     last_value = 0,
                     startTick = false,
@@ -237,11 +198,34 @@ e:SetScript("OnEvent", function(self, event, ...)
                     tickRate = 2.02,
                 }
             end
+            if RougeUI.db.EnemyTicker then
+                AddEnergy(TargetFrameManaBar)
+                energyValues["target"] = {
+                    last_tick = 0,
+                    last_value = 0,
+                    startTick = false,
+                    validTick = false,
+                    tickRate = 2.02,
+                }
 
-            self:RegisterEvent("PLAYER_TARGET_CHANGED")
+                for i = 1, 10 do
+                    energyValues["nameplate" .. i] = {
+                        last_tick = 0,
+                        last_value = 0,
+                        startTick = false,
+                        validTick = false,
+                        tickRate = 2.02,
+                    }
+                end
+
+                self:RegisterEvent("PLAYER_TARGET_CHANGED")
+            end
+
+            self:RegisterEvent("UNIT_POWER_UPDATE")
+            self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
             self:RegisterEvent("PLAYER_ENTERING_WORLD")
+            self:SetScript("OnUpdate", OnUpdate)
         end
-        self:SetScript("OnUpdate", OnUpdate)
     elseif event == "PLAYER_ENTERING_WORLD" then
         for unit in pairs(energyValues) do
             energyValues[unit] = {
@@ -260,8 +244,10 @@ e:SetScript("OnEvent", function(self, event, ...)
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         RealTick()
     elseif event == "PLAYER_TARGET_CHANGED" then
-        if not UnitIsPlayer("target")
-                or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
+        if not TargetFrameManaBar.energy.spark then
+            return
+        end
+        if not UnitIsPlayer("target") or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
             TargetFrameManaBar.energy.spark:SetAlpha(0)
             C_Timer.After(0.1, function()
                 if energyValues.target.startTick and UnitIsPlayer("target")
@@ -271,12 +257,6 @@ e:SetScript("OnEvent", function(self, event, ...)
             end)
         else
             TargetFrameManaBar.energy.spark:SetAlpha(1)
-        end
-    elseif event == "UPDATE_SHAPESHIFT_FORM" then
-        if (UnitPowerType("player") == 1) then
-            PlayerFrameManaBar.energy.spark:SetAlpha(0)
-        else
-            PlayerFrameManaBar.energy.spark:SetAlpha(1)
         end
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local _, _, spellId = ...

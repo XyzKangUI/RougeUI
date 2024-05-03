@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local CL = {}
 CL.NF = {}
 
@@ -35,15 +35,15 @@ local function ApplyTextures()
 end
 
 function CL:CreateClassOutlines(unit, frame)
-  if not self.NF[unit] then
-    self.NF[unit] = CreateFrame("Frame", nil, frame)
-    self.NF[unit]:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", 32, 32)
-    self.NF[unit]:SetSize(62,62)
-    self.NF[unit]:SetScale(1)
-    self.NF[unit].texture = self.NF[unit]:CreateTexture(nil, "BORDER")
-    self.NF[unit].texture:SetAllPoints(self.NF[unit])
-    self.NF[unit]:Hide()
-  end
+    if not self.NF[unit] then
+        self.NF[unit] = CreateFrame("Frame", nil, frame)
+        self.NF[unit]:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", 32, 32)
+        self.NF[unit]:SetSize(62, 62)
+        self.NF[unit]:SetScale(1)
+        self.NF[unit].texture = self.NF[unit]:CreateTexture(nil, "BORDER")
+        self.NF[unit].texture:SetAllPoints(self.NF[unit])
+        self.NF[unit]:Hide()
+    end
 
     if not UnitIsPlayer(unit) then
         self.NF[unit]:Hide()
@@ -56,23 +56,20 @@ function CL:CreateClassOutlines(unit, frame)
 end
 
 function CL:hookfunc()
-	if self.portrait then
-		if self.unit == "focus" or self.unit == "target" then
-			CL:CreateClassOutlines(self.unit, self)
-		end
-	end
-end
-
-function CL:ADDON_LOADED()
-	hooksecurefunc("UnitFramePortrait_Update", self.hookfunc)
+    if self.portrait then
+        if self.unit == "focus" or self.unit == "target" then
+            CL:CreateClassOutlines(self.unit, self)
+        end
+    end
 end
 
 local eventframe = CreateFrame("Frame")
 eventframe:RegisterEvent("ADDON_LOADED")
 eventframe:SetScript("OnEvent", function(self, event, ...)
-	if RougeUI.db.classoutline then
-        ApplyTextures()
-		CL[event](CL, ...)
-	end
-	self:UnregisterEvent("ADDON_LOADED")
+    if ... == addonName then
+        if RougeUI.db.classoutline then
+            ApplyTextures()
+            hooksecurefunc("UnitFramePortrait_Update", CL.hookfunc)
+        end
+    end
 end)

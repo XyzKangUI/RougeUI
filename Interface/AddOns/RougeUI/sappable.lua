@@ -1,10 +1,9 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local plates = {}
 local cacheUnit = {}
-local unitID = { "target", "arena1", "arena2", "arena3" }
+local unitID = { "target", "focus", "arena1", "arena2", "arena3" }
 local ipairs, mceil = ipairs, math.ceil
 local CombatLog_Object_IsA, COMBATLOG_FILTER_HOSTILE_PLAYERS = CombatLog_Object_IsA, COMBATLOG_FILTER_HOSTILE_PLAYERS
-local glyphHex = nil
 
 local function unitToken(guid)
     for _, unit in ipairs(unitID) do
@@ -24,18 +23,18 @@ local eventRegistered = {
 }
 
 local PF = {
-    [8122] = true, -- Psychic Scream
-    [8124] = true,
-    [10888] = true,
-    [10890] = true,
-    [5782] = true, -- Fear
-    [6213] = true,
-    [6215] = true,
-    [5484] = true, -- Howl of Terror
-    [17928] = true,
-    [5246] = true, -- Intimidating Shout
-    [51514] = true, -- Hex
-    [10326] = true -- Turn Evil
+    [8122] = 0.45, -- Psychic Scream
+    [5782] = 0.4, -- Fear
+    [5484] = 0.4, -- Howl of Terror
+    [5246] = 0.4, -- Intimidating Shout (others)
+    [20511] = 0.0001, -- Intimidating Shout (target)
+    [51514] = 0.4, -- Hex
+    [10326] = 0.4, -- Turn Evil
+    [82691] = 0.13, -- Ring of Frost
+    [122] = 9700, -- Frost Nova
+    [339] = 9700, -- Entangling Roots
+    [33395] = 9700, -- Freeze
+    --[1513] = true, -- Scare Beast
 }
 
 -- Base Health lvl 85
@@ -52,23 +51,6 @@ local classHealth = {
     [11] = 39533, -- Druid
 }
 
--- Do all damaging trinket procs count or only pendulum of telluric currents?
-local bustedSpells = {}
-if GetSpellInfo(58381) then bustedSpells[GetSpellInfo(58381)] = true end
-if GetSpellInfo(63675) then bustedSpells[GetSpellInfo(63675)] = true end
-
-local function GlyphCheck()
-    for i = 1, 6 do
-        local _, _, glyphID = GetGlyphSocketInfo(i);
-
-        if glyphID and (glyphID == 63291 or glyphID == 56244) then
-            glyphHex = true
-            return
-        end
-    end
-    glyphHex = false
-end
-
 local function CreateIcon(unit, unitGUID)
     local plate = C_NamePlate.GetNamePlateForUnit(unit)
 
@@ -76,16 +58,16 @@ local function CreateIcon(unit, unitGUID)
         return
     end
 
-    if not plate.indicator then
-        plate.indicator = plate:CreateFontString(nil, "OVERLAY", "GameFontWhite")
-        plate.indicator:SetFontObject("SystemFont_Outline_Small")
-        plate.indicator:SetSize(50, 50)
-        plate.indicator:SetScale(1.25)
-        plate.indicator:SetPoint("CENTER", 0, -18)
-        plate.indicator:Hide()
+    if not plate.ccAbsorbTrack then
+        plate.ccAbsorbTrack = plate:CreateFontString(nil, "OVERLAY", "GameFontWhite")
+        plate.ccAbsorbTrack:SetFontObject("SystemFont_Outline_Small")
+        plate.ccAbsorbTrack:SetSize(50, 50)
+        plate.ccAbsorbTrack:SetScale(1.25)
+        plate.ccAbsorbTrack:SetPoint("CENTER", 0, -18)
+        plate.ccAbsorbTrack:Hide()
     end
 
-    plate.indicator.unit = unit
+    plate.ccAbsorbTrack.unit = unit
 
     plates[unitGUID] = plate
 end
@@ -98,15 +80,15 @@ local function UpdateIndicator(guid)
     end
 
     local amount = cacheUnit[guid] and cacheUnit[guid].maxAmount or 0
-    if plate.indicator then
+    if plate.ccAbsorbTrack then
         if amount > 0 then
-            plate.indicator:SetText(mceil(amount))
-            if not plate.indicator:IsShown() then
-                plate.indicator:Show()
+            plate.ccAbsorbTrack:SetText(mceil(amount))
+            if not plate.ccAbsorbTrack:IsShown() then
+                plate.ccAbsorbTrack:Show()
             end
         else
-            plate.indicator:Hide()
-            plate.indicator:SetText("")
+            plate.ccAbsorbTrack:Hide()
+            plate.ccAbsorbTrack:SetText("")
         end
     end
 end
@@ -120,8 +102,10 @@ local function CLEU()
         return
     end
 
+    local modifier = PF[spellID]
+
     if type == "SPELL_AURA_APPLIED" then
-        if PF[spellID] then
+        if modifier then
             local unit = unitToken(destGUID)
 
             if not unit then
@@ -129,12 +113,13 @@ local function CLEU()
             end
 
             local _, _, class = UnitClass(unit)
-            local amount = classHealth[class] * 0.40
-            --local amount = UnitHealthMax(unit) * 0.15
-
-            if spellID == 51514 and glyphHex then
-                amount = amount * 1.2
+            local _, _, race = UnitRace(unit)
+            local baseHealth = (race == 6) and classHealth[class] * 1.05 or classHealth[class]
+            local amount = baseHealth * modifier
+            if modifier > 1 then
+                amount = modifier
             end
+            --local amount = UnitHealthMax(unit) * 0.15
 
             cacheUnit[destGUID] = {
                 maxAmount = amount,
@@ -144,13 +129,13 @@ local function CLEU()
             UpdateIndicator(destGUID)
         end
     elseif type == "SPELL_AURA_REMOVED" then
-        if PF[spellID] and (cacheUnit[destGUID] and cacheUnit[destGUID].feared) then
+        if modifier and (cacheUnit[destGUID] and cacheUnit[destGUID].feared) then
             cacheUnit[destGUID] = {}
             UpdateIndicator(destGUID)
         end
     else
         if (cacheUnit[destGUID] and cacheUnit[destGUID].feared) then
-            if bustedSpells[spellName] and (type ~= "SPELL_PERIODIC_DAMAGE") then
+            if spellID == 63675 and (type ~= "SPELL_PERIODIC_DAMAGE") then
                 return
             end
 
@@ -176,36 +161,22 @@ local function CLEU()
 end
 
 local frame = CreateFrame("Frame")
-frame:RegisterEvent("PLAYER_LOGIN")
-frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
         for _, plate in pairs(plates) do
-            plate.indicator:Hide()
+            plate.ccAbsorbTrack:Hide()
         end
         plates = {}
         cacheUnit = {}
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         CLEU()
-    --elseif event == "GLYPH_UPDATED" then
-    --    local _, _, class = UnitClass("player")
-    --    if (class == 7 or class == 9) then
-    --        GlyphCheck()
-    --    end
-    elseif event == "PLAYER_LOGIN" then
-        if not RougeUI.db.PSTrack then
-            self:UnregisterAllEvents()
-            self:SetScript("OnEvent", nil)
-            return
+    elseif event == "ADDON_LOADED" and ... == addonName then
+        if RougeUI.db.PSTrack then
+            self:RegisterEvent("PLAYER_ENTERING_WORLD")
+            self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+            self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
         end
-        --local _, _, class = UnitClass("player")
-        --if (class == 7 or class == 9) then
-        --    frame:RegisterEvent("GLYPH_UPDATED")
-        --    GlyphCheck()
-        --end
-        self:UnregisterEvent("PLAYER_LOGIN")
     elseif event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...
         local namePlateFrameBase = C_NamePlate.GetNamePlateForUnit(unit, issecure())

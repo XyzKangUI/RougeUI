@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local str_split, select = string.split, select
 local UnitGUID, U = UnitGUID, UnitIsUnit
 local IsActiveBattlefieldArena = IsActiveBattlefieldArena
@@ -90,15 +90,16 @@ local function HidePlates(plate, unit)
     end
 
     local _, _, _, _, _, npcId = str_split("-", UnitGUID(unit))
-    -- Hide feral spirit, treants, army of the dead, snake trap, mirror image, underbelly croc, Crashin' Thrashin' Robot
-    if npcId == "29264" or npcId == "1964" or npcId == "24207" or npcId == "19833" or npcId == "19921" or npcId == "31216" or npcId == "32441" or npcId == "17299" then
+    -- Hide feral spirit, treants, army of the dead, snake trap, mirror image, underbelly croc, Crashin' Thrashin' Robot, Shadowy Apparitions
+    if npcId == "29264" or npcId == "1964" or npcId == "24207" or npcId == "19833" or npcId == "19921" or
+            npcId == "31216" or npcId == "32441" or npcId == "17299" or npcId == "46954" then
         plate.UnitFrame:Hide()
     else
         plate.UnitFrame:Show()
     end
 end
 
-local OnEvent = function(self, event, ...)
+local function OnEvent(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...
         local namePlateFrameBase = GetNamePlateForUnit(unit, false);
@@ -110,20 +111,20 @@ local OnEvent = function(self, event, ...)
             HidePlates(namePlateFrameBase, unit)
         end
         AddElements(namePlateFrameBase.UnitFrame)
-    elseif event == "PLAYER_LOGIN" then
+    elseif event == "ADDON_LOADED" and ... == addonName then
         if GetCVar("nameplateShowOnlyNames") == "1" then
-            self:UnregisterAllEvents()
             return
         end
+
+        self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+        ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+
         if RougeUI.db.ArenaNumbers then
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
         end
-        ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-        self:UnregisterEvent("PLAYER_LOGIN")
     end
 end
 
 local e = CreateFrame("Frame")
-e:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-e:RegisterEvent("PLAYER_LOGIN")
+e:RegisterEvent("ADDON_LOADED")
 e:SetScript('OnEvent', OnEvent)

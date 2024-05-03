@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local ceil, mod, floor = _G.math.ceil, _G.math.fmod, _G.math.floor
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
@@ -19,7 +19,6 @@ local backdrop = {
 }
 
 local function addBorder(button, drawLayer, dbf)
-
     local name = button:GetName() or "nil"
     local icon = _G[name .. "Icon"]
     local border
@@ -76,7 +75,7 @@ local function addBorder(button, drawLayer, dbf)
         end
 
         if stealable and customStealable then
-            --stealable:SetAtlas("newplayertutorial-drag-slotblue") -- doesn't exist on 3.4.0 lets add 2mb
+            --stealable:SetAtlas("newplayertutorial-drag-slotblue") -- doesn't exist on 4.4.0 lets add 2mb
             stealable:SetTexture("Interface\\AddOns\\RougeUI\\textures\\newexp")
             stealable:SetTexCoord(0.338379, 0.412598, 0.680664, 0.829102)
         end
@@ -342,12 +341,18 @@ local function styleActionButton(bu)
 end
 
 local function OmniTimers(buttonName, index, filter)
-    local name, _, _, _, duration, expirationTime, buffName, buff
+    local name, _, duration, expirationTime, buffName, buff, caster, spellId
 
     if index and filter then
         buffName = buttonName .. index
         buff = _G[buffName]
-        name, _, _, _, duration, expirationTime = UnitAura("player", index, filter)
+        name, _, _, _, duration, expirationTime, caster, _, _, spellId = UnitAura("player", index, filter)
+
+        local guid = caster and UnitGUID(caster) or nil
+        if RougeUI.bombExpireTime and name and spellId == 88611 and guid then
+            duration = RougeUI.bombExpireTime[guid] and 6 or 0
+            expirationTime = RougeUI.bombExpireTime[guid] or 0
+        end
 
         if not name then
             return
@@ -604,9 +609,9 @@ local function DebuffAnchor(buttonName, index)
 end
 
 local e3 = CreateFrame("Frame")
-e3:RegisterEvent("PLAYER_LOGIN")
-e3:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_LOGIN" then
+e3:RegisterEvent("ADDON_LOADED")
+e3:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" and ... == addonName then
         if not IsAddOnLoaded("SimpleAuraFilter") and (RougeUI.db.BuffsRow and RougeUI.db.BuffsRow < 10) then
             C_Timer.After(1, function()
                 hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
@@ -620,10 +625,11 @@ e3:SetScript("OnEvent", function(self, event)
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
             end
 
+            self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+            self:RegisterEvent("PLAYER_ENTERING_WORLD")
+
             if skinEnabled then
                 if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
-                    self:UnregisterEvent("PLAYER_LOGIN")
-                    self:SetScript("OnEvent", nil)
                     return
                 end
 
@@ -643,10 +649,71 @@ e3:SetScript("OnEvent", function(self, event)
                 if RougeUI.db.OmniCC then
                     OmniTimers(self, index, filter)
                 end
+
+                if RougeUI.bombExpireTime and filter == "HARMFUL" and not RougeUI.db.OmniCC then
+                    local name, _, _, _, duration, expirationTime, caster, _, _, spellId, _, _, _, _, timeMod = UnitAura("player", index, filter);
+                    local guid = caster and UnitGUID(caster) or nil
+                    if name and spellId == 88611 and guid then
+                        duration = RougeUI.bombExpireTime[guid] and 6 or 0
+                        expirationTime = RougeUI.bombExpireTime[guid] or 0
+                        local tmod, tml, et
+
+                        if (duration > 0 and expirationTime) then
+                            if (SHOW_BUFF_DURATIONS == "1") then
+                                button.duration:Show();
+                            else
+                                button.duration:Hide();
+                            end
+
+                            local timeLeft = (expirationTime - GetTime());
+                            if (timeMod > 0) then
+                                tmod = timeMod
+                                timeLeft = timeLeft / timeMod;
+                            end
+
+                            if (not tml) then
+                                tml = timeLeft;
+                                button:SetScript("OnUpdate", function(self)
+                                    self:SetAlpha(1.0);
+                                    AuraButton_UpdateDuration(self, tml)
+                                    local timeLeft = et - GetTime();
+                                    if (tmod > 0) then
+                                        timeLeft = timeLeft / tmod
+                                    end
+                                    tml = max(timeLeft, 0)
+                                end);
+                            else
+                                tml = timeLeft;
+                            end
+
+                            et = expirationTime;
+                        else
+                            button.duration:Hide();
+                            if (tml) then
+                                button:SetScript("OnUpdate", nil);
+                            end
+                            tml = nil;
+                        end
+                    end
+                end
             end)
         end
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        local _, event, _, sourceGUID, _, _, _, _, _, _, _, spellId = CombatLogGetCurrentEventInfo()
 
-        self:UnregisterEvent("PLAYER_LOGIN")
-        self:SetScript("OnEvent", nil)
+        if (event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED") and spellId == 76577 then
+            if RougeUI.bombExpireTime == nil then
+                RougeUI.bombExpireTime = {}
+            end
+
+            local now = GetTime()
+            if (RougeUI.bombExpireTime[sourceGUID] and now >= RougeUI.bombExpireTime[sourceGUID]) or event == "SPELL_CAST_SUCCESS" then
+                RougeUI.bombExpireTime[sourceGUID] = now + 6
+            elseif not RougeUI.bombExpireTime[sourceGUID] then
+                RougeUI.bombExpireTime[sourceGUID] = now + 6
+            end
+        end
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        RougeUI.bombExpireTime = {}
     end
 end)

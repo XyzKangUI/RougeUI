@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------
 -- Smooth animations -- Ls
 
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local smoothing = {}
 local floor, next = math.floor, next
 local mabs = math.abs
@@ -123,27 +123,22 @@ local function SmoothBar(bar)
     end
 end
 
-local function init()
-    for k, v in pairs(barstosmooth) do
-        local statusbar = _G[k]
-        if statusbar then
-            SmoothBar(statusbar)
-            statusbar:HookScript("OnHide", function(self)
-                self.guid, self.max_ = nil, nil
-            end)
-            if v ~= "" then
-                statusbar.unit = v
+smoothframe:RegisterEvent("ADDON_LOADED")
+smoothframe:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" and ... == addonName and RougeUI.db.smooth then
+        for k, v in pairs(barstosmooth) do
+            local statusbar = _G[k]
+            if statusbar then
+                SmoothBar(statusbar)
+                statusbar:HookScript("OnHide", function(self)
+                    self.guid, self.max_ = nil, nil
+                end)
+                if v ~= "" then
+                    statusbar.unit = v
+                end
             end
         end
-    end
-end
 
-smoothframe:RegisterEvent("ADDON_LOADED")
-smoothframe:SetScript("OnEvent", function(self, event)
-    if event == "ADDON_LOADED" and RougeUI.db.smooth then
-        init()
-        smoothframe:SetScript("OnUpdate", AnimationTick)
+        self:SetScript("OnUpdate", AnimationTick)
     end
-    self:UnregisterEvent("ADDON_LOADED")
-    self:SetScript("OnEvent", nil)
 end)

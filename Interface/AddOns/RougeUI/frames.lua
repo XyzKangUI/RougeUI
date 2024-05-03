@@ -1,4 +1,4 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local pairs = _G.pairs
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 
@@ -780,6 +780,13 @@ local function FrameColour()
             v:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
+    if FComboPoint1 then
+        for _, v in pairs({ FComboPoint1, FComboPoint2, FComboPoint3, FComboPoint4, FComboPoint5 }) do
+            if v then
+                v:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+    end
 end
 
 local function NewVariables()
@@ -1404,7 +1411,7 @@ end
 local Framecolor = CreateFrame("Frame")
 Framecolor:RegisterEvent("ADDON_LOADED")
 Framecolor:SetScript("OnEvent", function(self, event, addon)
-    if addon == "RougeUI" then
+    if addon == addonName then
         if RougeUI.db.Colval < 1 then
             FrameColour()
             NewVariables()
