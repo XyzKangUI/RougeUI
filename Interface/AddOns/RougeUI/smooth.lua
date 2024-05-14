@@ -1,4 +1,3 @@
----------------------------------------------------------------------
 -- Smooth animations -- Ls
 
 local addonName, RougeUI = ...
@@ -35,29 +34,41 @@ local function lerp(startValue, endValue, amount)
 end
 
 local function isCloseEnough(new, target, range)
-    if range > 0.0 then
-        return mabs((new - target) / range) <= 0.001
-    end
+    return range > 0.0 and mabs((new - target) / range) <= 0.001
+end
 
-    return true
+local function hasAbsorbValue(unit)
+    if Precognito and (Precognito.db.animHealth or Precognito.db.absorbTrack) and unit then
+        if Precognito.UnitGetTotalAbsorbs(unit) and Precognito.UnitGetTotalAbsorbs(unit) > 0 then
+            return true
+        elseif UnitGetIncomingHeals(unit) and UnitGetIncomingHeals(unit) > 0 then
+            return true
+        end
+    end
+    return false
 end
 
 local function AnimationTick(_, elapsed)
-    for unitFrame, info in next, smoothing do
-        local newValue = lerp(unitFrame._value, info, clamp(.33 * elapsed * 60))
-        unitFrame:SetValue_(floor(newValue))
-        unitFrame._value = newValue
-
-        if not unitFrame:IsVisible() or isCloseEnough(newValue, info, unitFrame._max) then
-            if smoothing[unitFrame] then
-                unitFrame:SetValue_(smoothing[unitFrame])
-                unitFrame._value = smoothing[unitFrame]
-
-                smoothing[unitFrame] = nil
-            end
-
+    for unitFrame, targetValue in next, smoothing do
+        if hasAbsorbValue(unitFrame.unit) then
+            smoothing[unitFrame] = nil
+            unitFrame:SetValue_(unitFrame._value)
             if not next(smoothing) then
                 smoothframe:SetScript("OnUpdate", nil)
+            end
+        else
+            local newValue = lerp(unitFrame._value, targetValue, clamp(0.33 * elapsed * 60))
+            unitFrame:SetValue_(floor(newValue))
+            unitFrame._value = newValue
+
+            if not unitFrame:IsVisible() or isCloseEnough(newValue, targetValue, unitFrame._max) then
+                unitFrame:SetValue_(targetValue)
+                unitFrame._value = targetValue
+                smoothing[unitFrame] = nil
+
+                if not next(smoothing) then
+                    smoothframe:SetScript("OnUpdate", nil)
+                end
             end
         end
     end
@@ -67,10 +78,8 @@ local function SetSmoothedValue(self, value)
     self.finalValue = value
     local guid = UnitGUID(self.unit)
 
-    if not self:IsVisible() or isCloseEnough(self._value, value, self._max) or (self.unit and guid ~= self.guid) then
-        if guid ~= self.guid then
-            self.guid = guid
-        end
+    if hasAbsorbValue(self.unit) or not self:IsVisible() or isCloseEnough(self._value, value, self._max) or (self.unit and guid ~= self.guid) then
+        self.guid = guid
         smoothing[self] = nil
         self:SetValue_(floor(value))
         self._value = self:GetValue()
@@ -88,10 +97,7 @@ local function SmoothSetValue(self, min, max)
     self:SetMinMaxValues_(min, max)
 
     if self._max and self._max ~= max then
-        local ratio = 1
-        if max ~= 0 and self._max and self._max ~= 0 then
-            ratio = max / (self._max or max)
-        end
+        local ratio = (max ~= 0 and self._max and self._max ~= 0) and (max / self._max) or 1
 
         local target = smoothing[self]
         if target then
@@ -124,21 +130,20 @@ local function SmoothBar(bar)
 end
 
 smoothframe:RegisterEvent("ADDON_LOADED")
-smoothframe:SetScript("OnEvent", function(self, event, ...)
-    if event == "ADDON_LOADED" and ... == addonName and RougeUI.db.smooth then
-        for k, v in pairs(barstosmooth) do
-            local statusbar = _G[k]
+smoothframe:SetScript("OnEvent", function(self, event, addon)
+    if event == "ADDON_LOADED" and addon == addonName and RougeUI.db.smooth then
+        for barName, unit in pairs(barstosmooth) do
+            local statusbar = _G[barName]
             if statusbar then
                 SmoothBar(statusbar)
                 statusbar:HookScript("OnHide", function(self)
                     self.guid, self.max_ = nil, nil
                 end)
-                if v ~= "" then
-                    statusbar.unit = v
-                end
+                statusbar.unit = unit ~= "" and unit or nil
             end
         end
 
+        self:UnregisterEvent("ADDON_LOADED")
         self:SetScript("OnUpdate", AnimationTick)
     end
 end)

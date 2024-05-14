@@ -128,9 +128,9 @@ local function AnimateDominos()
 end
 
 local CF = CreateFrame("Frame")
-CF:RegisterEvent("ADDON_LOADED")
+CF:RegisterEvent("PLAYER_LOGIN")
 CF:SetScript("OnEvent", function(self, event, ...)
-    if ... == addonName and RougeUI.db.ButtonAnim and not (bt4 and dm) then
+    if RougeUI.db.ButtonAnim and not (bt4 and dm) then
 
         if RougeUI.db.KeyEcho then
             wahk = true

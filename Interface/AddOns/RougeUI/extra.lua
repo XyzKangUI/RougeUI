@@ -821,9 +821,9 @@ local conflictingAddons = {
 }
 
 local e = CreateFrame("Frame")
-e:RegisterEvent("ADDON_LOADED")
+e:RegisterEvent("PLAYER_LOGIN")
 e:SetScript("OnEvent", function(self, event, ...)
-    if event == "ADDON_LOADED" and ... == addonName then
+    if event == "PLAYER_LOGIN" then
         if RougeUI.db.FadeIcon or RougeUI.db.SQFix or RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
             self:RegisterEvent("PLAYER_ENTERING_WORLD")
         end

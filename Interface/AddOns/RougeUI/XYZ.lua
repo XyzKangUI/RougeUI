@@ -3,6 +3,7 @@ local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bartender = IsAddOnLoaded("Bartender4")
 local dominos = IsAddOnLoaded("Dominos")
 local frame = CreateFrame("Frame")
+local wahkFrames = {}
 
 local buttonNames = {
     ["ACTIONBUTTON"] = "ActionButton",
@@ -17,7 +18,6 @@ local buttonNames = {
 local function ConvertActionButtonName(name)
     -- remove "CLICK "
     name = name:gsub("^CLICK ", "")
-
     -- remove ":Keybind"
     name = name:gsub(":Keybind$", "")
 
@@ -37,14 +37,10 @@ local function ConvertActionButtonName(name)
 end
 
 local function WAHK(button, ok)
-    if not button then
-        return
-    end
+    if not button then return end
 
     local btn = _G[button]
-    if not btn then
-        return
-    end
+    if not btn then return end
 
     local clickButton, id
     if button:match("BT4Button") then
@@ -59,22 +55,15 @@ local function WAHK(button, ok)
     end
 
     local key, key2 = GetBindingKey(clickButton)
-    if not key then
-        return
-    end
+    if not key and not key2 then return end
 
     local cacheKeys = {}
-    if key then
-        cacheKeys[key] = key
-    end
-    if key2 then
-        cacheKeys[key2] = key2
-    end
+    if key then cacheKeys[key] = key end
+    if key2 then cacheKeys[key2] = key2 end
 
     for v in pairs(cacheKeys) do
         local action = GetBindingAction(v, true)
-
-        if action and (action ~= "") then
+        if action and action ~= "" then
             btn = _G[ConvertActionButtonName(action)]
         end
 
@@ -86,7 +75,9 @@ local function WAHK(button, ok)
                 id = tonumber(button:match("(%d+)"))
             end
 
-            local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
+            local wahkName = "WAHK" .. v .. button
+            local wahk = _G[wahkName] or CreateFrame("Button", wahkName, nil, "SecureActionButtonTemplate")
+            wahkFrames[wahkName] = true
             wahk:RegisterForClicks("AnyDown", "AnyUp")
             wahk:SetAttribute("type", "macro")
 
@@ -97,7 +88,6 @@ local function WAHK(button, ok)
                 onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
             end
 
-            ClearOverrideBindings(wahk)
             SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
             SetOverrideBindingClick(wahk, true, v, wahk:GetName())
 
@@ -147,38 +137,38 @@ local function UpdateBinds()
         return
     end
 
+    for name in pairs(wahkFrames) do
+        local wahk = _G[name]
+        if wahk then
+            ClearOverrideBindings(wahk)
+            SecureHandlerUnwrapScript(wahk, "OnClick")
+        end
+    end
+    wipe(wahkFrames)
+
     for i = 1, 12 do
-        WAHK("ActionButton" .. i, true)
-        WAHK("MultiBarBottomRightButton" .. i)
-        WAHK("MultiBarBottomLeftButton" .. i)
-        WAHK("MultiBarRightButton" .. i)
-        WAHK("MultiBarLeftButton" .. i)
+        for _, name in ipairs({"ActionButton", "MultiBarBottomRightButton", "MultiBarBottomLeftButton", "MultiBarRightButton", "MultiBarLeftButton"}) do
+            WAHK(name .. i)
+        end
     end
 
     if bartender or dominos then
         for i = 1, 180 do
-            if bartender then
-                WAHK("BT4Button" .. i)
-            else
-                WAHK("DominosActionButton" .. i)
-            end
+            local btnName = bartender and "BT4Button" or "DominosActionButton"
+            WAHK(btnName .. i)
         end
     end
 end
 
-frame:RegisterEvent("UPDATE_BINDINGS")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function(self, event, ...)
-    if not RougeUI.db.KeyEcho then
-        -- stop copying, use the addon.
-        self:UnregisterAllEvents()
-        self:SetScript("OnEvent", nil)
-        return
-    end
-
-    if event == "PLAYER_REGEN_ENABLED" then
+    if event == "PLAYER_LOGIN" and RougeUI.db.KeyEcho then
+        self:RegisterEvent("UPDATE_BINDINGS")
+        C_Timer.After(1, UpdateBinds)
+    elseif event == "PLAYER_REGEN_ENABLED" then
         self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        C_Timer.After(1, UpdateBinds)
+    elseif event == "UPDATE_BINDINGS" then
+        C_Timer.After(1, UpdateBinds)
     end
-
-    C_Timer.After(1, UpdateBinds)
 end)

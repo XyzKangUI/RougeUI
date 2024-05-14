@@ -174,6 +174,12 @@ local function RealTick()
     end
 end
 
+local function delay()
+    if energyValues.target.startTick and UnitIsPlayer("target") and UnitIsEnemy("player", "target") then
+        TargetFrameManaBar.energy.spark:SetAlpha(1)
+    end
+end
+
 local e = CreateFrame("Frame")
 e:RegisterEvent("ADDON_LOADED")
 e:SetScript("OnEvent", function(self, event, ...)
@@ -249,12 +255,7 @@ e:SetScript("OnEvent", function(self, event, ...)
         end
         if not UnitIsPlayer("target") or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
             TargetFrameManaBar.energy.spark:SetAlpha(0)
-            C_Timer.After(0.1, function()
-                if energyValues.target.startTick and UnitIsPlayer("target")
-                        and UnitIsEnemy("player", "target") then
-                    TargetFrameManaBar.energy.spark:SetAlpha(1)
-                end
-            end)
+            C_Timer.After(0.1, delay)
         else
             TargetFrameManaBar.energy.spark:SetAlpha(1)
         end

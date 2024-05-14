@@ -1,4 +1,4 @@
-local addonName, RougeUI = ...
+local _, RougeUI = ...
 local ceil, mod, floor = _G.math.ceil, _G.math.fmod, _G.math.floor
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
@@ -609,9 +609,9 @@ local function DebuffAnchor(buttonName, index)
 end
 
 local e3 = CreateFrame("Frame")
-e3:RegisterEvent("ADDON_LOADED")
+e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event, ...)
-    if event == "ADDON_LOADED" and ... == addonName then
+    if event == "PLAYER_LOGIN" then
         if not IsAddOnLoaded("SimpleAuraFilter") and (RougeUI.db.BuffsRow and RougeUI.db.BuffsRow < 10) then
             C_Timer.After(1, function()
                 hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
