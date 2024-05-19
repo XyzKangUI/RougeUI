@@ -234,13 +234,15 @@ e:SetScript("OnEvent", function(self, event, ...)
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
         for unit in pairs(energyValues) do
-            energyValues[unit] = {
-                last_tick = 0,
-                last_value = 0,
-                startTick = false,
-                validTick = false,
-                tickRate = 2.02,
-            }
+            if unit ~= "player" then
+                energyValues[unit] = {
+                    last_tick = 0,
+                    last_value = 0,
+                    startTick = false,
+                    validTick = false,
+                    tickRate = 2.02,
+                }
+            end
         end
     elseif event == "UNIT_POWER_UPDATE" then
         local unit = ...

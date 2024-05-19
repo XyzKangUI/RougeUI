@@ -828,6 +828,10 @@ e:SetScript("OnEvent", function(self, event, ...)
             self:RegisterEvent("PLAYER_ENTERING_WORLD")
         end
 
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+            SetCVar("showKeyring", 0)
+        end
+
         if RougeUI.db.SQFix then
             self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         end

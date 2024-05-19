@@ -414,6 +414,15 @@ local function FrameColour()
             end
         end
 
+        CharacterFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        CharacterFrameInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        CharacterFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        CharacterFrameInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        CharacterFrameInsetInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        CharacterFrameInsetInsetTopBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        CharacterFrameInsetInsetTopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        CharacterFrameInsetInsetTopRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+
         CharacterFramePortrait:SetVertexColor(1,1,1)
     end
 
@@ -485,6 +494,8 @@ local function FrameColour()
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
+        ReputationFrameStandingLabel:SetVertexColor(1, 1, 1)
+        ReputationFrameFactionLabel:SetVertexColor(1, 1, 1)
     end
 
     if ReputationDetailCorner and ReputationDetailDivider then
@@ -785,6 +796,40 @@ local function FrameColour()
             if v then
                 v:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
+        end
+    end
+
+    if CharacterHeadSlotFrame then
+        for _, v in pairs({"Head", "Neck", "Shoulder", "Back", "Chest", "Wrist", "Shirt", "Tabard", "Hands", "Waist",
+                           "Legs", "Feet", "Finger0", "Finger1", "Trinket0", "Trinket1", "MainHand", "SecondaryHand", "Ranged"}) do
+            local slotFrame = _G["Character" .. v .. "SlotFrame"]
+            if slotFrame then
+                slotFrame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+        local crs = { CharacterRangedSlot:GetRegions() }
+        if crs[14] then
+            crs[14]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        local cmh = { CharacterMainHandSlot:GetRegions() }
+        if cmh[14] then
+            cmh[14]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+
+        if PaperDollInnerBorderRight then
+            PaperDollInnerBorderRight:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if PaperDollInnerBorderLeft then
+            PaperDollInnerBorderLeft:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if PaperDollInnerBorderTop then
+            PaperDollInnerBorderTop:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if PaperDollInnerBorderBottom then
+            PaperDollInnerBorderBottom:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if PaperDollInnerBorderBottom2 then
+            PaperDollInnerBorderBottom2:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
 end

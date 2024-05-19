@@ -169,6 +169,13 @@ local function TimeFormat(button, time)
 
     if time <= 0 then
         text = ""
+    elseif time >= 86400 then
+        local d = floor(time / 86400 + 0.99)
+        if RougeUI.db.modtheme then
+            text = duration:SetFormattedText("|cffffffff%d|rd", d)
+        else
+            text = duration:SetFormattedText("|r%d|rd", d)
+        end
     elseif time < 3600 and time > 60 then
         h = floor(time / 3600)
         m = floor(mod(time, 3600) / 60 + 0.99)
@@ -625,8 +632,10 @@ e3:SetScript("OnEvent", function(self, event, ...)
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
             end
 
-            self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-            self:RegisterEvent("PLAYER_ENTERING_WORLD")
+            if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+                self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+                self:RegisterEvent("PLAYER_ENTERING_WORLD")
+            end
 
             if skinEnabled then
                 if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then

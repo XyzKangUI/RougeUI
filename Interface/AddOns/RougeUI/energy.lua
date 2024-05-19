@@ -108,10 +108,6 @@ EnemyOOC.Quirks = {
     [82941] = true, -- Ice Trap
     [34600] = true, -- Snake Trap
     [82948] = true, -- Snake Trap
-    [13795] = true, -- Immolation Trap
-    [82945] = true, -- Immolation Trap
-    [13813] = true, -- Explosive Trap
-    [82939] = true, -- Explosive Trap
     [60192] = true, -- Freezing Trap
     [1499] = true, -- Freezing Trap
     [19880] = true, -- Track elementals
@@ -235,6 +231,36 @@ EnemyOOC.Quirks = {
     [87023] = true, -- Cauterize
     [3355] = true, -- Freezing trap
     [77769] = true, -- Trap Launcher
+    [83154] = true, -- Piercing Chill
+    [99560] = true, -- Piercing Chill
+    [83073] = true, -- Shattered Barrier
+    [55080] = true, -- Shattered Barrier
+    [83301] = true, -- Improved Cone of Cold
+    [83302] = true, -- Improved Cone of Cold
+    [22959] = true, -- Critical Mass
+    [27285] = true, -- Seed of Corruption (explosion)
+    [85455] = true, -- Bane of Havoc
+    [81751] = true, -- Atonement
+    [414268] = true, -- Desecration
+    [414206] = true, -- Desecration
+    [50536] = true, -- Unholy Blight
+    [60433] = true, -- Earth and Moon
+    [87194] = true, -- Paralysis
+    [87193] = true, -- Paralysis
+    [77661] = true, -- Searing Flames
+    [64695] = true, -- Eartgrab
+    [19185] = true, -- Entrapment
+    [64803] = true, -- Entrapment
+    [20066] = true, -- Repentance
+    [19386] = true, -- Wyvern Sting
+    [118] = true, -- Polymorph
+    [710] = true, -- Banish
+    [2637] = true, -- Hibernate
+    [51514] = true, -- Hex
+    [9484] = true, -- Shackle Undead
+    [339] = true, -- Entangling Roots
+    [76780] = true, -- Bind Elemental
+    [6358] = true, -- Seduction
 };
 
 EnemyOOC.Channeling = {
@@ -242,7 +268,25 @@ EnemyOOC.Channeling = {
     [1120] = true, -- Drain soul r1
     [26573] = true, -- Consecration r1
     [2120] = true, -- Flamestrike r1
+    [13812] = true, -- Explosive Trap
 };
+
+EnemyOOC.SpreadEffect = {
+    [44457] = true, -- Living Bomb
+    [11366] = true, -- Pyroblast
+    [413841] = true, -- Ignite
+    [83853] = true, -- Combustion
+    [87389] = true, -- Corruption
+    [94009] = true, -- Rend
+    [8050] = true, -- Flame Shock
+}
+
+EnemyOOC.SpreadTriggers = {
+    [12355] = "SPELL_AURA_APPLIED", -- Impact
+    [87385] = "SPELL_DAMAGE", -- Seed of Corruption
+    [6343] = "SPELL_DAMAGE", -- Thunder Clap
+    [60103] = "SPELL_DAMAGE", -- Lava Lash
+}
 
 EnemyOOC.Nova = {
     [15237] = true, -- r1
@@ -520,8 +564,9 @@ local eventRegistered = {
     ["DAMAGE_SPLIT"] = true,
 }
 
+local skip = {}
 function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
-    local _, eventType, _, sourceGUID, _, sourceFlags, _, destGUID, _, destFlags, _, spellID, _, _, amount = CombatLogGetCurrentEventInfo()
+    local timestamp, eventType, _, sourceGUID, _, sourceFlags, _, destGUID, _, destFlags, _, spellID, _, _, amount = CombatLogGetCurrentEventInfo()
 
     if not (eventRegistered[eventType]) then
         return
@@ -537,6 +582,19 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     local isDestHostile = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_UNITS)
     local isUnknown = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_UNKNOWN_UNITS)
     local GuardianPet = bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_GUARDIAN) > 0 and isEnemyPet
+
+    -- Debuffs applied by spreading procs don't affect combat
+    if isDestEnemy or isDestHostile then
+        if skip[destGUID] == nil then
+            skip[destGUID] = {}
+        end
+
+        if self.SpreadTriggers[spellID] == eventType then
+            skip[destGUID] = timestamp
+        elseif self.SpreadEffect[spellID] and skip[destGUID] == timestamp then
+            return
+        end
+    end
 
     if (not isDestEnemy and not isSourceEnemy and not isEnemyPet) then
         return
@@ -563,7 +621,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
     end
 
     -- Master's call: when pet is in combat it puts hunter in combat
-    if isEnemyPet and isDestEnemy and spellID == 62305 and not Unitids(sourceGUID) then
+    if isEnemyPet and isDestEnemy and spellID == 62305 and not isInCombat(sourceGUID) then
         return
     end
 
@@ -637,6 +695,11 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
 
     -- Feral charge (bear) affects only source's combat state.
     if (isDestEnemy or isDestHostile) and spellID == 16979 then
+        return
+    end
+
+    -- Immolation and Explosive Trap don't affect the hunter's combat
+    if isSourceEnemy and (spellID == 13812 or spellID == 13797) then
         return
     end
 
@@ -725,6 +788,7 @@ function EnemyOOC:PLAYER_ENTERING_WORLD()
         endTime = {}
         outOfCombatTime = {}
         running = {}
+        skip = {}
         EnemyOOC.U["target"]:Hide()
         EnemyOOC.U["focus"]:Hide()
     end

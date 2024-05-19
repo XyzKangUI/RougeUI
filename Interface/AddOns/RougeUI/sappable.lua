@@ -20,6 +20,9 @@ local eventRegistered = {
     ["SPELL_PERIODIC_DAMAGE"] = true,
     ["SPELL_AURA_APPLIED"] = true,
     ["SPELL_AURA_REMOVED"] = true,
+    ["SPELL_MISSED"] = true,
+    ["SWING_MISSED"] = true,
+    ["RANGE_MISSED"] = true
 }
 
 local PF = {
@@ -94,7 +97,7 @@ local function UpdateIndicator(guid)
 end
 
 local function CLEU()
-    local _, type, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, arg15, _, _, arg18, _, _, arg21 = CombatLogGetCurrentEventInfo()
+    local _, type, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, arg14, arg15, _, arg17, arg18, _, _, arg21 = CombatLogGetCurrentEventInfo()
 
     local isDestEnemy = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
 
@@ -139,20 +142,21 @@ local function CLEU()
                 return
             end
 
-            local damage, arg
+            local damage = arg15
 
             if type == "SWING_DAMAGE" then
                 damage = spellID
-                arg = arg18
-            else
-                damage = arg15
-                arg = arg21
+            elseif type == "RANGE_MISSED" or type == "SPELL_MISSED" then
+                if arg15 ~= "ABSORB" then
+                    return
+                end
+                damage = arg17
+            elseif type == "SWING_MISSED" then
+                if spellID ~= "ABSORB" then
+                    return
+                end
+                damage = arg14
             end
-
-            -- Crits count towards breaking CC, stealthfix?
-            --   if arg then
-            --       damage = damage / 2
-            --    end
 
             cacheUnit[destGUID].maxAmount = cacheUnit[destGUID].maxAmount - damage
             UpdateIndicator(destGUID)
