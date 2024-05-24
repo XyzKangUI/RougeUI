@@ -67,13 +67,6 @@ local function ComboUpdate(self)
     COMBOFRAMELAST_NUM_POINTS = comboPoints;
 end
 
-local function FixPoints(self)
-    if GetComboPoints("player", "target") ~= comboPoints then
-        ComboFrame_Update(ComboFrame)
-        self:Cancel()
-    end
-end
-
 local CF = CreateFrame("Frame")
 CF:RegisterEvent("ADDON_LOADED")
 CF:SetScript("OnEvent", function(self, event, ...)
@@ -85,16 +78,10 @@ CF:SetScript("OnEvent", function(self, event, ...)
 
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
         self:RegisterEvent("UNIT_POWER_UPDATE")
-        self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED")
         hooksecurefunc("ComboFrame_Update", ComboUpdate)
     elseif event == "PLAYER_ENTERING_WORLD" then
         comboPointsCache = {}
     elseif event == "UNIT_POWER_UPDATE" then
         ComboFrame_Update(ComboFrame)
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local _, _, spellId = ...
-        if spellId == 73981 or spellId == 14183 then
-            C_Timer.NewTicker(0, FixPoints)
-        end
     end
 end)

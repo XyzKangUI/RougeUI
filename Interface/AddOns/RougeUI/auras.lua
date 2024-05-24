@@ -125,40 +125,15 @@ local whitelistMetatable = {
 }
 setmetatable(Whitelist, whitelistMetatable)
 
-local function RealWidth(frame, auraName, width)
-    if not (frame.totFrame == _G.TargetFrameToT or frame.totFrame == _G.FocusFrameToT) then
-        return
+local function GetFramePosition(frame)
+    if not frame then
+        return 0, 0, 0
     end
 
-    local x1 = frame.totFrame:GetLeft()
-    local x2 = _G[auraName .. "1"] and _G[auraName .. "1"]:GetLeft() or nil
-    if not x1 or not x2 then
-        return frame.TOT_AURA_ROW_WIDTH
-    end
-
-    local diff = mabs(x2 - x1)
-    local distance = mfloor(diff) + 2 -- cheat a bit
-
-    if distance > 136 then
-        -- let user regulate when ToTo is in Africa
-        return width
-    else
-        return distance
-    end
-end
-
-local function maxRows(self, width, mirror, auraName)
-    local haveTargetofTarget
-
-    if self.totFrame ~= nil then
-        haveTargetofTarget = self.totFrame:IsShown()
-    end
-
-    if (haveTargetofTarget and self.auraRows <= 2) and not mirror then
-        return RealWidth(self, auraName, width)
-    else
-        return width
-    end
+    local left = frame:GetLeft() or 0
+    local bottom = frame:GetBottom() or 0
+    local top = frame:GetTop() or 0
+    return left, top, bottom
 end
 
 local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
@@ -169,6 +144,8 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
     local offsetY = AURA_OFFSET_Y
     local rowWidth = 0
     local firstBuffOnRow = 1
+    local haveTargetofTarget = frame.totFrame and frame.totFrame:IsShown()
+    local totFrameX, totFrameTop, totFrameBottom = GetFramePosition(frame.totFrame)
 
     maxRowWidth = AURA_ROW_WIDTH
 
@@ -187,7 +164,18 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             rowWidth = rowWidth + size + offsetX
         end
 
-        if (rowWidth > maxRows(frame, maxRowWidth, mirrorAurasVertically, auraName)) then
+        local auraX, auraTop = GetFramePosition(_G[auraName..i])
+        local verticalDistance = auraTop - totFrameBottom
+        local prevX = i > 1 and GetFramePosition(_G[auraName..(i-1)])
+        local horizontalDistance
+
+        if prevX then
+            horizontalDistance = (mfloor(mabs((prevX + size + offsetX) - totFrameX)))
+        else
+            horizontalDistance = mfloor(mabs(auraX - totFrameX))
+        end
+
+        if (haveTargetofTarget and (horizontalDistance < size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
             rowWidth = size
             frame.auraRows = frame.auraRows + 1
@@ -247,16 +235,6 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
             -- unit is friendly or there are no debuffs...buffs start on top
             buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
         else
-            -- Fix circular dependency i've created
-            local _, a = self.debuffs:GetPoint()
-            if a then
-                local _, b = a:GetPoint()
-                if b == self.buffs then
-                    self.debuffs:ClearAllPoints()
-                    self.debuffs:SetPoint(point .. "LEFT", self, point .. "LEFT", 0, 0)
-                    self.debuffs:SetPoint(relativePoint .. "LEFT", self, relativePoint .. "LEFT", 0, -auraOffsetY)
-                end
-            end
             -- unit is not friendly and we have debuffs...buffs start on bottom
             buff:SetPoint(point .. "LEFT", self.debuffs, relativePoint .. "LEFT", 0, -offsetY)
         end
@@ -522,24 +500,14 @@ local function Target_Update(frame)
 
     frame.auraRows = 0
 
-    local mirrorAurasVertically = false
-    if (frame.buffsOnTop) then
-        mirrorAurasVertically = true
-    end
+    local mirrorAurasVertically = frame.buffsOnTop and true or false
+    local maxRowWidth = RougeUI.db.AuraRow
 
     frame.spellbarAnchor = nil
-    local maxRowWidth = RougeUI.db.AuraRow
-    if UnitIsFriend("player", frame.unit) then
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
-    else
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
-    end
+    -- update buff positions
+    TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+    -- update debuff positions
+    TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
     -- update the spell bar position
     if (frame.spellbar) then
         New_Target_Spellbar_AdjustPosition(frame.spellbar)
@@ -565,9 +533,9 @@ function RougeUI.RougeUIF:HookAuras()
 end
 
 local FF = CreateFrame("Frame")
-FF:RegisterEvent("ADDON_LOADED")
-FF:SetScript("OnEvent", function(self, fireEvent, name)
-    if fireEvent == "ADDON_LOADED" and name == addonName then
+FF:RegisterEvent("PLAYER_LOGIN")
+FF:SetScript("OnEvent", function(self, fireEvent)
+    if fireEvent == "PLAYER_LOGIN" then
         if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
             RougeUI.RougeUIF:HookAuras()
             if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then

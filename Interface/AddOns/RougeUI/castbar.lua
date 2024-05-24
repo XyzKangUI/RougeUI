@@ -1,4 +1,4 @@
-local addonName, RougeUI = ...
+local _, RougeUI = ...
 local strformat, max = string.format, math.max
 
 local function PurpleKoolaid(statusbar)
@@ -225,9 +225,9 @@ local missileId = {
 }
 
 local FR = CreateFrame("Frame")
-FR:RegisterEvent("ADDON_LOADED")
+FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event, ...)
-    if event == "ADDON_LOADED" and ... == addonName then
+    if event == "PLAYER_LOGIN" then
         if isSoD and not IsAddOnLoaded("ClassicCastbars") then
             hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, unit, _, spellId)
                 if (unit ~= self.unit) then

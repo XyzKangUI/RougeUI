@@ -147,9 +147,11 @@ local function UpdateBinds()
     wipe(wahkFrames)
 
     for i = 1, 12 do
-        for _, name in ipairs({"ActionButton", "MultiBarBottomRightButton", "MultiBarBottomLeftButton", "MultiBarRightButton", "MultiBarLeftButton"}) do
-            WAHK(name .. i)
-        end
+        WAHK("ActionButton" .. i, true)
+        WAHK("MultiBarBottomRightButton" .. i)
+        WAHK("MultiBarBottomLeftButton" .. i)
+        WAHK("MultiBarRightButton" .. i)
+        WAHK("MultiBarLeftButton" .. i)
     end
 
     if bartender or dominos then

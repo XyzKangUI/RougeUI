@@ -818,6 +818,9 @@ local conflictingAddons = {
     "RiizUI",
     "TextureScript",
     "SUI",
+    "whoaUnitFrames_WotLK",
+    "whoaThickFrames_WotLK",
+    "BetterBlizzFrames",
 }
 
 local e = CreateFrame("Frame")
@@ -826,10 +829,6 @@ e:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         if RougeUI.db.FadeIcon or RougeUI.db.SQFix or RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
             self:RegisterEvent("PLAYER_ENTERING_WORLD")
-        end
-
-        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
-            SetCVar("showKeyring", 0)
         end
 
         if RougeUI.db.SQFix then

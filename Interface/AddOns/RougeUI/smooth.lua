@@ -94,6 +94,11 @@ local function SetSmoothedValue(self, value)
 end
 
 local function SmoothSetValue(self, min, max)
+    if self.updatingMinMax then
+        return
+    end
+
+    self.updatingMinMax = true
     self:SetMinMaxValues_(min, max)
 
     if self._max and self._max ~= max then
@@ -112,6 +117,7 @@ local function SmoothSetValue(self, min, max)
     end
 
     self._max = max
+    self.updatingMinMax = false
 end
 
 local function SmoothBar(bar)

@@ -1,4 +1,4 @@
-local addonName, RougeUI = ...
+local _, RougeUI = ...
 local FontType = STANDARD_TEXT_FONT
 local mfloor, tonumber, mceil = math.floor, tonumber, math.ceil
 local GetCVar, UnitIsDeadOrGhost, UnitExists = GetCVar, UnitIsDeadOrGhost, UnitExists
@@ -278,9 +278,9 @@ local function UpdatePartyHealth(unit)
 end
 
 local PW = CreateFrame("Frame")
-PW:RegisterEvent("ADDON_LOADED")
+PW:RegisterEvent("PLAYER_LOGIN")
 PW:SetScript("OnEvent", function(self, event, unit)
-    if event == "ADDON_LOADED" and unit == addonName then
+    if event == "PLAYER_LOGIN" then
         if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
             hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
         end
