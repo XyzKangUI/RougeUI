@@ -72,24 +72,26 @@ f:SetScript("OnEvent", function(self, event, ...)
         -- Leatrix Maps pins
         if IsAddOnLoaded("Leatrix_Maps") then
             if LeaMapsDB["UseClassIcons"] == "On" then
-                local function ClassColorGetter(classFilename)
-                    local color = newClassColors[classFilename];
-                    if color then
-                        return color.r, color.g, color.b, color.colorStr;
+                for k, _ in pairs(WorldMapFrame.dataProviders) do
+                    if k.pin and k.pin.SetUnitAppearanceInternal then
+                        hooksecurefunc(k.pin, "SetUnitAppearanceInternal", function(self, timeNow, unit, appearanceData)
+                            if appearanceData.shouldShow and appearanceData.useClassColor then
+                                local _, class = UnitClass(unit)
+                                if class == "SHAMAN" then
+                                    self:SetUnitColor(unit, 0.0, 0.44, 0.87, 1)
+                                end
+                            end
+                        end)
+                        hooksecurefunc(k.pin, "AddUnitInternal", function(self, timeNow, unit, appearanceData)
+                            if appearanceData.shouldShow and appearanceData.useClassColor then
+                                local _, class = UnitClass(unit)
+                                if class == "SHAMAN" then
+                                    self:SetUnitColor(unit, 0.0, 0.44, 0.87, 1)
+                                end
+                            end
+                        end)
                     end
-
-                    return 1, 1, 1, "ffffffff";
                 end
-
-                setfenv(UnitPositionFrameMixin.GetUnitColor, setmetatable({}, {
-                    __index = function(t, k)
-                        if k == "GetClassColor" then
-                            return ClassColorGetter
-                        else
-                            return _G[k]
-                        end
-                    end
-                }))
             end
         end
     elseif event == "ADDON_LOADED" and ... == "Blizzard_RaidUI" then

@@ -215,57 +215,13 @@ local function colour(statusbar, unit)
     end
 end
 
-local function manabarcolor(statusbar, unit)
-    if statusbar and unit then
-        local r, g, b = 0.49803921568, 0, 1.0
-        PlayerFrameManaBar:SetStatusBarColor(r, g, b)
-        if (statusbar == PlayerFrameManaBar) and not statusbar.lockColor then
-            statusbar.lockColor = true -- taint?
-        end
-        if (UnitIsUnit("targettarget", "player")) then
-            TargetFrameToTManaBar:SetStatusBarColor(r, g, b)
-        end
-        if (UnitIsUnit("target", "player")) then
-            TargetFrameManaBar:SetStatusBarColor(r, g, b)
-        end
-        if FocusFrame then
-            if (UnitIsUnit("focus", "player")) then
-                FocusFrameManaBar:SetStatusBarColor(r, g, b)
-            end
-            if (UnitIsUnit("focustarget", "player")) then
-                FocusFrameToTManaBar:SetStatusBarColor(r, g, b)
-            end
-        end
-    end
-end
+local function manabarRecolor(manaBar)
+    if not manaBar or not UnitIsUnit(manaBar.unit, "player") then return end
 
--- Backup if lockColor taints
-local PowerBarColors = {};
-PowerBarColors["MANA"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["RAGE"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["FOCUS"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["ENERGY"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["RUNIC_POWER"] = { r = 0.49803921568, g = 0, b = 1.0 };
-
-local function ZunitFrame(manaBar)
-    local unitFrame = manaBar:GetParent();
-
-    if (not manaBar) or not (unitFrame == PlayerFrame) then
-        return ;
-    end
-    local powerType, powerToken, altR = UnitPowerType(manaBar.unit);
-    local prefix = _G[powerToken];
-    local info = PowerBarColors[powerToken];
-    if info then
-        if (not manaBar.lockColor) then
-            local playerDeadOrGhost = manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")) and not UnitIsFeignDeath("player");
-            if not info.atlas and not playerDeadOrGhost then
-                manaBar:SetStatusBarColor(info.r, info.g, info.b);
-            end
-        end
-    else
-        if (not altR) then
-            info = PowerBarColors[powerType] or PowerBarColors["MANA"];
+    if not manaBar.lockColor then
+        local playerDeadOrGhost = manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")) and not UnitIsFeignDeath("player")
+        if not playerDeadOrGhost then
+            manaBar:SetStatusBarColor(0.498, 0, 1.0)
         end
     end
 end
@@ -896,8 +852,7 @@ e:SetScript("OnEvent", function(self, event, ...)
             end
         end
         if RougeUI.db.pimp then
-            hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
-            -- hooksecurefunc("UnitFrameManaBar_UpdateType", ZunitFrame)
+            hooksecurefunc("UnitFrameManaBar_UpdateType", manabarRecolor)
         end
         if RougeUI.db.HideAggro then
             if CompactUnitFrame_UpdateAggroHighlight then

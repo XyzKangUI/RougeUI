@@ -590,15 +590,8 @@ function f:CreateGUI()
                 BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(addon.db.BuffsRow)))
                 BuffValueSlider:SetValueStep(1)
                 BuffValueSlider:SetObeyStepOnDrag(true);
-                local origValue, msgPrinted = 10, false
-                local origAnchor = _G.BuffFrame_UpdateAllBuffAnchors
                 BuffValueSlider:SetScript("OnValueChanged", function(_, value)
                     BuffValueSlider.text:SetText("Buffs Per Row: " .. RoundNumbers(addon.db.BuffsRow, 1))
-                    if origValue == addon.db.BuffsRow and value ~= 10 and not msgPrinted
-                            and origAnchor == _G.BuffFrame_UpdateAllBuffAnchors then
-                        print(Title .. ": Changed default BuffsRow value. Don't forget to /reload")
-                        msgPrinted = true
-                    end
                     addon.db.BuffsRow = value
                 end)
             end

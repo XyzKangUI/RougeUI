@@ -518,6 +518,10 @@ local function FrameColour()
             PVPFramePortrait:SetVertexColor(1, 1, 1)
             PVPFrameLeftButton_RightSeparator:SetAlpha(0)
             PVPFrameRightButton_LeftSeparator:SetAlpha(0)
+            PVPFrameLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            PVPFrameRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            PVPTeamManagementFrameBackground:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            PVPFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         else
             local _, _, c, d, e, f, g, h = PVPFrame:GetRegions()
             for _, v in pairs({ c, d, e, f, g, h }) do
@@ -947,6 +951,10 @@ local function NewVariables()
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
+    end
+
+    if DressUpFrameTitleText then
+        DressUpFrameTitleText:SetVertexColor(1, 1, 1)
     end
 
     -- Readycheck

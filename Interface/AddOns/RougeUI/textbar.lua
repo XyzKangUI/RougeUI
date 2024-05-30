@@ -122,7 +122,7 @@ local function true_format(value)
             return value
         end
     elseif (RougeUI.db.ShortNumeric == false) then
-        return value
+        return AbbreviateLargeNumbers(value)
     end
 end
 
@@ -250,7 +250,7 @@ local function UpdatePartyMana(unit)
     if RougeUI.db.ShortNumeric then
         manatext = true_format(currMana)
     elseif RougeUI.db.Abbreviate then
-        manatext = currMana
+        manatext = AbbreviateLargeNumbers(currMana)
     else
         manatext = currMana .. "/" .. maxMana
     end
@@ -267,7 +267,7 @@ local function UpdatePartyHealth(unit)
     if RougeUI.db.ShortNumeric then
         hptext = true_format(currHP)
     elseif RougeUI.db.Abbreviate then
-        hptext = currHP
+        hptext = AbbreviateLargeNumbers(currHP)
     else
         hptext = currHP .. "/" .. maxHP
     end

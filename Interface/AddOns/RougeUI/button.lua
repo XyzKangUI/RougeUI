@@ -572,7 +572,11 @@ local function BuffAnchor()
             else
                 if (numBuffs == 1) then
                     if (BuffFrame.numEnchants > 0) then
-                        buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", BUFF_HORIZ_SPACING, 0);
+                        if not RougeUI.db.Lorti then
+                            buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", -8, 0);
+                        else
+                            buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", BUFF_HORIZ_SPACING, 0);
+                        end
                         aboveBuff = TemporaryEnchantFrame;
                     else
                         buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "TOPLEFT", BUFF_HORIZ_SPACING, 0);
@@ -619,11 +623,9 @@ local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        if not IsAddOnLoaded("SimpleAuraFilter") and (RougeUI.db.BuffsRow and RougeUI.db.BuffsRow < 10) then
-            C_Timer.After(1, function()
-                hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
-                hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
-            end)
+        if not IsAddOnLoaded("SimpleAuraFilter") then
+            hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
+            hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
         end
 
         local skinEnabled = RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme
