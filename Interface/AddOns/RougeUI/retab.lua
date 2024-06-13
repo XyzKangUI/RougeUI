@@ -1,4 +1,5 @@
 local _, RougeUI = ...
+local val = nil
 local RE = CreateFrame("Frame")
 RE:RegisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -15,7 +16,7 @@ local function Retabbind()
     local _, instanceType = IsInInstance()
 
     if InCombatLockdown() then
-		RE:RegisterEvent("PLAYER_REGEN_ENABLED")
+        RE:RegisterEvent("PLAYER_REGEN_ENABLED")
         return
     end
 
@@ -24,7 +25,7 @@ local function Retabbind()
         SetCVar("TargetEnemyAttacker", 0)
     else
         ClearOverrideBindings(button)
-        SetCVar("TargetEnemyAttacker", 1)
+        SetCVar("TargetEnemyAttacker", val)
     end
 end
 
@@ -35,9 +36,12 @@ RE:SetScript("OnEvent", function(self, event, ...)
         return
     end
     if event == "PLAYER_ENTERING_WORLD" then
+        if val == nil then
+            val = GetCVar("TargetEnemyAttacker") or "1"
+        end
         Retabbind()
-	elseif event == "PLAYER_REGEN_ENABLED" then
-		Retabbind()
-		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        Retabbind()
+        self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     end
 end)

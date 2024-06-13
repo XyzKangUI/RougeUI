@@ -704,9 +704,9 @@ function f:CreateGUI()
 
         if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
             local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
-                addon.db.RETabBinder = value
+                addon.db.retab = value
             end)
-            Retab:SetChecked(addon.db.RETabBinder)
+            Retab:SetChecked(addon.db.retab)
             Retab:SetPoint("TOPLEFT", 350, -280)
         end
 
