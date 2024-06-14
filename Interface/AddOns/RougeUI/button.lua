@@ -572,7 +572,7 @@ local function BuffAnchor()
             else
                 if (numBuffs == 1) then
                     if (BuffFrame.numEnchants > 0) then
-                        if not RougeUI.db.Lorti then
+                        if not RougeUI.db.Lorti and BuffFrame.numEnchants > 2 then
                             buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", -8, 0);
                         else
                             buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", BUFF_HORIZ_SPACING, 0);

@@ -132,8 +132,7 @@ local function GetFramePosition(frame)
 
     local left = frame:GetLeft() or 0
     local bottom = frame:GetBottom() or 0
-    local top = frame:GetTop() or 0
-    return left, top, bottom
+    return left, bottom
 end
 
 local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
@@ -145,7 +144,8 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
     local rowWidth = 0
     local firstBuffOnRow = 1
     local haveTargetofTarget = frame.totFrame and frame.totFrame:IsShown()
-    local totFrameX, totFrameTop, totFrameBottom = GetFramePosition(frame.totFrame)
+    local totFrameX, totFrameBottom = GetFramePosition(frame.totFrame)
+    local currentX, currentY
 
     maxRowWidth = AURA_ROW_WIDTH
 
@@ -164,18 +164,14 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             rowWidth = rowWidth + size + offsetX
         end
 
-        local auraX, auraTop = GetFramePosition(_G[auraName..i])
-        local verticalDistance = auraTop - totFrameBottom
-        local prevX = i > 1 and GetFramePosition(_G[auraName..(i-1)])
-        local horizontalDistance
+        local verticalDistance = currentY and (currentY - totFrameBottom) or 0
+        local horizontalDistance = rowWidth
 
-        if prevX then
-            horizontalDistance = (mfloor(mabs((prevX + size + offsetX) - totFrameX)))
-        else
-            horizontalDistance = mfloor(mabs(auraX - totFrameX))
+        if currentX then
+            horizontalDistance = (mfloor(mabs((currentX + size + offsetX) - totFrameX))) + 2 -- Cheat a bit
         end
 
-        if (haveTargetofTarget and (horizontalDistance < size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
+        if (haveTargetofTarget and (horizontalDistance <= size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
             rowWidth = size
             frame.auraRows = frame.auraRows + 1
@@ -184,6 +180,9 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
         else
             updateFunc(frame, auraName, i, numOppositeAuras, i - 1, size, offsetX, offsetY, mirrorAurasVertically)
         end
+
+        local aura = _G[auraName .. i]
+        currentX, currentY = aura:GetLeft(), aura:GetTop()
     end
 end
 
