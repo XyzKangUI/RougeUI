@@ -347,6 +347,28 @@ local function styleActionButton(bu)
     bu.styled = true
 end
 
+local function skinBags(button)
+    if not button or button.styled then
+        return
+    end
+
+    local icon = _G[button:GetName() .. "IconTexture"]
+    local nt = _G[button:GetName() .. "NormalTexture"]
+
+    nt:SetTexCoord(0, 1, 0, 1)
+    nt:SetDrawLayer("BACKGROUND", -7)
+    nt:SetVertexColor(0.4, 0.35, 0.35)
+    nt:SetAllPoints(button)
+    local bo = button.IconBorder
+    bo:SetAlpha(0)
+    icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    icon:SetPoint("TOPLEFT", button, "TOPLEFT", 2, -2)
+    icon:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -2, 2)
+
+    addBorder(button, "BACKGROUND")
+    button.styled = true
+end
+
 local function OmniTimers(buttonName, index, filter)
     local name, _, duration, expirationTime, buffName, buff, caster, spellId
 
@@ -453,6 +475,11 @@ local function init()
             OmniTimers(bu)
         end
     end
+
+    for i = 0, 3 do
+        skinBags(_G["CharacterBag" .. i .. "Slot"])
+    end
+    skinBags(MainMenuBarBackpackButton)
 end
 
 local function HookAuras()
@@ -619,6 +646,14 @@ local function DebuffAnchor(buttonName, index)
     end
 end
 
+local function shorten(val)
+    if val >= 1e3 then
+        return string.format("%dk", floor((val / 1e3) + 0.5))
+    else
+        return tostring(val)
+    end
+end
+
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event, ...)
@@ -659,6 +694,14 @@ e3:SetScript("OnEvent", function(self, event, ...)
 
                 if RougeUI.db.OmniCC then
                     OmniTimers(self, index, filter)
+                end
+
+                if filter == "HARMFUL" then
+                    local necroAura = C_UnitAuras.GetDebuffDataByIndex("player", index)
+                    if necroAura and necroAura.spellId == 73975 and button then
+                        button.count:SetText(shorten(necroAura.points[1]))
+                        button.count:Show()
+                    end
                 end
 
                 if RougeUI.bombExpireTime and filter == "HARMFUL" and not RougeUI.db.OmniCC then

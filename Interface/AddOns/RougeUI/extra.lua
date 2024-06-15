@@ -6,7 +6,7 @@ local UnitClass, UnitExists, UnitCanAttack, GetUnitName = UnitClass, UnitExists,
 local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification
 local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local isClassicEra = false
+local isClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 -- Hide MultiGroupFrame icons showing as Party(+BG) leader
 local mg = PlayerPlayTime:GetParent().MultiGroupFrame
@@ -216,7 +216,9 @@ local function colour(statusbar, unit)
 end
 
 local function manabarRecolor(manaBar)
-    if not manaBar or not UnitIsUnit(manaBar.unit, "player") then return end
+    if not manaBar or not UnitIsUnit(manaBar.unit, "player") then
+        return
+    end
 
     if not manaBar.lockColor then
         local playerDeadOrGhost = manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")) and not UnitIsFeignDeath("player")
@@ -460,18 +462,48 @@ end
 
 local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.blp"
 
+local function OverlayPortrait(parent)
+    local layer, level = parent.portrait:GetDrawLayer()
+    local texture = parent:CreateTexture(nil, layer, nil, level + 1)
+    texture:SetSize(parent.portrait:GetSize())
+    for i = 1, parent.portrait:GetNumPoints() do
+        texture:SetPoint(parent.portrait:GetPoint(i))
+    end
+    texture:ClearAllPoints()
+    texture:SetPoint("CENTER", parent.portrait, "CENTER")
+    return texture
+end
+
+local function UpdatePortrait(self)
+    local unit, texture = self.unit, self.overlayPortrait
+    local unitExists, unitGuid = UnitExists(unit), UnitGUID(unit)
+    local _, class = UnitClass(unit)
+
+    if unitExists and unitGuid ~= self.lastGuid then
+        self.lastGuid = unitGuid
+        if UnitIsPlayer(unit) and class then
+            texture:SetTexture(CLASS_TEXTURE:format(class))
+            texture:Show()
+        else
+            texture:Hide()
+        end
+    elseif not unitExists then
+        texture:Hide()
+        self.lastGuid = nil
+    end
+end
+
 local function ClassPortrait(self)
-    if self.unit == "player" or self.unit == "pet" then
+    if self.unit == "pet" then
         return
     end
 
-    if self.portrait and UnitIsPlayer(self.unit) then
-        local _, class = UnitClass(self.unit)
-        if class then
-            self.portrait:SetTexture(CLASS_TEXTURE:format(class))
-        end
-    else
-        format(self.unit)
+    if not self.overlayPortrait and self.portrait then
+        self.overlayPortrait = OverlayPortrait(self)
+    end
+
+    if self.overlayPortrait then
+        UpdatePortrait(self)
     end
 end
 
@@ -791,7 +823,16 @@ e:SetScript("OnEvent", function(self, event, ...)
             self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         end
 
-        isClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC and not IsAddOnLoaded("Precognito") then
+            for _, v in pairs { PlayerFrameHealthBar, TargetFrameHealthBar, FocusFrameHealthBar } do
+                if v and v.MyHealPredictionBar then
+                    v.MyHealPredictionBar.FillMask:SetTexture("Interface\\TargetingFrame\\UI-StatusBar", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+                end
+                if v and v.OtherHealPredictionBar then
+                    v.OtherHealPredictionBar.FillMask:SetTexture("Interface\\TargetingFrame\\UI-StatusBar", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+                end
+            end
+        end
 
         for _, v in ipairs(conflictingAddons) do
             if IsAddOnLoaded(v) then

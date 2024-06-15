@@ -728,23 +728,6 @@ local function FrameColour()
     end
 
     if GetBuildInfo() >= "3.4.3" then
-        -- Blizz lack of quality control
-        MainMenuExpBar:SetSize(1034, 13);
-        MainMenuXPBarTexture0:SetSize(262, 10);
-        MainMenuXPBarTexture1:SetSize(262, 10);
-        MainMenuXPBarTexture2:SetSize(262, 10);
-        MainMenuXPBarTexture3:SetSize(262, 10);
-        MainMenuXPBarTexture0:SetPoint("BOTTOM", -391, 3);
-        MainMenuXPBarTexture1:SetPoint("BOTTOM", -130, 3);
-        MainMenuXPBarTexture2:SetPoint("BOTTOM", 130, 3);
-        MainMenuXPBarTexture3:SetPoint("BOTTOM", 391, 3);
-        MainMenuMaxLevelBar0:SetPoint("CENTER", -391, 4)
-        MainMenuMaxLevelBar0:SetSize(261, 7)
-        MainMenuMaxLevelBar1:SetSize(261, 7)
-        MainMenuMaxLevelBar2:SetSize(261, 7)
-        MainMenuMaxLevelBar3:SetSize(261, 7)
-        MainMenuBarTextureExtender:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-
         if PVEFrame then
             for _, region in pairs({ PVEFrame:GetRegions() }) do
                 if region and region:IsObjectType("Texture") then
@@ -995,6 +978,29 @@ local function NewVariables()
     for _, v in pairs({ PetStableFrame:GetRegions() }) do
         if v:GetObjectType() == "Texture" and v ~= PetStableFramePortrait then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
+
+    if PetLevelText then
+        PetLevelText:SetVertexColor(1, 1, 1)
+    end
+
+    if ContainerFrame1PortraitButton then
+        local mask = ContainerFrame1PortraitButton:CreateMaskTexture()
+        mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask")
+        mask:SetAllPoints(ContainerFrame1Portrait)
+
+        local overlay = ContainerFrame1PortraitButton:CreateTexture(nil, "OVERLAY")
+        overlay:SetTexture(133633)
+        overlay:SetAllPoints(ContainerFrame1Portrait)
+        overlay:AddMaskTexture(mask)
+        overlay:SetTexCoord(0.04, 0.96, 0.04, 0.96)
+    end
+
+    for i = 0, 3 do
+        local snt = _G["CharacterBag" .. i .. "SlotNormalTexture"]
+        if snt then
+            snt:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
 end
@@ -1448,6 +1454,8 @@ local function BlizzFrames(addon)
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
+
+        CommunitiesFrame.PortraitOverlay.Portrait:SetTexCoord(0.05, 0.95, 0.05, 0.95)
     end
 
     if addon == "Blizzard_EncounterJournal" then
@@ -1469,9 +1477,41 @@ Framecolor:SetScript("OnEvent", function(self, event, addon)
             FrameColour()
             NewVariables()
         end
+
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+            -- Blizz lack of quality control
+            MainMenuExpBar:SetSize(1034, 13);
+            MainMenuXPBarTexture0:SetSize(262, 10);
+            MainMenuXPBarTexture1:SetSize(262, 10);
+            MainMenuXPBarTexture2:SetSize(262, 10);
+            MainMenuXPBarTexture3:SetSize(262, 10);
+            MainMenuXPBarTexture0:SetPoint("BOTTOM", -391, 3);
+            MainMenuXPBarTexture1:SetPoint("BOTTOM", -130, 3);
+            MainMenuXPBarTexture2:SetPoint("BOTTOM", 130, 3);
+            MainMenuXPBarTexture3:SetPoint("BOTTOM", 391, 3);
+            MainMenuMaxLevelBar0:SetPoint("CENTER", -391, 4)
+            MainMenuMaxLevelBar0:SetSize(261, 7)
+            MainMenuMaxLevelBar1:SetSize(261, 7)
+            MainMenuMaxLevelBar2:SetSize(261, 7)
+            MainMenuMaxLevelBar3:SetSize(261, 7)
+            MainMenuBarTextureExtender:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            MainMenuBarTexture3:SetSize(281, 43)
+            MainMenuBarTexture3:SetPoint("BOTTOM", 379, 0);
+            CharacterMicroButton:SetPoint("BOTTOMLEFT", 549, 2)
+            CharacterMainHandSlot:SetPoint("BOTTOMLEFT", 109, 16)
+        end
     else
         BlizzFrames(addon)
     end
+
+    C_Timer.After(0, function()
+        for i = 0, 3 do
+            local snt = _G["CharacterBag" .. i .. "SlotNormalTexture"]
+            if snt then
+                snt:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+    end)
 end)
 
 function RougeUI.RougeUIF:ChangeFrameColors()

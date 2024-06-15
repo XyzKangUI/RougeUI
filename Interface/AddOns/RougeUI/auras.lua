@@ -6,6 +6,7 @@ local isClassic, LibClassicDurations
 local mabs, mfloor = math.abs, math.floor
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns and C_AddOns.IsAddOnLoaded
 local AURA_OFFSET_Y = 1
+local fontName
 
 local Enraged = {
     --[5229] = true, -- Enrage (Druid)
@@ -139,7 +140,7 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
     local LARGE_AURA_SIZE = RougeUI.db.SelfSize
     local SMALL_AURA_SIZE = RougeUI.db.OtherBuffSize
     local AURA_ROW_WIDTH = RougeUI.db.AuraRow
-    local size
+    local size, biggestAura
     local offsetY = AURA_OFFSET_Y
     local rowWidth = 0
     local firstBuffOnRow = 1
@@ -160,6 +161,9 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
         if (i == 1) then
             rowWidth = size
             frame.auraRows = frame.auraRows + 1
+            if frame.largestAura then
+                offsetY = frame.largestAura
+            end
         else
             rowWidth = rowWidth + size + offsetX
         end
@@ -168,17 +172,32 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
         local horizontalDistance = rowWidth
 
         if currentX then
-            horizontalDistance = (mfloor(mabs((currentX + size + offsetX) - totFrameX))) + 2 -- Cheat a bit
+            horizontalDistance = (mfloor(mabs((currentX + size + offsetX) - totFrameX))) + 5 -- Cheat a bit
         end
 
-        if (haveTargetofTarget and (horizontalDistance <= size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
+        if (haveTargetofTarget and (horizontalDistance < size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
+            local anchorAura = _G[auraName..firstBuffOnRow]
+            if biggestAura >= mfloor(anchorAura:GetSize() + 0.5) then
+                offsetY = (AURA_OFFSET_Y * 2) + (biggestAura - anchorAura:GetSize())
+            end
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
             rowWidth = size
             frame.auraRows = frame.auraRows + 1
             firstBuffOnRow = i
             offsetY = AURA_OFFSET_Y
+            biggestAura = nil
+            frame.largestAura = nil
         else
             updateFunc(frame, auraName, i, numOppositeAuras, i - 1, size, offsetX, offsetY, mirrorAurasVertically)
+        end
+
+        if not biggestAura or (biggestAura and (biggestAura < size)) then
+            biggestAura = size
+        end
+
+        local calc = (AURA_OFFSET_Y * 2) + (biggestAura - _G[auraName..firstBuffOnRow]:GetSize())
+        if not frame.largestAura or (frame.largestAura and (frame.largestAura < calc)) then
+            frame.largestAura = calc
         end
 
         local aura = _G[auraName .. i]
@@ -234,6 +253,15 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
             -- unit is friendly or there are no debuffs...buffs start on top
             buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
         else
+            local _, a = self.debuffs:GetPoint()
+            if a then
+                local _, b = a:GetPoint()
+                if b == self.buffs then
+                    self.debuffs:ClearAllPoints()
+                    self.debuffs:SetPoint(point .. "LEFT", self, point .. "LEFT", 0, 0)
+                    self.debuffs:SetPoint(relativePoint .. "LEFT", self, relativePoint .. "LEFT", 0, -auraOffsetY)
+                end
+            end
             -- unit is not friendly and we have debuffs...buffs start on bottom
             buff:SetPoint(point .. "LEFT", self.debuffs, relativePoint .. "LEFT", 0, -offsetY)
         end
@@ -429,12 +457,14 @@ local function Target_Update(frame)
                 end
 
                 local largeSize = ShouldAuraBeLarge(caster)
+                local buffSize = RougeUI.db.OtherBuffSize
+
+                if largeSize then
+                    buffSize = RougeUI.db.SelfSize
+                end
+
                 local frameStealable = _G[frameName .. "Stealable"]
                 if showHighlight then
-                    local buffSize = RougeUI.db.OtherBuffSize
-                    if largeSize then
-                        buffSize = RougeUI.db.SelfSize
-                    end
                     frameStealable:Show()
                     frameStealable:SetHeight(buffSize * modifier)
                     frameStealable:SetWidth(buffSize * modifier)
@@ -444,6 +474,14 @@ local function Target_Update(frame)
                     end
                 else
                     frameStealable:Hide()
+                end
+
+                frameCount = _G[frameName .. "Count"]
+                if frameCount then
+                    if not fontName then
+                        fontName = frameCount:GetFont()
+                    end
+                    frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
                 end
 
                 -- set the buff to be big if the buff is cast by the player or his pet
@@ -485,9 +523,21 @@ local function Target_Update(frame)
                         frameCooldown = _G[frameName.."Cooldown"];
                         CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
                     end
+
+                    local largeSize = ShouldAuraBeLarge(caster)
+
+                    frameCount = _G[frameName .. "Count"]
+                    if frameCount then
+                        if not fontName then
+                            fontName = frameCount:GetFont()
+                        end
+                        local buffSize = largeSize and RougeUI.db.SelfSize or RougeUI.db.OtherBuffSize
+                        frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
+                    end
+
                     -- set the debuff to be big if the buff is cast by the player or his pet
                     numDebuffs = numDebuffs + 1
-                    largeDebuffList[numDebuffs] = ShouldAuraBeLarge(caster)
+                    largeDebuffList[numDebuffs] = largeSize
                     frameNum = frameNum + 1
                 end
             end
@@ -498,15 +548,20 @@ local function Target_Update(frame)
     end
 
     frame.auraRows = 0
+    frame.largestAura = 0
 
     local mirrorAurasVertically = frame.buffsOnTop and true or false
     local maxRowWidth = RougeUI.db.AuraRow
 
     frame.spellbarAnchor = nil
-    -- update buff positions
-    TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
-    -- update debuff positions
-    TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+
+    if isEnemy then
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+    else
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+    end
     -- update the spell bar position
     if (frame.spellbar) then
         New_Target_Spellbar_AdjustPosition(frame.spellbar)
