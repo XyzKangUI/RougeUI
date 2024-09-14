@@ -87,7 +87,9 @@ function f:ADDON_LOADED(msg)
         return
     end
 
-    if not RougeUI then RougeUI = {} end
+    if not RougeUI then
+        RougeUI = {}
+    end
 
     for i, j in pairs(stock) do
         if type(j) == "table" then
@@ -137,6 +139,25 @@ local function CreateText(frame, x, y, text)
     textstring:SetFont("Fonts\\MORPHEUS.ttf", 14, "")
     textstring:SetText(text)
     textstring:SetVertexColor(0.99, 0.82, 0)
+end
+
+local function CreateSliderText(frame)
+    frame.text = frame:CreateFontString(frame:GetName() .. "Text", "ARTWORK", "GameFontHighlight")
+    frame.text:SetPoint("BOTTOM", frame, "TOP")
+    frame.text:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+
+    frame.textHigh = frame:CreateFontString(frame:GetName() .. "High", "ARTWORK", "GameFontHighlightSmall")
+    frame.textHigh:SetText("HIGH")
+    frame.textHigh:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 4, 3)
+    frame.textHigh:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+
+
+    frame.textLow = frame:CreateFontString(frame:GetName() .. "Low", "ARTWORK", "GameFontHighlightSmall")
+    frame.textLow:SetText("LOW")
+    frame.textLow:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", -4, 3)
+    frame.textLow:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+
+    frame:SetSize(144, 17)
 end
 
 function f:CreateGUI()
@@ -256,7 +277,7 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel1, 10, -210, "StatusText")
 
-        local ShortNumericButton , AbbButton
+        local ShortNumericButton, AbbButton
         ShortNumericButton = CheckBtn("Display HP/Mana Text as '10k'", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value)
             addon.db.ShortNumeric = value
             addon.db.Abbreviate = false
@@ -370,7 +391,6 @@ function f:CreateGUI()
         ModPlates:SetChecked(addon.db.ModPlates)
         ModPlates:SetPoint("TOPLEFT", 10, -75)
 
-
         local OmniTimers = CheckBtn("OmniCC Buff Timers", "Disable Blizzard's buff timers and use OmniCC instead", Panel.childPanel5, function(self, value)
             if not IsAddOnLoaded("OmniCC") then
                 UIErrorsFrame:AddMessage("To enable this option you have to enable OmniCC first", 1, 0, 0)
@@ -385,8 +405,20 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel5, 350, -40, "Theme's")
 
+        local sliderTemplate = "OptionsSliderTemplate"
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            sliderTemplate = "UISliderTemplate"
+        end
+
         local name = "BuffColSlider"
-        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(BuffColSlider)
+        else
+            BuffColSlider.text = _G[name .. "Text"]
+            BuffColSlider.textHigh = _G[name .. "High"]
+            BuffColSlider.textLow = _G[name .. "Low"]
+        end
         BuffColSlider:SetMinMaxValues(0, 1)
         BuffColSlider:SetPoint("TOPLEFT", 25, -300)
         if addon.db.Modern or addon.db.modtheme then
@@ -394,9 +426,6 @@ function f:CreateGUI()
         else
             BuffColSlider:Hide()
         end
-        BuffColSlider.text = _G[name .. "Text"]
-        BuffColSlider.textLow = _G[name .. "Low"]
-        BuffColSlider.textHigh = _G[name .. "High"]
         BuffColSlider.minValue, BuffColSlider.maxValue = BuffColSlider:GetMinMaxValues()
         BuffColSlider.textLow:SetText(floor(BuffColSlider.minValue))
         BuffColSlider.textHigh:SetText(floor(BuffColSlider.maxValue))
@@ -461,11 +490,15 @@ function f:CreateGUI()
         Modtheme:SetPoint("TOPLEFT", 350, -175)
 
         local name = "FontSizeSlider"
-        local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
+        local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(FontSizeSlider)
+        else
+            FontSizeSlider.text = _G[name .. "Text"]
+            FontSizeSlider.textHigh = _G[name .. "High"]
+            FontSizeSlider.textLow = _G[name .. "Low"]
+        end
         FontSizeSlider:SetPoint("TOPLEFT", 20, -410)
-        FontSizeSlider.textLow = _G[name .. "Low"]
-        FontSizeSlider.textHigh = _G[name .. "High"]
-        FontSizeSlider.text = _G[name .. "Text"]
         FontSizeSlider:SetMinMaxValues(8, 16)
         FontSizeSlider.minValue, FontSizeSlider.maxValue = FontSizeSlider:GetMinMaxValues()
         FontSizeSlider.textLow:SetText(FontSizeSlider.minValue)
@@ -481,11 +514,15 @@ function f:CreateGUI()
         end)
 
         local name = "MFontSizeSlider"
-        local MFontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
+        local MFontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(MFontSizeSlider)
+        else
+            MFontSizeSlider.text = _G[name .. "Text"]
+            MFontSizeSlider.textHigh = _G[name .. "High"]
+            MFontSizeSlider.textLow = _G[name .. "Low"]
+        end
         MFontSizeSlider:SetPoint("TOPLEFT", 20, -470)
-        MFontSizeSlider.textLow = _G[name .. "Low"]
-        MFontSizeSlider.textHigh = _G[name .. "High"]
-        MFontSizeSlider.text = _G[name .. "Text"]
         MFontSizeSlider:SetMinMaxValues(8, 16)
         MFontSizeSlider.minValue, MFontSizeSlider.maxValue = MFontSizeSlider:GetMinMaxValues()
         MFontSizeSlider.textLow:SetText(MFontSizeSlider.minValue)
@@ -501,16 +538,20 @@ function f:CreateGUI()
         end)
 
         local names = "TargetPlayerBuffSizeSlider"
-        local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, "OptionsSliderTemplate")
+        local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(TargetPlayerBuffSizeSlider)
+        else
+            TargetPlayerBuffSizeSlider.text = _G[name .. "Text"]
+            TargetPlayerBuffSizeSlider.textHigh = _G[name .. "High"]
+            TargetPlayerBuffSizeSlider.textLow = _G[name .. "Low"]
+        end
         TargetPlayerBuffSizeSlider:SetPoint("TOPLEFT", 20, -490)
         if addon.db.BuffSizer then
             TargetPlayerBuffSizeSlider:Show()
         else
             TargetPlayerBuffSizeSlider:Hide()
         end
-        TargetPlayerBuffSizeSlider.textLow = _G[names .. "Low"]
-        TargetPlayerBuffSizeSlider.textHigh = _G[names .. "High"]
-        TargetPlayerBuffSizeSlider.text = _G[names .. "Text"]
         TargetPlayerBuffSizeSlider:SetMinMaxValues(15, 34)
         TargetPlayerBuffSizeSlider.minValue, TargetPlayerBuffSizeSlider.maxValue = TargetPlayerBuffSizeSlider:GetMinMaxValues()
         TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
@@ -528,7 +569,14 @@ function f:CreateGUI()
         end)
 
         local names = "TargetBuffSizeSlider"
-        local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, "OptionsSliderTemplate")
+        local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(TargetBuffSizeSlider)
+        else
+            TargetBuffSizeSlider.text = _G[name .. "Text"]
+            TargetBuffSizeSlider.textHigh = _G[name .. "High"]
+            TargetBuffSizeSlider.textLow = _G[name .. "Low"]
+        end
         TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -440)
         if addon.db.BuffSizer then
             TargetBuffSizeSlider:Show()
@@ -537,9 +585,6 @@ function f:CreateGUI()
         end
         TargetBuffSizeSlider:SetMinMaxValues(15, 34)
         TargetBuffSizeSlider:SetValueStep(1)
-        TargetBuffSizeSlider.textLow = _G[names .. "Low"]
-        TargetBuffSizeSlider.textHigh = _G[names .. "High"]
-        TargetBuffSizeSlider.text = _G[names .. "Text"]
         TargetBuffSizeSlider.minValue, TargetBuffSizeSlider.maxValue = TargetBuffSizeSlider:GetMinMaxValues()
         TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
         TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
@@ -555,12 +600,16 @@ function f:CreateGUI()
         end)
 
         local name = "ColorValueSlider"
-        local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+        local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(ColorValueSlider)
+        else
+            ColorValueSlider.text = _G[name .. "Text"]
+            ColorValueSlider.textHigh = _G[name .. "High"]
+            ColorValueSlider.textLow = _G[name .. "Low"]
+        end
         ColorValueSlider:SetMinMaxValues(0, 1)
         ColorValueSlider:SetPoint("TOPLEFT", 25, -230)
-        ColorValueSlider.text = _G[name .. "Text"]
-        ColorValueSlider.textLow = _G[name .. "Low"]
-        ColorValueSlider.textHigh = _G[name .. "High"]
         ColorValueSlider.minValue, ColorValueSlider.maxValue = ColorValueSlider:GetMinMaxValues()
         ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
         ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
@@ -577,12 +626,16 @@ function f:CreateGUI()
         C_Timer.After(1, function()
             if not IsAddOnLoaded("SimpleAuraFilter") then
                 local name = "BuffValueSlider"
-                local BuffValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+                local BuffValueSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+                if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+                    CreateSliderText(BuffValueSlider)
+                else
+                    BuffValueSlider.text = _G[name .. "Text"]
+                    BuffValueSlider.textHigh = _G[name .. "High"]
+                    BuffValueSlider.textLow = _G[name .. "Low"]
+                end
                 BuffValueSlider:SetMinMaxValues(2, 10)
                 BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
-                BuffValueSlider.text = _G[name .. "Text"]
-                BuffValueSlider.textLow = _G[name .. "Low"]
-                BuffValueSlider.textHigh = _G[name .. "High"]
                 BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
                 BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
                 BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
@@ -598,7 +651,14 @@ function f:CreateGUI()
         end)
 
         local names = "AuraRowSlider"
-        local AuraRowSlider = CreateFrame("Slider", names, Panel.childPanel2, "OptionsSliderTemplate")
+        local AuraRowSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(AuraRowSlider)
+        else
+            AuraRowSlider.text = _G[name .. "Text"]
+            AuraRowSlider.textHigh = _G[name .. "High"]
+            AuraRowSlider.textLow = _G[name .. "Low"]
+        end
         AuraRowSlider:SetPoint("TOPLEFT", 20, -540)
         if addon.db.BuffSizer then
             AuraRowSlider:Show()
@@ -607,9 +667,6 @@ function f:CreateGUI()
         end
         AuraRowSlider:SetMinMaxValues(108, 200)
         AuraRowSlider:SetValueStep(14)
-        AuraRowSlider.textLow = _G[names .. "Low"]
-        AuraRowSlider.textHigh = _G[names .. "High"]
-        AuraRowSlider.text = _G[names .. "Text"]
         AuraRowSlider.minValue, AuraRowSlider.maxValue = AuraRowSlider:GetMinMaxValues()
         AuraRowSlider.textLow:SetText(floor(AuraRowSlider.minValue))
         AuraRowSlider.textHigh:SetText(floor(AuraRowSlider.maxValue))
@@ -716,11 +773,11 @@ function f:CreateGUI()
         ButtonAnim:SetChecked(addon.db.ButtonAnim)
         ButtonAnim:SetPoint("TOPLEFT", 350, -210)
 
-        local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
-            addon.db.KeyEcho = value
-        end)
-        Echo:SetChecked(addon.db.KeyEcho)
-        Echo:SetPoint("TOPLEFT", 350, -245)
+        --local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
+        --    addon.db.KeyEcho = value
+        --end)
+        --Echo:SetChecked(addon.db.KeyEcho)
+        --Echo:SetPoint("TOPLEFT", 350, -245)
 
         local Echo = CheckBtn("Actionbar Range Indicator", "Color your actionbuttons when out of range or oom", Panel.childPanel2, function(self, value)
             addon.db.RangeIndicator = value
@@ -741,7 +798,7 @@ function f:CreateGUI()
                 addon.db.EnergyTicker = value
             end)
             EnemyTicksButton:SetChecked(addon.db.EnergyTicker)
-            EnemyTicksButton:SetPoint("TOPLEFT", 350, -280)
+            EnemyTicksButton:SetPoint("TOPLEFT", 350, -245)
         else
             local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
                 addon.db.Slice = value
@@ -749,7 +806,6 @@ function f:CreateGUI()
             SliceButton:SetChecked(addon.db.Slice)
             SliceButton:SetPoint("TOPLEFT", 350, -400)
         end
-
 
         local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
             addon.db.CastTimer = value
@@ -759,7 +815,7 @@ function f:CreateGUI()
 
         local HighlightDispellable
         if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-        HighlightDispellable = CheckBtn("Highlight Magic Buffs", "Higlights enemy magic buffs", Panel.childPanel2, function(self, value)
+            HighlightDispellable = CheckBtn("Highlight Magic Buffs", "Higlights enemy magic buffs", Panel.childPanel2, function(self, value)
                 addon.db.HighlightDispellable = value
                 addon.db.BuffSizer = true
             end)

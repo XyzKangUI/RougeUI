@@ -97,24 +97,6 @@ local function FrameColour()
         GameMenuFrame.TopEdge,
         GameMenuFrame.TopLeftCorner,
         GameMenuFrame.TopRightCorner,
-        InterfaceOptionsFrameHeader,
-        InterfaceOptionsFrame.BottomEdge,
-        InterfaceOptionsFrame.BottomLeftCorner,
-        InterfaceOptionsFrame.BottomRightCorner,
-        InterfaceOptionsFrame.LeftEdge,
-        InterfaceOptionsFrame.RightEdge,
-        InterfaceOptionsFrame.TopEdge,
-        InterfaceOptionsFrame.TopLeftCorner,
-        InterfaceOptionsFrame.TopRightCorner,
-        VideoOptionsFrameHeader,
-        VideoOptionsFrame.BottomEdge,
-        VideoOptionsFrame.BottomLeftCorner,
-        VideoOptionsFrame.BottomRightCorner,
-        VideoOptionsFrame.LeftEdge,
-        VideoOptionsFrame.RightEdge,
-        VideoOptionsFrame.TopEdge,
-        VideoOptionsFrame.TopLeftCorner,
-        VideoOptionsFrame.TopRightCorner,
         AddonListBotLeftCorner,
         AddonListBotRightCorner,
         AddonListBottomBorder,
@@ -355,7 +337,11 @@ local function FrameColour()
         end
     end
 
-    -- TotemFrame
+    if SettingsPanelTitleBg then
+        SettingsPanelTitleBg:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    end
+
+        -- TotemFrame
     if TotemFrame then
         for i = 1, 4 do
             local _, totem = _G["TotemFrameTotem" .. i]:GetChildren()

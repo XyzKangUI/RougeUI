@@ -134,7 +134,7 @@ manager:HookScript("OnEnter", function(self)
 end)
 
 manager:HookScript("OnLeave", function(self)
-    if manager.collapsed and not FindParent(GetMouseFocus(), self) then
+    if manager.collapsed and not FindParent(GetMouseFoci()[1], self) then
         self:SetAlpha(0)
     end
 end)

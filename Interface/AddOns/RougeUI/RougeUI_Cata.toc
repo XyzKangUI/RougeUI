@@ -1,6 +1,6 @@
-## Interface: 40400
+## Interface: 40400, 40401
 ## Title: |cff009cffRougeUI-Cataclysm|r
-## Version: 4.07
+## Version: 4.08
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
@@ -21,4 +21,3 @@ outlines.lua
 snowfallkey.lua
 sappable.lua
 combofix.lua
-XYZ.lua
