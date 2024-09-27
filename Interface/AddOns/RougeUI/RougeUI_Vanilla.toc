@@ -1,6 +1,6 @@
 ## Interface: 11502, 11503, 11504
 ## Title: |cff009cffRougeUI-Vanilla|r
-## Version: 4.08
+## Version: 4.09
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
@@ -22,3 +22,4 @@ snowfallkey.lua
 combofix.lua
 ticks.lua
 blueShaman.lua
+XYZ.lua

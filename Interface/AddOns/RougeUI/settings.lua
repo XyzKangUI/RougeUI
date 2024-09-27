@@ -542,9 +542,9 @@ function f:CreateGUI()
         if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
             CreateSliderText(TargetPlayerBuffSizeSlider)
         else
-            TargetPlayerBuffSizeSlider.text = _G[name .. "Text"]
-            TargetPlayerBuffSizeSlider.textHigh = _G[name .. "High"]
-            TargetPlayerBuffSizeSlider.textLow = _G[name .. "Low"]
+            TargetPlayerBuffSizeSlider.textLow = _G[names .. "Low"]
+            TargetPlayerBuffSizeSlider.textHigh = _G[names .. "High"]
+            TargetPlayerBuffSizeSlider.text = _G[names .. "Text"]
         end
         TargetPlayerBuffSizeSlider:SetPoint("TOPLEFT", 20, -490)
         if addon.db.BuffSizer then
@@ -573,9 +573,9 @@ function f:CreateGUI()
         if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
             CreateSliderText(TargetBuffSizeSlider)
         else
-            TargetBuffSizeSlider.text = _G[name .. "Text"]
-            TargetBuffSizeSlider.textHigh = _G[name .. "High"]
-            TargetBuffSizeSlider.textLow = _G[name .. "Low"]
+            TargetBuffSizeSlider.textLow = _G[names .. "Low"]
+            TargetBuffSizeSlider.textHigh = _G[names .. "High"]
+            TargetBuffSizeSlider.text = _G[names .. "Text"]
         end
         TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -440)
         if addon.db.BuffSizer then
@@ -631,8 +631,8 @@ function f:CreateGUI()
                     CreateSliderText(BuffValueSlider)
                 else
                     BuffValueSlider.text = _G[name .. "Text"]
-                    BuffValueSlider.textHigh = _G[name .. "High"]
                     BuffValueSlider.textLow = _G[name .. "Low"]
+                    BuffValueSlider.textHigh = _G[name .. "High"]
                 end
                 BuffValueSlider:SetMinMaxValues(2, 10)
                 BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
@@ -655,9 +655,9 @@ function f:CreateGUI()
         if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
             CreateSliderText(AuraRowSlider)
         else
-            AuraRowSlider.text = _G[name .. "Text"]
-            AuraRowSlider.textHigh = _G[name .. "High"]
-            AuraRowSlider.textLow = _G[name .. "Low"]
+            AuraRowSlider.textLow = _G[names .. "Low"]
+            AuraRowSlider.textHigh = _G[names .. "High"]
+            AuraRowSlider.text = _G[names .. "Text"]
         end
         AuraRowSlider:SetPoint("TOPLEFT", 20, -540)
         if addon.db.BuffSizer then
@@ -773,11 +773,11 @@ function f:CreateGUI()
         ButtonAnim:SetChecked(addon.db.ButtonAnim)
         ButtonAnim:SetPoint("TOPLEFT", 350, -210)
 
-        --local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
-        --    addon.db.KeyEcho = value
-        --end)
-        --Echo:SetChecked(addon.db.KeyEcho)
-        --Echo:SetPoint("TOPLEFT", 350, -245)
+        local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
+            addon.db.KeyEcho = value
+        end)
+        Echo:SetChecked(addon.db.KeyEcho)
+        Echo:SetPoint("TOPLEFT", 350, -245)
 
         local Echo = CheckBtn("Actionbar Range Indicator", "Color your actionbuttons when out of range or oom", Panel.childPanel2, function(self, value)
             addon.db.RangeIndicator = value
@@ -798,7 +798,7 @@ function f:CreateGUI()
                 addon.db.EnergyTicker = value
             end)
             EnemyTicksButton:SetChecked(addon.db.EnergyTicker)
-            EnemyTicksButton:SetPoint("TOPLEFT", 350, -245)
+            EnemyTicksButton:SetPoint("TOPLEFT", 350, -280)
         else
             local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
                 addon.db.Slice = value

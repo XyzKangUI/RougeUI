@@ -22,7 +22,7 @@ local function ConvertActionButtonName(name)
     name = name:gsub(":Keybind$", "")
 
     if dominos then
-        if strmatch(name, "Dominos") then
+        if string.match(name, "Dominos") then
             name = name:gsub(":LeftButton", "")
             name = name:gsub(":HOTKEY", "")
         end
@@ -37,10 +37,14 @@ local function ConvertActionButtonName(name)
 end
 
 local function WAHK(button, ok)
-    if not button then return end
+    if not button then
+        return
+    end
 
     local btn = _G[button]
-    if not btn then return end
+    if not btn then
+        return
+    end
 
     local clickButton, id
     if button:match("BT4Button") then
@@ -55,11 +59,17 @@ local function WAHK(button, ok)
     end
 
     local key, key2 = GetBindingKey(clickButton)
-    if not key and not key2 then return end
+    if not key and not key2 then
+        return
+    end
 
     local cacheKeys = {}
-    if key then cacheKeys[key] = key end
-    if key2 then cacheKeys[key2] = key2 end
+    if key then
+        cacheKeys[key] = key
+    end
+    if key2 then
+        cacheKeys[key2] = key2
+    end
 
     for v in pairs(cacheKeys) do
         local action = GetBindingAction(v, true)
@@ -78,17 +88,11 @@ local function WAHK(button, ok)
             local wahkName = "WAHK" .. v .. button
             local wahk = _G[wahkName] or CreateFrame("Button", wahkName, nil, "SecureActionButtonTemplate")
             wahkFrames[wahkName] = true
+
             wahk:RegisterForClicks("AnyDown", "AnyUp")
-            wahk:SetAttribute("type", "macro")
+            wahk:SetAttribute("type", "click")
+            wahk:SetAttribute("clickbutton", _G[button])
 
-            local onclick
-            if ok then
-                onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] OverrideActionBarButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
-            else
-                onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
-            end
-
-            SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
             SetOverrideBindingClick(wahk, true, v, wahk:GetName())
 
             wahk:SetScript("OnMouseDown", function()
