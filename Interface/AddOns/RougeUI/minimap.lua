@@ -7,7 +7,9 @@ MM:SetScript("OnEvent", function(self, event)
     if not (IsAddOnLoaded("SexyMap")) then
         TimeManagerClockButton:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         -- Hide stuff
-        hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)
+        if MiniMapWorldMapButton then
+            hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)
+        end
         hooksecurefunc(MinimapNorthTag, "Show", MinimapNorthTag.Hide)
 
         for _, v in pairs({

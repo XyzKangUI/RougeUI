@@ -1453,6 +1453,19 @@ local function BlizzFrames(addon)
         EncounterJournalPortrait:SetVertexColor(1, 1, 1)
     end
 
+    if addon == "Blizzard_EngravingUI" then
+        if EngravingFrame then
+            EngravingFrame.Border.NineSlice.TopEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.Center:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.LeftEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.RightEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.TopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.TopRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.BottomRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            EngravingFrame.Border.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
 end
 
 local Framecolor = CreateFrame("Frame")
