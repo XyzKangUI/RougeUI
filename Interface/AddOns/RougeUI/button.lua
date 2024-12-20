@@ -1,8 +1,8 @@
 local _, RougeUI = ...
-local ceil, mod = _G.math.ceil, _G.math.fmod
+local ceil, mod, floor = _G.math.ceil, _G.math.fmod, _G.math.floor
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
-local floor, max = _G.math.floor, _G.math.max
 
 local backdrop = {
     bgFile = nil,
@@ -19,7 +19,6 @@ local backdrop = {
 }
 
 local function addBorder(button, drawLayer, dbf)
-
     local name = button:GetName() or "nil"
     local icon = _G[name .. "Icon"]
     local border
@@ -76,7 +75,9 @@ local function addBorder(button, drawLayer, dbf)
         end
 
         if stealable and customStealable then
-            stealable:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\Rouge-Stealable")
+            --stealable:SetAtlas("newplayertutorial-drag-slotblue") -- doesn't exist on 4.4.0 lets add 2mb
+            stealable:SetTexture("Interface\\AddOns\\RougeUI\\textures\\newexp")
+            stealable:SetTexCoord(0.338379, 0.412598, 0.680664, 0.829102)
         end
 
         border:SetTexCoord(0, 1, 0, 1)
@@ -151,8 +152,30 @@ local function TimeFormat(button, time)
         return
     end
 
+    if RougeUI.db.OmniCC then
+        if duration and duration:GetAlpha() > 0 then
+            local name = button:GetName()
+            if name and (name:match("BuffButton") or name:match("DebuffButton") or name:match("TempEnchant")) then
+                duration:SetAlpha(0)
+            end
+        end
+
+        if button.cooldown and (not button.cooldownSet or time >= button.cooldownSet) then
+            CooldownFrame_Set(button.cooldown, GetTime(), time, true)
+            button.cooldownSet = time
+        end
+        return
+    end
+
     if time <= 0 then
         text = ""
+    elseif time >= 86400 then
+        local d = floor(time / 86400 + 0.99)
+        if RougeUI.db.modtheme then
+            text = duration:SetFormattedText("|cffffffff%d|rd", d)
+        else
+            text = duration:SetFormattedText("|r%d|rd", d)
+        end
     elseif time < 3600 and time > 60 then
         h = floor(time / 3600)
         m = floor(mod(time, 3600) / 60 + 0.99)
@@ -203,10 +226,10 @@ local function SkinBuffs(bu)
         return
     end
 
+    bu.styled = true
+
     local name = bu:GetName()
     local icon = _G[name .. "Icon"]
-
-    bu.styled = true
 
     if icon then
         icon:SetDrawLayer("BACKGROUND", -8)
@@ -258,6 +281,7 @@ local function SkinBuffs(bu)
     end
 
     addBorder(bu, "OVERLAY", true)
+
 end
 
 local function styleActionButton(bu)
@@ -276,7 +300,6 @@ local function styleActionButton(bu)
     local nt2 = _G[name .. "NormalTexture2"]
     local bo = _G[name .. "Border"]
     local ho = _G[name .. "HotKey"]
-
     bu.SetNormalTexture = function()
         return
     end
@@ -320,6 +343,11 @@ local function styleActionButton(bu)
         fobs:SetTexture(nil)
     end
 
+    if RougeUI.db.modtheme and bu.border then
+        bu.border:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 2)
+        bu.border:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 2, -2)
+    end
+
     if RougeUI.db.Lorti then
         bu:SetPushedTexture("Interface\\AddOns\\RougeUI\\textures\\art\\pushed")
     end
@@ -329,6 +357,36 @@ local function styleActionButton(bu)
         addBorder(bu, "OVERLAY")
     else
         addBorder(bu, "BACKGROUND")
+    end
+end
+
+local function OmniTimers(buttonName, index, filter)
+    local name, _, duration, expirationTime, buffName, buff, spellId
+
+    if index and filter then
+        buffName = buttonName .. index
+        buff = _G[buffName]
+        name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitAura("player", index, filter)
+
+        if not name then
+            return
+        end
+    elseif (type(buttonName) == "table" and buttonName:GetName():match("TempEnchant")) then
+        buff = buttonName
+    else
+        return
+    end
+
+    if buff and not buff.cooldown then
+        local cooldown = CreateFrame("Cooldown", nil, buff, "CooldownFrameTemplate")
+        cooldown:SetAllPoints()
+        cooldown:SetFrameLevel(buff:GetFrameLevel())
+        cooldown:SetReverse(true)
+        buff.cooldown = cooldown
+    end
+
+    if buff and buff.cooldown and duration then
+        CooldownFrame_Set(buff.cooldown, expirationTime - duration, duration, true)
     end
 end
 
@@ -347,8 +405,11 @@ local function init()
     end
 
     if dominos then
-        for i = 1, 120 do
-            styleActionButton(_G["DominosActionButton" .. i])
+        for i = 1, 168 do
+            local btn = _G["DominosActionButton" .. i]
+            if btn then
+                styleActionButton(btn)
+            end
         end
     end
 
@@ -387,6 +448,9 @@ local function init()
                 bu.border:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 2)
                 bu.border:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", 2, -2)
             end
+        end
+        if RougeUI.db.OmniCC then
+            OmniTimers(bu)
         end
     end
 end
@@ -442,9 +506,8 @@ local function HookAuras()
     end)
 
     if not bartender4 then
+        if RougeUI.db.Lorti then
             hooksecurefunc("ActionButton_Update", function(self)
-                styleActionButton(self)
-
                 local action = self.action
                 local border = _G[self:GetName() .. "Border"]
                 local newBorder = _G[self:GetName() .. "NewBorder"]
@@ -453,17 +516,18 @@ local function HookAuras()
                         if newBorder then
                             newBorder:SetDrawLayer("BACKGROUND")
                         end
-                        border:Show()
                         if RougeUI.db.Lorti then
                             border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss_grey")
                             border:SetSize(36, 36)
                             border:SetVertexColor(0.499, 0.999, 0.499, 1)
                         end
+                        border:Show()
                     else
                         border:Hide()
                     end
                 end
             end)
+        end
 
         hooksecurefunc("ActionButton_UpdateHotkeys", function(self)
             local hotkey = self.HotKey
@@ -481,36 +545,51 @@ local function HookAuras()
     end
 end
 
+local function shorten(val)
+    if val >= 1e3 then
+        return string.format("%dk", floor((val / 1e3) + 0.5))
+    else
+        return tostring(val)
+    end
+end
+
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
-e3:SetScript("OnEvent", function(self, event)
+e3:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme or RougeUI.db.TimerGap then
-            if not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
+        local skinEnabled = RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme
+        if skinEnabled or RougeUI.db.TimerGap or RougeUI.db.OmniCC then
+            if RougeUI.db.OmniCC or not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
             end
 
-            if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme then
+            if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+                self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+                self:RegisterEvent("PLAYER_ENTERING_WORLD")
+            end
+
+            if skinEnabled then
                 if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
-                    self:UnregisterEvent("PLAYER_LOGIN")
-                    self:SetScript("OnEvent", nil)
                     return
                 end
 
                 init()
-                hooksecurefunc("AuraButton_Update", function(self, index)
-                    local button = _G[self .. index]
-                    if button then
-                        SkinBuffs(button)
-                    end
-                    if button and RougeUI.db.Roug then
-                        BtnGlow(button)
-                    end
-                end)
                 HookAuras()
             end
-        end
 
-        self:UnregisterEvent("PLAYER_LOGIN")
+            hooksecurefunc("AuraButton_Update", function(self, index, filter)
+                local button = _G[self .. index]
+                if button and skinEnabled then
+                    SkinBuffs(button)
+                end
+                if button and RougeUI.db.Roug then
+                    BtnGlow(button)
+                end
+
+                if RougeUI.db.OmniCC then
+                    OmniTimers(self, index, filter)
+                end
+            end)
+        end
     end
 end)

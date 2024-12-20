@@ -1,16 +1,9 @@
-local _, RougeUI = ...
-local AURA_OFFSET_Y = 3
-local AURA_START_X = 5
-local AURA_START_Y = 32
-local OFFSET_X = 3
-local GetSpellInfo, hooksecurefunc, UnitIsFriend = _G.GetSpellInfo, _G.hooksecurefunc, _G.UnitIsFriend
-local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy, UnitClass = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy, _G.UnitClass
-local UnitBuff, UnitDebuff = _G.UnitBuff, _G.UnitDebuff
-local pairs = _G.pairs
-local MAX_TARGET_DEBUFFS = 16
-local MAX_TARGET_BUFFS = 32
+local addonName, RougeUI = ...
+local UnitIsUnit, UnitIsOwnerOrControllerOfUnit, UnitIsEnemy = _G.UnitIsUnit, _G.UnitIsOwnerOrControllerOfUnit, _G.UnitIsEnemy
+local UnitClass, UnitIsFriend = _G.UnitClass, _G.UnitIsFriend
 local mabs, mfloor = math.abs, math.floor
-local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
+local AURA_OFFSET_Y = 1
+local fontName
 
 local Enraged = {
     --    [5229] = true, -- Enrage (Druid)
@@ -47,91 +40,78 @@ local Enraged = {
 }
 
 local Whitelist = {
-    [GetSpellInfo(16188)] = true, -- Nature's Swiftness
-    [GetSpellInfo(12043)] = true, -- Presence of Mind
-    [GetSpellInfo(12042)] = true, -- Arcane Power
-    [GetSpellInfo(12472)] = true, -- Icy Veins
-    [GetSpellInfo(31884)] = true, -- Avenging Wrath
-    [GetSpellInfo(48066)] = true, -- Power Word: Shield
-    [GetSpellInfo(47986)] = true, -- Sacrifice
-    [GetSpellInfo(43039)] = true, -- Ice Barrier
-    [GetSpellInfo(22812)] = true, -- Barkskin
-    [GetSpellInfo(1044)] = true, -- Hand of Freedom
-    [GetSpellInfo(29166)] = true, -- Innervate
-    [GetSpellInfo(2825)] = true, -- Bloodlust
-    [GetSpellInfo(32182)] = true, -- Heroism
-    [GetSpellInfo(10060)] = true, -- Power Infusion
-    [GetSpellInfo(33206)] = true, -- Pain Supression
-    [GetSpellInfo(53312)] = true, -- Nature's Grasp
-    [GetSpellInfo(6346)] = true, -- Fear Ward
-    [GetSpellInfo(6940)] = true, -- Hand of Sacrifice
-    [GetSpellInfo(10278)] = true, -- Blessing of Protection
-    [GetSpellInfo(18708)] = true, -- Fel Domination
-    [GetSpellInfo(45438)] = true, -- Ice Block
-    [GetSpellInfo(642)] = true, -- Divine Shield
-    [GetSpellInfo(53601)] = true, -- Sacred Shield
-    [GetSpellInfo(54428)] = true, -- Divine Plea
-    [GetSpellInfo(66115)] = true, -- Hand of Freedom
-    [GetSpellInfo(498)] = true, -- Divine Protection
-    [GetSpellInfo(53563)] = true, -- Beacon of Light
-    [GetSpellInfo(63560)] = true, -- Ghoul Frenzy
-    [GetSpellInfo(31842)] = true, -- Divine illumination
-    [GetSpellInfo(57761)] = true, -- Fireball!
-    [GetSpellInfo(49284)] = true, -- Earth Shield
-    [GetSpellInfo(69369)] = true, -- Predator's Swiftness
-    [GetSpellInfo(64701)] = true, -- Elemental Mastery
-    [GetSpellInfo(44544)] = true, -- Fingers of frost
-    [GetSpellInfo(63167)] = true, -- Decimation
-    [GetSpellInfo(63244)] = true, -- Pyroclasm
-    [GetSpellInfo(34936)] = true, -- Backlash
-    [GetSpellInfo(65081)] = true, -- Body and Soul
-    [GetSpellInfo(54372)] = true, -- Nether Protection
-
+    [16188] = true, -- Nature's Swiftness
+    [12043] = true, -- Presence of Mind
+    [12042] = true, -- Arcane Power
+    [12472] = true, -- Icy Veins
+    [31884] = true, -- Avenging Wrath
+    [48066] = true, -- Power Word: Shield
+    [47986] = true, -- Sacrifice
+    [43039] = true, -- Ice Barrier
+    [22812] = true, -- Barkskin
+    [1044] = true, -- Hand of Freedom
+    [29166] = true, -- Innervate
+    [2825] = true, -- Bloodlust
+    [32182] = true, -- Heroism
+    [10060] = true, -- Power Infusion
+    [33206] = true, -- Pain Suppression
+    [53312] = true, -- Nature's Grasp
+    [6346] = true, -- Fear Ward
+    [6940] = true, -- Hand of Sacrifice
+    [10278] = true, -- Blessing of Protection
+    [18708] = true, -- Fel Domination
+    [45438] = true, -- Ice Block
+    [642] = true, -- Divine Shield
+    [53601] = true, -- Sacred Shield
+    [54428] = true, -- Divine Plea
+    [66115] = true, -- Hand of Freedom
+    [498] = true, -- Divine Protection
+    [53563] = true, -- Beacon of Light
+    [63560] = true, -- Ghoul Frenzy
+    [31842] = true, -- Divine Illumination
+    [57761] = true, -- Fireball!
+    [49284] = true, -- Earth Shield
+    [69369] = true, -- Predator's Swiftness
+    [64701] = true, -- Elemental Mastery
+    [44544] = true, -- Fingers of Frost
+    [63167] = true, -- Decimation
+    [63244] = true, -- Pyroclasm
+    [34936] = true, -- Backlash
+    [65081] = true, -- Body and Soul
+    [54372] = true, -- Nether Protection
 }
 
-local function RealWidth(frame, auraName, width)
-    if not (frame.totFrame == _G.TargetFrameToT or frame.totFrame == _G.FocusFrameToT) then
-        return
+local whitelistMetatable = {
+    __index = function(tbl, key)
+        local name = GetSpellInfo(key)
+        return name
+    end
+}
+setmetatable(Whitelist, whitelistMetatable)
+
+local function GetFramePosition(frame)
+    if not frame then
+        return 0, 0, 0
     end
 
-    local x1 = frame.totFrame:GetLeft()
-    local x2 = _G[auraName .. "1"]:GetLeft()
-    if not x1 or not x2 then
-        return frame.TOT_AURA_ROW_WIDTH
-    end
-
-    local diff = mabs(x2 - x1)
-    local distance = mfloor(diff) + 2 -- cheat a bit
-
-    if distance > 136 then
-        -- let user regulate when ToTo is in Africa
-        return width
-    else
-        return distance
-    end
-end
-
-local function maxRows(self, width, auraName)
-    local haveTargetofTarget
-
-    if self.totFrame ~= nil then
-        haveTargetofTarget = self.totFrame:IsShown() == 1
-    end
-
-    if (haveTargetofTarget and (self.auraRows <= 2)) then
-        return RealWidth(self, auraName, width)
-    else
-        return width
-    end
+    local left = frame:GetLeft() or 0
+    local bottom = frame:GetBottom() or 0
+    return left, bottom
 end
 
 local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX)
     local LARGE_AURA_SIZE = RougeUI.db.SelfSize
     local SMALL_AURA_SIZE = RougeUI.db.OtherBuffSize
-    local size
+    local AURA_ROW_WIDTH = RougeUI.db.AuraRow
+    local size, biggestAura
     local offsetY = AURA_OFFSET_Y
     local rowWidth = 0
     local firstBuffOnRow = 1
+    local haveTargetofTarget = frame.totFrame and frame.totFrame:IsShown()
+    local totFrameX, totFrameBottom = GetFramePosition(frame.totFrame)
+    local currentX, currentY
+
+    maxRowWidth = AURA_ROW_WIDTH
 
     for i = 1, numAuras do
         if (largeAuraList[i]) then
@@ -144,19 +124,47 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
         if (i == 1) then
             rowWidth = size
             frame.auraRows = frame.auraRows + 1
+            if frame.largestAura then
+                offsetY = frame.largestAura
+            end
         else
             rowWidth = rowWidth + size + offsetX
         end
 
-        if (rowWidth > maxRows(frame, maxRowWidth, auraName)) then
+        local verticalDistance = currentY and (currentY - totFrameBottom) or 0
+        local horizontalDistance = rowWidth
+
+        if currentX then
+            horizontalDistance = (mfloor(mabs((currentX + size + offsetX) - totFrameX))) + 5 -- Cheat a bit
+        end
+
+        if (haveTargetofTarget and (horizontalDistance < size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
+            local anchorAura = _G[auraName .. firstBuffOnRow]
+            if biggestAura >= mfloor(anchorAura:GetSize() + 0.5) then
+                offsetY = (AURA_OFFSET_Y * 2) + (biggestAura - anchorAura:GetSize())
+            end
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY)
             rowWidth = size
             frame.auraRows = frame.auraRows + 1
             firstBuffOnRow = i
             offsetY = AURA_OFFSET_Y
+            biggestAura = nil
+            frame.largestAura = nil
         else
             updateFunc(frame, auraName, i, numOppositeAuras, i - 1, size, offsetX, offsetY)
         end
+
+        if not biggestAura or (biggestAura and (biggestAura < size)) then
+            biggestAura = size
+        end
+
+        local calc = (AURA_OFFSET_Y * 2) + (biggestAura - _G[auraName .. firstBuffOnRow]:GetSize())
+        if not frame.largestAura or (frame.largestAura and (frame.largestAura < calc)) then
+            frame.largestAura = calc
+        end
+
+        local aura = _G[auraName .. i]
+        currentX, currentY = aura:GetLeft(), aura:GetTop()
     end
 end
 
@@ -186,20 +194,20 @@ local function New_Target_Spellbar_AdjustPosition(self)
 end
 
 local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuffs, anchorIndex, size, offsetX, offsetY)
+    --For mirroring vertically
     local point, relativePoint
     local startY, auraOffsetY
     point = "TOP"
     relativePoint = "BOTTOM"
-    startY = AURA_START_Y
+    startY = 32
     auraOffsetY = AURA_OFFSET_Y
 
     local buff = _G[buffName .. index]
     if (index == 1) then
         if (UnitIsFriend("player", self.unit) or numDebuffs == 0) then
             -- unit is friendly or there are no debuffs...buffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", AURA_START_X, startY)
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
         else
-            -- Fix circular dependency i've created
             local _, a = self.debuffs:GetPoint()
             if a then
                 local _, b = a:GetPoint()
@@ -212,6 +220,7 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
             -- unit is not friendly and we have debuffs...buffs start on bottom
             buff:SetPoint(point .. "LEFT", self.debuffs, relativePoint .. "LEFT", 0, -offsetY)
         end
+
         self.buffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0)
         self.buffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
         self.spellbarAnchor = buff
@@ -234,11 +243,12 @@ local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBu
     local buff = _G[debuffName .. index]
     local isFriend = UnitIsFriend("player", self.unit)
 
+    --For mirroring vertically
     local point, relativePoint
     local startY, auraOffsetY
     point = "TOP"
     relativePoint = "BOTTOM"
-    startY = AURA_START_Y
+    startY = 32
     auraOffsetY = AURA_OFFSET_Y
 
     if (index == 1) then
@@ -247,7 +257,7 @@ local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBu
             buff:SetPoint(point .. "LEFT", self.buffs, relativePoint .. "LEFT", 0, -offsetY)
         else
             -- unit is not friendly or there are no buffs...debuffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", AURA_START_X, startY)
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
         end
         self.debuffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0)
         self.debuffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
@@ -282,6 +292,17 @@ local PLAYER_UNITS = {
     pet = true,
 }
 
+local function ShouldAuraBeLarge(caster)
+    if not caster then
+        return false
+    end
+    for token, value in pairs(PLAYER_UNITS) do
+        if UnitIsUnit(caster, token) then
+            return value
+        end
+    end
+end
+
 local function Target_Update(frame)
     if not (frame == TargetFrame or frame == FocusFrame) then
         return
@@ -293,10 +314,10 @@ local function Target_Update(frame)
     local selfName = frame:GetName()
     local isEnemy = UnitIsEnemy("player", frame.unit)
     local _, _, class = UnitClass("player")
-    local playerIsTarget = UnitIsUnit(PlayerFrame.unit, frame.unit)
+    local playerIsTarget = UnitIsUnit("player", frame.unit)
 
-    for i = 1, MAX_TARGET_BUFFS do
-        local name, rank, icon, _, debuffType, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, "HELPFUL")
+    for i = 1, 32 do
+        local name, _, icon, _, debuffType, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, "HELPFUL")
         if (name) then
             frameName = selfName .. "Buff" .. (i)
             buffFrame = _G[frameName]
@@ -304,11 +325,16 @@ local function Target_Update(frame)
             if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
                 local showHighlight = false
                 local r, g, b = 1, 1, 1
+                local modifier = 1.2
+
+                if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
+                    r, g, b = 1, 1, 0.75
+                    modifier = 2.2
+                end
 
                 if RougeUI.db.HighlightDispellable then
                     if isEnemy then
                         if Whitelist[name] and isStealable then
-                            r, g, b = 1, 1, 1 -- White
                             showHighlight = true
                         elseif (class == 4 or class == 3) and Enraged[spellId] then
                             r, g, b = 1, 0, 0 -- Red
@@ -319,28 +345,38 @@ local function Target_Update(frame)
                         elseif spellId == 49039 and (class == 5 or class == 2) then
                             r, g, b = 1, 0, 127 / 255 -- Pink
                             showHighlight = true
-                        elseif spellId == 53659 then
-                            r, g, b = 52 / 255, 235 / 255, 146 / 255 -- Green
-                            showHighlight = true
                         end
                     end
                 elseif isEnemy and isStealable and not RougeUI.db.HighlightDispellable then
                     showHighlight = true
                 end
 
-                local largeSize = (not playerIsTarget and PLAYER_UNITS[caster])
+                local largeSize = ShouldAuraBeLarge(caster)
+                local buffSize = RougeUI.db.OtherBuffSize
+
+                if largeSize then
+                    buffSize = RougeUI.db.SelfSize
+                end
+
                 local frameStealable = _G[frameName .. "Stealable"]
                 if showHighlight then
-                    local buffSize = RougeUI.db.OtherBuffSize
-                    if largeSize then
-                        buffSize = RougeUI.db.SelfSize
-                    end
                     frameStealable:Show()
-                    frameStealable:SetHeight(buffSize * 1.2)
-                    frameStealable:SetWidth(buffSize * 1.2)
+                    frameStealable:SetHeight(buffSize * modifier)
+                    frameStealable:SetWidth(buffSize * modifier)
                     frameStealable:SetVertexColor(r, g, b)
+                    if modifier == 2.2 then
+                        frameStealable:SetDesaturated(true)
+                    end
                 else
                     frameStealable:Hide()
+                end
+
+                frameCount = _G[frameName .. "Count"]
+                if frameCount then
+                    if not fontName then
+                        fontName = frameCount:GetFont()
+                    end
+                    frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
                 end
 
                 -- set the buff to be big if the buff is cast by the player or his pet
@@ -357,17 +393,31 @@ local function Target_Update(frame)
     local frameNum = 1
     local index = 1
 
-    local maxDebuffs = frame.maxDebuffs or MAX_TARGET_DEBUFFS
+    local maxDebuffs = frame.maxDebuffs or 16
     while (frameNum <= maxDebuffs and index <= maxDebuffs) do
-        local debuffName, _, icon, _, _, _, _, caster = UnitDebuff(frame.unit, index, "INCLUDE_NAME_PLATE_ONLY")
+        local debuffName, _, icon, count, debuffType, duration, expirationTime, caster, _, _, spellId = UnitDebuff(frame.unit, index, "INCLUDE_NAME_PLATE_ONLY")
         if (debuffName) then
+            --if (TargetFrame_ShouldShowDebuffs(frame.unit, caster, nameplateShowAll, casterIsPlayer)) then
             frameName = selfName .. "Debuff" .. frameNum
             buffFrame = _G[frameName]
             if (icon) then
+
+                local largeSize = ShouldAuraBeLarge(caster)
+
+                frameCount = _G[frameName .. "Count"]
+                if frameCount then
+                    if not fontName then
+                        fontName = frameCount:GetFont()
+                    end
+                    local buffSize = largeSize and RougeUI.db.SelfSize or RougeUI.db.OtherBuffSize
+                    frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
+                end
+
                 -- set the debuff to be big if the buff is cast by the player or his pet
                 numDebuffs = numDebuffs + 1
-                largeDebuffList[numDebuffs] = (PLAYER_UNITS[caster])
+                largeDebuffList[numDebuffs] = largeSize
                 frameNum = frameNum + 1
+                -- end
             end
         else
             break
@@ -376,19 +426,18 @@ local function Target_Update(frame)
     end
 
     frame.auraRows = 0
+    frame.largestAura = 0
+
+    local maxRowWidth = RougeUI.db.AuraRow
 
     frame.spellbarAnchor = nil
-    local maxRowWidth = RougeUI.db.AuraRow
-    if UnitIsFriend("player", frame.unit) then
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X)
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X)
+
+    if isEnemy then
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3)
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3)
     else
-        -- update debuff positions
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, OFFSET_X)
-        -- update buff positions
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, OFFSET_X)
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3)
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3)
     end
     -- update the spell bar position
     if (frame.spellbar) then
@@ -416,11 +465,10 @@ end
 
 local FF = CreateFrame("Frame")
 FF:RegisterEvent("PLAYER_LOGIN")
-FF:SetScript("OnEvent", function(self)
-    if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
-        RougeUI.RougeUIF:HookAuras()
+FF:SetScript("OnEvent", function(self, fireEvent)
+    if fireEvent == "PLAYER_LOGIN" then
+        if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
+            RougeUI.RougeUIF:HookAuras()
+        end
     end
-
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:SetScript("OnEvent", nil)
 end)

@@ -1,8 +1,26 @@
-local _, RougeUI = ...
-local pairs = pairs
+local addonName, RougeUI = ...
+local pairs, gsub = pairs, string.gsub
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
+local IsInInstance, IsDesaturated = IsInInstance, IsDesaturated
+local UnitClass, UnitExists, UnitCanAttack, GetUnitName = UnitClass, UnitExists, UnitCanAttack, GetUnitName
+local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit, UnitClassification
+local UnitIsConnected, UnitSelectionColor, UnitIsTapDenied = UnitIsConnected, UnitSelectionColor, UnitIsTapDenied
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local gsub, format = string.gsub, string.format
-local mfloor, mceil = math.floor, math.ceil
+
+-- Hide Raid frame titles
+local function HideFrameTitles(groupIndex)
+    local frame
+
+    if groupIndex and groupIndex > 0 then
+        frame = _G["CompactRaidGroup" .. groupIndex .. "Title"]
+    else
+        frame = _G["CompactPartyFrameTitle"]
+    end
+
+    if frame then
+        frame:SetAlpha(0)
+    end
+end
 
 -- Class colored scoreboard
 local function ColorScoreBoard()
@@ -79,6 +97,21 @@ local function HideGlows()
     end
 end
 
+-- Remove server name from raid frames
+if CompactUnitFrame_UpdateName then
+    hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
+        local _, instanceType = IsInInstance()
+        local name = frame.overlay.name
+        local xName = GetUnitName(frame.unit, true)
+        if (instanceType == "pvp" or instanceType == "arena") then
+            if (xName) then
+                local noRealm = gsub(xName, "%-[^|]+", "")
+                name:SetText(noRealm)
+            end
+        end
+    end)
+end
+
 -- Class colored health and/or gradient
 
 function RougeUI.RougeUIF:GradientColour(statusbar)
@@ -142,57 +175,15 @@ local function colour(statusbar, unit)
     end
 end
 
-local function manabarcolor(statusbar, unit)
-    if statusbar and unit then
-        local r, g, b = 0.49803921568, 0, 1.0
-        PlayerFrameManaBar:SetStatusBarColor(r, g, b)
-        if (statusbar == PlayerFrameManaBar) and not statusbar.lockColor then
-            statusbar.lockColor = true -- taint?
-        end
-        if (UnitIsUnit("targettarget", "player")) then
-            TargetFrameToTManaBar:SetStatusBarColor(r, g, b)
-        end
-        if (UnitIsUnit("target", "player")) then
-            TargetFrameManaBar:SetStatusBarColor(r, g, b)
-        end
-        if FocusFrame then
-            if (UnitIsUnit("focus", "player")) then
-                FocusFrameManaBar:SetStatusBarColor(r, g, b)
-            end
-            if (UnitIsUnit("focustarget", "player")) then
-                FocusFrameToTManaBar:SetStatusBarColor(r, g, b)
-            end
-        end
+local function manabarRecolor(manaBar)
+    if not manaBar or not UnitIsUnit(manaBar.unit, "player") then
+        return
     end
-end
 
--- Backup if lockColor taints
-local PowerBarColors = {};
-PowerBarColors["MANA"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["RAGE"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["FOCUS"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["ENERGY"] = { r = 0.49803921568, g = 0, b = 1.0 };
-PowerBarColors["RUNIC_POWER"] = { r = 0.49803921568, g = 0, b = 1.0 };
-
-local function ZunitFrame(manaBar)
-    local unitFrame = manaBar:GetParent();
-
-    if (not manaBar) or not (unitFrame == PlayerFrame) then
-        return ;
-    end
-    local powerType, powerToken, altR = UnitPowerType(manaBar.unit);
-    local prefix = _G[powerToken];
-    local info = PowerBarColors[powerToken];
-    if info then
-        if (not manaBar.lockColor) then
-            local playerDeadOrGhost = manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")) and not UnitIsFeignDeath("player");
-            if not info.atlas and not playerDeadOrGhost then
-                manaBar:SetStatusBarColor(info.r, info.g, info.b);
-            end
-        end
-    else
-        if (not altR) then
-            info = PowerBarColors[powerType] or PowerBarColors["MANA"];
+    if not manaBar.lockColor then
+        local playerDeadOrGhost = manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")) and not UnitIsFeignDeath("player")
+        if not playerDeadOrGhost then
+            manaBar:SetStatusBarColor(0.498, 0, 1.0)
         end
     end
 end
@@ -346,6 +337,14 @@ local function CheckClassification(self, forceNormalTexture)
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", -50, 14)
         self.healthbar:SetHeight(27)
+        if self.healthbar.LeftText then
+            self.healthbar.LeftText:ClearAllPoints()
+            self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        end
+        if self.healthbar.RightText then
+            self.healthbar.RightText:ClearAllPoints()
+            self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        end
         if self.healthbar.TextString then
             self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
         end
@@ -358,6 +357,14 @@ local function CheckClassification(self, forceNormalTexture)
         self.manabar:ClearAllPoints()
         self.manabar:SetPoint("CENTER", self, "CENTER", -50, -7)
 
+        if self.manabar.LeftText then
+            self.manabar.LeftText:ClearAllPoints()
+            self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
+        end
+        if self.manabar.RightText then
+            self.manabar.RightText:ClearAllPoints()
+            self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+        end
         if self.manabar.TextString then
             self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
         end
@@ -398,7 +405,7 @@ end
 local CLASS_TEXTURE = "Interface\\AddOns\\RougeUI\\textures\\classes\\%s.blp"
 
 local function ClassPortrait(self)
-    if self.unit == "player" or self.unit == "pet" then
+    if self.unit == "pet" then
         return
     end
 
@@ -465,10 +472,26 @@ local function PlayerArtThick(self)
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 14)
         self.healthbar:SetHeight(27)
+        if self.healthbar.LeftText then
+            self.healthbar.LeftText:ClearAllPoints()
+            self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        end
+        if self.healthbar.RightText then
+            self.healthbar.RightText:ClearAllPoints()
+            self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        end
         self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
         self.manabar:ClearAllPoints()
         self.manabar:SetPoint("CENTER", self, "CENTER", 50, -7)
         self.manabar:SetHeight(13)
+        if self.manabar.LeftText then
+            self.manabar.LeftText:ClearAllPoints()
+            self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
+        end
+        if self.manabar.RightText then
+            self.manabar.RightText:ClearAllPoints()
+            self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+        end
         self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
     end
 end
@@ -505,22 +528,33 @@ local function PetArtThick()
     PetFrameHealthBar.TextString:SetPoint("CENTER", PetFrameHealthBar, "CENTER", 0, -0.5)
     PetFrameManaBar.TextString:ClearAllPoints()
     PetFrameManaBar.TextString:SetPoint("CENTER", PetFrameManaBar, "CENTER", 0, 0)
+    if PetFrameHealthBarTextLeft then
+        PetFrameHealthBarTextLeft:ClearAllPoints()
+        PetFrameHealthBarTextLeft:SetPoint("TOPLEFT", 45, -18)
+    end
+    if PetFrameHealthBarTextRight then
+        PetFrameHealthBarTextRight:ClearAllPoints()
+        PetFrameHealthBarTextRight:SetPoint("TOPRIGHT", -14, -18)
+    end
+    if PetFrameManaBarTextLeft then
+        PetFrameManaBarTextLeft:ClearAllPoints()
+        PetFrameManaBarTextLeft:SetPoint("LEFT", 45, -7)
+    end
+    if PetFrameManaBarTextRight then
+        PetFrameManaBarTextRight:ClearAllPoints()
+        PetFrameManaBarTextRight:SetPoint("RIGHT", -14, -7)
+    end
 end
 
 local function ApplyThickness()
     PlayerFrame.name:ClearAllPoints()
     PlayerFrame.name:SetPoint("TOP", PlayerFrameHealthBar, 0, 15)
-    PlayerStatusTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\UI-Player-Status2");
+    PlayerStatusTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\UI-Player-Status2");
     PlayerRestGlow:SetAlpha(0)
     hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
     hooksecurefunc("PlayerFrame_ToVehicleArt", VehicleArtThick)
     hooksecurefunc("PetFrame_Update", PetArtThick)
 end
-
-local events = {
-    "PLAYER_LOGIN",
-    "PLAYER_ENTERING_WORLD",
-}
 
 local function GetActionButton(slot)
     local name
@@ -556,10 +590,37 @@ local function GetActionButton(slot)
     return name
 end
 
+local function Haxx()
+    local slots = C_ActionBar.FindSpellActionButtons(6774)
+    if slots then
+        for _, slot in ipairs(slots) do
+            local actionButton = GetActionButton(slot)
+            if actionButton then
+                local key = GetBindingKey(actionButton)
+                if string.match(actionButton, "^ACTIONBUTTON%d+$") then
+                    print("RougeUI: For the Slice and Dice hax to work, place your unmodified Slice and Dice spell in any other slot than the (stealth) actionbar.")
+                    return
+                end
+                if key then
+                    local button = CreateFrame("Button", "FSND", nil, "SecureActionButtonTemplate")
+                    button:RegisterForClicks("AnyDown", "AnyUp")
+                    button:SetAttribute("type", "macro")
+                    SecureHandlerWrapScript(button, "OnClick", button, [[ if down then
+                    self:SetAttribute("macrotext","/cast Slice and Dice") else
+                    self:SetAttribute("macrotext","/cast [@focus, exists] Slice and Dice") end]])
+                    SetOverrideBindingClick(button, true, key, "FSND")
+                end
+            end
+        end
+    elseif slots == nil then
+        print("Can't find Slice and Dice on the actionbar or this actionbar is unsupported")
+    end
+end
+
 local IsUsableAction, GetActionCount, IsConsumableAction = IsUsableAction, GetActionCount, IsConsumableAction
 local IsStackableAction, IsActionInRange, RANGE_INDICATOR = IsStackableAction, IsActionInRange, RANGE_INDICATOR
 
-local function Usable(button, r, g, b, a)
+local function Usable(button)
     local action = button.action
     local icon = _G[button:GetName() .. "Icon"]
 
@@ -571,78 +632,78 @@ local function Usable(button, r, g, b, a)
     local count = GetActionCount(action)
 
     if isUsable then
-        -- if (r ~= 1.0 or g ~= 1.0 or b ~= 1.0 or a ~= 1.0) or icon:IsDesaturated() then
         icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-        icon:SetDesaturated(false)
-        --  end
+        icon:SetDesaturated(0)
     elseif notEnoughMana then
-        -- if ((mfloor(r * 100) / 100) ~= 0.3 or (mfloor(g * 100) / 100) ~= 0.3 or (mfloor(b * 100) / 100) ~= 0.3 or a ~= 1.0) or not icon:IsDesaturated() then
         icon:SetVertexColor(0.3, 0.3, 0.3, 1.0)
-        icon:SetDesaturated(true)
-        -- end
+        icon:SetDesaturated(1)
     elseif (IsConsumableAction(action) or IsStackableAction(action)) and count == 0 then
         if not icon:IsDesaturated() then
-            icon:SetDesaturated(true)
+            icon:SetDesaturated(1)
         end
     else
         if UnitExists("target") or UnitExists("focus") then
-            -- if ((mfloor(r * 100) / 100) ~= 0.4 or (mfloor(g * 100) / 100) ~= 0.4 or (mfloor(b * 100) / 100) ~= 0.4 or a ~= 1.0) or not icon:IsDesaturated() then
             icon:SetVertexColor(0.4, 0.4, 0.4, 1.0)
-            icon:SetDesaturated(true)
-            --  end
+            icon:SetDesaturated(1)
         else
-            --   if r ~= 1.0 or b ~= 1.0 or g ~= 1.0 or a ~= 1.0 then
             icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-            icon:SetDesaturated(false)
-            --  end
+            icon:SetDesaturated(0)
         end
     end
 end
 
-local function RangeIndicator(self)
-    if self and not self:IsVisible() then
-        return
-    end
-
-    local icon = _G[self:GetName() .. "Icon"]
-    local hotKey = _G[self:GetName() .. "HotKey"]
-
-    if not icon or not hotKey then
-        return
-    end
-
+local function RangeIndicator(self, checksRange, inRange)
     local valid = IsActionInRange(self.action);
-    local checksRange = (valid ~= nil)
-    local inRange = checksRange and valid;
+    checksRange = (valid ~= nil)
+    inRange = checksRange and valid;
+    local icon = _G[self:GetName() .. "Icon"]
 
-    local r, g, b, a = icon:GetVertexColor()
-
-    if hotKey and hotKey:GetText() == RANGE_INDICATOR and hotKey:GetAlpha() > 0 then
-        hotKey:SetAlpha(0)
-    end
-    if checksRange and not inRange then
-        -- if r ~= 1.0 or ((mceil(g * 100) / 100) ~= 0.35 or (mceil(b * 100) / 100) ~= 0.35 or (mceil(a * 100) / 100) ~= 0.75) or not self.icon:IsDesaturated() then
+    if checksRange and inRange ~= 1 then
         icon:SetVertexColor(1.0, 0.35, 0.35, 0.75)
-        icon:SetDesaturated(true)
-        hotKey:SetAlpha(1.0, 0.35, 0.35, 0.75)
-        -- end
+        icon:SetDesaturated(1)
     else
-        hotKey:SetAlpha(1.0, 1.0, 1.0, 1.0)
-        if self:GetName():match("PetActionButton%d") then
-            icon:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-            icon:SetDesaturated(false)
-            return
-        end
-        Usable(self, r, g, b, a)
+        Usable(self)
     end
 end
+
+local conflictingAddons = {
+    "BuffSizer",
+    "ClassicAuraDurations",
+    "DarkModeUI",
+    "EasyFrames",
+    "LargerSelfAuras",
+    "RiizUI",
+    "TextureScript",
+    "SUI",
+    "whoaUnitFrames_WotLK",
+    "whoaThickFrames_WotLK",
+    "BetterBlizzFrames",
+}
 
 local e = CreateFrame("Frame")
-for _, v in pairs(events) do
-    e:RegisterEvent(v)
-end
-e:SetScript("OnEvent", function(self, event)
+e:RegisterEvent("PLAYER_LOGIN")
+e:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
+        if RougeUI.db.FadeIcon or RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
+            self:RegisterEvent("PLAYER_ENTERING_WORLD")
+        end
+
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC and not IsAddOnLoaded("Precognito") then
+            for _, v in pairs { PlayerFrameHealthBar, TargetFrameHealthBar, FocusFrameHealthBar } do
+                if v and v.MyHealPredictionBar then
+                    v.MyHealPredictionBar.FillMask:SetTexture("Interface\\TargetingFrame\\UI-StatusBar", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+                end
+                if v and v.OtherHealPredictionBar then
+                    v.OtherHealPredictionBar.FillMask:SetTexture("Interface\\TargetingFrame\\UI-StatusBar", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+                end
+            end
+        end
+
+        for _, v in ipairs(conflictingAddons) do
+            if IsAddOnLoaded(v) then
+                ChatFrame1:AddMessage("|cff009cffRougeUI:|r disable |cffffff00" .. v .. "|r to avoid bugs.")
+            end
+        end
 
         if RougeUI.db.ToTDebuffs then
             for _, totFrame in ipairs({ TargetFrameToT, FocusFrameToT }) do
@@ -688,10 +749,39 @@ e:SetScript("OnEvent", function(self, event)
             if not RougeUI.db.ThickFrames then
                 hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
             end
+            if CompactRaidGroup_GenerateForGroup then
+                hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
+            end
+            if CompactPartyFrame_Generate then
+                hooksecurefunc("CompactPartyFrame_Generate", HideFrameTitles)
+            end
+            for i = 0, 8 do
+                HideFrameTitles(i)
+            end
         end
         if RougeUI.db.pimp then
-            hooksecurefunc("UnitFrameManaBar_Update", manabarcolor)
-            -- hooksecurefunc("UnitFrameManaBar_UpdateType", ZunitFrame)
+            hooksecurefunc("UnitFrameManaBar_UpdateType", manabarRecolor)
+        end
+        if RougeUI.db.HideAggro then
+            if CompactUnitFrame_UpdateAggroHighlight then
+                hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
+                    if self.aggroHighlight and (self.aggroHighlight:GetAlpha() > 0) then
+                        self.aggroHighlight:SetAlpha(0)
+                        return
+                    end
+                end)
+            end
+        end
+        if RougeUI.db.roleIcon then
+            hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
+                if not frame.roleIcon then
+                    return
+                end
+
+                if frame.roleIcon:IsShown() and (frame.roleIcon:GetAlpha() > 0) then
+                    frame.roleIcon:SetAlpha(0);
+                end
+            end)
         end
         if RougeUI.db.Stance then
             local stancebar = CreateFrame("Frame", nil, UIParent)
@@ -706,8 +796,7 @@ e:SetScript("OnEvent", function(self, event)
                     local _, class = UnitClass(self.unit)
                     local c = RAID_CLASS_COLORS[class]
                     if c then
-                        self.nameBackground:SetVertexColor(0, 0, 0)
-                        self.nameBackground:SetAlpha(0.5)
+                        self.nameBackground:SetVertexColor(c.r, c.g, c.b)
                     end
                 else
                     self.nameBackground:SetVertexColor(0, 0, 0, 0.5)
@@ -747,6 +836,10 @@ e:SetScript("OnEvent", function(self, event)
             end)
         end
 
+        if RougeUI.db.Slice then
+            Haxx()
+        end
+
         if RougeUI.db.RangeIndicator and not (IsAddOnLoaded("Bartender4") or IsAddOnLoaded("tullaRange")) then
             hooksecurefunc("ActionButton_OnUpdate", RangeIndicator)
         end
@@ -756,9 +849,7 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.ThickFrames or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3) or RougeUI.db.ClassNames then
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
-    end
-
-    if event == "PLAYER_ENTERING_WORLD" then
+    elseif event == "PLAYER_ENTERING_WORLD" then
         if RougeUI.db.FadeIcon then
             PvPIcon()
         end
@@ -766,11 +857,6 @@ e:SetScript("OnEvent", function(self, event)
         if RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
             HideHotkeys()
         end
-
-        if not RougeUI.db.FadeIcon and not RougeUI.db.SQFix and not RougeUI.db.HideHotkey and not RougeUI.db.HideMacro then
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-        end
     end
-
-    self:UnregisterEvent("PLAYER_LOGIN")
 end)
+

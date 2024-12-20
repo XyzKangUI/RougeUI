@@ -1,5 +1,8 @@
 local Name, addon = ...
 local floor = math.floor
+local format = format
+local CreateFrame, _G = CreateFrame, _G
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 addon.RougeUIF = {}
 
 local function RoundNumbers(val, valStep)
@@ -11,8 +14,8 @@ local stock = {
     ClassHP = true,
     GradientHP = false,
     ShortNumeric = true,
-    ManaFontSize = 11,
-    HPFontSize = 11,
+    ManaFontSize = 14,
+    HPFontSize = 14,
     SelfSize = 23,
     OtherBuffSize = 23,
     HighlightDispellable = false,
@@ -41,7 +44,6 @@ local stock = {
     AuraRow = 122,
     BuffAlpha = false,
     ButtonAnim = false,
-    PartyText = false,
     BuffSizer = true,
     GoldElite = false,
     RareElite = false,
@@ -50,9 +52,7 @@ local stock = {
     Roug = false,
     Modern = false,
     BuffVal = 1.0,
-    PSTrack = false,
     cfix = false,
-    roleIcon = false,
     transparent = true,
     NoLevel = false,
     KeyEcho = false,
@@ -61,7 +61,9 @@ local stock = {
     EnergyTicker = false,
     wahksfk = false,
     EnemyTicker = false,
-    modtheme = false
+    modtheme = false,
+    OmniCC = false,
+    defaultFont = true,
 }
 
 local f = CreateFrame("Frame")
@@ -76,7 +78,9 @@ function f:ADDON_LOADED(msg)
         return
     end
 
-    if not RougeUI then RougeUI = {} end
+    if not RougeUI then
+        RougeUI = {}
+    end
 
     for i, j in pairs(stock) do
         if type(j) == "table" then
@@ -223,10 +227,6 @@ function f:CreateGUI()
         local ClassHPButton, GradientHPButton, UnitHPButton
         ClassHPButton = CheckBtn("Enable Class Colored HealthBar", "Enabling this will change the green healthBar color to the class color", Panel.childPanel4, function(self, value)
             addon.db.ClassHP = value
-            addon.db.GradientHP = false
-            addon.db.unithp = false
-            GradientHPButton:SetChecked(addon.db.GradientHP)
-            UnitHPButton:SetChecked(addon.db.unithp)
         end)
         ClassHPButton:SetChecked(addon.db.ClassHP)
         ClassHPButton:SetPoint("TOPLEFT", 10, -75)
@@ -243,10 +243,6 @@ function f:CreateGUI()
 
         UnitHPButton = CheckBtn("Color HealthBar by Unit's Reaction", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value)
             addon.db.unithp = value
-            addon.db.ClassHP = false
-            addon.db.GradientHP = false
-            ClassHPButton:SetChecked(addon.db.ClassHP)
-            GradientHPButton:SetChecked(addon.db.GradientHP)
         end)
         UnitHPButton:SetChecked(addon.db.unithp)
         UnitHPButton:SetPoint("TOPLEFT", 10, -145)
@@ -269,6 +265,12 @@ function f:CreateGUI()
         end)
         AbbButton:SetChecked(addon.db.Abbreviate)
         AbbButton:SetPoint("TOPLEFT", 10, -280)
+
+        local defaultFontButton = CheckBtn("Retail statusText font", "This changes the WoW font to a retail look", Panel.childPanel1, function(self, value)
+            addon.db.defaultFont = value
+        end)
+        defaultFontButton:SetChecked(addon.db.defaultFont)
+        defaultFontButton:SetPoint("TOPLEFT", 10, -350)
 
         CreateText(Panel.childPanel1, 350, -40, "Misc")
 
@@ -349,10 +351,33 @@ function f:CreateGUI()
         Nolvl:SetChecked(addon.db.NoLevel)
         Nolvl:SetPoint("TOPLEFT", 350, -175)
 
+        local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
+            addon.db.ModPlates = value
+        end)
+        ModPlates:SetChecked(addon.db.ModPlates)
+        ModPlates:SetPoint("TOPLEFT", 10, -75)
+
+        local OmniTimers = CheckBtn("OmniCC Buff Timers", "Disable Blizzard's buff timers and use OmniCC instead", Panel.childPanel5, function(self, value)
+            if not IsAddOnLoaded("OmniCC") then
+                UIErrorsFrame:AddMessage("To enable this option you have to enable OmniCC first", 1, 0, 0)
+                self:SetChecked(false)
+                addon.db.OmniCC = false
+                return
+            end
+            addon.db.OmniCC = value
+        end)
+        OmniTimers:SetChecked(addon.db.OmniCC)
+        OmniTimers:SetPoint("TOPLEFT", 10, -110)
+
         CreateText(Panel.childPanel5, 350, -40, "Theme's")
 
+        local sliderTemplate = "OptionsSliderTemplate"
+
         local name = "BuffColSlider"
-        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+        BuffColSlider.text = _G[name .. "Text"]
+        BuffColSlider.textHigh = _G[name .. "High"]
+        BuffColSlider.textLow = _G[name .. "Low"]
         BuffColSlider:SetMinMaxValues(0, 1)
         BuffColSlider:SetPoint("TOPLEFT", 25, -300)
         if addon.db.Modern or addon.db.modtheme then
@@ -360,9 +385,6 @@ function f:CreateGUI()
         else
             BuffColSlider:Hide()
         end
-        BuffColSlider.text = _G[name .. "Text"]
-        BuffColSlider.textLow = _G[name .. "Low"]
-        BuffColSlider.textHigh = _G[name .. "High"]
         BuffColSlider.minValue, BuffColSlider.maxValue = BuffColSlider:GetMinMaxValues()
         BuffColSlider.textLow:SetText(floor(BuffColSlider.minValue))
         BuffColSlider.textHigh:SetText(floor(BuffColSlider.maxValue))
@@ -426,11 +448,11 @@ function f:CreateGUI()
         Modtheme:SetPoint("TOPLEFT", 350, -175)
 
         local name = "FontSizeSlider"
-        local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
-        FontSizeSlider:SetPoint("TOPLEFT", 20, -400)
-        FontSizeSlider.textLow = _G[name .. "Low"]
-        FontSizeSlider.textHigh = _G[name .. "High"]
+        local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
         FontSizeSlider.text = _G[name .. "Text"]
+        FontSizeSlider.textHigh = _G[name .. "High"]
+        FontSizeSlider.textLow = _G[name .. "Low"]
+        FontSizeSlider:SetPoint("TOPLEFT", 20, -410)
         FontSizeSlider:SetMinMaxValues(8, 16)
         FontSizeSlider.minValue, FontSizeSlider.maxValue = FontSizeSlider:GetMinMaxValues()
         FontSizeSlider.textLow:SetText(FontSizeSlider.minValue)
@@ -445,11 +467,11 @@ function f:CreateGUI()
         end)
 
         local name = "MFontSizeSlider"
-        local MFontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, "OptionsSliderTemplate")
-        MFontSizeSlider:SetPoint("TOPLEFT", 20, -460)
-        MFontSizeSlider.textLow = _G[name .. "Low"]
-        MFontSizeSlider.textHigh = _G[name .. "High"]
+        local MFontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
         MFontSizeSlider.text = _G[name .. "Text"]
+        MFontSizeSlider.textHigh = _G[name .. "High"]
+        MFontSizeSlider.textLow = _G[name .. "Low"]
+        MFontSizeSlider:SetPoint("TOPLEFT", 20, -470)
         MFontSizeSlider:SetMinMaxValues(8, 16)
         MFontSizeSlider.minValue, MFontSizeSlider.maxValue = MFontSizeSlider:GetMinMaxValues()
         MFontSizeSlider.textLow:SetText(MFontSizeSlider.minValue)
@@ -464,16 +486,16 @@ function f:CreateGUI()
         end)
 
         local names = "TargetPlayerBuffSizeSlider"
-        local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, "OptionsSliderTemplate")
+        local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        TargetPlayerBuffSizeSlider.textLow = _G[names .. "Low"]
+        TargetPlayerBuffSizeSlider.textHigh = _G[names .. "High"]
+        TargetPlayerBuffSizeSlider.text = _G[names .. "Text"]
         TargetPlayerBuffSizeSlider:SetPoint("TOPLEFT", 20, -490)
         if addon.db.BuffSizer then
             TargetPlayerBuffSizeSlider:Show()
         else
             TargetPlayerBuffSizeSlider:Hide()
         end
-        TargetPlayerBuffSizeSlider.textLow = _G[names .. "Low"]
-        TargetPlayerBuffSizeSlider.textHigh = _G[names .. "High"]
-        TargetPlayerBuffSizeSlider.text = _G[names .. "Text"]
         TargetPlayerBuffSizeSlider:SetMinMaxValues(15, 34)
         TargetPlayerBuffSizeSlider.minValue, TargetPlayerBuffSizeSlider.maxValue = TargetPlayerBuffSizeSlider:GetMinMaxValues()
         TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
@@ -490,7 +512,10 @@ function f:CreateGUI()
         end)
 
         local names = "TargetBuffSizeSlider"
-        local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, "OptionsSliderTemplate")
+        local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        TargetBuffSizeSlider.textLow = _G[names .. "Low"]
+        TargetBuffSizeSlider.textHigh = _G[names .. "High"]
+        TargetBuffSizeSlider.text = _G[names .. "Text"]
         TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -440)
         if addon.db.BuffSizer then
             TargetBuffSizeSlider:Show()
@@ -499,9 +524,6 @@ function f:CreateGUI()
         end
         TargetBuffSizeSlider:SetMinMaxValues(15, 34)
         TargetBuffSizeSlider:SetValueStep(1)
-        TargetBuffSizeSlider.textLow = _G[names .. "Low"]
-        TargetBuffSizeSlider.textHigh = _G[names .. "High"]
-        TargetBuffSizeSlider.text = _G[names .. "Text"]
         TargetBuffSizeSlider.minValue, TargetBuffSizeSlider.maxValue = TargetBuffSizeSlider:GetMinMaxValues()
         TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
         TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
@@ -516,12 +538,12 @@ function f:CreateGUI()
         end)
 
         local name = "ColorValueSlider"
-        local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel5, "OptionsSliderTemplate")
+        local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+        ColorValueSlider.text = _G[name .. "Text"]
+        ColorValueSlider.textHigh = _G[name .. "High"]
+        ColorValueSlider.textLow = _G[name .. "Low"]
         ColorValueSlider:SetMinMaxValues(0, 1)
         ColorValueSlider:SetPoint("TOPLEFT", 25, -230)
-        ColorValueSlider.text = _G[name .. "Text"]
-        ColorValueSlider.textLow = _G[name .. "Low"]
-        ColorValueSlider.textHigh = _G[name .. "High"]
         ColorValueSlider.minValue, ColorValueSlider.maxValue = ColorValueSlider:GetMinMaxValues()
         ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
         ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
@@ -535,7 +557,10 @@ function f:CreateGUI()
         end)
 
         local names = "AuraRowSlider"
-        local AuraRowSlider = CreateFrame("Slider", names, Panel.childPanel2, "OptionsSliderTemplate")
+        local AuraRowSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        AuraRowSlider.textLow = _G[names .. "Low"]
+        AuraRowSlider.textHigh = _G[names .. "High"]
+        AuraRowSlider.text = _G[names .. "Text"]
         AuraRowSlider:SetPoint("TOPLEFT", 20, -540)
         if addon.db.BuffSizer then
             AuraRowSlider:Show()
@@ -544,9 +569,6 @@ function f:CreateGUI()
         end
         AuraRowSlider:SetMinMaxValues(108, 200)
         AuraRowSlider:SetValueStep(14)
-        AuraRowSlider.textLow = _G[names .. "Low"]
-        AuraRowSlider.textHigh = _G[names .. "High"]
-        AuraRowSlider.text = _G[names .. "Text"]
         AuraRowSlider.minValue, AuraRowSlider.maxValue = AuraRowSlider:GetMinMaxValues()
         AuraRowSlider.textLow:SetText(floor(AuraRowSlider.minValue))
         AuraRowSlider.textHigh:SetText(floor(AuraRowSlider.maxValue))
@@ -570,17 +592,17 @@ function f:CreateGUI()
         EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
         EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
 
-        local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value)
-            addon.db.ArenaNumbers = value
-        end)
-        ArenaNumbersButton:SetChecked(addon.db.ArenaNumbers)
-        ArenaNumbersButton:SetPoint("TOPLEFT", 10, -175)
-
         local CombatIndicatorButton = CheckBtn("Combat Indicator", "Displays a Combat icon next to Target-/FocusFrame when they enter combat or send pet", Panel.childPanel2, function(self, value)
             addon.db.CombatIndicator = value
         end)
         CombatIndicatorButton:SetChecked(addon.db.CombatIndicator)
         CombatIndicatorButton:SetPoint("TOPLEFT", 10, -70)
+
+        local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value)
+            addon.db.ArenaNumbers = value
+        end)
+        ArenaNumbersButton:SetChecked(addon.db.ArenaNumbers)
+        ArenaNumbersButton:SetPoint("TOPLEFT", 10, -175)
 
         local ScoreBoardButton = CheckBtn("Class colored PvP Scoreboard", "Color names on the PvP Scoreboard by class", Panel.childPanel2, function(self, value)
             addon.db.ScoreBoard = value
@@ -592,37 +614,43 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel2, 350, -40, "Misc")
 
-        local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
-            addon.db.RETabBinder = value
+        local AutoReadyButton = CheckBtn("Auto accept raid ready check", "When enabled it will automatically accept any readychecks. Warning: Don't AFK or enable when queueing arena with a random", Panel.childPanel2, function(self, value)
+            addon.db.AutoReady = value
         end)
-        Retab:SetChecked(addon.db.RETabBinder)
-        Retab:SetPoint("TOPLEFT", 350, -140)
+        AutoReadyButton:SetChecked(addon.db.AutoReady)
+        AutoReadyButton:SetPoint("TOPLEFT", 350, -140)
+
+        local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
+            addon.db.retab = value
+        end)
+        Retab:SetChecked(addon.db.retab)
+        Retab:SetPoint("TOPLEFT", 350, -280)
 
         local ButtonAnim = CheckBtn("Animated Keypress (SnowFallKeyPress)", "Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
             addon.db.ButtonAnim = value
         end)
         ButtonAnim:SetChecked(addon.db.ButtonAnim)
-        ButtonAnim:SetPoint("TOPLEFT", 350, -175)
+        ButtonAnim:SetPoint("TOPLEFT", 350, -210)
 
         local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
             addon.db.KeyEcho = value
         end)
         Echo:SetChecked(addon.db.KeyEcho)
-        Echo:SetPoint("TOPLEFT", 350, -105)
+        Echo:SetPoint("TOPLEFT", 350, -245)
 
         local Echo = CheckBtn("Actionbar Range Indicator", "Color your actionbuttons when out of range or oom", Panel.childPanel2, function(self, value)
             addon.db.RangeIndicator = value
         end)
         Echo:SetChecked(addon.db.RangeIndicator)
-        Echo:SetPoint("TOPLEFT", 350, -70)
+        Echo:SetPoint("TOPLEFT", 350, -175)
 
-        CreateText(Panel.childPanel2, 350, -255, "Rogue Specific")
+        CreateText(Panel.childPanel2, 350, -330, "Rogue Specific")
 
         local ComboFixButton = CheckBtn("ComboFrame Fix", "This change will allow you to see combo points on mind controlled enemy players", Panel.childPanel2, function(self, value)
             addon.db.cfix = value
         end)
         ComboFixButton:SetChecked(addon.db.cfix)
-        ComboFixButton:SetPoint("TOPLEFT", 350, -285)
+        ComboFixButton:SetPoint("TOPLEFT", 350, -365)
 
         local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
             addon.db.CastTimer = value
@@ -630,13 +658,8 @@ function f:CreateGUI()
         CastTimerButton:SetChecked(addon.db.CastTimer)
         CastTimerButton:SetPoint("TOPLEFT", 10, -40)
 
-        local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
-            addon.db.ModPlates = value
-        end)
-        ModPlates:SetChecked(addon.db.ModPlates)
-        ModPlates:SetPoint("TOPLEFT", 10, -75)
-
-        local HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
+        local HighlightDispellable
+        HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
             addon.db.HighlightDispellable = value
             addon.db.BuffSizer = true
         end)
@@ -685,29 +708,35 @@ function f:CreateGUI()
         HideIndicatorButton:SetChecked(addon.db.HideIndicator)
         HideIndicatorButton:SetPoint("TOPLEFT", 10, -75)
 
+        local HideTitlesButton = CheckBtn("Hide Group/Raid text", "Hides the Group/Raid text showing on top of frames", Panel.childPanel3, function(self, value)
+            addon.db.HideTitles = value
+        end)
+        HideTitlesButton:SetChecked(addon.db.HideTitles)
+        HideTitlesButton:SetPoint("TOPLEFT", 10, -110)
+
         local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value)
             addon.db.Stance = value
         end)
         HideStanceButton:SetChecked(addon.db.Stance)
-        HideStanceButton:SetPoint("TOPLEFT", 10, -110)
+        HideStanceButton:SetPoint("TOPLEFT", 10, -180)
 
         local HideHotkeyButton = CheckBtn("Hide Hotkey text on default actionbar", "Hides the keybinding text displayed", Panel.childPanel3, function(self, value)
             addon.db.HideHotkey = value
         end)
         HideHotkeyButton:SetChecked(addon.db.HideHotkey)
-        HideHotkeyButton:SetPoint("TOPLEFT", 10, -145)
+        HideHotkeyButton:SetPoint("TOPLEFT", 10, -215)
 
         local HideMacroButton = CheckBtn("Hide macro text on default actionbar", "Hides the macro name displayed on icons", Panel.childPanel3, function(self, value)
             addon.db.HideMacro = value
         end)
         HideMacroButton:SetChecked(addon.db.HideMacro)
-        HideMacroButton:SetPoint("TOPLEFT", 10, -180)
+        HideMacroButton:SetPoint("TOPLEFT", 10, -250)
 
         local HideTotDebuffs = CheckBtn("Hide TargetOfTarget Debuffs", "Hides the 4 small ToT Debuffs", Panel.childPanel3, function(self, value)
             addon.db.ToTDebuffs = value
         end)
         HideTotDebuffs:SetChecked(addon.db.ToTDebuffs)
-        HideTotDebuffs:SetPoint("TOPLEFT", 10, -215)
+        HideTotDebuffs:SetPoint("TOPLEFT", 10, -285)
 
         CreateText(Panel.childPanel1, 350, -215, "Player Chain")
 

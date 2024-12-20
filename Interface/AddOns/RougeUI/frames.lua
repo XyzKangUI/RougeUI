@@ -61,15 +61,15 @@ local function FrameColour()
         end
     end
 
-        for _, v in pairs({
-            FocusFrameToTTextureFrameTexture,
-            FocusFrameTextureFrameTexture,
-            FocusFrameSpellBarBorder,
-        }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
+    for _, v in pairs({
+        FocusFrameToTTextureFrameTexture,
+        FocusFrameTextureFrameTexture,
+        FocusFrameSpellBarBorder,
+    }) do
+        if v then
+            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
+    end
 
     CHAT_FONT_HEIGHTS = { 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 }
 
@@ -1060,4 +1060,3 @@ function RougeUI.RougeUIF:ChangeFrameColors()
     NewVariables()
     BlizzFrames()
 end
-	

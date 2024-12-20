@@ -1,6 +1,6 @@
 ## Interface: 30300
-## Title: |cff009cffRougeUI-WOTLKC|r
-## Version: 3.56
+## Title: |cff009cffRougeUI|r
+## Version: 4.09
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 ## Dependencies: !!!ClassicAPI
@@ -12,6 +12,7 @@ extra.lua
 textbar.lua
 combat.lua
 castbar.lua
+nameplate.lua
 auras.lua
 retab.lua
 minimap.lua
@@ -21,4 +22,3 @@ outlines.lua
 snowfallkey.lua
 combofix.lua
 XYZ.lua
-nameplate.lua

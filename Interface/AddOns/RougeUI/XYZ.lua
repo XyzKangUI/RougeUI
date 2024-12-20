@@ -1,8 +1,9 @@
 local _, RougeUI = ...
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local bartender = IsAddOnLoaded("Bartender4")
 local dominos = IsAddOnLoaded("Dominos")
-local tonumber, strmatch = tonumber, string.match
 local frame = CreateFrame("Frame")
+local wahkFrames = {}
 
 local buttonNames = {
     ["ACTIONBUTTON"] = "ActionButton",
@@ -17,12 +18,11 @@ local buttonNames = {
 local function ConvertActionButtonName(name)
     -- remove "CLICK "
     name = name:gsub("^CLICK ", "")
-
     -- remove ":Keybind"
     name = name:gsub(":Keybind$", "")
 
     if dominos then
-        if strmatch(name, "Dominos") then
+        if string.match(name, "Dominos") then
             name = name:gsub(":LeftButton", "")
             name = name:gsub(":HOTKEY", "")
         end
@@ -59,7 +59,7 @@ local function WAHK(button, ok)
     end
 
     local key, key2 = GetBindingKey(clickButton)
-    if not key then
+    if not key and not key2 then
         return
     end
 
@@ -73,8 +73,7 @@ local function WAHK(button, ok)
 
     for v in pairs(cacheKeys) do
         local action = GetBindingAction(v, true)
-
-        if action and (action ~= "") then
+        if action and action ~= "" then
             btn = _G[ConvertActionButtonName(action)]
         end
 
@@ -86,19 +85,14 @@ local function WAHK(button, ok)
                 id = tonumber(button:match("(%d+)"))
             end
 
-            local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
+            local wahkName = "WAHK" .. v .. button
+            local wahk = _G[wahkName] or CreateFrame("Button", wahkName, nil, "SecureActionButtonTemplate")
+            wahkFrames[wahkName] = true
+
             wahk:RegisterForClicks("AnyDown", "AnyUp")
-            wahk:SetAttribute("type", "macro")
+            wahk:SetAttribute("type", "click")
+            wahk:SetAttribute("clickbutton", _G[button])
 
-            local onclick
-            if ok then
-                onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] VehicleMenuBarActionButton" .. id .. "; [bonusbar:1/2/3] BonusActionButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] VehicleMenuBarActionButton" .. id .. "; [bonusbar:1/2/3] BonusActionButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
-            else
-                onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
-            end
-
-            ClearOverrideBindings(wahk)
-            SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
             SetOverrideBindingClick(wahk, true, v, wahk:GetName())
 
             wahk:SetScript("OnMouseDown", function()
@@ -147,6 +141,15 @@ local function UpdateBinds()
         return
     end
 
+    for name in pairs(wahkFrames) do
+        local wahk = _G[name]
+        if wahk then
+            ClearOverrideBindings(wahk)
+            SecureHandlerUnwrapScript(wahk, "OnClick")
+        end
+    end
+    wipe(wahkFrames)
+
     for i = 1, 12 do
         WAHK("ActionButton" .. i, true)
         WAHK("MultiBarBottomRightButton" .. i)
@@ -157,28 +160,21 @@ local function UpdateBinds()
 
     if bartender or dominos then
         for i = 1, 180 do
-            if bartender then
-                WAHK("BT4Button" .. i)
-            else
-                WAHK("DominosActionButton" .. i)
-            end
+            local btnName = bartender and "BT4Button" or "DominosActionButton"
+            WAHK(btnName .. i)
         end
     end
 end
 
-frame:RegisterEvent("UPDATE_BINDINGS")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function(self, event, ...)
-    if not RougeUI.db.KeyEcho then
-        -- stop copying, use the addon.
-        self:UnregisterAllEvents()
-        self:SetScript("OnEvent", nil)
-        return
-    end
-
-    if event == "PLAYER_REGEN_ENABLED" then
+    if event == "PLAYER_LOGIN" and RougeUI.db.KeyEcho then
+        self:RegisterEvent("UPDATE_BINDINGS")
+        C_Timer.After(1, UpdateBinds)
+    elseif event == "PLAYER_REGEN_ENABLED" then
         self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        C_Timer.After(1, UpdateBinds)
+    elseif event == "UPDATE_BINDINGS" then
+        C_Timer.After(1, UpdateBinds)
     end
-
-    C_Timer.After(1, UpdateBinds)
 end)

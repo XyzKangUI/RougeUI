@@ -15,16 +15,14 @@ local function Retabbind()
     local _, instanceType = IsInInstance()
 
     if InCombatLockdown() then
-		RE:RegisterEvent("PLAYER_REGEN_ENABLED")
+        RE:RegisterEvent("PLAYER_REGEN_ENABLED")
         return
     end
 
     if (instanceType == "arena" or instanceType == "pvp") then
         SetOverrideBindingClick(button, true, key, "Tabber")
-        SetCVar("TargetEnemyAttacker", 0)
     else
         ClearOverrideBindings(button)
-        SetCVar("TargetEnemyAttacker", 1)
     end
 end
 
@@ -36,8 +34,8 @@ RE:SetScript("OnEvent", function(self, event, ...)
     end
     if event == "PLAYER_ENTERING_WORLD" then
         Retabbind()
-	elseif event == "PLAYER_REGEN_ENABLED" then
-		Retabbind()
-		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        Retabbind()
+        self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     end
 end)
