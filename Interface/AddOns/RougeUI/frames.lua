@@ -400,14 +400,39 @@ local function FrameColour()
             end
         end
 
-        CharacterFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        CharacterFrameInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        CharacterFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        CharacterFrameInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        CharacterFrameInsetInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        CharacterFrameInsetInsetTopBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        CharacterFrameInsetInsetTopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        CharacterFrameInsetInsetTopRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        if CharacterFrameInsetInsetBottomBorder then
+            CharacterFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInsetInsetLeftBorder then
+            CharacterFrameInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInsetInsetRightBorder then
+            CharacterFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInsetInsetBotLeftCorner then
+            CharacterFrameInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInsetInsetBotRightCorner then
+            CharacterFrameInsetInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInsetInsetTopBorder then
+            CharacterFrameInsetInsetTopBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInsetInsetTopLeftCorner then
+            CharacterFrameInsetInsetTopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInsetInsetTopRightCorner then
+            CharacterFrameInsetInsetTopRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInset.NineSlice.BottomEdge then
+            CharacterFrameInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInset.NineSlice.LeftEdge then
+            CharacterFrameInset.NineSlice.LeftEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if CharacterFrameInset.NineSlice.BottomLeftCorner then
+            CharacterFrameInset.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
 
         CharacterFramePortrait:SetVertexColor(1,1,1)
     end
@@ -507,7 +532,12 @@ local function FrameColour()
             PVPFrameLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVPFrameRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVPTeamManagementFrameBackground:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVPFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            if PVPFrameInsetInsetBottomBorder then
+                PVPFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PVPFrameInset.NineSlice.BottomEdge then
+                PVPFrameInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
         else
             local _, _, c, d, e, f, g, h = PVPFrame:GetRegions()
             for _, v in pairs({ c, d, e, f, g, h }) do
@@ -740,11 +770,49 @@ local function FrameColour()
                     region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
             end
+            if RaidFinderQueueFrame then
+                for _, region in pairs({ RaidFinderQueueFrame:GetRegions() }) do
+                    if region and region:IsObjectType("Texture") then
+                        region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    end
+                end
+                for _, region in pairs({ RaidFinderFrameRoleInset:GetRegions() }) do
+                    if region and region:IsObjectType("Texture") then
+                        region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    end
+                end
+                for _, region in pairs({ RaidFinderFrameRoleInset.NineSlice:GetRegions() }) do
+                    if region and region:IsObjectType("Texture") then
+                        region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    end
+                end
+            end
             LFDQueueFrameFindGroupButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             LFDQueueFrameFindGroupButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVEFrameLeftInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVEFrameLeftInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVEFrameLeftInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            if PVEFrameLeftInsetInsetLeftBorder then
+                PVEFrameLeftInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PVEFrameLeftInsetInsetBottomBorder then
+                PVEFrameLeftInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PVEFrameLeftInsetInsetBotLeftCorner then
+                PVEFrameLeftInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PVEFrameLeftInset.NineSlice.BottomEdge then
+                PVEFrameLeftInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PVEFrameLeftInset.NineSlice.BottomLeftCorner then
+                PVEFrameLeftInset.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PVEFrameLeftInset.NineSlice.LeftEdge then
+                PVEFrameLeftInset.NineSlice.LeftEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if RaidFinderFrameFindRaidButton_LeftSeparator then
+                RaidFinderFrameFindRaidButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if RaidFinderFrameFindRaidButton_RightSeparator then
+                RaidFinderFrameFindRaidButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
             LFGListFrame.CategorySelection.FindGroupButton.LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             LFGListFrame.CategorySelection.StartGroupButton.RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             PVEFramePortrait:SetVertexColor(1, 1, 1)
@@ -823,11 +891,39 @@ local function NewVariables()
         local vars = {}
         if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
             vars = { a, c, d, e, f, i, j, k, l, m, n, o, p }
-            SpellBookFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            SpellBookFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            SpellBookFrameInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            SpellBookFrameInsetInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            SpellBookFrameInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            if SpellBookFrameInsetInsetBottomBorder then
+                SpellBookFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInsetInsetRightBorder then
+                SpellBookFrameInsetInsetRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInsetInsetLeftBorder then
+                SpellBookFrameInsetInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInsetInsetBotRightCorner then
+                SpellBookFrameInsetInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInsetInsetBotLeftCorner then
+                SpellBookFrameInsetInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInset.NineSlice.BottomEdge then
+                SpellBookFrameInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInset.NineSlice.BottomLeftCorner then
+                SpellBookFrameInset.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInset.NineSlice.RightEdge then
+                SpellBookFrameInset.NineSlice.RightEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameInset.NineSlice.LeftEdge then
+                SpellBookFrameInset.NineSlice.LeftEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameBotRightCorner then
+                SpellBookFrameBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if SpellBookFrameRightBorner then
+                SpellBookFrameRightBorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
         else
             vars = { a, b, c, d }
         end
@@ -989,6 +1085,16 @@ local function NewVariables()
             snt:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
+
+    if CommunitiesFrame then
+        for _, v in pairs({CommunitiesFrame:GetRegions()}) do
+            if v:IsObjectType("Texture") then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+
+        CommunitiesFrame.PortraitOverlay.Portrait:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+    end
 end
 
 local function BlizzFrames(addon)
@@ -1147,6 +1253,30 @@ local function BlizzFrames(addon)
 
             if PlayerTalentFrameInsetInsetTopLeftCorner then
                 PlayerTalentFrameInsetInsetTopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInset.NineSlice.BottomEdge then
+                PlayerTalentFrameInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInset.NineSlice.LeftEdge then
+                PlayerTalentFrameInset.NineSlice.LeftEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameInset.NineSlice.BottomLeftCorner then
+                PlayerTalentFrameInset.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameLearnButton_LeftSeparator then
+                PlayerTalentFrameLearnButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameResetButton_LeftSeparator then
+                PlayerTalentFrameResetButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameLearnButton_RightSeparator then
+                PlayerTalentFrameLearnButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
 
             for i = 1, 3 do
@@ -1430,8 +1560,32 @@ local function BlizzFrames(addon)
         end
         CollectionsJournalTitleText:SetVertexColor(1, 1, 1)
         CollectionsJournalPortrait:SetVertexColor(1, 1, 1)
-        MountJournalInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-        MountJournalInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        if MountJournalInsetBottomBorder then
+            MountJournalInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if MountJournalInsetBotRightCorner then
+            MountJournalInsetBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if MountJournal then
+            if MountJournal.RightInset.NineSlice.BottomEdge then
+                MountJournal.RightInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if MountJournal.RightInset.NineSlice.RightEdge then
+                MountJournal.RightInset.NineSlice.RightEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if MountJournal.RightInset.NineSlice.TopEdge then
+                MountJournal.RightInset.NineSlice.TopEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if MountJournal.RightInset.NineSlice.BottomLeftCorner then
+                MountJournal.RightInset.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if MountJournal.LeftInset.NineSlice.BottomEdge then
+                MountJournal.LeftInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if MountJournalMountButton_RightSeparator then
+                MountJournalMountButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
     end
 
     if addon == "Blizzard_Communities" then
@@ -1449,6 +1603,20 @@ local function BlizzFrames(addon)
             if v:IsObjectType("Texture") then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
+        end
+        for _, v in pairs({EncounterJournalInset.NineSlice:GetRegions()}) do
+            if v and v:IsObjectType("Texture") then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+        if EncounterJournalNavBarInsetBottomBorder then
+            EncounterJournalNavBarInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if EncounterJournalNavBarInsetLeftBorder then
+            EncounterJournalNavBarInsetLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if EncounterJournalNavBarInsetBotLeftCorner then
+            EncounterJournalNavBarInsetBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
         EncounterJournalPortrait:SetVertexColor(1, 1, 1)
     end

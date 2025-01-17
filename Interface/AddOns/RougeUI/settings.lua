@@ -169,6 +169,7 @@ function f:CreateGUI()
         if Settings then
             category = Settings.RegisterCanvasLayoutCategory(Panel, Title)
             Settings.RegisterAddOnCategory(category)
+            Panel.categoryID = category:GetID()
         else
             InterfaceOptions_AddCategory(Panel)
         end
@@ -948,5 +949,12 @@ function f:CreateGUI()
         RareElite:SetPoint("TOPLEFT", 350, -320)
 
     end
+
+    SLASH_RUI1 = "/rui"
+    function SlashCmdList.RUI()
+        Settings.OpenToCategory(Panel.categoryID)
+    end
+
     return Panel
 end
+
