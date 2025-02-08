@@ -20,7 +20,7 @@ local function ComboUpdate(self)
     if UnitIsPossessed("target") and UnitIsPlayer("target") then
         comboPoints = comboPointsCache[targetGUID] or 0;
     else
-        comboPoints = GetComboPoints(self.unit, "target");
+        comboPoints = self.unit and GetComboPoints(self.unit, "target");
         if UnitIsPlayer("target") and targetGUID ~= nil then
             comboPointsCache[targetGUID] = comboPoints
         end
@@ -28,7 +28,7 @@ local function ComboUpdate(self)
 
     local comboPoint, comboPointHighlight, comboPointShine;
 
-    if (comboPoints > 0) then
+    if comboPoints and (comboPoints > 0) then
         if (not self:IsShown()) then
             self:Show();
             UIFrameFadeIn(self, COMBOFRAME_FADE_IN);

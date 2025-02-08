@@ -73,6 +73,8 @@ local stock = {
     modtheme = false,
     OmniCC = false,
     defaultFont = true,
+    AsuriFrame = false,
+    HidePetText = false
 }
 
 local f = CreateFrame("Frame")
@@ -370,6 +372,7 @@ function f:CreateGUI()
         local ThickFrame = CheckBtn("Enable Big Frames", "Enable this for big (thick) UnitFrames", Panel.childPanel1, function(self, value)
             addon.db.ThickFrames = value
             addon.db.ClassBG = false
+            addon.db.AsuriFrame = false
             if addon.db.ThickFrames then
                 if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["ClassColFrames"] == "On" then
                     UIErrorsFrame:AddMessage("Don't forget to disable Class colored frames in Leatrix Plus", 1, 0, 0)
@@ -489,6 +492,20 @@ function f:CreateGUI()
         end)
         Modtheme:SetChecked(addon.db.modtheme)
         Modtheme:SetPoint("TOPLEFT", 350, -175)
+
+        local AsuriFrame = CheckBtn("Asuri UI Frames", nil, Panel.childPanel5, function(self, value)
+            addon.db.AsuriFrame = value
+            addon.db.ThickFrames = false
+            addon.db.ClassBG = false
+            addon.db.transparent = false
+            addon.db.NoLevel = false
+            ThickFrame:SetChecked(addon.db.ThickFrames)
+            ThickFrame:SetChecked(addon.db.ClassBG)
+            ThickFrame:SetChecked(addon.db.transparent)
+            ThickFrame:SetChecked(addon.db.NoLevel)
+        end)
+        AsuriFrame:SetChecked(addon.db.AsuriFrame)
+        AsuriFrame:SetPoint("TOPLEFT", 350, -210)
 
         local name = "FontSizeSlider"
         local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
@@ -884,6 +901,18 @@ function f:CreateGUI()
             AggroHighlightButton:SetChecked(addon.db.HideAggro)
             AggroHighlightButton:SetPoint("TOPLEFT", 10, -320)
         end
+
+        local HidePetText = CheckBtn("Hide Pet Health/Mana", "Hides Pet text", Panel.childPanel3, function(self, value)
+            addon.db.HidePetText = value
+            if PetFrameHealthBarText then
+                PetFrameHealthBarText:SetAlpha(0)
+            end
+            if PetFrameManaBarText then
+                PetFrameManaBarText:SetAlpha(0)
+            end
+        end)
+        HidePetText:SetChecked(addon.db.HidePetText)
+        HidePetText:SetPoint("TOPLEFT", 10, -355)
 
         local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value)
             addon.db.Stance = value

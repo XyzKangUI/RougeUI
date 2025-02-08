@@ -10,7 +10,9 @@ MM:SetScript("OnEvent", function(self, event)
         if MiniMapWorldMapButton then
             hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)
         end
-        hooksecurefunc(MinimapNorthTag, "Show", MinimapNorthTag.Hide)
+        if MinimapNorthTag then
+            hooksecurefunc(MinimapNorthTag, "Show", MinimapNorthTag.Hide)
+        end
 
         for _, v in pairs({
             MinimapBorderTop,
@@ -18,7 +20,9 @@ MM:SetScript("OnEvent", function(self, event)
             MinimapZoomIn,
             MinimapZoomOut,
         }) do
-            v:Hide()
+            if v then
+                v:Hide()
+            end
         end
 
         -- Zoom in with mousewheel
@@ -48,24 +52,25 @@ MM:SetScript("OnEvent", function(self, event)
         end)
 
         calendar:HookScript("OnLeave", function(self)
-            if not FindParent(GetMouseFoci()[1], self) then
+            local focus = GetMouseFoci and GetMouseFoci()[1] or GetMouseFocus()
+            if not FindParent(focus, self) then
                 self:SetAlpha(0)
             end
         end)
 
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+        if calendar:HasScript("OnClick") then
             calendar:HookScript("OnClick", function()
                 calendar:SetAlpha(0)
             end)
         end
 
-        -- Center text properly
-        MinimapZoneText:ClearAllPoints()
-        MinimapZoneText:SetPoint("TOPLEFT", "MinimapZoneTextButton", "TOPLEFT", 8, 0)
-
         if IsAddOnLoaded("Leatrix_Plus") and (LeaPlusDB["MinimapModder"] == "On" and (LeaPlusDB["CombineAddonButtons"] == "On") or LeaPlusDB["SquareMinimap"] == "On") then
             return
         end
+
+        -- Center text properly
+        MinimapZoneText:ClearAllPoints()
+        MinimapZoneText:SetPoint("TOPLEFT", "MinimapZoneTextButton", "TOPLEFT", 8, 0)
 
         MiniMapMailFrame:ClearAllPoints()
         MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)

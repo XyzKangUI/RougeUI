@@ -571,7 +571,7 @@ local function BuffAnchor()
     local numBuffs = 0;
     local numAuraRows = 0;
     local slack = BuffFrame.numEnchants;
-    if (BuffFrame.numConsolidated > 0) then
+    if BuffFrame.numConsolidated and (BuffFrame.numConsolidated > 0) then
         slack = slack + 1;    -- one icon for all consolidated buffs
     end
     local BUFFS_PER_ROW = RougeUI.db.BuffsRow
@@ -621,7 +621,7 @@ local function DebuffAnchor(buttonName, index)
     local numBuffs = BUFF_ACTUAL_DISPLAY + BuffFrame.numEnchants;
     local BUFFS_PER_ROW = RougeUI.db.BuffsRow
 
-    if (BuffFrame.numConsolidated > 0) then
+    if BuffFrame.numConsolidated and (BuffFrame.numConsolidated > 0) then
         numBuffs = numBuffs - BuffFrame.numConsolidated + 1;
     end
 
@@ -697,7 +697,7 @@ e3:SetScript("OnEvent", function(self, event, ...)
                 end
 
                 if filter == "HARMFUL" then
-                    local necroAura = C_UnitAuras.GetDebuffDataByIndex("player", index)
+                    local necroAura = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex("player", index)
                     if necroAura and necroAura.spellId == 73975 and button then
                         button.count:SetText(shorten(necroAura.points[1]))
                         button.count:Show()

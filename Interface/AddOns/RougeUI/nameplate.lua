@@ -36,7 +36,7 @@ end
 
 local function AddElements(plate)
     if RougeUI.db.ModPlates then
-        if (RougeUI.db.ArenaNumbers and not IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers then
+        if ((RougeUI.db.ArenaNumbers and not IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers) and not RougeUI.db.AsuriFrame then
             plate.name:SetFont(STANDARD_TEXT_FONT, 8)
             plate.name:ClearAllPoints()
             plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
@@ -44,7 +44,7 @@ local function AddElements(plate)
         end
     end
 
-    if RougeUI.db.NoLevel then
+    if RougeUI.db.NoLevel or RougeUI.db.AsuriFrame then
         local border = plate.healthBar.border:GetRegions()
         if border then
             border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")

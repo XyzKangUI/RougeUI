@@ -7,6 +7,7 @@ local mabs, mfloor = math.abs, math.floor
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns and C_AddOns.IsAddOnLoaded
 local AURA_OFFSET_Y = 1
 local fontName
+local xPosOffset = 5
 
 local Enraged = {
     --[5229] = true, -- Enrage (Druid)
@@ -128,37 +129,36 @@ setmetatable(Whitelist, whitelistMetatable)
 
 local function GetFramePosition(frame)
     if not frame then
-        return 0, 0, 0
+        return 0, 0
     end
-
-    local left = frame:GetLeft() or 0
-    local bottom = frame:GetBottom() or 0
-    return left, bottom
+    return frame:GetLeft() or 0, frame:GetBottom() or 0
 end
 
 local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, largeAuraList, updateFunc, maxRowWidth, offsetX, mirrorAurasVertically)
-    local LARGE_AURA_SIZE = RougeUI.db.SelfSize
-    local SMALL_AURA_SIZE = RougeUI.db.OtherBuffSize
-    local AURA_ROW_WIDTH = RougeUI.db.AuraRow
+    local db = RougeUI.db
+    local LARGE_AURA_SIZE = db.SelfSize
+    local SMALL_AURA_SIZE = db.OtherBuffSize
+    local AURA_ROW_WIDTH = db.AuraRow
+    maxRowWidth = AURA_ROW_WIDTH
+
     local size, biggestAura
     local offsetY = AURA_OFFSET_Y
     local rowWidth = 0
     local firstBuffOnRow = 1
-    local haveTargetofTarget = frame.totFrame and frame.totFrame:IsShown()
-    local totFrameX, totFrameBottom = GetFramePosition(frame.totFrame)
+    local totFrame = frame.totFrame
+    local haveTargetofTarget = totFrame and totFrame:IsShown()
+    local totFrameX, totFrameBottom = GetFramePosition(totFrame)
     local currentX, currentY
 
-    maxRowWidth = AURA_ROW_WIDTH
-
     for i = 1, numAuras do
-        if (largeAuraList[i]) then
+        if largeAuraList[i] then
             size = LARGE_AURA_SIZE
-            offsetY = AURA_OFFSET_Y + AURA_OFFSET_Y
+            offsetY = AURA_OFFSET_Y * 2
         else
             size = SMALL_AURA_SIZE
         end
 
-        if (i == 1) then
+        if i == 1 then
             rowWidth = size
             frame.auraRows = frame.auraRows + 1
             if frame.largestAura then
@@ -170,14 +170,13 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
 
         local verticalDistance = currentY and (currentY - totFrameBottom) or 0
         local horizontalDistance = rowWidth
-
         if currentX then
-            horizontalDistance = (mfloor(mabs((currentX + size + offsetX) - totFrameX))) + 5 -- Cheat a bit
+            horizontalDistance = mfloor(mabs((currentX + size + offsetX) - totFrameX)) + 5
         end
 
         if (haveTargetofTarget and (horizontalDistance < size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
-            local anchorAura = _G[auraName..firstBuffOnRow]
-            if biggestAura >= mfloor(anchorAura:GetSize() + 0.5) then
+            local anchorAura = _G[auraName .. firstBuffOnRow]
+            if biggestAura and (biggestAura >= mfloor(anchorAura:GetSize() + 0.5)) then
                 offsetY = (AURA_OFFSET_Y * 2) + (biggestAura - anchorAura:GetSize())
             end
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY, mirrorAurasVertically)
@@ -191,12 +190,12 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             updateFunc(frame, auraName, i, numOppositeAuras, i - 1, size, offsetX, offsetY, mirrorAurasVertically)
         end
 
-        if not biggestAura or (biggestAura and (biggestAura < size)) then
+        if not biggestAura or (biggestAura < size) then
             biggestAura = size
         end
 
-        local calc = (AURA_OFFSET_Y * 2) + (biggestAura - _G[auraName..firstBuffOnRow]:GetSize())
-        if not frame.largestAura or (frame.largestAura and (frame.largestAura < calc)) then
+        local calc = (AURA_OFFSET_Y * 2) + (biggestAura - _G[auraName .. firstBuffOnRow]:GetSize())
+        if not frame.largestAura or (frame.largestAura < calc) then
             frame.largestAura = calc
         end
 
@@ -207,22 +206,22 @@ end
 
 local function New_Target_Spellbar_AdjustPosition(self)
     local parentFrame = self:GetParent()
-    if (self.boss) then
+    if self.boss then
         self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, 10)
-    elseif (parentFrame.haveToT) then
-        if (parentFrame.buffsOnTop or parentFrame.auraRows <= 1) then
+    elseif parentFrame.haveToT then
+        if parentFrame.buffsOnTop or parentFrame.auraRows <= 1 then
             self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -25)
         else
             self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15)
         end
-    elseif (parentFrame.haveElite) then
-        if (parentFrame.buffsOnTop or parentFrame.auraRows <= 1) then
+    elseif parentFrame.haveElite then
+        if parentFrame.buffsOnTop or parentFrame.auraRows <= 1 then
             self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, -5)
         else
             self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15)
         end
     else
-        if ((not parentFrame.buffsOnTop) and parentFrame.auraRows > 0) then
+        if (not parentFrame.buffsOnTop) and (parentFrame.auraRows > 0) then
             self:SetPoint("TOPLEFT", parentFrame.spellbarAnchor, "BOTTOMLEFT", 20, -15)
         else
             self:SetPoint("TOPLEFT", parentFrame, "BOTTOMLEFT", 25, 7)
@@ -231,10 +230,8 @@ local function New_Target_Spellbar_AdjustPosition(self)
 end
 
 local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuffs, anchorIndex, size, offsetX, offsetY, mirrorVertically)
-    --For mirroring vertically
-    local point, relativePoint
-    local startY, auraOffsetY
-    if (mirrorVertically) then
+    local point, relativePoint, startY, auraOffsetY
+    if mirrorVertically then
         point = "BOTTOM"
         relativePoint = "TOP"
         startY = -9
@@ -248,10 +245,9 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
     end
 
     local buff = _G[buffName .. index]
-    if (index == 1) then
-        if (UnitIsFriend("player", self.unit) or numDebuffs == 0) then
-            -- unit is friendly or there are no debuffs...buffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
+    if index == 1 then
+        if UnitIsFriend("player", self.unit) or numDebuffs == 0 then
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", xPosOffset, startY)
         else
             local _, a = self.debuffs:GetPoint()
             if a then
@@ -262,36 +258,26 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
                     self.debuffs:SetPoint(relativePoint .. "LEFT", self, relativePoint .. "LEFT", 0, -auraOffsetY)
                 end
             end
-            -- unit is not friendly and we have debuffs...buffs start on bottom
             buff:SetPoint(point .. "LEFT", self.debuffs, relativePoint .. "LEFT", 0, -offsetY)
         end
-
         self.buffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0)
         self.buffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
         self.spellbarAnchor = buff
-    elseif (anchorIndex ~= (index - 1)) then
-        -- anchor index is not the previous index...must be a new row
+    elseif anchorIndex ~= (index - 1) then
         buff:SetPoint(point .. "LEFT", _G[buffName .. anchorIndex], relativePoint .. "LEFT", 0, -offsetY)
         self.buffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
         self.spellbarAnchor = buff
     else
-        -- anchor index is the previous index
         buff:SetPoint(point .. "LEFT", _G[buffName .. anchorIndex], point .. "RIGHT", offsetX, 0)
     end
 
-    -- Resize
     buff:SetWidth(size)
     buff:SetHeight(size)
 end
 
 local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBuffs, anchorIndex, size, offsetX, offsetY, mirrorVertically)
-    local buff = _G[debuffName .. index]
-    local isFriend = UnitIsFriend("player", self.unit)
-
-    --For mirroring vertically
-    local point, relativePoint
-    local startY, auraOffsetY
-    if (mirrorVertically) then
+    local point, relativePoint, startY, auraOffsetY
+    if mirrorVertically then
         point = "BOTTOM"
         relativePoint = "TOP"
         startY = -15
@@ -304,32 +290,30 @@ local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBu
         auraOffsetY = AURA_OFFSET_Y
     end
 
-    if (index == 1) then
-        if (isFriend and numBuffs > 0) then
-            -- unit is friendly and there are buffs...debuffs start on bottom
+    local buff = _G[debuffName .. index]
+    local isFriend = UnitIsFriend("player", self.unit)
+
+    if index == 1 then
+        if isFriend and numBuffs > 0 then
             buff:SetPoint(point .. "LEFT", self.buffs, relativePoint .. "LEFT", 0, -offsetY)
         else
-            -- unit is not friendly or there are no buffs...debuffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", xPosOffset, startY)
         end
         self.debuffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0)
         self.debuffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
-        if ((isFriend) or (not isFriend and numBuffs == 0)) then
+        if isFriend or (not isFriend and numBuffs == 0) then
             self.spellbarAnchor = buff
         end
-    elseif (anchorIndex ~= (index - 1)) then
-        -- anchor index is not the previous index...must be a new row
+    elseif anchorIndex ~= (index - 1) then
         buff:SetPoint(point .. "LEFT", _G[debuffName .. anchorIndex], relativePoint .. "LEFT", 0, -offsetY)
         self.debuffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
-        if ((isFriend) or (not isFriend and numBuffs == 0)) then
+        if isFriend or (not isFriend and numBuffs == 0) then
             self.spellbarAnchor = buff
         end
     else
-        -- anchor index is the previous index
         buff:SetPoint(point .. "LEFT", _G[debuffName .. (index - 1)], point .. "RIGHT", offsetX, 0)
     end
 
-    -- Resize
     buff:SetWidth(size)
     buff:SetHeight(size)
     local debuffFrame = _G[debuffName .. index .. "Border"]
@@ -349,7 +333,6 @@ local function ShouldAuraBeLarge(caster)
     if not caster then
         return false
     end
-
     for token, value in pairs(PLAYER_UNITS) do
         if UnitIsUnit(caster, token) or UnitIsOwnerOrControllerOfUnit(token, caster) then
             return value
@@ -362,13 +345,13 @@ local function Target_Update(frame)
         return
     end
 
-    local buffFrame, frameName
-    local frameIcon, frameCount, frameCooldown
-    local numBuffs = 0
+    local db = RougeUI.db
     local selfName = frame:GetName()
     local isEnemy = UnitIsEnemy("player", frame.unit)
     local _, _, class = UnitClass("player")
+    local fontName
 
+    local numBuffs = 0
     for i = 1, 32 do
         local name, icon, count, debuffType, duration, expirationTime, caster, isStealable, spellId
         if isClassic then
@@ -376,194 +359,174 @@ local function Target_Update(frame)
         else
             name, icon, _, debuffType, _, _, caster, isStealable, _, spellId = UnitBuff(frame.unit, i, "HELPFUL")
         end
-        if (name) then
-            frameName = selfName .. "Buff" .. (i)
-            buffFrame = _G[frameName]
+        if not name then
+            break
+        end
 
-            if isClassic then
-                if (not buffFrame) then
-                    if (not icon) then
-                        break
-                    else
-                        buffFrame = CreateFrame("Button", frameName, frame, "TargetBuffFrameTemplate")
-                        buffFrame.unit = frame.unit
-                    end
+        local frameName = selfName .. "Buff" .. i
+        local buffFrame = _G[frameName]
+        if isClassic then
+            if not buffFrame then
+                if not icon then
+                    break
                 end
+                buffFrame = CreateFrame("Button", frameName, frame, "TargetBuffFrameTemplate")
+                buffFrame.unit = frame.unit
+            end
+        end
+
+        if icon and (not frame.maxBuffs or i <= frame.maxBuffs) then
+            if isClassic then
+                buffFrame:SetID(i)
+                if isEnemy and not UnitBuff(frame.unit, i, "HELPFUL") then
+                    buffFrame:SetScript("OnEnter", function(self)
+                        GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 15, -25)
+                        GameTooltip:SetSpellByID(spellId)
+                        GameTooltip:Show()
+                    end)
+                    buffFrame:SetScript("OnLeave", function(self)
+                        GameTooltip:Hide()
+                    end)
+                end
+
+                local frameIcon = _G[frameName .. "Icon"]
+                frameIcon:SetTexture(icon)
+
+                local frameCount = _G[frameName .. "Count"]
+                if count and count > 1 and frame.showAuraCount then
+                    frameCount:SetText(count)
+                    frameCount:Show()
+                else
+                    frameCount:Hide()
+                end
+
+                local frameCooldown = _G[frameName .. "Cooldown"]
+                CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
+                frameCooldown:SetDrawEdge(false)
             end
 
-            if (icon and (not frame.maxBuffs or i <= frame.maxBuffs)) then
-                if isClassic then
-                    buffFrame:SetID(i)
+            local showHighlight = false
+            local r, g, b = 1, 1, 1
+            local modifier = 1.2
+            if db.Lorti or db.Roug or db.Modern then
+                r, g, b = 1, 1, 0.75
+                modifier = 2.2
+            end
 
-                    if isEnemy and UnitBuff(frame.unit, i, "HELPFUL") == nil then
-                        buffFrame:SetScript("OnEnter", function(self)
-                            GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 15, -25);
-                            GameTooltip:SetSpellByID(spellId)
-                            GameTooltip:Show()
-                        end)
-
-                        buffFrame:SetScript("OnLeave", function(self)
-                            GameTooltip:Hide()
-                        end)
+            if db.HighlightDispellable and (WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC) then
+                if isEnemy then
+                    if Whitelist[name] and isStealable then
+                        showHighlight = true
+                    elseif (class == 4 or class == 3) and Enraged[spellId] then
+                        r, g, b = 1, 0, 0
+                        showHighlight = true
+                    elseif spellId == 31821 then
+                        r, g, b = 0, 0, 1
+                        showHighlight = true
+                    elseif spellId == 49039 and (class == 5 or class == 2) then
+                        r, g, b = 1, 0, 127 / 255
+                        showHighlight = true
                     end
-
-                    -- set the icon
-                    frameIcon = _G[frameName .. "Icon"]
-                    frameIcon:SetTexture(icon)
-
-                    -- set the count
-                    frameCount = _G[frameName .. "Count"]
-                    if (count and count > 1 and frame.showAuraCount) then
-                        frameCount:SetText(count)
-                        frameCount:Show()
-                    else
-                        frameCount:Hide()
-                    end
-
-                    -- Handle cooldowns
-                    frameCooldown = _G[frameName .. "Cooldown"]
-                    CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
-                    frameCooldown:SetDrawEdge(false)
                 end
+            elseif (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and db.HighlightDispellable and isEnemy and debuffType == "Magic" then
+                showHighlight = true
+            elseif isEnemy and isStealable and not db.HighlightDispellable then
+                showHighlight = true
+            end
 
-                local showHighlight = false
-                local r, g, b = 1, 1, 1
-                local modifier = 1.2
+            local largeSize = ShouldAuraBeLarge(caster)
+            local buffSize = largeSize and db.SelfSize or db.OtherBuffSize
 
-                if RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern then
-                    r, g, b = 1, 1, 0.75
-                    modifier = 2.2
-                end
-
-                if RougeUI.db.HighlightDispellable and (WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC) then
-                    if isEnemy then
-                        if Whitelist[name] and isStealable then
-                            showHighlight = true
-                        elseif (class == 4 or class == 3) and Enraged[spellId] then
-                            r, g, b = 1, 0, 0 -- Red
-                            showHighlight = true
-                        elseif spellId == 31821 then
-                            r, g, b = 0, 0, 1 -- Blue
-                            showHighlight = true
-                        elseif spellId == 49039 and (class == 5 or class == 2) then
-                            r, g, b = 1, 0, 127 / 255 -- Pink
-                            showHighlight = true
-                        end
-                    end
-                elseif (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and RougeUI.db.HighlightDispellable and isEnemy and debuffType == "Magic" then
-                    showHighlight = true
-                elseif isEnemy and isStealable and not RougeUI.db.HighlightDispellable then
-                    showHighlight = true
-                end
-
-                local largeSize = ShouldAuraBeLarge(caster)
-                local buffSize = RougeUI.db.OtherBuffSize
-
-                if largeSize then
-                    buffSize = RougeUI.db.SelfSize
-                end
-
-                local frameStealable = _G[frameName .. "Stealable"]
-                if showHighlight then
-                    frameStealable:Show()
-                    frameStealable:SetHeight(buffSize * modifier)
-                    frameStealable:SetWidth(buffSize * modifier)
-                    frameStealable:SetVertexColor(r, g, b)
-                    if modifier == 2.2 then
-                        frameStealable:SetDesaturated(true)
-                    end
-                else
-                    frameStealable:Hide()
-                end
-
-                frameCount = _G[frameName .. "Count"]
-                if frameCount then
-                    if not fontName then
-                        fontName = frameCount:GetFont()
-                    end
-                    frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
-                end
-
-                -- set the buff to be big if the buff is cast by the player or his pet
-                numBuffs = numBuffs + 1
-                largeBuffList[numBuffs] = largeSize
-
-                if isClassic then
-                    buffFrame:ClearAllPoints()
-                    buffFrame:Show()
+            local frameStealable = _G[frameName .. "Stealable"]
+            if showHighlight then
+                frameStealable:Show()
+                frameStealable:SetHeight(buffSize * modifier)
+                frameStealable:SetWidth(buffSize * modifier)
+                frameStealable:SetVertexColor(r, g, b)
+                if modifier == 2.2 then
+                    frameStealable:SetDesaturated(true)
                 end
             else
-                if isClassic and buffFrame then
-                    buffFrame:Hide()
+                frameStealable:Hide()
+            end
+
+            local frameCount = _G[frameName .. "Count"]
+            if frameCount then
+                if not fontName then
+                    fontName = frameCount:GetFont()
                 end
+                frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
+            end
+
+            numBuffs = numBuffs + 1
+            largeBuffList[numBuffs] = largeSize
+
+            if isClassic then
+                buffFrame:ClearAllPoints()
+                buffFrame:Show()
             end
         else
-            break
+            if isClassic and buffFrame then
+                buffFrame:Hide()
+            end
         end
     end
 
     local numDebuffs = 0
-
     local frameNum = 1
     local index = 1
-
     local maxDebuffs = frame.maxDebuffs or 16
-    while (frameNum <= maxDebuffs and index <= maxDebuffs) do
+    while frameNum <= maxDebuffs and index <= maxDebuffs do
         local debuffName, icon, count, debuffType, duration, expirationTime, caster, _, _, spellId, _, _, casterIsPlayer, nameplateShowAll = UnitDebuff(frame.unit, index, "INCLUDE_NAME_PLATE_ONLY")
-        if (debuffName) then
-            if (TargetFrame_ShouldShowDebuffs(frame.unit, caster, nameplateShowAll, casterIsPlayer)) then
-                frameName = selfName .. "Debuff" .. frameNum
-                buffFrame = _G[frameName]
-                if (icon) then
-
-                    local guid = caster and UnitGUID(caster) or nil
-                    if spellId == 88611 and RougeUI.bombExpireTime and guid then
-                        duration = RougeUI.bombExpireTime[guid] and 6 or 0
-                        expirationTime = RougeUI.bombExpireTime[guid] or 0
-                        frameCooldown = _G[frameName.."Cooldown"];
-                        CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
-                    end
-
-                    local largeSize = ShouldAuraBeLarge(caster)
-
-                    frameCount = _G[frameName .. "Count"]
-                    if frameCount then
-                        if not fontName then
-                            fontName = frameCount:GetFont()
-                        end
-                        local buffSize = largeSize and RougeUI.db.SelfSize or RougeUI.db.OtherBuffSize
-                        frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
-                    end
-
-                    -- set the debuff to be big if the buff is cast by the player or his pet
-                    numDebuffs = numDebuffs + 1
-                    largeDebuffList[numDebuffs] = largeSize
-                    frameNum = frameNum + 1
-                end
-            end
-        else
+        if not debuffName then
             break
+        end
+        if TargetFrame_ShouldShowDebuffs(frame.unit, caster, nameplateShowAll, casterIsPlayer) then
+            local frameName = selfName .. "Debuff" .. frameNum
+            local buffFrame = _G[frameName]
+            if icon then
+                local guid = caster and UnitGUID(caster) or nil
+                if spellId == 88611 and RougeUI.bombExpireTime and guid then
+                    duration = RougeUI.bombExpireTime[guid] and 6 or 0
+                    expirationTime = RougeUI.bombExpireTime[guid] or 0
+                    local frameCooldown = _G[frameName .. "Cooldown"]
+                    CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
+                end
+
+                local largeSize = ShouldAuraBeLarge(caster)
+                local frameCount = _G[frameName .. "Count"]
+                if frameCount then
+                    if not fontName then
+                        fontName = frameCount:GetFont()
+                    end
+                    local buffSize = largeSize and db.SelfSize or db.OtherBuffSize
+                    frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
+                end
+
+                numDebuffs = numDebuffs + 1
+                largeDebuffList[numDebuffs] = largeSize
+                frameNum = frameNum + 1
+            end
         end
         index = index + 1
     end
 
     frame.auraRows = 0
     frame.largestAura = 0
-
-    local mirrorAurasVertically = frame.buffsOnTop and true or false
-    local maxRowWidth = RougeUI.db.AuraRow
-
+    local mirrorAurasVertically = frame.buffsOnTop or false
+    local maxRowWidth = db.AuraRow
     frame.spellbarAnchor = nil
+    local xOffset = db.Roug and 5 or 3
 
     if isEnemy then
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
     else
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3, mirrorAurasVertically)
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
     end
-    -- update the spell bar position
-    if (frame.spellbar) then
+
+    if frame.spellbar then
         New_Target_Spellbar_AdjustPosition(frame.spellbar)
     end
 end
@@ -591,6 +554,16 @@ FF:RegisterEvent("PLAYER_LOGIN")
 FF:SetScript("OnEvent", function(self, fireEvent)
     if fireEvent == "PLAYER_LOGIN" then
         if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
+            if RougeUI.db.AsuriFrame and not RougeUI.db.Roug then
+                xPosOffset = 7
+            elseif RougeUI.db.AsuriFrame and RougeUI.db.Roug then
+                xPosOffset = 8
+                AURA_OFFSET_Y = 2
+            elseif RougeUI.db.Roug then
+                xPosOffset = 6
+                AURA_OFFSET_Y = 2
+            end
+
             RougeUI.RougeUIF:HookAuras()
             if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
                 isClassic = true

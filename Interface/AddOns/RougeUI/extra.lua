@@ -134,7 +134,8 @@ manager:HookScript("OnEnter", function(self)
 end)
 
 manager:HookScript("OnLeave", function(self)
-    if manager.collapsed and not FindParent(GetMouseFoci()[1], self) then
+    local focus = GetMouseFoci and GetMouseFoci()[1] or GetMouseFocus()
+    if manager.collapsed and not FindParent(focus, self) then
         self:SetAlpha(0)
     end
 end)
@@ -269,72 +270,43 @@ local classificationTexture = {
     },
 }
 
-local function FrameTexture(frame, classification)
-    local textureName, textureType = "", ""
 
-    if classification then
-        if classificationTexture[classification] then
-            if RougeUI.db.ThickFrames and (RougeUI.db.Colval >= 0.3) then
-                if RougeUI.db.NoLevel then
-                    textureName = classificationTexture[classification]["nthick2"]
-                    textureType = "nthick2"
-                else
-                    textureName = classificationTexture[classification]["thick2"]
-                    textureType = "thick2"
-                end
-            elseif RougeUI.db.ThickFrames then
-                if RougeUI.db.NoLevel then
-                    textureName = classificationTexture[classification]["nthick"]
-                    textureType = "nthick"
-                else
-                    textureName = classificationTexture[classification]["thick"]
-                    textureType = "thick"
-                end
+local function FrameTexture(frame, classification)
+    local textureName = ""
+
+    if RougeUI.db.AsuriFrame then
+        frame:SetTexture("Interface\\AddOns\\RougeUI\\textures\\target\\AsuriFrame")
+        frame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        return
+    end
+
+    if classification and classificationTexture[classification] then
+        if RougeUI.db.ThickFrames and (RougeUI.db.Colval >= 0.3) then
+            textureName = RougeUI.db.NoLevel and classificationTexture[classification]["nthick2"] or classificationTexture[classification]["thick2"]
+        elseif RougeUI.db.ThickFrames then
+            textureName = RougeUI.db.NoLevel and classificationTexture[classification]["nthick"] or classificationTexture[classification]["thick"]
+        else
+            if RougeUI.db.NoLevel then
+                textureName = (RougeUI.db.Colval >= 0.3) and classificationTexture[classification]["nthin2"] or classificationTexture[classification]["nthin"]
             else
-                if RougeUI.db.NoLevel then
-                    if (RougeUI.db.Colval >= 0.3) then
-                        textureName = classificationTexture[classification]["nthin2"]
-                        textureType = "nthin2"
-                    else
-                        textureName = classificationTexture[classification]["nthin"]
-                        textureType = "nthin"
-                    end
-                else
-                    textureName = classificationTexture[classification]["thin"]
-                    textureType = "thin"
-                end
-            end
-            if (RougeUI.db.Colval >= 0.3) then
-                frame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            else
-                frame:SetVertexColor(1, 1, 1)
+                textureName = classificationTexture[classification]["thin"]
             end
         end
+        frame:SetVertexColor((RougeUI.db.Colval >= 0.3) and RougeUI.db.Colval or 1, (RougeUI.db.Colval >= 0.3) and RougeUI.db.Colval or 1, (RougeUI.db.Colval >= 0.3) and RougeUI.db.Colval or 1)
     end
 
     if textureName == "" then
         if RougeUI.db.ThickFrames then
-            if RougeUI.db.NoLevel then
-                textureName = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-TargetingFrame"
-            else
-                textureName = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-TargetingFrame"
-            end
+            textureName = RougeUI.db.NoLevel and "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-TargetingFrame" or "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-TargetingFrame"
         else
-            if RougeUI.db.NoLevel then
-                textureName = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame"
-            else
-                textureName = "Interface\\TargetingFrame\\UI-TargetingFrame"
-            end
-        end
-        if RougeUI.db.NoLevel then
-            textureType = "nthin"
-        else
-            textureType = "thin"
+            textureName = RougeUI.db.NoLevel and "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-UI-TargetingFrame" or "Interface\\TargetingFrame\\UI-TargetingFrame"
         end
         frame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
+
     frame:SetTexture(textureName)
 end
+
 
 local function CheckClassification(self, forceNormalTexture)
     local classification = UnitClassification(self.unit)
@@ -355,7 +327,7 @@ local function CheckClassification(self, forceNormalTexture)
             else
                 self.name:SetVertexColor(c.r, c.g, c.b)
             end
-            if RougeUI.db.ClassBG then
+            if RougeUI.db.ClassBG and not RougeUI.db.AsuriFrame then
                 self.name:SetFontObject("SystemFont_Outline_Small")
             end
         else
@@ -363,7 +335,7 @@ local function CheckClassification(self, forceNormalTexture)
         end
     end
 
-    if RougeUI.db.NoLevel then
+    if RougeUI.db.NoLevel and not RougeUI.db.AsuriFrame then
         self.levelText:SetAlpha(0)
         if self.threatIndicator then
             self.threatIndicator:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\ui-targetingframe-flash")
@@ -443,6 +415,60 @@ local function CheckClassification(self, forceNormalTexture)
         else
             self.haveElite = true
             self.Background:SetSize(119, 42)
+            self.Background:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 7, 35) -- hmm
+        end
+    elseif RougeUI.db.AsuriFrame then
+        self.highLevelTexture:SetAlpha(0)
+        self.nameBackground:SetAlpha(0)
+        self.levelText:SetAlpha(0)
+        if self.threatIndicator then
+            self.threatIndicator:SetAlpha(0)
+        end
+        self.name:ClearAllPoints()
+        self.name:SetPoint("CENTER", self, "CENTER", -50, 25)
+        self.name:SetShadowOffset(1, -1)
+
+        self.healthbar:ClearAllPoints()
+        self.healthbar:SetPoint("CENTER", self, "CENTER", -50, 7)
+        self.healthbar:SetHeight(16)
+        if self.healthbar.LeftText then
+            self.healthbar.LeftText:ClearAllPoints()
+            self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        end
+        if self.healthbar.RightText then
+            self.healthbar.RightText:ClearAllPoints()
+            self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        end
+        if self.healthbar.TextString then
+            self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        end
+
+        if self.deadText then
+            self.deadText:ClearAllPoints()
+            self.deadText:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        end
+
+        self.manabar:ClearAllPoints()
+        self.manabar:SetPoint("CENTER", self, "CENTER", -50, -7)
+
+        if self.manabar.LeftText then
+            self.manabar.LeftText:ClearAllPoints()
+            self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, -1)
+        end
+        if self.manabar.RightText then
+            self.manabar.RightText:ClearAllPoints()
+            self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, -1)
+        end
+        if self.manabar.TextString then
+            self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, -1)
+        end
+        if (forceNormalTexture) then
+            self.haveElite = nil
+            self.Background:SetSize(119, 30)
+            self.Background:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 7, 35)
+        else
+            self.haveElite = true
+            self.Background:SetSize(119, 30)
         end
     end
 end
@@ -553,11 +579,11 @@ end
 local function PlayerArtThick(self)
     local classification
 
-    if RougeUI.db.NoLevel then
+    if RougeUI.db.NoLevel or RougeUI.db.AsuriFrame then
         PlayerLevelText:Hide()
     end
 
-    if RougeUI.db.ClassNames then
+    if RougeUI.db.ClassNames and not RougeUI.db.AsuriFrame then
         local _, class = UnitClass("player")
         local c = RAID_CLASS_COLORS[class]
         if c then
@@ -579,6 +605,23 @@ local function PlayerArtThick(self)
     elseif RougeUI.db.Rare then
         classification = "rare"
     end
+
+    if RougeUI.db.AsuriFrame and classification then
+        if not AsuriChain then
+            local asuriChain = PlayerFrameTexture:GetParent():CreateTexture("AsuriChain", "BORDER", nil, 1)
+            if classification == "rare" or classification == "rareelite" then
+                asuriChain:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\ChainAsuri")
+            else
+                asuriChain:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\ChainAsuriGold")
+            end
+            asuriChain:SetTexCoord(1, 0, 0, 1)
+            asuriChain:SetSize(256, 128)
+            asuriChain:SetPoint("CENTER", PlayerFrame, "CENTER", 12, -14)
+            asuriChain:Show()
+        elseif not AsuriChain:IsShown() then
+            AsuriChain:Show()
+        end
+    end
     FrameTexture(PlayerFrameTexture, classification)
 
     if RougeUI.db.ThickFrames then
@@ -589,19 +632,57 @@ local function PlayerArtThick(self)
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 14)
         self.healthbar:SetHeight(27)
-        self.healthbar.LeftText:ClearAllPoints()
-        self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
-        self.healthbar.RightText:ClearAllPoints()
-        self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        if self.healthbar.LeftText then
+            self.healthbar.LeftText:ClearAllPoints()
+            self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        end
+        if self.healthbar.RightText then
+            self.healthbar.RightText:ClearAllPoints()
+            self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        end
         self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
         self.manabar:ClearAllPoints()
         self.manabar:SetPoint("CENTER", self, "CENTER", 50, -7)
         self.manabar:SetHeight(13)
-        self.manabar.LeftText:ClearAllPoints()
-        self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
-        self.manabar.RightText:ClearAllPoints()
-        self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+        if self.manabar.LeftText then
+            self.manabar.LeftText:ClearAllPoints()
+            self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, 0)
+        end
+        if self.manabar.RightText then
+            self.manabar.RightText:ClearAllPoints()
+            self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, 0)
+        end
         self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, 0)
+    elseif RougeUI.db.AsuriFrame then
+        self.name:SetAlpha(0)
+        PlayerFrameBackground:SetSize(119, 29)
+        PlayerFrameBackground:SetPoint("TOPLEFT", 106, -34)
+        self.healthbar:ClearAllPoints()
+        self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 7)
+        self.healthbar:SetHeight(16)
+
+
+        if self.healthbar.LeftText then
+            self.healthbar.LeftText:ClearAllPoints()
+            self.healthbar.LeftText:SetPoint("LEFT", self.healthbar, "LEFT", 7, 0)
+        end
+        if self.healthbar.RightText then
+            self.healthbar.RightText:ClearAllPoints()
+            self.healthbar.RightText:SetPoint("RIGHT", self.healthbar, "RIGHT", -4, 0)
+        end
+        self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
+        self.manabar:ClearAllPoints()
+        self.manabar:SetPoint("CENTER", self, "CENTER", 50, -7)
+        self.manabar:SetHeight(13)
+        if self.manabar.LeftText then
+            self.manabar.LeftText:ClearAllPoints()
+            self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, -1)
+        end
+        if self.manabar.RightText then
+            self.manabar.RightText:ClearAllPoints()
+            self.manabar.RightText:SetPoint("RIGHT", self.manabar, "RIGHT", -4, -1)
+        end
+        self.manabar.TextString:SetPoint("CENTER", self.manabar, "CENTER", 0, -1)
     end
 end
 
@@ -622,6 +703,10 @@ local function VehicleArtThick(self, vehicleType)
         self.healthbar:SetPoint("TOPLEFT", 119, -41)
         self.manabar:SetSize(100, 12)
         self.manabar:SetPoint("TOPLEFT", 119, -52)
+    end
+
+    if AsuriChain and AsuriChain:IsShown() then
+        AsuriChain:Hide()
     end
 end
 
@@ -656,13 +741,15 @@ local function PetArtThick()
 end
 
 local function ApplyThickness()
-    PlayerFrame.name:ClearAllPoints()
-    PlayerFrame.name:SetPoint("TOP", PlayerFrameHealthBar, 0, 15)
-    PlayerStatusTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\UI-Player-Status2");
+    if not RougeUI.db.AsuriFrame then
+        PlayerFrame.name:ClearAllPoints()
+        PlayerFrame.name:SetPoint("TOP", PlayerFrameHealthBar, 0, 15)
+        PlayerStatusTexture:SetTexture("Interface\\Addons\\RougeUI\\textures\\target\\UI-Player-Status2");
+    end
     PlayerRestGlow:SetAlpha(0)
+    hooksecurefunc("PetFrame_Update", PetArtThick)
     hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
     hooksecurefunc("PlayerFrame_ToVehicleArt", VehicleArtThick)
-    hooksecurefunc("PetFrame_Update", PetArtThick)
 end
 
 local function GetActionButton(slot)
@@ -682,7 +769,7 @@ local function GetActionButton(slot)
         name = "MULTIACTIONBAR1BUTTON" .. (slot - 60)
     elseif IsAddOnLoaded("Bartender4") and slot >= 1 and slot <= 120 then
         name = "CLICK BT4Button" .. slot .. ":Keybind"
-    elseif IsAddOnLoaded("Dominos") and slot >= 1 and slot <= 120 then
+    elseif IsAddOnLoaded("Dominos") and slot >= 1 and slot <= 168 then
         name = "CLICK DominosActionButton" .. slot .. ":HOTKEY"
     elseif slot <= 144 then
         name = nil
@@ -853,11 +940,33 @@ e:SetScript("OnEvent", function(self, event, ...)
             -- end)
         end
 
-        if RougeUI.db.ThickFrames then
+        if RougeUI.db.ThickFrames or RougeUI.db.AsuriFrame then
             ApplyThickness()
         end
 
-        if RougeUI.db.NoLevel or RougeUI.db.ThickFrames or RougeUI.db.GoldElite or RougeUI.db.RareElite or RougeUI.db.Rare or RougeUI.db.ClassNames then
+        if RougeUI.db.AsuriFrame then
+            local hideToTName, hideFoTName
+            hooksecurefunc(TargetFrameToT.name, "SetText", function(self)
+                if hideToTName then return end
+                hideToTName = true
+                self:SetText("")
+                hideToTName = false
+            end)
+            if FocusFrameToT then
+                hooksecurefunc(FocusFrameToT.name, "SetText", function(self)
+                    if hideFoTName then return end
+                    hideFoTName = true
+                    self:SetText("")
+                    hideFoTName = false
+                end)
+            end
+            hooksecurefunc(TargetFrameNameBackground, "Show", TargetFrameNameBackground.Hide)
+            if FocusFrameNameBackground then
+                hooksecurefunc(FocusFrameNameBackground, "Show", FocusFrameNameBackground.Hide)
+            end
+        end
+
+        if RougeUI.db.NoLevel or RougeUI.db.ThickFrames or RougeUI.db.AsuriFrame or RougeUI.db.GoldElite or RougeUI.db.RareElite or RougeUI.db.Rare or RougeUI.db.ClassNames then
             hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
         end
 
@@ -875,7 +984,7 @@ e:SetScript("OnEvent", function(self, event, ...)
         if RougeUI.db.ScoreBoard then
             hooksecurefunc("WorldStateScoreFrame_Update", ColorScoreBoard)
         end
-        if RougeUI.db.HideGlows then
+        if RougeUI.db.HideGlows or RougeUI.db.AsuriFrame then
             hooksecurefunc("PlayerFrame_UpdateStatus", HideGlows)
         end
         if RougeUI.db.HideIndicator then
@@ -883,7 +992,7 @@ e:SetScript("OnEvent", function(self, event, ...)
             hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
         end
         if RougeUI.db.HideTitles then
-            if not RougeUI.db.ThickFrames then
+            if not RougeUI.db.ThickFrames or not RougeUI.db.AsuriFrame then
                 hooksecurefunc(PlayerFrameGroupIndicator, "Show", PlayerFrameGroupIndicator.Hide)
             end
             hooksecurefunc("CompactRaidGroup_GenerateForGroup", HideFrameTitles)
@@ -923,7 +1032,7 @@ e:SetScript("OnEvent", function(self, event, ...)
             StanceBarFrame:SetParent(stancebar)
         end
 
-        if not RougeUI.db.ThickFrames and (RougeUI.db.ClassBG or RougeUI.db.transparent) then
+        if (not RougeUI.db.ThickFrames or not RougeUI.db.AsuriFrame) and (RougeUI.db.ClassBG or RougeUI.db.transparent) then
             hooksecurefunc("TargetFrame_CheckFaction", function(self)
                 if RougeUI.db.ClassBG and UnitIsPlayer(self.unit) then
                     local _, class = UnitClass(self.unit)
@@ -941,7 +1050,7 @@ e:SetScript("OnEvent", function(self, event, ...)
             end)
         end
 
-        if RougeUI.db.ClassBG then
+        if RougeUI.db.ClassBG and not RougeUI.db.AsuriFrame then
             if PlayerFrame:IsShown() and not PlayerFrame.bg then
                 local _, class = UnitClass("player")
                 local c = RAID_CLASS_COLORS[class]
@@ -986,9 +1095,18 @@ e:SetScript("OnEvent", function(self, event, ...)
             hooksecurefunc("ActionButton_UpdateUsable", RangeIndicator)
         end
 
+        if RougeUI.db.HidePetText then
+            if PetFrameHealthBarText then
+                PetFrameHealthBarText:SetAlpha(0)
+            end
+            if PetFrameManaBarText then
+                PetFrameManaBarText:SetAlpha(0)
+            end
+        end
+
         OnLoad()
 
-        if RougeUI.db.ThickFrames or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3) or RougeUI.db.ClassNames then
+        if RougeUI.db.ThickFrames or RougeUI.db.AsuriFrame or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3) or RougeUI.db.ClassNames then
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
@@ -1007,4 +1125,3 @@ e:SetScript("OnEvent", function(self, event, ...)
         SpellQueueFix()
     end
 end)
-

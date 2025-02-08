@@ -101,9 +101,9 @@ function RougeUI.RougeUIF:CusFonts()
             hp.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
             hp.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
             hp.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-            mana.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-            mana.LeftText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-            mana.RightText:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+            mana.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+            mana.LeftText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
+            mana.RightText:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
         end
     end
 end
@@ -135,6 +135,30 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
         statusFrame.RightText:SetText("");
         statusFrame.LeftText:Hide();
         statusFrame.RightText:Hide();
+    end
+
+    if unit then
+        if not UnitIsConnected(unit) or UnitIsDeadOrGhost(unit) then
+            textString:SetText("")
+            textString:Show()
+            if statusFrame.LeftText then
+                statusFrame.LeftText:Hide()
+            end
+            if statusFrame.RightText then
+                statusFrame.RightText:Hide()
+            end
+            local name = statusFrame:GetName()
+            if name then
+                if string.find(name, "HealthBar") then
+                    if UnitIsDeadOrGhost(unit) then
+                        textString:SetText(DEAD)
+                    else
+                        textString:SetText(PLAYER_OFFLINE)
+                    end
+                end
+            end
+            return
+        end
     end
 
     if ((tonumber(valueMax) ~= valueMax or valueMax > 0) and not (statusFrame.pauseUpdates)) then
@@ -212,8 +236,6 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
                 end
             end
         end
-    elseif unit and UnitIsDeadOrGhost(unit) then
-        textString:SetText("")
     else
         textString:Hide();
         textString:SetText("");
@@ -226,54 +248,24 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
 end
 
 local function PartyStatusBarText()
-    if not PartyText then
-        for i = 1, 4, 1 do
-            local PartyText = CreateFrame("Frame", nil, _G["PartyMemberFrame" .. i])
-            PartyText:SetFrameStrata("HIGH")
-            PartyText:Show()
+    for i = 1, 4, 1 do
+        local partyFrame = _G["PartyMemberFrame" .. i]
+        if partyFrame then
+            local name = _G["PartyMemberFrame" .. i .. "Name"]
+            local healthBar = _G["PartyMemberFrame" .. i .. "HealthBar"]
+            local manaBar = _G["PartyMemberFrame" .. i .. "ManaBar"]
 
-            PartyText.HealthText = PartyText:CreateFontString("PartyMemberFrame" .. i .. "HealthBarText", "OVERLAY", "TextStatusBarText");
-            PartyText.HealthText:SetFont(FontType, 10, "OUTLINE")
-            PartyText.HealthText:SetAllPoints(_G["PartyMemberFrame" .. i .. "HealthBar"])
+            local healthText = name:GetParent():CreateFontString("PartyMemberFrame" .. i .. "HealthBarText", "OVERLAY", "TextStatusBarText")
+            healthText:SetPoint("CENTER", 20, 12)
+            SetTextStatusBarText(healthBar, healthText)
 
-            PartyText.ManaText = PartyText:CreateFontString("PartyMemberFrame" .. i .. "ManaBarText", "OVERLAY", "TextStatusBarText");
-            PartyText.ManaText:SetFont(FontType, 10, "OUTLINE")
-            PartyText.ManaText:SetAllPoints(_G["PartyMemberFrame" .. i .. "ManaBar"])
+            local manaText = name:GetParent():CreateFontString("PartyMemberFrame" .. i .. "ManaBarText", "OVERLAY", "TextStatusBarText")
+            manaText:SetPoint("CENTER", 20, 2)
+            SetTextStatusBarText(manaBar, manaText)
+
+            healthBar.TextString:SetFont(FontType, 11, "OUTLINE")
+            manaBar.TextString:SetFont(FontType, 11, "OUTLINE")
         end
-    end
-end
-
-local function UpdatePartyMana(unit)
-    local id = string.gsub(unit, "party([1-4])", "%1");
-    local manatext
-    local currMana, maxMana = UnitPower(unit), UnitPowerMax(unit)
-    if RougeUI.db.ShortNumeric then
-        manatext = true_format(currMana)
-    elseif RougeUI.db.Abbreviate then
-        manatext = AbbreviateLargeNumbers(currMana)
-    else
-        manatext = currMana .. "/" .. maxMana
-    end
-
-    if id then
-        _G["PartyMemberFrame" .. id .. "ManaBarText"]:SetText(manatext);
-    end
-end
-
-local function UpdatePartyHealth(unit)
-    local id = string.gsub(unit, "party([1-4])", "%1");
-    local hptext
-    local currHP, maxHP = UnitHealth(unit), UnitHealthMax(unit)
-    if RougeUI.db.ShortNumeric then
-        hptext = true_format(currHP)
-    elseif RougeUI.db.Abbreviate then
-        hptext = AbbreviateLargeNumbers(currHP)
-    else
-        hptext = currHP .. "/" .. maxHP
-    end
-
-    if id then
-        _G["PartyMemberFrame" .. id .. "HealthBarText"]:SetText(hptext)
     end
 end
 
@@ -284,38 +276,15 @@ PW:SetScript("OnEvent", function(self, event, unit)
         if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
             hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
         end
+
+        if RougeUI.db.PartyText then
+            PartyStatusBarText()
+        end
+
         isClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
         if isClassic and not IsAddOnLoaded("ModernTargetFrame") then
             CreateStatusText()
             RougeUI.RougeUIF:CusFonts()
-        end
-
-        if RougeUI.db.PartyText then
-            hooksecurefunc("PartyMemberFrame_UpdateMember", function(self)
-                local i = self:GetID()
-                if UnitExists("party" .. i) then
-                    UpdatePartyMana("party" .. i)
-                    UpdatePartyHealth("party" .. i)
-                end
-            end)
-            PartyStatusBarText()
-
-            PW:RegisterEvent("UNIT_HEALTH_FREQUENT")
-            PW:RegisterEvent("UNIT_POWER_FREQUENT")
-        end
-    elseif event == "UNIT_HEALTH_FREQUENT" then
-        if not (unit == "party1" or unit == "party2" or unit == "party3" or unit == "party4") then
-            return
-        end
-        if UnitExists(unit) then
-            UpdatePartyHealth(unit);
-        end
-    elseif event == "UNIT_POWER_FREQUENT" then
-        if not (unit == "party1" or unit == "party2" or unit == "party3" or unit == "party4") then
-            return
-        end
-        if UnitExists(unit) then
-            UpdatePartyMana(unit)
         end
     end
 end)
