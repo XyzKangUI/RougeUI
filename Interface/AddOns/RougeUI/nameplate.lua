@@ -1,91 +1,130 @@
-local str_split = string.split
-local UnitGUID = UnitGUID
-local hookedFrames = {}
-local U = UnitIsUnit
-local select = select
+local addonName, RougeUI = ...
+local str_split, select = string.split, select
+local UnitGUID, U = UnitGUID, UnitIsUnit
+local IsActiveBattlefieldArena = IsActiveBattlefieldArena
+local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local ClassicEra = false
 
 local function NameToArenaNumber(plate)
-	if plate:IsForbidden() then return end
+    if plate:IsForbidden() then
+        return
+    end
 
-	if plate.unit:find("nameplate") then
- 		if select(1, IsActiveBattlefieldArena()) then
-			for i=1,5 do 
-				if U(plate.unit, "arena"..i) then
-					plate.name:SetText(i)
-					plate.name:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
-					plate.name:ClearAllPoints()
-					plate.name:SetPoint("BOTTOM", plate.healthBar.border, "TOP", 0, 2)
-					plate.name:SetJustifyH("CENTER")
-					break
-				else
-					plate.name:SetFont(STANDARD_TEXT_FONT, 8)
-					plate.name:ClearAllPoints()
-					plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
-					plate.name:SetJustifyH("RIGHT")
-				end
-			end
-		end
-	end
+    if plate.unit:find("nameplate") then
+        if select(1, IsActiveBattlefieldArena()) then
+            for i = 1, 5 do
+                if U(plate.unit, "arena" .. i) then
+                    plate.name:SetText(i)
+                    plate.name:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
+                    plate.name:ClearAllPoints()
+                    plate.name:SetPoint("BOTTOM", plate.healthBar.border, "TOP", 0, 2)
+                    plate.name:SetJustifyH("CENTER")
+                    break
+                else
+                    if RougeUI.db.ModPlates then
+                        plate.name:SetFont(STANDARD_TEXT_FONT, 8)
+                        plate.name:ClearAllPoints()
+                        plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
+                        plate.name:SetJustifyH("RIGHT")
+                    end
+                end
+            end
+        end
+    end
 end
 
 local function AddElements(plate)
-	if plate:IsForbidden() then return end
+    if RougeUI.db.ModPlates then
+        if ((RougeUI.db.ArenaNumbers and not IsActiveBattlefieldArena()) or not RougeUI.db.ArenaNumbers) and not RougeUI.db.AsuriFrame then
+            plate.name:SetFont(STANDARD_TEXT_FONT, 8)
+            plate.name:ClearAllPoints()
+            plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
+            plate.name:SetJustifyH("RIGHT")
+        end
+    end
 
-	plate.CastBar.Text:SetFont(STANDARD_TEXT_FONT, 8)
-	local sh = plate.selectionHighlight -- kang from evolvee
-	sh:SetPoint("TOPLEFT", sh:GetParent(), "TOPLEFT", 1, -1)
-	sh:SetPoint("BOTTOMRIGHT", sh:GetParent(), "BOTTOMRIGHT", -1, 1)
-	if RougeUI.ArenaNumbers and not select(1, IsActiveBattlefieldArena()) or not RougeUI.ArenaNumbers then
-		plate.name:SetFont(STANDARD_TEXT_FONT, 8)
-		plate.name:ClearAllPoints()
-		plate.name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
-		plate.name:SetJustifyH("RIGHT")
-	end
+    if RougeUI.db.NoLevel or RougeUI.db.AsuriFrame then
+        local border = plate.healthBar.border:GetRegions()
+        if border then
+            border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")
+        end
+        if plate.LevelFrame then
+            plate.LevelFrame:Hide()
+        end
+        if plate.healthBar then
+            plate.healthBar:ClearAllPoints()
+            plate.healthBar:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 4, 4)
+            plate.healthBar:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -4, 4)
+        end
+        if plate.CastBar then
+            plate.CastBar:ClearAllPoints()
+            plate.CastBar:SetPoint("TOP", plate.healthBar, "BOTTOM", 8, -9)
+        end
+    end
 
-	for _, v in pairs({plate.healthBar.border:GetRegions(), plate.CastBar.Border}) do
-		v:SetVertexColor(RougeUI.Colval, RougeUI.Colval, RougeUI.Colval)
-	end
+    for _, v in pairs({ plate.healthBar.border:GetRegions() }) do
+        if v then
+            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
+    if plate.CastBar and plate.CastBar.Border then
+        plate.CastBar.Border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    end
+end
 
-	if not hookedFrames[plate] then
-		plate.CastBar:HookScript("OnShow", function()
-			if not plate.CastBar.Text:IsShown() then
-				plate.CastBar.Text:Show();
-			end
-		end)
-		hookedFrames[plate] = plate
-	end
+local function NiceOne(self)
+    if self and self.Text and not self:IsForbidden() then
+        self.Text:SetFont(STANDARD_TEXT_FONT, 8)
+        self.Text:Show()
+    end
+end
+if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    hooksecurefunc("Nameplate_CastBar_AdjustPosition", NiceOne)
 end
 
 -- Modification of Knall's genius pet script. Ty <3
 local function HidePlates(plate, unit)
-    if plate:IsForbidden() then return end
+    if plate:IsForbidden() then
+        return
+    end
 
     local _, _, _, _, _, npcId = str_split("-", UnitGUID(unit))
-	-- treants, snake trap
-    if npcId == "1964" or npcId == "19833" or npcId == "19921" then
+    -- Hide feral spirit, treants, army of the dead, snake trap, mirror image, underbelly croc, Crashin' Thrashin' Robot, Shadowy Apparitions
+    if npcId == "29264" or npcId == "1964" or npcId == "24207" or npcId == "19833" or npcId == "19921" or
+            npcId == "31216" or npcId == "32441" or npcId == "17299" or npcId == "46954" then
         plate.UnitFrame:Hide()
     else
         plate.UnitFrame:Show()
     end
 end
 
-local OnEvent = function(self, event, ...)
-	if event == "NAME_PLATE_UNIT_ADDED" then
-		local base = ...
-		local namePlateFrameBase = C_NamePlate.GetNamePlateForUnit(base, issecure());
-		if not namePlateFrameBase then return end
+local function OnEvent(self, event, ...)
+    if event == "NAME_PLATE_UNIT_ADDED" then
+        local unit = ...
+        local namePlateFrameBase = GetNamePlateForUnit(unit, false);
+        if not namePlateFrameBase or namePlateFrameBase:IsForbidden() then
+            return
+        end
 
-		HidePlates(namePlateFrameBase, base)
-        	AddElements(namePlateFrameBase.UnitFrame)
-    	elseif event == "ADDON_LOADED" then
-		if RougeUI.ArenaNumbers == true then
-			hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
-		end
-		self:UnregisterEvent("ADDON_LOADED")
-	end
+        if not ClassicEra then
+            HidePlates(namePlateFrameBase, unit)
+        end
+        AddElements(namePlateFrameBase.UnitFrame)
+    elseif event == "ADDON_LOADED" and ... == addonName then
+        if GetCVar("nameplateShowOnlyNames") == "1" then
+            return
+        end
+
+        self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+        ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+
+        if RougeUI.db.ArenaNumbers then
+            hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
+        end
+    end
 end
 
 local e = CreateFrame("Frame")
-e:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 e:RegisterEvent("ADDON_LOADED")
 e:SetScript('OnEvent', OnEvent)

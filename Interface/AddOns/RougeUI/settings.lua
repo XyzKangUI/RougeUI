@@ -1,379 +1,967 @@
-local Name, ns = ...;
-local Title = select(2,GetAddOnInfo(Name)):gsub("%s*v?[%d%.]+$","");
+local Name, addon = ...
 local floor = math.floor
+local format = format
+local CreateFrame, _G = CreateFrame, _G
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
+addon.RougeUIF = {}
+local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 
 local function RoundNumbers(val, valStep)
-	return floor(val/valStep)*valStep
+    return floor(val / valStep) * valStep
 end
 
-RougeUI = { Class_Portrait, ClassHP, GradientHP, FastKeyPress, ShortNumeric, FontSize, SelfSize, OtherBuffSize, HighlightDispellable, TimerGap, ScoreBoard, HideTitles,
-		FadeIcon, EnergyTicker, CombatIndicator, CastTimer, smooth, pimp, retab, rfocus, skinbuttons, Colval, ArenaNumbers, SQFix }
+local stock = {
+    Class_Portrait = false,
+    ClassHP = true,
+    GradientHP = false,
+    FastKeyPress = true,
+    ShortNumeric = true,
+    ManaFontSize = 14,
+    HPFontSize = 14,
+    SelfSize = 23,
+    OtherBuffSize = 23,
+    HighlightDispellable = false,
+    TimerGap = false,
+    ScoreBoard = true,
+    HideTitles = true,
+    FadeIcon = true,
+    CombatIndicator = true,
+    CastTimer = false,
+    smooth = true,
+    pimp = false,
+    retab = false,
+    Colval = 0.25,
+    ArenaNumbers = false,
+    SQFix = false,
+    classoutline = false,
+    HideAggro = true,
+    unithp = false,
+    Stance = false,
+    HideHotkey = false,
+    ClassBG = false,
+    AutoReady = false,
+    EnemyTicks = false,
+    ThickFrames = false,
+    HideIndicator = true,
+    Abbreviate = false,
+    ModPlates = true,
+    AuraRow = 122,
+    BuffAlpha = false,
+    ButtonAnim = false,
+    PartyText = false,
+    BuffSizer = true,
+    GoldElite = false,
+    RareElite = false,
+    Rare = false,
+    Lorti = false,
+    Roug = false,
+    Modern = false,
+    BuffsRow = 10,
+    BuffVal = 1.0,
+    roleIcon = false,
+    transparent = true,
+    Slice = false,
+    NoLevel = false,
+    KeyEcho = false,
+    ClassNames = false,
+    RangeIndicator = false,
+    EnergyTicker = false,
+    wahksfk = false,
+    EnemyTicker = false,
+    modtheme = false,
+    OmniCC = false,
+    defaultFont = true,
+    AsuriFrame = false,
+    HidePetText = false
+}
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
-f:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
-function f:ADDON_LOADED()
-    if RougeUI.Class_Portrait == nil then RougeUI.Class_Portrait = false; end
-    if RougeUI.ClassHP == nil then RougeUI.ClassHP = false; end
-    if RougeUI.GradientHP == nil then RougeUI.GradientHP = false; end
-    if RougeUI.FastKeyPress == nil then RougeUI.FastKeyPress = false; end
-    if RougeUI.ShortNumeric == nil then RougeUI.ShortNumeric = false; end
-    if RougeUI.FontSize == nil then RougeUI.FontSize = 11; end
-    if RougeUI.SelfSize == nil then RougeUI.SelfSize = 27; end
-    if RougeUI.OtherBuffSize == nil then RougeUI.OtherBuffSize = 23; end
-    if RougeUI.HighlightDispellable == nil then RougeUI.HighlightDispellable = false; end
-    if RougeUI.TimerGap == nil then RougeUI.TimerGap = false; end
-    if RougeUI.ScoreBoard == nil then RougeUI.ScoreBoard = false; end
-    if RougeUI.HideTitles == nil then RougeUI.HideTitles = false; end
-    if RougeUI.FadeIcon == nil then RougeUI.FadeIcon = false; end
-    if RougeUI.HideGlows == nil then RougeUI.HideGlows = false; end
-    if RougeUI.EnergyTicker == nil then RougeUI.EnergyTicker = false; end
-    if RougeUI.CombatIndicator == nil then RougeUI.CombatIndicator = false; end
-    if RougeUI.CastTimer == nil then RougeUI.CastTimer = false; end
-    if RougeUI.smooth == nil then RougeUI.smooth = false; end
-    if RougeUI.pimp == nil then RougeUI.pimp = false; end
-    if RougeUI.retab == nil then RougeUI.retab = false; end
-    if RougeUI.rfocus == nil then RougeUI.rfocus = false; end
-    if RougeUI.skinbuttons == nil then RougeUI.skinbuttons = false; end
-    if RougeUI.Colval == nil then RougeUI.Colval = 1; end
-    if RougeUI.ArenaNumbers == nil then RougeUI.ArenaNumbers = false; end
-    if RougeUI.SQFix == nil then RougeUI.SQFix = false; end
+f:RegisterEvent("PLAYER_LOGOUT")
+f:SetScript("OnEvent", function(self, event, ...)
+    self[event](self, ...)
+end)
 
+function f:ADDON_LOADED(msg)
+    if msg ~= Name then
+        return
+    end
 
-    Custom_TargetBuffSize();
-    CusFonts();
+    if not RougeUI then
+        RougeUI = {}
+    end
+
+    for i, j in pairs(stock) do
+        if type(j) == "table" then
+            for k, v in pairs(j) do
+                if RougeUI[i][k] == nil then
+                    RougeUI[i][k] = v
+                end
+            end
+        else
+            if RougeUI[i] == nil then
+                RougeUI[i] = j
+            end
+        end
+    end
+
+    addon.db = RougeUI
+
+    addon.RougeUIF:CusFonts();
 
     if not f.options then
         f.options = f:CreateGUI()
     end
+
+    f:UnregisterEvent("ADDON_LOADED")
+    f:SetScript("OnEvent", nil)
+end
+
+function f:PLAYER_LOGOUT()
+    RougeUI = addon.db
+end
+
+local function CheckBtn(title, desc, panel, onClick)
+    local frame = CreateFrame("CheckButton", title, panel, "InterfaceOptionsCheckButtonTemplate")
+    frame:SetScript("OnClick", function(self)
+        local enabled = self:GetChecked()
+        onClick(self, enabled and true or false)
+    end)
+    frame.text = _G[frame:GetName() .. "Text"]
+    frame.text:SetText(title)
+    frame.tooltipText = desc
+    return frame
+end
+
+local function CreateText(frame, x, y, text)
+    local textstring = frame:CreateFontString("textstring")
+    textstring:SetPoint("TOPLEFT", x, y)
+    textstring:SetFont("Fonts\\MORPHEUS.ttf", 14, "")
+    textstring:SetText(text)
+    textstring:SetVertexColor(0.99, 0.82, 0)
+end
+
+local function CreateSliderText(frame)
+    frame.text = frame:CreateFontString(frame:GetName() .. "Text", "ARTWORK", "GameFontHighlight")
+    frame.text:SetPoint("BOTTOM", frame, "TOP")
+    frame.text:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+
+    frame.textHigh = frame:CreateFontString(frame:GetName() .. "High", "ARTWORK", "GameFontHighlightSmall")
+    frame.textHigh:SetText("HIGH")
+    frame.textHigh:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 4, 3)
+    frame.textHigh:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+
+    frame.textLow = frame:CreateFontString(frame:GetName() .. "Low", "ARTWORK", "GameFontHighlightSmall")
+    frame.textLow:SetText("LOW")
+    frame.textLow:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", -4, 3)
+    frame.textLow:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+
+    frame:SetSize(144, 17)
 end
 
 function f:CreateGUI()
-	local Panel=CreateFrame("Frame", "$parentRougeUI_Config", InterfaceOptionsPanelContainer) do
-		Panel.name=Title;
-		InterfaceOptions_AddCategory(Panel);--	Panel Registration
+    local Panel = CreateFrame("Frame", "$parentRougeUI_Config", InterfaceOptionsPanelContainer)
+    do
+        local Title = "|cff009cffRougeUI|r"
+        Panel.name = Title
+        local category
+        if Settings then
+            category = Settings.RegisterCanvasLayoutCategory(Panel, Title)
+            Settings.RegisterAddOnCategory(category)
+            Panel.categoryID = category:GetID()
+        else
+            InterfaceOptions_AddCategory(Panel)
+        end
 
-		local title=Panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge");
-		title:SetPoint("TOPLEFT",12,-15);
-		title:SetText(Title);
+        local title = Panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge");
+        title:SetPoint("TOPLEFT", 12, -15);
+        title:SetText(Title);
 
-		local Filler = Panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		Filler:SetPoint("TOP", 0, -50)
-		Filler:SetText("Welcome to RougeUI.".." Don't forget to check for new updates on GitHub")
+        local Filler = Panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        Filler:SetPoint("TOP", 0, -50)
+        Filler:SetText("Welcome to RougeUI")
 
-		Panel.childPanel1 = CreateFrame("Frame", "$parentConfigChild_UnitFrame", Panel)
-		Panel.childPanel1.name = "UnitFrame"
-		Panel.childPanel1.parent = Panel.name
-		InterfaceOptions_AddCategory(Panel.childPanel1)
+        Panel.childPanel1 = CreateFrame("Frame", "$parentConfigChild_UnitFrame", Panel)
+        Panel.childPanel1.name = "UnitFrame"
+        Panel.childPanel1.parent = Panel.name
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel1, "UnitFrame")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel1)
+        end
 
-		Panel.childPanel2 = CreateFrame("Frame", "$parentConfigChild_Misc", Panel)
-		Panel.childPanel2.name = "Misc"
-		Panel.childPanel2.parent = Panel.name
-		InterfaceOptions_AddCategory(Panel.childPanel2)
+        Panel.childPanel2 = CreateFrame("Frame", "$parentConfigChild_Tweaks", Panel)
+        Panel.childPanel2.name = "Tweaks"
+        Panel.childPanel2.parent = Panel.name
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel2, "Tweaks")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel2)
+        end
 
-		local Reload = CreateFrame("Button", nil, Panel.childPanel1, "UIPanelButtonTemplate")
-		Reload:SetPoint("BOTTOMRIGHT", -10, 10)
-		Reload:SetWidth(100)
-		Reload:SetHeight(25)
-		Reload:SetText("Save & Reload")
-		Reload:SetScript("OnClick", function(self, button, down)
-			ReloadUI()
-		end)
+        Panel.childPanel3 = CreateFrame("Frame", "$parentConfigChild_Hide", Panel)
+        Panel.childPanel3.name = "Hide Elements"
+        Panel.childPanel3.parent = Panel.name
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel3, "Hide Elements")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel3)
+        end
 
-		local Reload = CreateFrame("Button", nil, Panel.childPanel2, "UIPanelButtonTemplate")
-		Reload:SetPoint("BOTTOMRIGHT", -10, 10)
-		Reload:SetWidth(100)
-		Reload:SetHeight(25)
-		Reload:SetText("Save & Reload")
-		Reload:SetScript("OnClick", function(self, button, down)
-			ReloadUI()
-		end)
+        Panel.childPanel4 = CreateFrame("Frame", "$parentConfigChild_StatusBar", Panel)
+        Panel.childPanel4.name = "StatusBar"
+        Panel.childPanel4.parent = Panel.name
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel4, "StatusBar")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel4)
+        end
 
-		local name = "ClassPortraitButton"
-		local template = "UICheckButtonTemplate"
-		local ClassPortraitButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		ClassPortraitButton:SetPoint("TOPLEFT", 10, -40)
-		ClassPortraitButton.text = _G[name.."Text"]
-		ClassPortraitButton.text:SetText("Enable class portraits")
-		ClassPortraitButton:SetChecked(RougeUI.Class_Portrait)
-		ClassPortraitButton:SetScript("OnClick", function() RougeUI.Class_Portrait = not RougeUI.Class_Portrait end)
+        Panel.childPanel5 = CreateFrame("Frame", "$parentConfigChild_Theme", Panel)
+        Panel.childPanel5.name = "Theme"
+        Panel.childPanel5.parent = Panel.name
+        if Settings then
+            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel5, "Theme")
+            Settings.RegisterAddOnCategory(subcategory)
+        else
+            InterfaceOptions_AddCategory(Panel.childPanel5)
+        end
 
-		local name = "ClassHP"
-		local template = "UICheckButtonTemplate"
-		local ClassHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		ClassHPButton:SetPoint("TOPLEFT", 10, -80)
-		ClassHPButton.text = _G[name.."Text"]
-		ClassHPButton.text:SetText("Class Colored HP")
-		ClassHPButton:SetChecked(RougeUI.ClassHP)
-		ClassHPButton:SetScript("OnClick", function() RougeUI.ClassHP = not RougeUI.ClassHP end)
+        for _, v in pairs({ Panel.childPanel1, Panel.childPanel2, Panel.childPanel3, Panel.childPanel4, Panel.childPanel5 }) do
+            local Reload = CreateFrame("Button", nil, v, "UIPanelButtonTemplate")
+            Reload:SetPoint("BOTTOMRIGHT", -10, 10)
+            Reload:SetWidth(100)
+            Reload:SetHeight(25)
+            Reload:SetText("Save & Reload")
+            Reload:SetScript("OnClick", function()
+                ReloadUI()
+            end)
+        end
 
-		local name = "ScoreBoard"
-		local template = "UICheckButtonTemplate"
-		local ScoreBoardButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		ScoreBoardButton:SetPoint("TOPLEFT", 10, -120)
-		ScoreBoardButton.text = _G[name.."Text"]
-		ScoreBoardButton.text:SetText("Class Colored PvP Scoreboard")
-		ScoreBoardButton:SetChecked(RougeUI.ScoreBoard)
-		ScoreBoardButton:SetScript("OnClick", function() RougeUI.ScoreBoard = not RougeUI.ScoreBoard end)
+        --childPanel1
 
-		local name = "HideTitles"
-		local template = "UICheckButtonTemplate"
-		local HideTitlesButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		HideTitlesButton:SetPoint("TOPLEFT", 10, -240)
-		HideTitlesButton.text = _G[name.."Text"]
-		HideTitlesButton.text:SetText("Hide Group/Raid titles, e.g. Group 1")
-		HideTitlesButton:SetChecked(RougeUI.HideTitles)
-		HideTitlesButton:SetScript("OnClick", function() RougeUI.HideTitles = not RougeUI.HideTitles end)
+        CreateText(Panel.childPanel1, 10, -40, "Class colored indicators")
 
-		local name = "FadeIcon"
-		local template = "UICheckButtonTemplate"
-		local FadeIconButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		FadeIconButton:SetPoint("TOPLEFT", 350, -40)
-		FadeIconButton.text = _G[name.."Text"]
-		FadeIconButton.text:SetText("Fade PvP Icon")
-		FadeIconButton:SetChecked(RougeUI.FadeIcon)
-		FadeIconButton:SetScript("OnClick", function() RougeUI.FadeIcon = not RougeUI.FadeIcon end)
+        local ClassPortraitButton = CheckBtn("Enable Class Portraits", "Turn this on to display class portrait on target and focus frame", Panel.childPanel1, function(self, value)
+            addon.db.Class_Portrait = value
+        end)
+        ClassPortraitButton:SetChecked(addon.db.Class_Portrait)
+        ClassPortraitButton:SetPoint("TOPLEFT", 10, -70)
 
-		local name = "HideGlows"
-		local template = "UICheckButtonTemplate"
-		local HideGlowsButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		HideGlowsButton:SetPoint("TOPLEFT", 350, -80)
-		HideGlowsButton.text = _G[name.."Text"]
-		HideGlowsButton.text:SetText("Hide hit indicator + glows on Playerframe")
-		HideGlowsButton:SetChecked(RougeUI.HideGlows)
-		HideGlowsButton:SetScript("OnClick", function() RougeUI.HideGlows = not RougeUI.HideGlows end)
+        local ClassHPButton, GradientHPButton, UnitHPButton
+        ClassHPButton = CheckBtn("Enable Class Colored HealthBar", "Enabling this will change the green healthBar color to the class color", Panel.childPanel4, function(self, value)
+            addon.db.ClassHP = value
+        end)
+        ClassHPButton:SetChecked(addon.db.ClassHP)
+        ClassHPButton:SetPoint("TOPLEFT", 10, -75)
 
-		local name = "EnergyTicker"
-		local template = "UICheckButtonTemplate"
-		local EnergyTickerButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		EnergyTickerButton:SetPoint("TOPLEFT", 350, -120)
-		EnergyTickerButton.text = _G[name.."Text"]
-		EnergyTickerButton.text:SetText("Enable Energy ticker for Rogue/Druid")
-		EnergyTickerButton:SetChecked(RougeUI.EnergyTicker)
-		EnergyTickerButton:SetScript("OnClick", function() RougeUI.EnergyTicker = not RougeUI.EnergyTicker end)
+        GradientHPButton = CheckBtn("Enable Gradient HealthBar", "This changes the healthBar color from green > yellow > orange > red based on the current percentage", Panel.childPanel4, function(self, value)
+            addon.db.GradientHP = value
+            addon.db.ClassHP = false
+            addon.db.unithp = false
+            ClassHPButton:SetChecked(addon.db.ClassHP)
+            UnitHPButton:SetChecked(addon.db.unithp)
+        end)
+        GradientHPButton:SetChecked(addon.db.GradientHP)
+        GradientHPButton:SetPoint("TOPLEFT", 10, -110)
 
-		local name = "CombatIndicator"
-		local template = "UICheckButtonTemplate"
-		local CombatIndicatorButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		CombatIndicatorButton:SetPoint("TOPLEFT", 10, -160)
-		CombatIndicatorButton.text = _G[name.."Text"]
-		CombatIndicatorButton.text:SetText("Enable Combat Indicator")
-		CombatIndicatorButton:SetChecked(RougeUI.CombatIndicator)
-		CombatIndicatorButton:SetScript("OnClick", function() RougeUI.CombatIndicator = not RougeUI.CombatIndicator end)
+        UnitHPButton = CheckBtn("Color HealthBar by Unit's Reaction", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value)
+            addon.db.unithp = value
+        end)
+        UnitHPButton:SetChecked(addon.db.unithp)
+        UnitHPButton:SetPoint("TOPLEFT", 10, -145)
 
-		local name = "CastTimer"
-		local template = "UICheckButtonTemplate"
-		local CastTimerButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		CastTimerButton:SetPoint("TOPLEFT", 10, -200)
-		CastTimerButton.text = _G[name.."Text"]
-		CastTimerButton.text:SetText("Enable modUI castbar style with timer")
-		CastTimerButton:SetChecked(RougeUI.CastTimer)
-		CastTimerButton:SetScript("OnClick", function() RougeUI.CastTimer = not RougeUI.CastTimer end)
+        CreateText(Panel.childPanel1, 10, -210, "StatusText")
 
-		local name = "SmoothFrame"
-		local template = "UICheckButtonTemplate"
-		local SmoothFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		SmoothFrameButton:SetPoint("TOPLEFT", 350, -160)
-		SmoothFrameButton.text = _G[name.."Text"]
-		SmoothFrameButton.text:SetText("Smooth animated health/mana bars")
-		SmoothFrameButton:SetChecked(RougeUI.smooth)
-		SmoothFrameButton:SetScript("OnClick", function() RougeUI.smooth = not RougeUI.smooth end)
+        local ShortNumericButton, AbbButton
+        ShortNumericButton = CheckBtn("Display HP/Mana Text as '10k'", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value)
+            addon.db.ShortNumeric = value
+            addon.db.Abbreviate = false
+            AbbButton:SetChecked(addon.db.Abbreviate)
+        end)
+        ShortNumericButton:SetChecked(addon.db.ShortNumeric)
+        ShortNumericButton:SetPoint("TOPLEFT", 10, -245)
 
-		local name = "PimpFrame"
-		local template = "UICheckButtonTemplate"
-		local PimpFrameButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		PimpFrameButton:SetPoint("TOPLEFT", 350, -200)
-		PimpFrameButton.text = _G[name.."Text"]
-		PimpFrameButton.text:SetText("Enable Violet Colored Energy/Mana Bar")
-		PimpFrameButton:SetChecked(RougeUI.pimp)
-		PimpFrameButton:SetScript("OnClick", function() RougeUI.pimp = not RougeUI.pimp end)
+        AbbButton = CheckBtn("Display only CURRENT HP/Mana Text", "This will show the HP/Mana StatusText as CURRENT value instead of CURRENT / MAX", Panel.childPanel1, function(self, value)
+            addon.db.Abbreviate = value
+            addon.db.ShortNumeric = false
+            ShortNumericButton:SetChecked(addon.db.ShortNumeric)
+        end)
+        AbbButton:SetChecked(addon.db.Abbreviate)
+        AbbButton:SetPoint("TOPLEFT", 10, -280)
 
-		local name = "RetabBind"
-		local template = "UICheckButtonTemplate"
-		local RetabBind = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		RetabBind:SetPoint("TOPLEFT", 10, -280)
-		RetabBind.text = _G[name.."Text"]
-		RetabBind.text:SetText("RETabBinder")
-		RetabBind:SetChecked(RougeUI.retab)
-		RetabBind:SetScript("OnClick", function() RougeUI.retab = not RougeUI.retab end)
+        local PartyTextButton = CheckBtn("Show HP/Mana Text on PartyFrames", "This will show the HP/Mana StatusText on party1-4", Panel.childPanel1, function(self, value)
+            addon.db.PartyText = value
+        end)
+        PartyTextButton:SetChecked(addon.db.PartyText)
+        PartyTextButton:SetPoint("TOPLEFT", 10, -315)
 
-		local name = "Skinbuttons"
-		local template = "UICheckButtonTemplate"
-		local Skinbuttons = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		Skinbuttons:SetPoint("TOPLEFT", 10, -320)
-		Skinbuttons.text = _G[name.."Text"]
-		Skinbuttons.text:SetText("Apply border theme to actionbar, buffs etc")
-		Skinbuttons:SetChecked(RougeUI.skinbuttons)
-		Skinbuttons:SetScript("OnClick", function() RougeUI.skinbuttons = not RougeUI.skinbuttons end)
+        local defaultFontButton = CheckBtn("Retail statusText font", "This changes the WoW font to a retail look", Panel.childPanel1, function(self, value)
+            addon.db.defaultFont = value
+        end)
+        defaultFontButton:SetChecked(addon.db.defaultFont)
+        defaultFontButton:SetPoint("TOPLEFT", 10, -350)
 
-		local name = "ColorValueSlider"
-		local template = "OptionsSliderTemplate"
-		local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel2, template)
-		ColorValueSlider:SetMinMaxValues(0, 1)
-		ColorValueSlider:SetPoint("TOPLEFT",20, -390)
-		ColorValueSlider.text = _G[name.."Text"]
-		ColorValueSlider.textLow = _G[name.."Low"]
-		ColorValueSlider.textHigh = _G[name.."High"]
-		ColorValueSlider.minValue, ColorValueSlider.maxValue = ColorValueSlider:GetMinMaxValues()
-		ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
-		ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
-		ColorValueSlider:SetValue(RougeUI.Colval)
-		ColorValueSlider.text:SetText("Change brightness of UI: "..ColorValueSlider:GetValue(Colval))
-		ColorValueSlider:SetValueStep(0.05)
-		ColorValueSlider:SetObeyStepOnDrag(true);
-		ColorValueSlider:SetScript("OnValueChanged", function(self,value)
-			ColorValueSlider.text:SetText("Change brightness of UI: "..RoundNumbers(RougeUI.Colval, 0.05))
-			RougeUI.Colval = ColorValueSlider:GetValue()
-			ChangeFrameColors()
-		end)
+        CreateText(Panel.childPanel1, 350, -40, "Misc")
 
-		local name = "ArenaNumbers"
-		local template = "UICheckButtonTemplate"
-		local ArenaNumbersButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		ArenaNumbersButton:SetPoint("TOPLEFT", 350, -40)
-		ArenaNumbersButton.text = _G[name.."Text"]
-		ArenaNumbersButton.text:SetText("Show arena number on nameplate")
-		ArenaNumbersButton:SetChecked(RougeUI.ArenaNumbers)
-		ArenaNumbersButton:SetScript("OnClick", function() RougeUI.ArenaNumbers = not RougeUI.ArenaNumbers end)
+        local FadeIconButton = CheckBtn("Fade out PvP Icon", "Enabling this will set the PvP Icon's transparency at 35%", Panel.childPanel1, function(self, value)
+            addon.db.FadeIcon = value
+        end)
+        FadeIconButton:SetChecked(addon.db.FadeIcon)
+        FadeIconButton:SetPoint("TOPLEFT", 350, -70)
 
-		local name = "SpellQueueWindow"
-		local template = "UICheckButtonTemplate"
-		local SQFixButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		SQFixButton:SetPoint("TOPLEFT", 350, -80)
-		SQFixButton.text = _G[name.."Text"]
-		SQFixButton.text:SetText("Auto-adjust SpellQueue Window")
-		SQFixButton:SetChecked(RougeUI.SQFix)
-		SQFixButton:SetScript("OnClick", function() RougeUI.SQFix = not RougeUI.SQFix end)
+        local SmoothFrameButton = CheckBtn("Smooth Animated Health & Mana Bar", "Adds a smoother transition effect when gaining / losing mana or health", Panel.childPanel4, function(self, value)
+            addon.db.smooth = value
+        end)
+        SmoothFrameButton:SetChecked(addon.db.smooth)
+        SmoothFrameButton:SetPoint("TOPLEFT", 10, -180)
 
-		local name = "RedFocus"
-		local template = "UICheckButtonTemplate"
-		local RedFocus = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		RedFocus:SetPoint("TOPLEFT", 350, -240)
-		RedFocus.text = _G[name.."Text"]
-		RedFocus.text:SetText("Add red line to focusframe")
-		RedFocus:SetChecked(RougeUI.rfocus)
-		RedFocus:SetScript("OnClick", function() RougeUI.rfocus = not RougeUI.rfocus end)
+        local PimpFrameButton = CheckBtn("Purple Manabar", "Pimps your manabar to a purple color", Panel.childPanel4, function(self, value)
+            addon.db.pimp = value
+        end)
+        PimpFrameButton:SetChecked(addon.db.pimp)
+        PimpFrameButton:SetPoint("TOPLEFT", 10, -40)
 
-		local name = "GradientHP"
-		local template = "UICheckButtonTemplate"
-		local GradientHPButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		GradientHPButton:SetPoint("TOPLEFT", 10, -120)
-		GradientHPButton.text = _G[name.."Text"]
-		GradientHPButton.text:SetText("Gradient effect on HP")
-		GradientHPButton:SetChecked(RougeUI.GradientHP)
-		GradientHPButton:SetScript("OnClick", function() RougeUI.GradientHP = not RougeUI.GradientHP end)
+        local ClassOutlines = CheckBtn("Class Colored Outlines", "When enabled it will add a class colored circle around target and focus frame portraits", Panel.childPanel1, function(self, value)
+            addon.db.classoutline = value
+        end)
+        ClassOutlines:SetChecked(addon.db.classoutline)
+        ClassOutlines:SetPoint("TOPLEFT", 10, -105)
 
-		local name = "FastKeyPress"
-		local template = "UICheckButtonTemplate"
-		local FastKeyPressButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		FastKeyPressButton:SetPoint("TOPLEFT", 10, -40)
-		FastKeyPressButton.text = _G[name.."Text"]
-		FastKeyPressButton.text:SetText("Cast spells on key down (SnowFallKey)")
-		FastKeyPressButton:SetChecked(RougeUI.FastKeyPress)
-		FastKeyPressButton:SetScript("OnClick", function() RougeUI.FastKeyPress = not RougeUI.FastKeyPress end)
-		FastKeyPressButton:RegisterEvent("PLAYER_ENTERING_WORLD")
-		FastKeyPressButton:SetScript("OnEvent", function(self, event, ...)
-			if (event == "PLAYER_ENTERING_WORLD") and RougeUI.FastKeyPress == true then
-				SetCVar('ActionButtonUseKeyDown', 1)
-			else
-				SetCVar('ActionButtonUseKeyDown', 0)
-			end
-		end)
+        local ClassBG, Transparent
+        ClassBG = CheckBtn("Class Colored Name Background", "Adds a class colored texture behind the UnitFrame name", Panel.childPanel1, function(self, value)
+            if addon.db.ThickFrames then
+                UIErrorsFrame:AddMessage("This cannot be enabled with big frames", 1, 0, 0)
+                self:SetChecked(false)
+            else
+                addon.db.ClassBG = value
+                Transparent:SetChecked(false)
+                addon.db.transparent = false
+                if addon.db.ClassBG then
+                    if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["ClassColFrames"] == "On" then
+                        UIErrorsFrame:AddMessage("Don't forget to disable Class colored frames in Leatrix Plus", 1, 0, 0)
+                        print("Don't forget to disable Class colored frames in Leatrix Plus")
+                    end
+                end
+            end
+        end)
+        ClassBG:SetChecked(addon.db.ClassBG)
+        ClassBG:SetPoint("TOPLEFT", 10, -140)
 
-		local name = "ShortNumeric"
-		local template = "UICheckButtonTemplate"
-		local ShortNumericButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		ShortNumericButton:SetPoint("TOPLEFT", 10, -160)
-		ShortNumericButton.text = _G[name.."Text"]
-		ShortNumericButton.text:SetText("Shorten NUMERIC HP to one decimal")
-		ShortNumericButton:SetChecked(RougeUI.ShortNumeric)
-		ShortNumericButton:SetScript("OnClick", function() RougeUI.ShortNumeric = not RougeUI.ShortNumeric end)
+        Transparent = CheckBtn("Transparent name background", nil, Panel.childPanel1, function(self, value)
+            addon.db.transparent = value
+            addon.db.ClassBG = false
+            ClassBG:SetChecked(false)
+        end)
+        Transparent:SetChecked(addon.db.transparent)
+        Transparent:SetPoint("TOPLEFT", 350, -140)
 
-		local name = "HighlightDispellable"
-		local template = "UICheckButtonTemplate"
-		local HighlightDispellableButton = CreateFrame("CheckButton", name, Panel.childPanel1, "UICheckButtonTemplate")
-		HighlightDispellableButton:SetPoint("TOPLEFT", 10, -200)
-		HighlightDispellableButton.text = _G[name.."Text"]
-		HighlightDispellableButton.text:SetText("Highlight enemy Magic buffs")
-		HighlightDispellableButton:SetChecked(RougeUI.HighlightDispellable)
-		HighlightDispellableButton:SetScript("OnClick", function() RougeUI.HighlightDispellable = not RougeUI.HighlightDispellable end)
+        local ClassCNames = CheckBtn("Class Colored Names", "Color names to their class color", Panel.childPanel1, function(self, value)
+            addon.db.ClassNames = value
+        end)
+        ClassCNames:SetChecked(addon.db.ClassNames)
+        ClassCNames:SetPoint("TOPLEFT", 10, -175)
 
-		local name = "TimerGap"
-		local template = "UICheckButtonTemplate"
-		local TimerGapButton = CreateFrame("CheckButton", name, Panel.childPanel2, "UICheckButtonTemplate")
-		TimerGapButton:SetPoint("TOPLEFT", 10, -80)
-		TimerGapButton.text = _G[name.."Text"]
-		TimerGapButton.text:SetText("Remove space gap in (de)buff timer")
-		TimerGapButton:SetChecked(RougeUI.TimerGap)
-		TimerGapButton:SetScript("OnClick", function() RougeUI.TimerGap = not RougeUI.TimerGap end)
+        local ThickFrame = CheckBtn("Enable Big Frames", "Enable this for big (thick) UnitFrames", Panel.childPanel1, function(self, value)
+            addon.db.ThickFrames = value
+            addon.db.ClassBG = false
+            addon.db.AsuriFrame = false
+            if addon.db.ThickFrames then
+                if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["ClassColFrames"] == "On" then
+                    UIErrorsFrame:AddMessage("Don't forget to disable Class colored frames in Leatrix Plus", 1, 0, 0)
+                    print("Don't forget to disable Class colored frames in Leatrix Plus")
+                end
+            end
+        end)
+        ThickFrame:SetChecked(addon.db.ThickFrames)
+        ThickFrame:SetPoint("TOPLEFT", 350, -105)
 
-		local name = "FontSizeSlider"
-		local template = "OptionsSliderTemplate"
-		local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, template)
-		FontSizeSlider:SetPoint("TOPLEFT",20, -360)
-		FontSizeSlider.textLow = _G[name.."Low"]
-		FontSizeSlider.textHigh = _G[name.."High"]
-		FontSizeSlider.text = _G[name.."Text"]
-		FontSizeSlider:SetMinMaxValues(8, 16)
-		FontSizeSlider.minValue, FontSizeSlider.maxValue = FontSizeSlider:GetMinMaxValues()
-		FontSizeSlider.textLow:SetText(FontSizeSlider.minValue)
-		FontSizeSlider.textHigh:SetText(FontSizeSlider.maxValue)
-		FontSizeSlider:SetValue(RougeUI.FontSize)
-		FontSizeSlider.text:SetText("Healthbar Font Size: "..FontSizeSlider:GetValue(FontSize))
-		FontSizeSlider:SetValueStep(1)
-		FontSizeSlider:SetObeyStepOnDrag(true);
-		FontSizeSlider:SetScript("OnValueChanged", function(self,event,arg1)
-			FontSizeSlider.text:SetText("Healthbar Font Size: "..FontSizeSlider:GetValue(RougeUI.FontSize))
-			RougeUI.FontSize = FontSizeSlider:GetValue()
-			CusFonts()
-		end)
+        local Nolvl = CheckBtn("Hide level text on frames", nil, Panel.childPanel1, function(self, value)
+            addon.db.NoLevel = value
+        end)
+        Nolvl:SetChecked(addon.db.NoLevel)
+        Nolvl:SetPoint("TOPLEFT", 350, -175)
 
-		local names = "TargetPlayerBuffSizeSlider"
-		local template = "OptionsSliderTemplate"
-		local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel1, template)
-		TargetPlayerBuffSizeSlider:SetPoint("TOPLEFT", 20, -420)
-		TargetPlayerBuffSizeSlider.textLow = _G[names.."Low"]
-		TargetPlayerBuffSizeSlider.textHigh = _G[names.."High"]
-		TargetPlayerBuffSizeSlider.text = _G[names.."Text"]
-		TargetPlayerBuffSizeSlider:SetMinMaxValues(8, 32)
-		TargetPlayerBuffSizeSlider.minValue, TargetPlayerBuffSizeSlider.maxValue = TargetPlayerBuffSizeSlider:GetMinMaxValues()
-		TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
-		TargetPlayerBuffSizeSlider.textHigh:SetText(TargetPlayerBuffSizeSlider.maxValue)
-		TargetPlayerBuffSizeSlider:SetValue(RougeUI.SelfSize)
-		TargetPlayerBuffSizeSlider.text:SetText("Personal (De)buff Size: "..TargetPlayerBuffSizeSlider:GetValue(SelfSize));
-		TargetPlayerBuffSizeSlider:SetValueStep(1)
-		TargetPlayerBuffSizeSlider:SetObeyStepOnDrag(true);
-		TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(self, value)
-			if RougeUI.SelfSize ~= value then
-				RougeUI.SelfSize = TargetPlayerBuffSizeSlider:GetValue();
-				TargetPlayerBuffSizeSliderText:SetText("Personal (De)buff Size: "..RoundNumbers(RougeUI.SelfSize, 1))
-				SetCustomBuffSize(value)
-			end
-		end)
+        local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
+            addon.db.ModPlates = value
+        end)
+        ModPlates:SetChecked(addon.db.ModPlates)
+        ModPlates:SetPoint("TOPLEFT", 10, -75)
 
-		local names = "TargetBuffSizeSlider"
-		local template = "OptionsSliderTemplate"
-		local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel1, template)
-		TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -480)
-		TargetBuffSizeSlider:SetMinMaxValues(8, 32)
-		TargetBuffSizeSlider:SetValueStep(1)
-		TargetBuffSizeSlider.textLow = _G[names.."Low"]
-		TargetBuffSizeSlider.textHigh = _G[names.."High"]
-		TargetBuffSizeSlider.text = _G[names.."Text"]
-		TargetBuffSizeSlider.minValue, TargetBuffSizeSlider.maxValue = TargetBuffSizeSlider:GetMinMaxValues()
-		TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
-		TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
-		TargetBuffSizeSlider:SetValue(RougeUI.OtherBuffSize)
-		TargetBuffSizeSlider.text:SetText("Target Buff Size: "..TargetBuffSizeSlider:GetValue(OtherBuffSize));
-		TargetBuffSizeSlider:SetObeyStepOnDrag(true);
-		TargetBuffSizeSlider:SetScript("OnValueChanged", function(self, value)
-			if RougeUI.OtherBuffSize ~= value then
-				RougeUI.OtherBuffSize = TargetBuffSizeSlider:GetValue();
-				TargetBuffSizeSliderText:SetText("Target Buff Size: "..RoundNumbers(RougeUI.OtherBuffSize, 1))
-				SetCustomBuffSize(value)
-			end
-		end)
+        local OmniTimers = CheckBtn("OmniCC Buff Timers", "Disable Blizzard's buff timers and use OmniCC instead", Panel.childPanel5, function(self, value)
+            if not IsAddOnLoaded("OmniCC") then
+                UIErrorsFrame:AddMessage("To enable this option you have to enable OmniCC first", 1, 0, 0)
+                self:SetChecked(false)
+                addon.db.OmniCC = false
+                return
+            end
+            addon.db.OmniCC = value
+        end)
+        OmniTimers:SetChecked(addon.db.OmniCC)
+        OmniTimers:SetPoint("TOPLEFT", 10, -110)
 
-	end
-	return Panel
+        CreateText(Panel.childPanel5, 350, -40, "Theme's")
+
+        local sliderTemplate = "OptionsSliderTemplate"
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            sliderTemplate = "UISliderTemplate"
+        end
+
+        local name = "BuffColSlider"
+        local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(BuffColSlider)
+        else
+            BuffColSlider.text = _G[name .. "Text"]
+            BuffColSlider.textHigh = _G[name .. "High"]
+            BuffColSlider.textLow = _G[name .. "Low"]
+        end
+        BuffColSlider:SetMinMaxValues(0, 1)
+        BuffColSlider:SetPoint("TOPLEFT", 25, -300)
+        if addon.db.Modern or addon.db.modtheme then
+            BuffColSlider:Show()
+        else
+            BuffColSlider:Hide()
+        end
+        BuffColSlider.minValue, BuffColSlider.maxValue = BuffColSlider:GetMinMaxValues()
+        BuffColSlider.textLow:SetText(floor(BuffColSlider.minValue))
+        BuffColSlider.textHigh:SetText(floor(BuffColSlider.maxValue))
+        BuffColSlider:SetValue(addon.db.BuffVal)
+        BuffColSlider.text:SetText("Theme's Border Brightness: " .. format("%.f", BuffColSlider:GetValue(addon.db.BuffVal)))
+        BuffColSlider:SetValueStep(0.05)
+        BuffColSlider:SetObeyStepOnDrag(true);
+        BuffColSlider:SetScript("OnValueChanged", function(_, value)
+            BuffColSlider.text:SetText("Theme's Border Brightness: " .. RoundNumbers(addon.db.BuffVal, 0.05))
+            addon.db.BuffVal = value
+        end)
+
+        local LortiTheme, RougTheme, ModernTheme, Modtheme
+        LortiTheme = CheckBtn("Lorti Theme", "This will theme the UI to look like Lorti", Panel.childPanel5, function(self, value)
+            addon.db.Lorti = value
+            addon.db.Roug = false
+            addon.db.Modern = false
+            addon.db.modtheme = false
+            RougTheme:SetChecked(addon.db.Roug)
+            ModernTheme:SetChecked(addon.db.Modern)
+            Modtheme:SetChecked(addon.db.modtheme)
+        end)
+        LortiTheme:SetChecked(addon.db.Lorti)
+        LortiTheme:SetPoint("TOPLEFT", 350, -105)
+
+        RougTheme = CheckBtn("RougeUI Theme", nil, Panel.childPanel5, function(self, value)
+            addon.db.Roug = value
+            addon.db.Lorti = false
+            addon.db.Modern = false
+            addon.db.modtheme = false
+            LortiTheme:SetChecked(addon.db.Lorti)
+            ModernTheme:SetChecked(addon.db.Modern)
+            Modtheme:SetChecked(addon.db.modtheme)
+        end)
+        RougTheme:SetChecked(addon.db.Roug)
+        RougTheme:SetPoint("TOPLEFT", 350, -70)
+
+        ModernTheme = CheckBtn("Minimalist Theme", nil, Panel.childPanel5, function(self, value)
+            addon.db.Modern = value
+            addon.db.Roug = false
+            addon.db.Lorti = false
+            addon.db.modtheme = false
+            RougTheme:SetChecked(addon.db.Roug)
+            LortiTheme:SetChecked(addon.db.Lorti)
+            Modtheme:SetChecked(addon.db.modtheme)
+            BuffColSlider:Show()
+        end)
+        ModernTheme:SetChecked(addon.db.Modern)
+        ModernTheme:SetPoint("TOPLEFT", 350, -140)
+
+        Modtheme = CheckBtn("ModUI Theme", nil, Panel.childPanel5, function(self, value)
+            addon.db.modtheme = value
+            addon.db.Roug = false
+            addon.db.Lorti = false
+            addon.db.Modern = false
+            RougTheme:SetChecked(addon.db.Roug)
+            LortiTheme:SetChecked(addon.db.Lorti)
+            ModernTheme:SetChecked(addon.db.Modern)
+            BuffColSlider:Show()
+        end)
+        Modtheme:SetChecked(addon.db.modtheme)
+        Modtheme:SetPoint("TOPLEFT", 350, -175)
+
+        local AsuriFrame = CheckBtn("Asuri UI Frames", nil, Panel.childPanel5, function(self, value)
+            addon.db.AsuriFrame = value
+            addon.db.ThickFrames = false
+            addon.db.ClassBG = false
+            addon.db.transparent = false
+            addon.db.NoLevel = false
+            ThickFrame:SetChecked(addon.db.ThickFrames)
+            ThickFrame:SetChecked(addon.db.ClassBG)
+            ThickFrame:SetChecked(addon.db.transparent)
+            ThickFrame:SetChecked(addon.db.NoLevel)
+        end)
+        AsuriFrame:SetChecked(addon.db.AsuriFrame)
+        AsuriFrame:SetPoint("TOPLEFT", 350, -210)
+
+        local name = "FontSizeSlider"
+        local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(FontSizeSlider)
+        else
+            FontSizeSlider.text = _G[name .. "Text"]
+            FontSizeSlider.textHigh = _G[name .. "High"]
+            FontSizeSlider.textLow = _G[name .. "Low"]
+        end
+        FontSizeSlider:SetPoint("TOPLEFT", 20, -410)
+        FontSizeSlider:SetMinMaxValues(8, 16)
+        FontSizeSlider.minValue, FontSizeSlider.maxValue = FontSizeSlider:GetMinMaxValues()
+        FontSizeSlider.textLow:SetText(FontSizeSlider.minValue)
+        FontSizeSlider.textHigh:SetText(FontSizeSlider.maxValue)
+        FontSizeSlider:SetValue(addon.db.HPFontSize)
+        FontSizeSlider.text:SetText("HP Font Size " .. FontSizeSlider:GetValue(addon.db.HPFontSize))
+        FontSizeSlider:SetValueStep(1)
+        FontSizeSlider:SetObeyStepOnDrag(true);
+        FontSizeSlider:SetScript("OnValueChanged", function(self)
+            self.text:SetText("HP Font Size: " .. self:GetValue(addon.db.HPFontSize))
+            addon.db.HPFontSize = self:GetValue()
+            addon.RougeUIF:CusFonts()
+        end)
+
+        local name = "MFontSizeSlider"
+        local MFontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(MFontSizeSlider)
+        else
+            MFontSizeSlider.text = _G[name .. "Text"]
+            MFontSizeSlider.textHigh = _G[name .. "High"]
+            MFontSizeSlider.textLow = _G[name .. "Low"]
+        end
+        MFontSizeSlider:SetPoint("TOPLEFT", 20, -470)
+        MFontSizeSlider:SetMinMaxValues(8, 16)
+        MFontSizeSlider.minValue, MFontSizeSlider.maxValue = MFontSizeSlider:GetMinMaxValues()
+        MFontSizeSlider.textLow:SetText(MFontSizeSlider.minValue)
+        MFontSizeSlider.textHigh:SetText(MFontSizeSlider.maxValue)
+        MFontSizeSlider:SetValue(addon.db.ManaFontSize)
+        MFontSizeSlider.text:SetText("Mana Font Size " .. MFontSizeSlider:GetValue(addon.db.ManaFontSize))
+        MFontSizeSlider:SetValueStep(1)
+        MFontSizeSlider:SetObeyStepOnDrag(true);
+        MFontSizeSlider:SetScript("OnValueChanged", function(self)
+            self.text:SetText("Mana Font Size: " .. self:GetValue(addon.db.ManaFontSize))
+            addon.db.ManaFontSize = self:GetValue()
+            addon.RougeUIF:CusFonts()
+        end)
+
+        local names = "TargetPlayerBuffSizeSlider"
+        local TargetPlayerBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(TargetPlayerBuffSizeSlider)
+        else
+            TargetPlayerBuffSizeSlider.textLow = _G[names .. "Low"]
+            TargetPlayerBuffSizeSlider.textHigh = _G[names .. "High"]
+            TargetPlayerBuffSizeSlider.text = _G[names .. "Text"]
+        end
+        TargetPlayerBuffSizeSlider:SetPoint("TOPLEFT", 20, -490)
+        if addon.db.BuffSizer then
+            TargetPlayerBuffSizeSlider:Show()
+        else
+            TargetPlayerBuffSizeSlider:Hide()
+        end
+        TargetPlayerBuffSizeSlider:SetMinMaxValues(15, 34)
+        TargetPlayerBuffSizeSlider.minValue, TargetPlayerBuffSizeSlider.maxValue = TargetPlayerBuffSizeSlider:GetMinMaxValues()
+        TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
+        TargetPlayerBuffSizeSlider.textHigh:SetText(TargetPlayerBuffSizeSlider.maxValue)
+        TargetPlayerBuffSizeSlider:SetValue(addon.db.SelfSize)
+        TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(addon.db.SelfSize)));
+        TargetPlayerBuffSizeSlider:SetValueStep(1)
+        TargetPlayerBuffSizeSlider:SetObeyStepOnDrag(true);
+        TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
+            if addon.db.SelfSize ~= value then
+                addon.db.SelfSize = value;
+                TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. RoundNumbers(addon.db.SelfSize, 1))
+                addon.RougeUIF:SetCustomBuffSize()
+            end
+        end)
+
+        local names = "TargetBuffSizeSlider"
+        local TargetBuffSizeSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(TargetBuffSizeSlider)
+        else
+            TargetBuffSizeSlider.textLow = _G[names .. "Low"]
+            TargetBuffSizeSlider.textHigh = _G[names .. "High"]
+            TargetBuffSizeSlider.text = _G[names .. "Text"]
+        end
+        TargetBuffSizeSlider:SetPoint("TOPLEFT", 20, -440)
+        if addon.db.BuffSizer then
+            TargetBuffSizeSlider:Show()
+        else
+            TargetBuffSizeSlider:Hide()
+        end
+        TargetBuffSizeSlider:SetMinMaxValues(15, 34)
+        TargetBuffSizeSlider:SetValueStep(1)
+        TargetBuffSizeSlider.minValue, TargetBuffSizeSlider.maxValue = TargetBuffSizeSlider:GetMinMaxValues()
+        TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
+        TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
+        TargetBuffSizeSlider:SetValue(addon.db.OtherBuffSize)
+        TargetBuffSizeSlider.text:SetText("Target Aura Size: " .. format("%.f", TargetBuffSizeSlider:GetValue(addon.db.OtherBuffSize)));
+        TargetBuffSizeSlider:SetObeyStepOnDrag(true);
+        TargetBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
+            if addon.db.OtherBuffSize ~= value then
+                addon.db.OtherBuffSize = value;
+                TargetBuffSizeSlider.text:SetText("Target Buff Size: " .. RoundNumbers(addon.db.OtherBuffSize, 1))
+                addon.RougeUIF:SetCustomBuffSize()
+            end
+        end)
+
+        local name = "ColorValueSlider"
+        local ColorValueSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(ColorValueSlider)
+        else
+            ColorValueSlider.text = _G[name .. "Text"]
+            ColorValueSlider.textHigh = _G[name .. "High"]
+            ColorValueSlider.textLow = _G[name .. "Low"]
+        end
+        ColorValueSlider:SetMinMaxValues(0, 1)
+        ColorValueSlider:SetPoint("TOPLEFT", 25, -230)
+        ColorValueSlider.minValue, ColorValueSlider.maxValue = ColorValueSlider:GetMinMaxValues()
+        ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
+        ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
+        ColorValueSlider:SetValue(addon.db.Colval)
+        ColorValueSlider.text:SetText("UI Brightness: " .. format("%.2f", ColorValueSlider:GetValue(addon.db.Colval)))
+        ColorValueSlider:SetValueStep(0.05)
+        ColorValueSlider:SetObeyStepOnDrag(true);
+        ColorValueSlider:SetScript("OnValueChanged", function(_, value)
+            ColorValueSlider.text:SetText("UI Brightness: " .. RoundNumbers(addon.db.Colval, 0.05))
+            addon.db.Colval = value
+            addon.RougeUIF:ChangeFrameColors()
+        end)
+
+        C_Timer.After(1, function()
+            if not IsAddOnLoaded("SimpleAuraFilter") then
+                local name = "BuffValueSlider"
+                local BuffValueSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+                if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+                    CreateSliderText(BuffValueSlider)
+                else
+                    BuffValueSlider.text = _G[name .. "Text"]
+                    BuffValueSlider.textLow = _G[name .. "Low"]
+                    BuffValueSlider.textHigh = _G[name .. "High"]
+                end
+                BuffValueSlider:SetMinMaxValues(2, 10)
+                BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
+                BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
+                BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
+                BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
+                BuffValueSlider:SetValue(addon.db.BuffsRow)
+                BuffValueSlider.text:SetText("Buffs Per Row: " .. format("%.f", BuffValueSlider:GetValue(addon.db.BuffsRow)))
+                BuffValueSlider:SetValueStep(1)
+                BuffValueSlider:SetObeyStepOnDrag(true);
+                BuffValueSlider:SetScript("OnValueChanged", function(_, value)
+                    BuffValueSlider.text:SetText("Buffs Per Row: " .. RoundNumbers(addon.db.BuffsRow, 1))
+                    addon.db.BuffsRow = value
+                end)
+            end
+        end)
+
+        local names = "AuraRowSlider"
+        local AuraRowSlider = CreateFrame("Slider", names, Panel.childPanel2, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(AuraRowSlider)
+        else
+            AuraRowSlider.textLow = _G[names .. "Low"]
+            AuraRowSlider.textHigh = _G[names .. "High"]
+            AuraRowSlider.text = _G[names .. "Text"]
+        end
+        AuraRowSlider:SetPoint("TOPLEFT", 20, -540)
+        if addon.db.BuffSizer then
+            AuraRowSlider:Show()
+        else
+            AuraRowSlider:Hide()
+        end
+        AuraRowSlider:SetMinMaxValues(108, 200)
+        AuraRowSlider:SetValueStep(14)
+        AuraRowSlider.minValue, AuraRowSlider.maxValue = AuraRowSlider:GetMinMaxValues()
+        AuraRowSlider.textLow:SetText(floor(AuraRowSlider.minValue))
+        AuraRowSlider.textHigh:SetText(floor(AuraRowSlider.maxValue))
+        AuraRowSlider:SetValue(addon.db.AuraRow)
+        AuraRowSlider.text:SetText("Aura Row Width Size: " .. format("%.f", AuraRowSlider:GetValue(addon.db.AuraRow)));
+        AuraRowSlider:SetObeyStepOnDrag(true);
+        AuraRowSlider:SetScript("OnValueChanged", function(_, value)
+            if addon.db.AuraRow ~= value then
+                addon.db.AuraRow = value;
+                AuraRowSlider.text:SetText("Aura Row Width Size: " .. RoundNumbers(addon.db.AuraRow, 1))
+                addon.RougeUIF:SetCustomBuffSize()
+            end
+        end)
+
+        -- childPanel2
+
+        CreateText(Panel.childPanel2, 10, -40, "PvP Tweaks")
+
+        local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value)
+            addon.db.EnemyTicks = value
+        end)
+        EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
+        EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
+        local EnemyTicksButton = CheckBtn("Enemy Tick Tracker", "Track your target's mana/energy ticks", Panel.childPanel4, function(self, value)
+            addon.db.EnemyTicker = value
+        end)
+        EnemyTicksButton:SetChecked(addon.db.EnemyTicker)
+        EnemyTicksButton:SetPoint("TOPLEFT", 10, -250)
+
+        local CombatIndicatorButton = CheckBtn("Combat Indicator", "Displays a Combat icon next to Target-/FocusFrame when they enter combat or send pet", Panel.childPanel2, function(self, value)
+            addon.db.CombatIndicator = value
+        end)
+        CombatIndicatorButton:SetChecked(addon.db.CombatIndicator)
+        CombatIndicatorButton:SetPoint("TOPLEFT", 10, -70)
+
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local ArenaNumbersButton = CheckBtn("Show arena number on nameplate", "When in Arena show 'arena1-5' on enemy nameplates", Panel.childPanel2, function(self, value)
+                addon.db.ArenaNumbers = value
+            end)
+            ArenaNumbersButton:SetChecked(addon.db.ArenaNumbers)
+            ArenaNumbersButton:SetPoint("TOPLEFT", 10, -175)
+        end
+
+        local ScoreBoardButton = CheckBtn("Class colored PvP Scoreboard", "Color names on the PvP Scoreboard by class", Panel.childPanel2, function(self, value)
+            addon.db.ScoreBoard = value
+        end)
+        ScoreBoardButton:SetChecked(addon.db.ScoreBoard)
+        ScoreBoardButton:SetPoint("TOPLEFT", 10, -105)
+
+        CreateText(Panel.childPanel2, 10, -255, "Buffs/Debuffs")
+
+        CreateText(Panel.childPanel2, 350, -40, "Misc")
+
+        local FastKeyPressButton = CheckBtn("Activate spells on key down", "Enabling this will trigger your spells on pressing keys down instead of on releasing them", Panel.childPanel2, function(self, value)
+            addon.db.FastKeyPress = value
+        end)
+        FastKeyPressButton:SetChecked(addon.db.FastKeyPress)
+        FastKeyPressButton:SetPoint("TOPLEFT", 350, -70)
+        FastKeyPressButton:RegisterEvent("PLAYER_LOGIN")
+        FastKeyPressButton:SetScript("OnEvent", function(self, event, ...)
+            if (event == "PLAYER_LOGIN") then
+                if addon.db.FastKeyPress and (GetCVarBool("ActionButtonUseKeyDown") ~= true) then
+                    SetCVar("ActionButtonUseKeyDown", 1)
+                end
+                self:UnregisterEvent("PLAYER_LOGIN")
+                self:SetScript("OnEvent", nil)
+            end
+        end)
+
+        local SpellQueueWindow = CheckBtn("Auto-adjust SpellQueue Window", "Automatically changes SpellQueue value based on current latency", Panel.childPanel2, function(self, value)
+            addon.db.SQFix = value
+        end)
+        SpellQueueWindow:SetChecked(addon.db.SQFix)
+        SpellQueueWindow:SetPoint("TOPLEFT", 350, -105)
+
+        local AutoReadyButton = CheckBtn("Auto accept raid ready check", "When enabled it will automatically accept any readychecks. Warning: Don't AFK or enable when queueing arena with a random", Panel.childPanel2, function(self, value)
+            addon.db.AutoReady = value
+        end)
+        AutoReadyButton:SetChecked(addon.db.AutoReady)
+        AutoReadyButton:SetPoint("TOPLEFT", 350, -140)
+
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local Retab = CheckBtn("RETabBinder", "Changes TAB Bind to target nearest enemy players when in arena/battleground", Panel.childPanel2, function(self, value)
+                addon.db.retab = value
+            end)
+            Retab:SetChecked(addon.db.retab)
+            Retab:SetPoint("TOPLEFT", 350, -280)
+        end
+
+        local ButtonAnim = CheckBtn("Animated Keypress (SnowFallKeyPress)", "Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
+            addon.db.ButtonAnim = value
+        end)
+        ButtonAnim:SetChecked(addon.db.ButtonAnim)
+        ButtonAnim:SetPoint("TOPLEFT", 350, -210)
+
+        local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
+            addon.db.KeyEcho = value
+        end)
+        Echo:SetChecked(addon.db.KeyEcho)
+        Echo:SetPoint("TOPLEFT", 350, -245)
+
+        local Echo = CheckBtn("Actionbar Range Indicator", "Color your actionbuttons when out of range or oom", Panel.childPanel2, function(self, value)
+            addon.db.RangeIndicator = value
+        end)
+        Echo:SetChecked(addon.db.RangeIndicator)
+        Echo:SetPoint("TOPLEFT", 350, -175)
+
+        CreateText(Panel.childPanel2, 350, -330, "Rogue Specific")
+
+        local EnemyTicksButton = CheckBtn("Personal energy ticker", "Track your mana/energy ticks on the manabar", Panel.childPanel4, function(self, value)
+            addon.db.EnergyTicker = value
+        end)
+        EnemyTicksButton:SetChecked(addon.db.EnergyTicker)
+        EnemyTicksButton:SetPoint("TOPLEFT", 10, -215)
+
+        local SliceButton = CheckBtn("Slice & Dice Hax", "Use slice and dice on target/focus with your default keybind - requires default Blizzard actionbar/Dominos/Bartender4", Panel.childPanel2, function(self, value)
+            addon.db.Slice = value
+        end)
+        SliceButton:SetChecked(addon.db.Slice)
+        SliceButton:SetPoint("TOPLEFT", 350, -365)
+
+        local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
+            addon.db.CastTimer = value
+        end)
+        CastTimerButton:SetChecked(addon.db.CastTimer)
+        CastTimerButton:SetPoint("TOPLEFT", 10, -40)
+
+        local HighlightDispellable
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            HighlightDispellable = CheckBtn("Highlight Magic Buffs", "Higlights enemy magic buffs", Panel.childPanel2, function(self, value)
+                addon.db.HighlightDispellable = value
+                addon.db.BuffSizer = true
+            end)
+        else
+            HighlightDispellable = CheckBtn("Highlight important Magic/Enrage buffs", "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel2, function(self, value)
+                addon.db.HighlightDispellable = value
+                addon.db.BuffSizer = true
+            end)
+        end
+        HighlightDispellable:SetChecked(addon.db.HighlightDispellable)
+        HighlightDispellable:SetPoint("TOPLEFT", 10, -285)
+
+        local TimerButton = CheckBtn("Remove space indentation from buffs", "When enabled (De)buffs will display the time as '1s' instead of '1 s'", Panel.childPanel2, function(self, value)
+            addon.db.TimerGap = value
+        end)
+        TimerButton:SetChecked(addon.db.TimerGap)
+        TimerButton:SetPoint("TOPLEFT", 10, -320)
+
+        local BuffAlphaButton = CheckBtn("Disable BuffFrame fading animation", "Disable the pulsing effect on buffs and debuffs", Panel.childPanel2, function(self, value)
+            addon.db.BuffAlpha = value
+        end)
+        BuffAlphaButton:SetChecked(addon.db.BuffAlpha)
+        BuffAlphaButton:SetPoint("TOPLEFT", 10, -355)
+
+        local BuffSizerButton = CheckBtn("Enable Buff Resizing", "Enables Target/Focus Frame Buff/Debuff scale sliders", Panel.childPanel2, function(self, value)
+            addon.db.BuffSizer = value
+            addon.RougeUIF:HookAuras()
+            if addon.db.BuffSizer then
+                AuraRowSlider:Show()
+                TargetBuffSizeSlider:Show()
+                TargetPlayerBuffSizeSlider:Show()
+            else
+                AuraRowSlider:Hide()
+                TargetBuffSizeSlider:Hide()
+                TargetPlayerBuffSizeSlider:Hide()
+            end
+        end)
+        BuffSizerButton:SetChecked(addon.db.BuffSizer)
+        BuffSizerButton:SetPoint("TOPLEFT", 10, -390)
+
+        --childPanel3
+
+        local HideGlowsButton = CheckBtn("Hide glowing effects on PlayerFrame", "Hides the yellow and red glowing when resting or being attacked on PlayerFrame", Panel.childPanel3, function(self, value)
+            addon.db.HideGlows = value
+        end)
+        HideGlowsButton:SetChecked(addon.db.HideGlows)
+        HideGlowsButton:SetPoint("TOPLEFT", 10, -40)
+
+        local HideIndicatorButton = CheckBtn("Hide Combat Text on Portrait", "Hides the player and pet combat text on portraits", Panel.childPanel3, function(self, value)
+            addon.db.HideIndicator = value
+        end)
+        HideIndicatorButton:SetChecked(addon.db.HideIndicator)
+        HideIndicatorButton:SetPoint("TOPLEFT", 10, -75)
+
+        local HideTitlesButton = CheckBtn("Hide Group/Raid text", "Hides the Group/Raid text showing on top of frames", Panel.childPanel3, function(self, value)
+            addon.db.HideTitles = value
+        end)
+        HideTitlesButton:SetChecked(addon.db.HideTitles)
+        HideTitlesButton:SetPoint("TOPLEFT", 10, -110)
+
+        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            local AggroHighlightButton = CheckBtn("Hide Aggro highlight on default raid frames", "Hides the red texture that appears on raid frames when someone has aggro", Panel.childPanel3, function(self, value)
+                addon.db.HideAggro = value
+            end)
+            AggroHighlightButton:SetChecked(addon.db.HideAggro)
+            AggroHighlightButton:SetPoint("TOPLEFT", 10, -320)
+        end
+
+        local HidePetText = CheckBtn("Hide Pet Health/Mana", "Hides Pet text", Panel.childPanel3, function(self, value)
+            addon.db.HidePetText = value
+            if PetFrameHealthBarText then
+                PetFrameHealthBarText:SetAlpha(0)
+            end
+            if PetFrameManaBarText then
+                PetFrameManaBarText:SetAlpha(0)
+            end
+        end)
+        HidePetText:SetChecked(addon.db.HidePetText)
+        HidePetText:SetPoint("TOPLEFT", 10, -355)
+
+        local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value)
+            addon.db.Stance = value
+        end)
+        HideStanceButton:SetChecked(addon.db.Stance)
+        HideStanceButton:SetPoint("TOPLEFT", 10, -180)
+
+        local HideHotkeyButton = CheckBtn("Hide Hotkey text on default actionbar", "Hides the keybinding text displayed", Panel.childPanel3, function(self, value)
+            addon.db.HideHotkey = value
+        end)
+        HideHotkeyButton:SetChecked(addon.db.HideHotkey)
+        HideHotkeyButton:SetPoint("TOPLEFT", 10, -215)
+
+        local HideMacroButton = CheckBtn("Hide macro text on default actionbar", "Hides the macro name displayed on icons", Panel.childPanel3, function(self, value)
+            addon.db.HideMacro = value
+        end)
+        HideMacroButton:SetChecked(addon.db.HideMacro)
+        HideMacroButton:SetPoint("TOPLEFT", 10, -250)
+
+        local HideTotDebuffs = CheckBtn("Hide TargetOfTarget Debuffs", "Hides the 4 small ToT Debuffs", Panel.childPanel3, function(self, value)
+            addon.db.ToTDebuffs = value
+        end)
+        HideTotDebuffs:SetChecked(addon.db.ToTDebuffs)
+        HideTotDebuffs:SetPoint("TOPLEFT", 10, -285)
+
+        local HideRoleButton = CheckBtn("Hide role icon on default raid frames", "Hides the role icon on blizzard raid frames", Panel.childPanel3, function(self, value)
+            addon.db.roleIcon = value
+        end)
+        HideRoleButton:SetChecked(addon.db.roleIcon)
+        HideRoleButton:SetPoint("TOPLEFT", 10, -145)
+
+        CreateText(Panel.childPanel1, 350, -215, "Player Chain")
+
+        local EliteChain, RareChain, RareElite
+        EliteChain = CheckBtn("Gold Elite PlayerFrame", "Show a `Gold Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+            addon.db.GoldElite = value
+            addon.db.Rare = false
+            addon.db.RareElite = false
+            RareChain:SetChecked(false)
+            RareElite:SetChecked(false)
+        end)
+        EliteChain:SetChecked(addon.db.GoldElite)
+        EliteChain:SetPoint("TOPLEFT", 350, -250)
+
+        RareChain = CheckBtn("Rare PlayerFrame", "Show a `Rare` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+            addon.db.Rare = value
+            addon.db.GoldElite = false
+            addon.db.RareElite = false
+            RareElite:SetChecked(false)
+            EliteChain:SetChecked(false)
+        end)
+        RareChain:SetChecked(addon.db.Rare)
+        RareChain:SetPoint("TOPLEFT", 350, -285)
+
+        RareElite = CheckBtn("Rare Elite PlayerFrame", "Show a `Rare Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
+            addon.db.RareElite = value
+            addon.db.Rare = false
+            addon.db.GoldElite = false
+            RareChain:SetChecked(false)
+            EliteChain:SetChecked(false)
+        end)
+        RareElite:SetChecked(addon.db.RareElite)
+        RareElite:SetPoint("TOPLEFT", 350, -320)
+
+    end
+
+    SLASH_RUI1 = "/rui"
+    function SlashCmdList.RUI()
+        Settings.OpenToCategory(Panel.categoryID)
+    end
+
+    return Panel
 end
+

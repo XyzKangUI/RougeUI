@@ -1,27 +1,47 @@
-local SetBinding = SetBinding
+local _, RougeUI = ...
+local val = nil
 local RE = CreateFrame("Frame")
 RE:RegisterEvent("PLAYER_ENTERING_WORLD")
 
+local key = "TAB"
+local button = CreateFrame("Button", "Tabber", nil, "SecureActionButtonTemplate")
+button:RegisterForClicks("AnyDown")
+button:SetAttribute("type", "macro")
+SecureHandlerWrapScript(button, "OnClick", button, [[
+     if down then
+         self:SetAttribute("macrotext","/targetenemyplayer\n/targetlasttarget [noexists]")
+     end]])
+
 local function Retabbind()
-	local inInstance, instanceType = IsInInstance()
-	if not RougeUI.retab then
-		RE:UnregisterEvent("PLAYER_ENTERING_WORLD")
-		return
-	end
+    local _, instanceType = IsInInstance()
 
-	if InCombatLockdown() then return end
+    if InCombatLockdown() then
+        RE:RegisterEvent("PLAYER_REGEN_ENABLED")
+        return
+    end
 
-	if (instanceType == "arena" or instanceType == "pvp") then
-		SetBinding("TAB", "TARGETNEARESTENEMYPLAYER", 1)
-		print("\124cFF74D06C[Retab]\124r PVP Mode")
-	else
-		SetBinding("TAB", "TARGETNEARESTENEMY", 1)
-		print("\124cFF74D06C[Retab]\124r PVE Mode")
-	end
+    if (instanceType == "arena" or instanceType == "pvp") then
+        SetOverrideBindingClick(button, true, key, "Tabber")
+        SetCVar("TargetEnemyAttacker", 0)
+    else
+        ClearOverrideBindings(button)
+        SetCVar("TargetEnemyAttacker", val)
+    end
 end
 
 RE:SetScript("OnEvent", function(self, event, ...)
-	if event == "PLAYER_ENTERING_WORLD" then
-        	Retabbind()
-    	end
+    if not RougeUI.db.retab then
+        self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+        self:SetScript("OnEvent", nil)
+        return
+    end
+    if event == "PLAYER_ENTERING_WORLD" then
+        if val == nil then
+            val = GetCVar("TargetEnemyAttacker") or "1"
+        end
+        Retabbind()
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        Retabbind()
+        self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    end
 end)
