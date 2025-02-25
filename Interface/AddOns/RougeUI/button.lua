@@ -3,6 +3,7 @@ local ceil, mod, floor = _G.math.ceil, _G.math.fmod, _G.math.floor
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
+local isCata = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 
 local backdrop = {
     bgFile = nil,
@@ -254,7 +255,7 @@ local function SkinBuffs(bu)
         end
     end
 
-    bu:SetNormalTexture("")
+    bu:ClearNormalTexture()
 
     if RougeUI.db.Lorti then
         bu:SetSize(28, 28)
@@ -377,10 +378,12 @@ local function OmniTimers(buttonName, index, filter)
         buff = _G[buffName]
         name, _, _, _, duration, expirationTime, caster, _, _, spellId = UnitAura("player", index, filter)
 
-        local guid = caster and UnitGUID(caster) or nil
-        if RougeUI.bombExpireTime and name and spellId == 88611 and guid then
-            duration = RougeUI.bombExpireTime[guid] and 6 or 0
-            expirationTime = RougeUI.bombExpireTime[guid] or 0
+        if isCata then
+            local guid = caster and UnitGUID(caster) or nil
+            if RougeUI.bombExpireTime and name and spellId == 88611 and guid then
+                duration = RougeUI.bombExpireTime[guid] and 6 or 0
+                expirationTime = RougeUI.bombExpireTime[guid] or 0
+            end
         end
 
         if not name then
@@ -407,45 +410,47 @@ end
 
 local function init()
     -- Actionbars
-    for i = 1, 12 do
-        styleActionButton(_G["ActionButton" .. i])
-        styleActionButton(_G["MultiBarRightButton" .. i])
-        styleActionButton(_G["MultiBarLeftButton" .. i])
-        styleActionButton(_G["MultiBarBottomLeftButton" .. i])
-        styleActionButton(_G["MultiBarBottomRightButton" .. i])
-    end
+    if not IsAddOnLoaded("Masque") then
+        for i = 1, 12 do
+            styleActionButton(_G["ActionButton" .. i])
+            styleActionButton(_G["MultiBarRightButton" .. i])
+            styleActionButton(_G["MultiBarLeftButton" .. i])
+            styleActionButton(_G["MultiBarBottomLeftButton" .. i])
+            styleActionButton(_G["MultiBarBottomRightButton" .. i])
+        end
 
-    for i = 1, NUM_PET_ACTION_SLOTS do
-        styleActionButton(_G["PetActionButton" .. i])
-    end
+        for i = 1, NUM_PET_ACTION_SLOTS do
+            styleActionButton(_G["PetActionButton" .. i])
+        end
 
-    for i = 1, 6 do
-        styleActionButton(_G["OverrideActionBarButton" .. i])
-    end
+        for i = 1, 6 do
+            styleActionButton(_G["OverrideActionBarButton" .. i])
+        end
 
-    if dominos then
-        for i = 1, 168 do
-            local btn = _G["DominosActionButton" .. i]
-            if btn then
-                styleActionButton(btn)
+        if dominos then
+            for i = 1, 168 do
+                local btn = _G["DominosActionButton" .. i]
+                if btn then
+                    styleActionButton(btn)
+                end
             end
         end
-    end
 
-    if bartender4 then
-        for i = 1, 120 do
-            styleActionButton(_G["BT4Button" .. i])
-        end
-        if GetNumShapeshiftForms() ~= 0 then
-            for i = 1, GetNumShapeshiftForms() do
-                styleActionButton(_G["BT4StanceButton" .. i])
+        if bartender4 then
+            for i = 1, 120 do
+                styleActionButton(_G["BT4Button" .. i])
+            end
+            if GetNumShapeshiftForms() ~= 0 then
+                for i = 1, GetNumShapeshiftForms() do
+                    styleActionButton(_G["BT4StanceButton" .. i])
+                end
             end
         end
-    end
 
-    for i = 1, 7 do
-        local bu = _G["StanceButton" .. i]
-        styleActionButton(bu)
+        for i = 1, 7 do
+            local bu = _G["StanceButton" .. i]
+            styleActionButton(bu)
+        end
     end
 
     -- Castbar
@@ -532,7 +537,7 @@ local function HookAuras()
         end
     end)
 
-    if not bartender4 then
+    if not bartender4 and not IsAddOnLoaded("Masque") then
         if RougeUI.db.Lorti then
             hooksecurefunc("ActionButton_Update", function(self)
                 local action = self.action
@@ -669,16 +674,12 @@ e3:SetScript("OnEvent", function(self, event, ...)
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
             end
 
-            if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+            if isCata then
                 self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
                 self:RegisterEvent("PLAYER_ENTERING_WORLD")
             end
 
             if skinEnabled then
-                if (IsAddOnLoaded("Masque") and (dominos or bartender4)) then
-                    return
-                end
-
                 init()
                 HookAuras()
             end
@@ -696,57 +697,59 @@ e3:SetScript("OnEvent", function(self, event, ...)
                     OmniTimers(self, index, filter)
                 end
 
-                if filter == "HARMFUL" then
-                    local necroAura = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex("player", index)
-                    if necroAura and necroAura.spellId == 73975 and button then
-                        button.count:SetText(shorten(necroAura.points[1]))
-                        button.count:Show()
+                if isCata then
+                    if filter == "HARMFUL" then
+                        local necroAura = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex("player", index)
+                        if necroAura and necroAura.spellId == 73975 and button then
+                            button.count:SetText(shorten(necroAura.points[1]))
+                            button.count:Show()
+                        end
                     end
-                end
 
-                if RougeUI.bombExpireTime and filter == "HARMFUL" and not RougeUI.db.OmniCC then
-                    local name, _, _, _, duration, expirationTime, caster, _, _, spellId, _, _, _, _, timeMod = UnitAura("player", index, filter);
-                    local guid = caster and UnitGUID(caster) or nil
-                    if name and spellId == 88611 and guid then
-                        duration = RougeUI.bombExpireTime[guid] and 6 or 0
-                        expirationTime = RougeUI.bombExpireTime[guid] or 0
-                        local tmod, tml, et
+                    if RougeUI.bombExpireTime and filter == "HARMFUL" and not RougeUI.db.OmniCC then
+                        local name, _, _, _, duration, expirationTime, caster, _, _, spellId, _, _, _, _, timeMod = UnitAura("player", index, filter);
+                        local guid = caster and UnitGUID(caster) or nil
+                        if name and spellId == 88611 and guid then
+                            duration = RougeUI.bombExpireTime[guid] and 6 or 0
+                            expirationTime = RougeUI.bombExpireTime[guid] or 0
+                            local tmod, tml, et
 
-                        if (duration > 0 and expirationTime) then
-                            if (SHOW_BUFF_DURATIONS == "1") then
-                                button.duration:Show();
+                            if (duration > 0 and expirationTime) then
+                                if (SHOW_BUFF_DURATIONS == "1") then
+                                    button.duration:Show();
+                                else
+                                    button.duration:Hide();
+                                end
+
+                                local timeLeft = (expirationTime - GetTime());
+                                if (timeMod > 0) then
+                                    tmod = timeMod
+                                    timeLeft = timeLeft / timeMod;
+                                end
+
+                                if (not tml) then
+                                    tml = timeLeft;
+                                    button:SetScript("OnUpdate", function(self)
+                                        self:SetAlpha(1.0);
+                                        AuraButton_UpdateDuration(self, tml)
+                                        local timeLeft = et - GetTime();
+                                        if (tmod > 0) then
+                                            timeLeft = timeLeft / tmod
+                                        end
+                                        tml = max(timeLeft, 0)
+                                    end);
+                                else
+                                    tml = timeLeft;
+                                end
+
+                                et = expirationTime;
                             else
                                 button.duration:Hide();
+                                if (tml) then
+                                    button:SetScript("OnUpdate", nil);
+                                end
+                                tml = nil;
                             end
-
-                            local timeLeft = (expirationTime - GetTime());
-                            if (timeMod > 0) then
-                                tmod = timeMod
-                                timeLeft = timeLeft / timeMod;
-                            end
-
-                            if (not tml) then
-                                tml = timeLeft;
-                                button:SetScript("OnUpdate", function(self)
-                                    self:SetAlpha(1.0);
-                                    AuraButton_UpdateDuration(self, tml)
-                                    local timeLeft = et - GetTime();
-                                    if (tmod > 0) then
-                                        timeLeft = timeLeft / tmod
-                                    end
-                                    tml = max(timeLeft, 0)
-                                end);
-                            else
-                                tml = timeLeft;
-                            end
-
-                            et = expirationTime;
-                        else
-                            button.duration:Hide();
-                            if (tml) then
-                                button:SetScript("OnUpdate", nil);
-                            end
-                            tml = nil;
                         end
                     end
                 end

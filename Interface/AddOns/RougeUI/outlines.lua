@@ -43,9 +43,10 @@ function CL:CreateClassOutlines(unit, frame)
     local nfUnit = self.NF[unit]
     
     if asuriFrameEnabled and not isPlayer and classification ~= "normal" then
-        local texturePath = (classification == "elite" or classification == "worldboss") 
-                            and "Interface\\AddOns\\RougeUI\\textures\\target\\ChainAsuriGold"
-                            or "Interface\\AddOns\\RougeUI\\textures\\target\\ChainAsuri"
+        local texturePath = (classification == "elite" or classification == "worldboss")
+                and "Interface\\AddOns\\RougeUI\\textures\\target\\ChainAsuriGold"
+                or ((classification == "rareelite" or classification == "rare")
+                and "Interface\\AddOns\\RougeUI\\textures\\target\\ChainAsuri")
 
         nfUnit.texture:SetTexture(texturePath)
         nfUnit.texture:SetVertexColor(1, 1, 1)

@@ -167,11 +167,11 @@ local function RealTick()
         energyValues[destGUID].externalGain = amount
         return
     end
-
-    if eventType == "SPELL_CAST_SUCCESS" and isSourcePlayer and spellID == 13750 then
-        energyValues["player"].last_tick = 0
-        return
-    end
+    
+    -- TBC resets tick? Patch 2.2.0
+    -- if eventType == "SPELL_CAST_SUCCESS" and isSourcePlayer and spellID == 13750 then
+    --     energyValues["player"].last_tick = 0
+    -- end
 end
 
 local function delay()

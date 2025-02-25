@@ -1,5 +1,6 @@
 local addonName, RougeUI = ...
 local Indicator = {}
+local asuriFrame = false
 
 local function InCombat(unit)
     local _, _, class = UnitClass(unit)
@@ -42,7 +43,7 @@ local function CreateCombatIndicatorForUnit(frame)
             if events[event] and frame:IsShown() then
                 local unit = SecureButton_GetUnit(self)
                 Indicator[self]:SetShown(InCombat(unit))
-                if UnitClassification(unit) ~= "normal" then
+                if UnitClassification(unit) ~= "normal" and not asuriFrame then
                     ciFrame:SetPoint("LEFT", frame, "RIGHT", 0, -5)
                 else
                     ciFrame:SetPoint("LEFT", frame, "RIGHT", -25, -5)
@@ -56,6 +57,7 @@ local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" and RougeUI.db.CombatIndicator and (... == addonName) then
+        asuriFrame = RougeUI.db.AsuriFrame
         CreateCombatIndicatorForUnit(TargetFrame)
         if FocusFrame then
             CreateCombatIndicatorForUnit(FocusFrame)
