@@ -1,6 +1,6 @@
 ## Interface: 11502, 11503, 11504, 11505, 11506, 11507
 ## Title: |cff009cffRougeUI-Vanilla|r
-## Version: 4.13
+## Version: 4.14
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 

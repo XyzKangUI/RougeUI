@@ -524,6 +524,14 @@ local function ClassPortrait(self)
         return
     end
 
+    if self.portrait and self.unit == "player" then
+        local _, class = UnitClass(self.unit)
+        if class then
+            self.portrait:SetTexture(CLASS_TEXTURE:format(class))
+        end
+        return
+    end
+
     if not self.overlayPortrait and self.portrait then
         self.overlayPortrait = OverlayPortrait(self)
     end

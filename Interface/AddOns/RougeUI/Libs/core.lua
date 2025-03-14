@@ -321,10 +321,13 @@ local function GetGUIDAuraTime(dstGUID, spellID)
         return 0, 0
     end
 
+    local duration, expiration, startTime = tonumber(duration), tonumber(expiration), tonumber(startTime)
     local expirationTime = expiration or (startTime + duration)
-    if GetTime() <= expirationTime then
+
+    if expirationTime and (GetTime() <= expirationTime) then
         return duration, expirationTime
     end
+
 end
 
 local function makeBuffInfo(spellID, dstGUID)

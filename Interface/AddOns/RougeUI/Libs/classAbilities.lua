@@ -325,7 +325,7 @@ Spell(415423, { duration = FAKE, type = "BUFF" }) -- Aspect of the Viper
 Spell({ 20043, 20190 }, { duration = FAKE, type = "BUFF" }) -- Aspect of the Wild
 Spell({ 13165, 14318, 14319, 14320, 14321, 14322, 25296 }, { duration = FAKE, type = "BUFF" }) -- Aspect of the Hawk
 Spell(409580, { duration = INFINITY, type = "BUFF" }) -- Heart of the Lion
-Spell(5384, { duration = FAKE, type = "BUFF" }) -- Feign Death (Will it work?)
+Spell(5384, { duration = 360, type = "BUFF" }) -- Feign Death (Will it work?)
 Spell(415320, { duration = 10, type = "BUFF" }) -- Flanking Strike
 
 Spell({ 19506, 20905, 20906 }, { duration = 1800, type = "BUFF", }) -- Trueshot Aura
@@ -735,7 +735,85 @@ Spell(1219520, { duration = 20, type = 'BUFF' }) -- Glyph of Deflection
 Spell(1220517, { duration = 60, type = 'BUFF', buffType = 'Magic' }) -- Bone Armor
 Spell(1220668, { duration = 8, type = 'BUFF' }) -- Unholy Might
 Spell(1220708, { duration = 10, type = 'BUFF' }) -- Displaced
-
+Spell(1225778, { duration = 900, type = 'BUFF' }) -- Well Fed
+Spell(1225779, { duration = 900, type = 'BUFF' }) -- Well Fed
+Spell(1225780, { duration = 900, type = 'BUFF' }) -- Well Fed
+Spell(1225782, { duration = 2700, type = 'BUFF' }) -- Well Fed
+Spell(1225987, { duration = 8, type = 'BUFF' }) -- Tinker: Nitro Boosts
+Spell(1225994, { duration = 8, type = 'BUFF' }) -- Tinker: Nitro Boosts
+Spell(1226035, { duration = 15, type = 'BUFF' }) -- Swiftbloom
+Spell(1226377, { duration = 6, type = 'BUFF' }) -- Timey Bearimy
+Spell(1226105, { duration = 15, type = 'BUFF' }) -- Sunsurge
+Spell(1226106, { duration = 15, type = 'BUFF' }) -- Moonsurge
+Spell(1226451, { duration = 60, type = 'BUFF' }) -- Emergency
+Spell(1226461, { duration = 15, type = 'BUFF' }) -- Holy Power
+Spell(1226464, { duration = 10, type = 'BUFF' }) -- Templar
+Spell(1226466, { duration = 6, type = 'BUFF' }) -- Righteous Shield
+Spell(1226500, { duration = 15, type = 'BUFF' }) -- Absolution
+Spell(1226502, { duration = 4, type = 'BUFF' }) -- Devotion
+Spell(1227088, { duration = 15, type = 'BUFF' }) -- Swiftearth
+Spell(1227200, { duration = 15, type = 'BUFF' }) -- Wickedness
+Spell(1227700, { duration = 3, type = 'BUFF' }) -- Invisibility
+Spell(1227772, { duration = 300, type = 'BUFF' }) -- Rapid Fire
+Spell(1229045, { duration = 14400, type = 'BUFF' }) -- Friend of Pupper
+Spell(1230596, { duration = 30, type = 'BUFF', buffType = 'Magic' }) -- Ashbringer
+Spell(1230980, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Stiltz's Standard
+Spell(1230944, { duration = 30, type = 'BUFF' }) -- Sir Dornel's Didgeridoo
+Spell(1230942, { duration = 20, type = 'BUFF' }) -- Heart of Light
+Spell(1230990, { duration = 10, type = 'BUFF' }) -- Molten Armaments
+Spell(1231124, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Righteous Strength
+Spell(1231138, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Righteous Fire
+Spell(1231162, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Righteous Blasting
+Spell(1231227, { duration = 2, type = 'BUFF' }) -- Reborn Inspiration
+Spell(1231230, { duration = 2, type = 'BUFF' }) -- Reborn Inspiration
+Spell(1231231, { duration = 2, type = 'BUFF' }) -- Reborn Inspiration
+Spell(1231254, { duration = 10, type = 'BUFF' }) -- Scarlet Bulwark
+Spell(1231266, { duration = 15, type = 'BUFF' }) -- En Garde
+Spell(1231289, { duration = 15, type = 'BUFF' }) -- Avatar of the Mountain
+Spell(1231339, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Corrupted Strength
+Spell(1231383, { duration = 15, type = 'BUFF' }) -- Divine Avatar
+Spell(1231402, { duration = 15, type = 'BUFF' }) -- Lightfist Flurry
+Spell(1231406, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Corrupted Agility
+Spell(1231436, { duration = 10, type = 'BUFF' }) -- Regicide
+Spell(1231444, { duration = 10, type = 'BUFF', buffType = 'Magic' }) -- Eat Apple
+Spell(1231456, { duration = 12, type = 'BUFF', buffType = 'Magic' }) -- Crimson Crusade
+Spell(1231498, { duration = 12, type = 'BUFF', buffType = 'Magic' }) -- Mercy by Fire
+Spell(1231548, { duration = 15, type = 'BUFF' }) -- Holy Might
+Spell(1231551, { duration = 15, type = 'BUFF' }) -- Holy Might
+Spell(1231585, { duration = 60, type = 'BUFF' }) -- Tidal Force
+Spell(1231590, { duration = 20, type = 'BUFF', buffType = "" }) -- Bestial Focus
+Spell(1231591, { duration = 20, type = 'BUFF', buffType = "" }) -- Bestial Focus
+Spell(1231625, { duration = 20, type = 'BUFF' }) -- Flames of the Red
+Spell(1231623, { duration = 15, type = 'BUFF' }) -- Tyr's Return
+Spell(1231929, { duration = 600, type = 'BUFF' }) -- Scarlet Illusion
+Spell(1231874, { duration = 30, type = 'BUFF' }) -- Abandoned Experiment
+Spell(1231883, { duration = INFINITY, type = 'BUFF' }) -- Strength of the Bear
+Spell(1231884, { duration = INFINITY, type = 'BUFF' }) -- Accuracy of the Owl
+Spell(1231886, { duration = INFINITY, type = 'BUFF' }) -- Speed of the Cat
+Spell(1231888, { duration = INFINITY, type = 'BUFF' }) -- Agility of the Raptor
+Spell(1231891, { duration = INFINITY, type = 'BUFF' }) -- Power of the Gorilla
+Spell(1231894, { duration = INFINITY, type = 'BUFF' }) -- Ferocity of the Crocolisk
+Spell(1231896, { duration = INFINITY, type = 'BUFF' }) -- Brilliance of Mr. Bigglesworth
+Spell(1232052, { duration = 15, type = 'BUFF' }) -- Heads
+Spell(1232169, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Righteous Inquisition
+Spell(1232581, { duration = INFINITY, type = 'BUFF' }) -- Liberation Aura
+Spell(1232575, { duration = INFINITY, type = 'BUFF' }) -- Guardian Aura
+Spell(1232553, { duration = INFINITY, type = 'BUFF' }) -- Dominance Aura
+Spell(1232383, { duration = INFINITY, type = 'BUFF' }) -- Dominance Aura
+Spell(1232703, { duration = INFINITY, type = 'BUFF' }) -- Retribution Aura
+Spell(1232734, { duration = 20, type = 'BUFF', buffType = 'Magic' }) -- Renew
+Spell(1233293, { duration = 30, type = 'BUFF', buffType = '' }) -- Battle Cry
+Spell(1227369, { duration = 15, type = 'BUFF', buffType = 'Magic' }) -- Searing Flames
+Spell(1233525, { duration = 20, type = 'BUFF' }) -- Avenging Shield
+Spell(1232710, { duration = 8, type = 'BUFF', buffType = 'Magic' }) -- Seal of Protection
+Spell(1233835, { duration = 15, type = 'BUFF' }) -- Thunder and Lava
+Spell(1232959, { duration = 20, type = 'BUFF' }) -- Strand of Fate
+Spell({ 1235119, 1235122 }, { duration = 1800, type = 'BUFF' }) -- Ninja Costume
+Spell(1233988, { duration = 20, type = 'BUFF' }) -- Infernalist Armor
+Spell(1234320, { duration = 7, type = 'BUFF' }) -- Epoch's End
+Spell(1234542, { duration = 10, type = 'BUFF' }) -- Redeemed
+Spell(1234071, { duration = 15, type = 'BUFF' }) -- Flurry of Blades
+Spell(1234067, { duration = 15, type = 'BUFF' }) -- Gladiator's Cunning
 
 -------------
 -- MOUNTS
@@ -822,7 +900,8 @@ Spell(1220568, { duration = FAKE, type = 'BUFF' }) -- Famine
 Spell(1220566, { duration = FAKE, type = 'BUFF' }) -- Conquest
 Spell(1220567, { duration = FAKE, type = 'BUFF' }) -- Death
 Spell(1220565, { duration = FAKE, type = 'BUFF' }) -- War
-
+Spell(1229305, { duration = FAKE, type = 'BUFF' }) -- Climhazzard
+Spell(1229308, { duration = FAKE, type = 'BUFF' }) -- Scarlet Steed
 -------------
 -- ITEMS
 -------------

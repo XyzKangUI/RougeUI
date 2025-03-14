@@ -971,12 +971,12 @@ local function NewVariables()
         QuestLogFrame.Material:SetHeight(511)
         QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
         QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
-    end
 
-    if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
-        QuestLogFrame.Material:SetWidth(510)
-        QuestLogFrame.Material:SetHeight(398)
-        QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame)
+        if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
+            QuestLogFrame.Material:SetWidth(510)
+            QuestLogFrame.Material:SetHeight(398)
+            QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame)
+        end
     end
 
     for _, v in pairs({
