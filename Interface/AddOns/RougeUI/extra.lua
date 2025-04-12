@@ -134,7 +134,8 @@ manager:HookScript("OnEnter", function(self)
 end)
 
 manager:HookScript("OnLeave", function(self)
-    local focus = GetMouseFoci and GetMouseFoci()[1] or GetMouseFocus()
+    local focus = GetMouseFoci()[1]
+    if not focus then return end
     if manager.collapsed and not FindParent(focus, self) then
         self:SetAlpha(0)
     end
@@ -524,7 +525,7 @@ local function ClassPortrait(self)
         return
     end
 
-    if self.portrait and self.unit == "player" then
+    if self.portrait and (self.unit == "player" or UnitInVehicle("player")) then
         local _, class = UnitClass(self.unit)
         if class then
             self.portrait:SetTexture(CLASS_TEXTURE:format(class))

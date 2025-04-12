@@ -52,7 +52,9 @@ MM:SetScript("OnEvent", function(self, event)
         end)
 
         calendar:HookScript("OnLeave", function(self)
-            local focus = GetMouseFoci and GetMouseFoci()[1] or GetMouseFocus()
+            local focus = GetMouseFoci()[1]
+            if not focus then return end
+
             if not FindParent(focus, self) then
                 self:SetAlpha(0)
             end

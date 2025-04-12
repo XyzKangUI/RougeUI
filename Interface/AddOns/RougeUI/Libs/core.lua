@@ -167,7 +167,7 @@ local function SetTimer(dstGUID, spellID, duration, expirationTime, doRemove)
         end
     end
 
-    if not duration then
+    if not duration or type(duration) ~= "number" then
         return SetTimer(dstGUID, spellID, nil, nil, true)
     end
 
@@ -285,7 +285,8 @@ function f:UNIT_AURA(_, unit, info)
             if auraID[unitGUID] and auraID[unitGUID][auraInstID] then
                 auraID[unitGUID].delay = true
                 local spellID = auraID[unitGUID][auraInstID][1]
-                local duration = auraID[unitGUID][auraInstID][2]
+                local smth = auraID[unitGUID][auraInstID][2]
+                local duration = type(smth) == "number" and smth or 0
                 SetTimer(unitGUID, spellID, duration)
                 FireToUnits("UNIT_BUFF", unitGUID)
             end

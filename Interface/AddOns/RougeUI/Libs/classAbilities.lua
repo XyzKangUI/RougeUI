@@ -99,7 +99,7 @@ Spell(6346, { duration = 600, type = "BUFF", buffType = "Magic" }) -- Fear Ward
 Spell({ 14893, 15357, 15359 }, { duration = 15, type = "BUFF", buffType = "Magic" }) -- Inspiration
 Spell({ 7001, 27873, 27874 }, { duration = 10, type = "BUFF", buffType = "Magic" }) -- Lightwell Renew
 Spell(552, { duration = 20, type = "BUFF", buffType = "Magic" }) -- Abolish Disease
-Spell({ 17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900, 10901 }, { duration = 30, type = "BUFF", buffType = "Magic" }) -- PWS
+Spell({ 17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900, 10901, 1236154 }, { duration = 30, type = "BUFF", buffType = "Magic" }) -- PWS
 Spell({ 139, 6074, 6075, 6076, 6077, 6078, 10927, 10928, 10929, 25315, 6074, 6075, 6076, 6077, 6078, 10927, 10928, 10929, 25315, 425268, 425269, 425270, 425271, 425272, 425273, 425274, 425275, 425276, 425277, 438341 }, {
     duration = 15,
     type = "BUFF", buffType = "Magic" }) -- Renew
@@ -814,6 +814,8 @@ Spell(1234320, { duration = 7, type = 'BUFF' }) -- Epoch's End
 Spell(1234542, { duration = 10, type = 'BUFF' }) -- Redeemed
 Spell(1234071, { duration = 15, type = 'BUFF' }) -- Flurry of Blades
 Spell(1234067, { duration = 15, type = 'BUFF' }) -- Gladiator's Cunning
+Spell({ 1235390, 1235353 }, { duration = 12, type = 'BUFF' }) -- Mercy by Fire
+
 
 -------------
 -- MOUNTS
