@@ -432,6 +432,8 @@ local function Target_Update(frame)
                 showHighlight = true
             elseif isEnemy and isStealable and not db.HighlightDispellable then
                 showHighlight = true
+            elseif isEnemy and debuffType == "Magic" and class == 5 then -- Cata fix
+                showHighlight = true
             end
 
             local largeSize = ShouldAuraBeLarge(caster)

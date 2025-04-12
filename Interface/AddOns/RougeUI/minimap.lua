@@ -77,13 +77,37 @@ MM:SetScript("OnEvent", function(self, event)
         MiniMapMailFrame:ClearAllPoints()
         MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
 
-        if MiniMapTracking then
-            MiniMapTracking:Hide()
+        if MiniMapTracking and MiniMapTrackingButton then
+            MiniMapTracking:ClearAllPoints()
+            MiniMapTracking:SetPoint("CENTER", UIParent, "CENTER", 100000, 100000)
+            MiniMapTrackingButton:SetParent(Minimap)
+            MiniMapTrackingButton:SetMenuAnchor(AnchorUtil.CreateAnchor("TOPRIGHT", Minimap, "CENTER"))
+
+            local menuOpen = false
             Minimap:SetScript("OnMouseUp", function(self, btn)
                 if btn == "RightButton" then
-                    ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, "MiniMapTracking", 0, -5)
+                    if menuOpen then
+                        MiniMapTrackingButton:CloseMenu()
+                    else
+                        MiniMapTrackingButton:OpenMenu()
+                    end
                 else
                     Minimap_OnClick(self)
+                end
+            end)
+
+            hooksecurefunc(MiniMapTrackingButton, "OpenMenu", function()
+                menuOpen = true
+            end)
+
+            hooksecurefunc(MiniMapTrackingButton, "CloseMenu", function()
+                menuOpen = false
+            end)
+
+            Minimap:SetPropagateKeyboardInput(true)
+            Minimap:HookScript("OnKeyDown", function(self, key)
+                if key == "ESCAPE" then
+                    menuOpen = false
                 end
             end)
         end
