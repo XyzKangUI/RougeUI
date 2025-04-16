@@ -4,6 +4,7 @@ local UnitClass, UnitIsFriend = _G.UnitClass, _G.UnitIsFriend
 local mabs, mfloor = math.abs, math.floor
 local AURA_OFFSET_Y = 1
 local fontName
+local xPosOffset = 5
 
 local Enraged = {
     --    [5229] = true, -- Enrage (Druid)
@@ -91,7 +92,7 @@ setmetatable(Whitelist, whitelistMetatable)
 
 local function GetFramePosition(frame)
     if not frame then
-        return 0, 0, 0
+        return 0, 0
     end
 
     local left = frame:GetLeft() or 0
@@ -140,7 +141,7 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
 
         if (haveTargetofTarget and (horizontalDistance < size) and verticalDistance > 0) or (rowWidth > maxRowWidth) then
             local anchorAura = _G[auraName .. firstBuffOnRow]
-            if biggestAura >= mfloor(anchorAura:GetSize() + 0.5) then
+            if biggestAura and (biggestAura >= mfloor(anchorAura:GetSize() + 0.5)) then
                 offsetY = (AURA_OFFSET_Y * 2) + (biggestAura - anchorAura:GetSize())
             end
             updateFunc(frame, auraName, i, numOppositeAuras, firstBuffOnRow, size, offsetX, offsetY)
@@ -154,12 +155,12 @@ local function TargetBuffSize(frame, auraName, numAuras, numOppositeAuras, large
             updateFunc(frame, auraName, i, numOppositeAuras, i - 1, size, offsetX, offsetY)
         end
 
-        if not biggestAura or (biggestAura and (biggestAura < size)) then
+        if not biggestAura or (biggestAura < size) then
             biggestAura = size
         end
 
         local calc = (AURA_OFFSET_Y * 2) + (biggestAura - _G[auraName .. firstBuffOnRow]:GetSize())
-        if not frame.largestAura or (frame.largestAura and (frame.largestAura < calc)) then
+        if not frame.largestAura or (frame.largestAura < calc) then
             frame.largestAura = calc
         end
 
@@ -206,7 +207,7 @@ local function New_TargetFrame_UpdateBuffAnchor(self, buffName, index, numDebuff
     if (index == 1) then
         if (UnitIsFriend("player", self.unit) or numDebuffs == 0) then
             -- unit is friendly or there are no debuffs...buffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", xPosOffset, startY)
         else
             local _, a = self.debuffs:GetPoint()
             if a then
@@ -257,7 +258,7 @@ local function New_TargetFrame_UpdateDebuffAnchor(self, debuffName, index, numBu
             buff:SetPoint(point .. "LEFT", self.buffs, relativePoint .. "LEFT", 0, -offsetY)
         else
             -- unit is not friendly or there are no buffs...debuffs start on top
-            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", 5, startY)
+            buff:SetPoint(point .. "LEFT", self, relativePoint .. "LEFT", xPosOffset, startY)
         end
         self.debuffs:SetPoint(point .. "LEFT", buff, point .. "LEFT", 0, 0)
         self.debuffs:SetPoint(relativePoint .. "LEFT", buff, relativePoint .. "LEFT", 0, -auraOffsetY)
@@ -429,15 +430,16 @@ local function Target_Update(frame)
     frame.largestAura = 0
 
     local maxRowWidth = RougeUI.db.AuraRow
+    local xOffset = RougeUI.db.Roug and 5 or 3
 
     frame.spellbarAnchor = nil
 
     if isEnemy then
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3)
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3)
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset)
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset)
     else
-        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, 3)
-        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, 3)
+        TargetBuffSize(frame, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset)
+        TargetBuffSize(frame, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset)
     end
     -- update the spell bar position
     if (frame.spellbar) then
@@ -468,6 +470,16 @@ FF:RegisterEvent("PLAYER_LOGIN")
 FF:SetScript("OnEvent", function(self, fireEvent)
     if fireEvent == "PLAYER_LOGIN" then
         if RougeUI.db.BuffSizer or RougeUI.db.HighlightDispellable then
+            if RougeUI.db.AsuriFrame and not RougeUI.db.Roug then
+                xPosOffset = 7
+            elseif RougeUI.db.AsuriFrame and RougeUI.db.Roug then
+                xPosOffset = 8
+                AURA_OFFSET_Y = 2
+            elseif RougeUI.db.Roug then
+                xPosOffset = 6
+                AURA_OFFSET_Y = 2
+            end
+            
             RougeUI.RougeUIF:HookAuras()
         end
     end

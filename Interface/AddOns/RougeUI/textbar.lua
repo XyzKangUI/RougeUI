@@ -36,17 +36,17 @@ function RougeUI.RougeUIF:CusFonts()
     end
 
     for i = 1, 5 do
-        if _G["ArenaEnemyFrame"..i] then
-            local hp = _G["ArenaEnemyFrame"..i.."HealthBar"]
-            local mana = _G["ArenaEnemyFrame"..i.."ManaBar"]
+        if _G["ArenaEnemyFrame" .. i] then
+            local hp = _G["ArenaEnemyFrame" .. i .. "HealthBar"]
+            local mana = _G["ArenaEnemyFrame" .. i .. "ManaBar"]
             hp.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
-            mana.TextString:SetFont(FontType, RougeUI.db.HPFontSize, "OUTLINE")
+            mana.TextString:SetFont(FontType, RougeUI.db.ManaFontSize, "OUTLINE")
         end
     end
 end
 
 local function true_format(value)
-    if (RougeUI.db.ShortNumeric == true) then
+    if (RougeUI.db.ShortNumeric) then
         if value > 1e7 then
             return (round(value / 1e6)) .. 'm'
         elseif value > 1e6 then
@@ -58,7 +58,19 @@ local function true_format(value)
         else
             return value
         end
-    elseif (RougeUI.db.ShortNumeric == false) then
+    elseif not RougeUI.db.ShortNumeric then
+        return value
+    end
+end
+
+local function asuriFormat(value)
+    if (value >= 1e6) then
+        return ("%.1fM"):format(value / 1e6)
+    elseif (value >= 1e5) then
+        return ("%.0fk"):format(value / 1e3)
+    elseif (value >= 1e3) then
+        return ("%.1f"):format(value / 1e3)
+    else
         return value
     end
 end
@@ -73,6 +85,8 @@ local function New_TextStatusBar_UpdateTextStringWithValues(textStatusBar)
         if textStatusBar.currValue and textStatusBar.currValue > 0 then
             if RougeUI.db.ShortNumeric then
                 textString:SetText(true_format(value));
+            elseif RougeUI.db.AsuriFrame and not RougeUI.db.ShortNumeric then
+                textString:SetText(asuriFormat(value));
             else
                 textString:SetText(value);
             end

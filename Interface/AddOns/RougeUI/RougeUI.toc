@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Title: |cff009cffRougeUI|r
-## Version: 4.09
+## Version: 4.16
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 ## Dependencies: !!!ClassicAPI

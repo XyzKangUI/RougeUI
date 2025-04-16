@@ -64,6 +64,7 @@ local stock = {
     modtheme = false,
     OmniCC = false,
     defaultFont = true,
+    AsuriFrame = false,
 }
 
 local f = CreateFrame("Frame")
@@ -307,6 +308,7 @@ function f:CreateGUI()
                 addon.db.ClassBG = value
                 Transparent:SetChecked(false)
                 addon.db.transparent = false
+                addon.db.AsuriFrame = false
                 if addon.db.ClassBG then
                     if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["ClassColFrames"] == "On" then
                         UIErrorsFrame:AddMessage("Don't forget to disable Class colored frames in Leatrix Plus", 1, 0, 0)
@@ -446,6 +448,20 @@ function f:CreateGUI()
         end)
         Modtheme:SetChecked(addon.db.modtheme)
         Modtheme:SetPoint("TOPLEFT", 350, -175)
+
+        local AsuriFrame = CheckBtn("Asuri UI Frames", nil, Panel.childPanel5, function(self, value)
+            addon.db.AsuriFrame = value
+            addon.db.ThickFrames = false
+            addon.db.ClassBG = false
+            addon.db.transparent = false
+            addon.db.NoLevel = false
+            ThickFrame:SetChecked(addon.db.ThickFrames)
+            ThickFrame:SetChecked(addon.db.ClassBG)
+            ThickFrame:SetChecked(addon.db.transparent)
+            ThickFrame:SetChecked(addon.db.NoLevel)
+        end)
+        AsuriFrame:SetChecked(addon.db.AsuriFrame)
+        AsuriFrame:SetPoint("TOPLEFT", 350, -210)
 
         local name = "FontSizeSlider"
         local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)

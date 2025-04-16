@@ -5,6 +5,8 @@ local IsInInstance, GetNumArenaOpponents = IsInInstance, GetNumArenaOpponents
 local UnitCanAttack = UnitCanAttack
 local np = {}
 
+if not C_NamePlate then return end
+
 local function AddElements(plate, unit)
     local _, border, cbborder, _, _, overlay, name, levelText, bossicon, raidicon, elite = plate:GetRegions()
 
@@ -34,7 +36,7 @@ local function AddElements(plate, unit)
     overlay:ClearAllPoints()
     overlay:SetPoint("CENTER", UIParent, "CENTER", 10000, 10000)
 
-    if RougeUI.db.ModPlates then
+    if RougeUI.db.ModPlates and not RougeUI.db.AsuriFrame then
         name:SetFont(STANDARD_TEXT_FONT, 9)
         name:ClearAllPoints()
         name:SetPoint("BOTTOMRIGHT", plate, "TOPRIGHT", -6, -13)
@@ -42,7 +44,7 @@ local function AddElements(plate, unit)
         levelText:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
     end
 
-    if RougeUI.db.NoLevel then
+    if RougeUI.db.NoLevel or RougeUI.db.AsuriFrame then
         if border then
             border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")
         end

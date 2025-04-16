@@ -19,7 +19,7 @@ local function ComboUpdate()
 
     local comboPoint, comboPointHighlight, comboPointShine;
 
-    if ( comboPoints > 0 ) then
+    if comboPoints and ( comboPoints > 0 ) then
         if ( not ComboFrame:IsShown() ) then
             ComboFrame:Show();
             UIFrameFadeIn(ComboFrame, COMBOFRAME_FADE_IN);

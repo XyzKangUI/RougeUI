@@ -2,57 +2,85 @@ local addonName, RougeUI = ...
 local CL = {}
 CL.NF = {}
 
-local classcolors = {}
+local classcolors = {
+    ["HUNTER"] = CreateColor(0.67, 0.83, 0.45),
+    ["WARLOCK"] = CreateColor(0.53, 0.53, 0.93),
+    ["PRIEST"] = CreateColor(1.0, 1.0, 1.0),
+    ["PALADIN"] = CreateColor(0.96, 0.55, 0.73),
+    ["MAGE"] = CreateColor(0.25, 0.78, 0.92),
+    ["ROGUE"] = CreateColor(1.0, 0.96, 0.41),
+    ["DRUID"] = CreateColor(1.0, 0.49, 0.04),
+    ["SHAMAN"] = CreateColor(0.0, 0.44, 0.87),
+    ["WARRIOR"] = CreateColor(0.78, 0.61, 0.43),
+    ["DEATHKNIGHT"] = CreateColor(0.77, 0.12 , 0.23),
+    ["MONK"] = CreateColor(0.0, 1.00 , 0.59),
+};
 
-local function ApplyTextures()
-    if RougeUI.db.NoLevel then
-        classcolors = {
-            ["ROGUE"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Rogue",
-            ["PRIEST"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Priest",
-            ["WARRIOR"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Warrior",
-            ["PALADIN"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Paladin",
-            ["DEATHKNIGHT"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Deathknight",
-            ["HUNTER"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Hunter",
-            ["DRUID"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Druid",
-            ["MAGE"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Mage",
-            ["SHAMAN"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Shaman",
-            ["WARLOCK"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Warlock",
-        }
-    else
-        classcolors = {
-            ["ROGUE"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Rogue",
-            ["PRIEST"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Priest",
-            ["WARRIOR"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Warrior",
-            ["PALADIN"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Paladin",
-            ["DEATHKNIGHT"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Deathknight",
-            ["HUNTER"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Hunter",
-            ["DRUID"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Druid",
-            ["MAGE"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Mage",
-            ["SHAMAN"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Shaman",
-            ["WARLOCK"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Warlock",
-        }
-    end
-end
 
 function CL:CreateClassOutlines(unit, frame)
+    local outlineEnabled = RougeUI.db.classoutline
+    local isPlayer = UnitIsPlayer(unit)
+    local classification = UnitClassification(unit)
+    local asuriFrameEnabled = RougeUI.db.AsuriFrame
+    local noLevel = RougeUI.db.NoLevel
+    
     if not self.NF[unit] then
-        self.NF[unit] = CreateFrame("Frame", nil, frame)
-        self.NF[unit]:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", 32, 32)
-        self.NF[unit]:SetSize(62, 62)
-        self.NF[unit]:SetScale(1)
-        self.NF[unit].texture = self.NF[unit]:CreateTexture(nil, "BORDER")
-        self.NF[unit].texture:SetAllPoints(self.NF[unit])
-        self.NF[unit]:Hide()
+        local nfUnit = CreateFrame("Frame", nil, frame)
+        nfUnit:ClearAllPoints()
+        nfUnit:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", 32, 32)
+        nfUnit:SetSize(62, 62)
+        nfUnit.texture = nfUnit:CreateTexture(nil, "BORDER")
+        nfUnit.texture:SetAllPoints(nfUnit)
+        nfUnit:SetScale(1)
+        nfUnit:Hide()
+        self.NF[unit] = nfUnit
+        
+        local defaultTexture = noLevel and "Interface\\AddOns\\RougeUI\\textures\\nolevel\\Priest"
+                              or "Interface\\AddOns\\RougeUI\\textures\\target\\Priest"
+        nfUnit.texture:SetTexture(defaultTexture)
     end
 
-    if not UnitIsPlayer(unit) then
-        self.NF[unit]:Hide()
+    local nfUnit = self.NF[unit]
+    
+    if asuriFrameEnabled and not isPlayer and classification ~= "normal" then
+        local texturePath = (classification == "elite" or classification == "worldboss")
+                and "Interface\\AddOns\\RougeUI\\textures\\target\\ChainAsuriGold"
+                or ((classification == "rareelite" or classification == "rare")
+                and "Interface\\AddOns\\RougeUI\\textures\\target\\ChainAsuri")
+
+        if frame == FocusFrame then
+            nfUnit.texture:SetTexCoord(1, 0, 0, 1)
+            nfUnit:ClearAllPoints()
+            nfUnit:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", 85, 12)
+        else
+            nfUnit:ClearAllPoints()
+            nfUnit:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", -22, 12)
+        end
+        nfUnit.texture:SetTexture(texturePath)
+        nfUnit.texture:SetVertexColor(1, 1, 1)
+        nfUnit:SetSize(256, 128)
+        nfUnit:Show()
         return
     end
-
+    
+    if not isPlayer or not outlineEnabled then
+        nfUnit:Hide()
+        return
+    end
+    
+    if asuriFrameEnabled then
+        nfUnit.texture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Priest")
+        nfUnit:ClearAllPoints()
+        nfUnit:SetPoint("CENTER", frame.portrait, "BOTTOMLEFT", 32, 32)
+        nfUnit:SetSize(62, 62)
+    end
+    
     local _, class = UnitClass(unit)
-    self.NF[unit].texture:SetTexture(classcolors[class])
-    self.NF[unit]:Show()
+    local c = classcolors[class]
+    if c then
+        nfUnit.texture:SetVertexColor(c.r, c.g, c.b)
+    end
+    nfUnit:Show()
 end
 
 function CL:hookfunc()
@@ -67,8 +95,7 @@ local eventframe = CreateFrame("Frame")
 eventframe:RegisterEvent("ADDON_LOADED")
 eventframe:SetScript("OnEvent", function(self, event, ...)
     if ... == addonName then
-        if RougeUI.db.classoutline then
-            ApplyTextures()
+        if RougeUI.db.classoutline or RougeUI.db.AsuriFrame then
             hooksecurefunc("UnitFramePortrait_Update", CL.hookfunc)
         end
     end
