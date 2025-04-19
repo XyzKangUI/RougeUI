@@ -50,6 +50,7 @@ local GetSpellInfo, GetSpellDescription = GetSpellInfo, GetSpellDescription
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local UnitCanAssist, UnitIsUnit = UnitCanAssist, UnitIsUnit
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
+local feigningUnits = {}
 
 local PURGE_THRESHOLD = 1200
 
@@ -222,7 +223,7 @@ function f:CombatLogHandler()
         FireToUnits("UNIT_BUFF", dstGUID)
     end
 
-    if eventType == "UNIT_DIED" then
+    if eventType == "UNIT_DIED" and not feigningUnits[dstGUID] then
         guids[dstGUID] = nil
         auraID[dstGUID] = nil
         buffCache[dstGUID] = nil
@@ -251,7 +252,6 @@ function f:NAME_PLATE_UNIT_REMOVED(_, unit)
         local unitGUID = UnitGUID(unit)
         if unitGUID then
             nameplateUnitMap[unitGUID] = nil
-            auraID[unitGUID] = nil
         end
     end
 end
@@ -276,6 +276,10 @@ function f:UNIT_AURA(_, unit, info)
                 SetTimer(unitGUID, aura.spellId, aura.duration, aura.expirationTime)
                 FireToUnits("UNIT_BUFF", unitGUID)
                 auraID[unitGUID][aura.auraInstanceID] = { aura.spellId, aura.duration }
+
+                if feigningUnits[unitGUID] then
+                    feigningUnits[unitGUID][aura.auraInstanceID] = true
+                end
             end
         end
     end
@@ -299,11 +303,56 @@ function f:UNIT_AURA(_, unit, info)
                 SetTimer(unitGUID, auraID[unitGUID][auraInstID][1], nil, nil, true)
                 auraID[unitGUID][auraInstID] = nil
             end
+
+            if feigningUnits[unitGUID] and feigningUnits[unitGUID][auraInstID] then
+                feigningUnits[unitGUID][auraInstID] = nil
+
+                if next(feigningUnits[unitGUID]) == nil then
+                    feigningUnits[unitGUID] = nil
+                end
+            end
+
             FireToUnits("UNIT_BUFF", unitGUID)
         end
     end
 end
 
+function f:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellId)
+    if spellId == 5384 and unit then
+        local guid = UnitGUID(unit)
+        if not guid then return end
+        feigningUnits[guid] = {}
+    end
+end
+
+function f:PLAYER_TARGET_CHANGED()
+    local _, class = UnitClass("target")
+    if class == "HUNTER" then
+        local hp = UnitHealth("target")
+        if (hp and hp > 0) then
+            local guid = UnitGUID("target")
+            if not guid then return end
+            local changed = false
+
+            feigningUnits[guid] = nil
+
+            if auraID[guid] then
+                for auraInstID, auraData in pairs(auraID[guid]) do
+                    local spellID = auraData[1]
+                    if spellID == 5384 then
+                        SetTimer(guid, spellID, nil, nil, true)
+                        auraID[guid][auraInstID] = nil
+                        changed = true
+                    end
+                end
+
+                if changed then
+                    FireToUnits("UNIT_BUFF", guid)
+                end
+            end
+        end
+    end
+end
 ----------------------------------
 -- Enemy Buffs Functions
 ----------------------------------
@@ -429,6 +478,8 @@ function lib:RegisterFrame(frame)
     if next(activeFrames) then
         f:RegisterEvent("UNIT_AURA")
         f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        f:RegisterEvent("PLAYER_TARGET_CHANGED")
     end
 end
 lib.Register = lib.RegisterFrame
@@ -438,6 +489,8 @@ function lib:UnregisterFrame(frame)
     if not next(activeFrames) then
         f:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         f:UnregisterEvent("UNIT_AURA")
+        f:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        f:UnregisterEvent("PLAYER_TARGET_CHANGED")
     end
 end
 lib.Unregister = lib.UnregisterFrame

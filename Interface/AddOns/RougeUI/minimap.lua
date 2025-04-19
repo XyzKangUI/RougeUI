@@ -1,27 +1,42 @@
 local _, RougeUI = ...
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
+local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
 
 local MM = CreateFrame("Frame")
 MM:RegisterEvent("PLAYER_LOGIN")
 MM:SetScript("OnEvent", function(self, event)
-    if not (IsAddOnLoaded("SexyMap")) then
+    if not (IsAddOnLoaded("SexyMap")) and event == "PLAYER_LOGIN" then
         TimeManagerClockButton:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         -- Hide stuff
         if MiniMapWorldMapButton then
             hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)
         end
+
         if MinimapNorthTag then
             hooksecurefunc(MinimapNorthTag, "Show", MinimapNorthTag.Hide)
         end
 
+        C_Timer.After(0, function()
+            if LFGMinimapFrameBorder then
+                LFGMinimapFrameBorder:Hide()
+            end
+
+            if LFGMinimapFrame then
+                LFGMinimapFrame:SetAlpha(0)
+                LFGMinimapFrame:HookScript("OnEnter", function(self) self:SetAlpha(1) end)
+                LFGMinimapFrame:HookScript("OnLeave", function(self) self:SetAlpha(0) end)
+            end
+        end)
+
         for _, v in pairs({
-            MinimapBorderTop,
+            --MinimapBorderTop,
             MinimapToggleButton,
             MinimapZoomIn,
             MinimapZoomOut,
+            MinimapNorthTag,
         }) do
             if v then
                 v:Hide()
+                v:SetAlpha(0)
             end
         end
 
@@ -70,12 +85,10 @@ MM:SetScript("OnEvent", function(self, event)
             return
         end
 
-        -- Center text properly
-        MinimapZoneText:ClearAllPoints()
-        MinimapZoneText:SetPoint("TOPLEFT", "MinimapZoneTextButton", "TOPLEFT", 8, 0)
-
         MiniMapMailFrame:ClearAllPoints()
-        MiniMapMailFrame:SetPoint('BOTTOMRIGHT', 0, -10)
+        MiniMapMailFrame:SetPoint("TOPLEFT", -23, 7)
+        MiniMapMailBorder:Hide()
+        MiniMapMailIcon:SetTexture("Interface\\AddOns\\RougeUI\\textures\\mailicon")
 
         if MiniMapTracking and MiniMapTrackingButton then
             MiniMapTracking:ClearAllPoints()
@@ -111,6 +124,32 @@ MM:SetScript("OnEvent", function(self, event)
                 end
             end)
         end
+
+
+        MinimapZoneText:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+        MinimapBorder:SetTexture("Interface\\AddOns\\RougeUI\\textures\\minimapBorder")
+        MinimapBorderTop:SetTexture("Interface\\AddOns\\RougeUI\\textures\\minimapBorder")
+        MinimapBorderTop:SetTexCoord(0.25, 1, 0, 0.125)
+        MinimapBorderTop:ClearAllPoints()
+        MinimapBorderTop:SetPoint("TOPRIGHT", MinimapCluster, "TOPRIGHT", 0, 7)
+        MinimapZoneTextButton:HookScript("OnClick", function()
+            ToggleMinimap()
+        end)
+        MinimapZoneTextButton:ClearAllPoints()
+        MinimapZoneTextButton:SetPoint("CENTER", MinimapCluster, "CENTER", -10, 83)
+        MinimapZoneText:ClearAllPoints()
+        MinimapZoneText:SetPoint("LEFT", MinimapBorderTop, "LEFT", 20, -1)
+        MinimapZoneText:SetJustifyH("LEFT")
+        MinimapZoneText:SetWidth(137)
+        TimeManagerClockTicker:SetParent(MinimapZoneTextButton) -- MinimapBackdrop
+        TimeManagerClockTicker:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+        TimeManagerClockTicker:ClearAllPoints()
+        TimeManagerClockTicker:SetPoint("RIGHT", MinimapBorderTop, "RIGHT", -8, -1)
+        TimeManagerClockTicker:SetJustifyH("RIGHT")
+        TimeManagerClockButton:SetParent(MinimapZoneTextButton)
+        TimeManagerClockButton:SetAlpha(0)
+        TimeManagerClockButton:ClearAllPoints()
+        TimeManagerClockButton:SetPoint("RIGHT", MinimapZoneText, "RIGHT", 38, -1)
     end
 end)
 

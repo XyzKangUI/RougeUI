@@ -919,6 +919,11 @@ e:SetScript("OnEvent", function(self, event, ...)
             self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         end
 
+        if C_AddOnProfiler and C_AddOnProfiler.IsEnabled() and C_CVar then
+            C_CVar.RegisterCVar("addonProfilerEnabled", "1")
+            C_CVar.SetCVar("addonProfilerEnabled", "0")
+        end
+
         if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC and not IsAddOnLoaded("Precognito") then
             for _, v in pairs { PlayerFrameHealthBar, TargetFrameHealthBar, FocusFrameHealthBar } do
                 if v and v.MyHealPredictionBar then
