@@ -6,6 +6,14 @@ MM:RegisterEvent("PLAYER_LOGIN")
 MM:SetScript("OnEvent", function(self, event)
     if not (IsAddOnLoaded("SexyMap")) and event == "PLAYER_LOGIN" then
         TimeManagerClockButton:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+
+        if not RougeUI.db.minimapChanges then
+            if MinimapBorderTop then
+                MinimapBorderTop:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            return
+        end
+
         -- Hide stuff
         if MiniMapWorldMapButton then
             hooksecurefunc(MiniMapWorldMapButton, "Show", MiniMapWorldMapButton.Hide)
@@ -22,8 +30,12 @@ MM:SetScript("OnEvent", function(self, event)
 
             if LFGMinimapFrame then
                 LFGMinimapFrame:SetAlpha(0)
-                LFGMinimapFrame:HookScript("OnEnter", function(self) self:SetAlpha(1) end)
-                LFGMinimapFrame:HookScript("OnLeave", function(self) self:SetAlpha(0) end)
+                LFGMinimapFrame:HookScript("OnEnter", function(self)
+                    self:SetAlpha(1)
+                end)
+                LFGMinimapFrame:HookScript("OnLeave", function(self)
+                    self:SetAlpha(0)
+                end)
             end
         end)
 
@@ -68,7 +80,9 @@ MM:SetScript("OnEvent", function(self, event)
 
         calendar:HookScript("OnLeave", function(self)
             local focus = GetMouseFoci()[1]
-            if not focus then return end
+            if not focus then
+                return
+            end
 
             if not FindParent(focus, self) then
                 self:SetAlpha(0)
@@ -125,8 +139,8 @@ MM:SetScript("OnEvent", function(self, event)
             end)
         end
 
-
         MinimapZoneText:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+        MinimapBorder:SetAlpha(0.7)
         MinimapBorder:SetTexture("Interface\\AddOns\\RougeUI\\textures\\minimapBorder")
         MinimapBorderTop:SetTexture("Interface\\AddOns\\RougeUI\\textures\\minimapBorder")
         MinimapBorderTop:SetTexCoord(0.25, 1, 0, 0.125)

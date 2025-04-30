@@ -53,7 +53,7 @@ end
 
 -- Some PvPIcon tweaks for BG/Arena/CP Classes
 
-local function PvPIcon()
+function RougeUI.PvPIcon()
     local _, instanceType = IsInInstance()
     for i, v in pairs({
         PlayerPVPIcon,
@@ -70,9 +70,10 @@ local function PvPIcon()
                 FocusFrameTextureFramePVPIcon:SetAlpha(0)
             end
         else
-            v:SetAlpha(0.45)
+            local opacity = RougeUI.db.FadePvPIcon or 0.45
+            v:SetAlpha(opacity)
             if FocusFrame then
-                FocusFrameTextureFramePVPIcon:SetAlpha(0.45)
+                FocusFrameTextureFramePVPIcon:SetAlpha(opacity)
             end
         end
     end
@@ -911,7 +912,7 @@ local e = CreateFrame("Frame")
 e:RegisterEvent("PLAYER_LOGIN")
 e:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        if RougeUI.db.FadeIcon or RougeUI.db.SQFix or RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
+        if (RougeUI.db.FadePvPIcon < 100) or RougeUI.db.SQFix or RougeUI.db.HideHotkey or RougeUI.db.HideMacro then
             self:RegisterEvent("PLAYER_ENTERING_WORLD")
         end
 
@@ -1124,8 +1125,8 @@ e:SetScript("OnEvent", function(self, event, ...)
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
-        if RougeUI.db.FadeIcon then
-            PvPIcon()
+        if RougeUI.db.FadePvPIcon < 100 then
+            RougeUI.PvPIcon()
         end
 
         if RougeUI.db.SQFix then

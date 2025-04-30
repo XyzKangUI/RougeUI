@@ -1,5 +1,6 @@
 local _, RougeUI = ...
 local strformat, max = string.format, math.max
+local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
 
 local function PurpleKoolaid(statusbar)
     if (not statusbar or statusbar.disconnected) then
@@ -61,8 +62,8 @@ local function modstyle()
             t.Text:SetShadowOffset(0, 0)
             t.Text:SetJustifyH("LEFT")
             t.Text:ClearAllPoints()
-          --  t.Text:SetPoint("CENTER", t, "CENTER", 0, 0.5)
-          --  t.Text:SetPoint("LEFT", t, "LEFT", 5, 0.5)
+            --  t.Text:SetPoint("CENTER", t, "CENTER", 0, 0.5)
+            --  t.Text:SetPoint("LEFT", t, "LEFT", 5, 0.5)
             t.Text:SetPoint("TOPLEFT", t, "BOTTOMLEFT", 2, -5)
             t.Spark:SetAlpha(0.7)
             t.Spark:SetSize(15, 15)
@@ -95,8 +96,6 @@ local function modstyle()
     cf.update = .1
     setFont(cf.timer, 9)
 end
-
-
 
 local function TimerHook(self, elapsed)
     if not self.timer then
@@ -182,13 +181,17 @@ local missileId = {
     [10211] = 5,
 }
 
+local function showTargetcastBar()
+    TargetFrameSpellBar:Show()
+end
+
 local FR = CreateFrame("Frame")
 FR:RegisterEvent("PLAYER_LOGIN")
 FR:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         if isSoD and not IsAddOnLoaded("ClassicCastbars") then
             hooksecurefunc("CastingBarFrame_OnEvent", function(self, event, unit, _, spellId)
-                if (unit ~= self.unit) then
+                if (unit ~= self.unit) or self ~= TargetFrameSpellBar then
                     return
                 end
 
@@ -255,7 +258,7 @@ FR:SetScript("OnEvent", function(self, event, ...)
                         self.fadeOut = nil
                         self.spellActive = spellId
                         if self.showCastbar then
-                            self:Show()
+                            C_Timer.After(0, showTargetcastBar)
                         end
                     end
                 end

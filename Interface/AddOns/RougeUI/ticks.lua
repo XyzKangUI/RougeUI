@@ -60,20 +60,20 @@ local function OnUpdate(self, elapsed)
                     energyValues["player"].tickRate = 2.02
                     possibleFSR = false
                 end
-                if UnitIsUnit(unit, "target") and not (unit == "player" or unit == "target") then
-                    energyValues.target.last_tick = energyValues[unit].last_tick
-                    energyValues.target.startTick = energyValues[unit].startTick
-                end
+                --if UnitIsUnit(unit, "target") and not (unit == "player" or unit == "target") then
+                --    energyValues.target.last_tick = energyValues[unit].last_tick
+                --    energyValues.target.startTick = energyValues[unit].startTick
+                --end
             end
 
             if unit == "player" then
                 SetEnergyValue(PlayerFrameManaBar, energyValues["player"].last_tick, energyValues["player"].tickRate)
-            elseif (unit ~= "player") then
-                if not UnitExists("playertarget") or UnitIsUnit(unit, "target") then
-                    energyValues.target.last_tick = energyValues[unit].last_tick
-                    energyValues.target.startTick = energyValues[unit].startTick
-                end
-                SetEnergyValue(TargetFrameManaBar, energyValues[unit].last_tick)
+            --elseif (unit ~= "player") then
+            --    if not UnitExists("playertarget") or UnitIsUnit(unit, "target") then
+            --        energyValues.target.last_tick = energyValues[unit].last_tick
+            --        energyValues.target.startTick = energyValues[unit].startTick
+            --    end
+            --    SetEnergyValue(TargetFrameManaBar, energyValues[unit].last_tick)
             end
         end
     end
@@ -141,8 +141,8 @@ local function UpdateEnergy(unit, powerType)
         energyValues[unit].tickRate = 2.02
         if unit == "player" and (PlayerFrameManaBar.energy.spark:GetAlpha() < 1) then
             PlayerFrameManaBar.energy.spark:SetAlpha(1)
-        elseif UnitIsUnit("target", unit) and (unit ~= "player") and (TargetFrameManaBar.energy.spark:GetAlpha() < 1) then
-            TargetFrameManaBar.energy.spark:SetAlpha(1)
+        --elseif UnitIsUnit("target", unit) and (unit ~= "player") and (TargetFrameManaBar.energy.spark:GetAlpha() < 1) then
+        --    TargetFrameManaBar.energy.spark:SetAlpha(1)
         end
     end
 end
@@ -204,28 +204,28 @@ e:SetScript("OnEvent", function(self, event, ...)
                     tickRate = 2.02,
                 }
             end
-            if RougeUI.db.EnemyTicker then
-                AddEnergy(TargetFrameManaBar)
-                energyValues["target"] = {
-                    last_tick = 0,
-                    last_value = 0,
-                    startTick = false,
-                    validTick = false,
-                    tickRate = 2.02,
-                }
-
-                for i = 1, 10 do
-                    energyValues["nameplate" .. i] = {
-                        last_tick = 0,
-                        last_value = 0,
-                        startTick = false,
-                        validTick = false,
-                        tickRate = 2.02,
-                    }
-                end
-
-                self:RegisterEvent("PLAYER_TARGET_CHANGED")
-            end
+            --if RougeUI.db.EnemyTicker then
+            --    AddEnergy(TargetFrameManaBar)
+            --    energyValues["target"] = {
+            --        last_tick = 0,
+            --        last_value = 0,
+            --        startTick = false,
+            --        validTick = false,
+            --        tickRate = 2.02,
+            --    }
+            --
+            --    for i = 1, 10 do
+            --        energyValues["nameplate" .. i] = {
+            --            last_tick = 0,
+            --            last_value = 0,
+            --            startTick = false,
+            --            validTick = false,
+            --            tickRate = 2.02,
+            --        }
+            --    end
+            --
+            --    self:RegisterEvent("PLAYER_TARGET_CHANGED")
+            --end
 
             self:RegisterEvent("UNIT_POWER_UPDATE")
             self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -251,16 +251,16 @@ e:SetScript("OnEvent", function(self, event, ...)
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         RealTick()
-    elseif event == "PLAYER_TARGET_CHANGED" then
-        if not TargetFrameManaBar.energy.spark then
-            return
-        end
-        if not UnitIsPlayer("target") or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
-            TargetFrameManaBar.energy.spark:SetAlpha(0)
-            C_Timer.After(0.1, delay)
-        else
-            TargetFrameManaBar.energy.spark:SetAlpha(1)
-        end
+    --elseif event == "PLAYER_TARGET_CHANGED" then
+    --    if not TargetFrameManaBar.energy.spark then
+    --        return
+    --    end
+    --    if not UnitIsPlayer("target") or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
+    --        TargetFrameManaBar.energy.spark:SetAlpha(0)
+    --        C_Timer.After(0.1, delay)
+    --    else
+    --        TargetFrameManaBar.energy.spark:SetAlpha(1)
+    --    end
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local _, _, spellId = ...
 

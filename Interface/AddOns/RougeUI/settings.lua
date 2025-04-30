@@ -24,7 +24,7 @@ local stock = {
     TimerGap = false,
     ScoreBoard = true,
     HideTitles = true,
-    FadeIcon = true,
+    FadePvPIcon = 0.45,
     CombatIndicator = true,
     CastTimer = false,
     smooth = true,
@@ -69,12 +69,13 @@ local stock = {
     RangeIndicator = false,
     EnergyTicker = false,
     wahksfk = false,
-    EnemyTicker = false,
+   -- EnemyTicker = false,
     modtheme = false,
     OmniCC = false,
     defaultFont = true,
     AsuriFrame = false,
-    HidePetText = false
+    HidePetText = false,
+    minimapChanges = true
 }
 
 local f = CreateFrame("Frame")
@@ -124,14 +125,14 @@ function f:PLAYER_LOGOUT()
 end
 
 local function CheckBtn(title, desc, panel, onClick)
-    local frame = CreateFrame("CheckButton", title, panel, "InterfaceOptionsCheckButtonTemplate")
-    frame:SetScript("OnClick", function(self)
+    local frame = CreateFrame("CheckButton", title, panel, "ChatConfigCheckButtonTemplate")
+    frame:HookScript("OnClick", function(self)
         local enabled = self:GetChecked()
         onClick(self, enabled and true or false)
     end)
-    frame.text = _G[frame:GetName() .. "Text"]
-    frame.text:SetText(title)
-    frame.tooltipText = desc
+    frame.Text = _G[frame:GetName() .. "Text"]
+    frame.Text:SetText(title)
+    frame.tooltip = desc
     return frame
 end
 
@@ -163,18 +164,13 @@ local function CreateSliderText(frame)
 end
 
 function f:CreateGUI()
-    local Panel = CreateFrame("Frame", "$parentRougeUI_Config", InterfaceOptionsPanelContainer)
+    local Panel = CreateFrame("Frame", "$parentRougeUI_Config")
     do
         local Title = "|cff009cffRougeUI|r"
         Panel.name = Title
-        local category
-        if Settings then
-            category = Settings.RegisterCanvasLayoutCategory(Panel, Title)
-            Settings.RegisterAddOnCategory(category)
-            Panel.categoryID = category:GetID()
-        else
-            InterfaceOptions_AddCategory(Panel)
-        end
+        local category = Settings.RegisterCanvasLayoutCategory(Panel, Title)
+        Settings.RegisterAddOnCategory(category)
+        Panel.categoryID = category:GetID()
 
         local title = Panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge");
         title:SetPoint("TOPLEFT", 12, -15);
@@ -187,52 +183,34 @@ function f:CreateGUI()
         Panel.childPanel1 = CreateFrame("Frame", "$parentConfigChild_UnitFrame", Panel)
         Panel.childPanel1.name = "UnitFrame"
         Panel.childPanel1.parent = Panel.name
-        if Settings then
-            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel1, "UnitFrame")
-            Settings.RegisterAddOnCategory(subcategory)
-        else
-            InterfaceOptions_AddCategory(Panel.childPanel1)
-        end
+
+        local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel1, "UnitFrame")
+        Settings.RegisterAddOnCategory(subcategory)
 
         Panel.childPanel2 = CreateFrame("Frame", "$parentConfigChild_Tweaks", Panel)
         Panel.childPanel2.name = "Tweaks"
         Panel.childPanel2.parent = Panel.name
-        if Settings then
-            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel2, "Tweaks")
-            Settings.RegisterAddOnCategory(subcategory)
-        else
-            InterfaceOptions_AddCategory(Panel.childPanel2)
-        end
+
+        local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel2, "Tweaks")
+        Settings.RegisterAddOnCategory(subcategory)
 
         Panel.childPanel3 = CreateFrame("Frame", "$parentConfigChild_Hide", Panel)
         Panel.childPanel3.name = "Hide Elements"
         Panel.childPanel3.parent = Panel.name
-        if Settings then
-            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel3, "Hide Elements")
-            Settings.RegisterAddOnCategory(subcategory)
-        else
-            InterfaceOptions_AddCategory(Panel.childPanel3)
-        end
+        local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel3, "Hide Elements")
+        Settings.RegisterAddOnCategory(subcategory)
 
         Panel.childPanel4 = CreateFrame("Frame", "$parentConfigChild_StatusBar", Panel)
         Panel.childPanel4.name = "StatusBar"
         Panel.childPanel4.parent = Panel.name
-        if Settings then
-            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel4, "StatusBar")
-            Settings.RegisterAddOnCategory(subcategory)
-        else
-            InterfaceOptions_AddCategory(Panel.childPanel4)
-        end
+        local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel4, "StatusBar")
+        Settings.RegisterAddOnCategory(subcategory)
 
         Panel.childPanel5 = CreateFrame("Frame", "$parentConfigChild_Theme", Panel)
         Panel.childPanel5.name = "Theme"
         Panel.childPanel5.parent = Panel.name
-        if Settings then
-            local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel5, "Theme")
-            Settings.RegisterAddOnCategory(subcategory)
-        else
-            InterfaceOptions_AddCategory(Panel.childPanel5)
-        end
+        local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, Panel.childPanel5, "Theme")
+        Settings.RegisterAddOnCategory(subcategory)
 
         for _, v in pairs({ Panel.childPanel1, Panel.childPanel2, Panel.childPanel3, Panel.childPanel4, Panel.childPanel5 }) do
             local Reload = CreateFrame("Button", nil, v, "UIPanelButtonTemplate")
@@ -311,12 +289,6 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel1, 350, -40, "Misc")
 
-        local FadeIconButton = CheckBtn("Fade out PvP Icon", "Enabling this will set the PvP Icon's transparency at 35%", Panel.childPanel1, function(self, value)
-            addon.db.FadeIcon = value
-        end)
-        FadeIconButton:SetChecked(addon.db.FadeIcon)
-        FadeIconButton:SetPoint("TOPLEFT", 350, -70)
-
         local SmoothFrameButton = CheckBtn("Smooth Animated Health & Mana Bar", "Adds a smoother transition effect when gaining / losing mana or health", Panel.childPanel4, function(self, value)
             addon.db.smooth = value
         end)
@@ -336,7 +308,7 @@ function f:CreateGUI()
         ClassOutlines:SetPoint("TOPLEFT", 10, -105)
 
         local ClassBG, Transparent
-        ClassBG = CheckBtn("Class Colored Name Background", "Adds a class colored texture behind the UnitFrame name", Panel.childPanel1, function(self, value)
+        ClassBG = CheckBtn("Class Colored Name Background", "Add a class colored background to Player/Target/Focus frame", Panel.childPanel1, function(self, value)
             if addon.db.ThickFrames then
                 UIErrorsFrame:AddMessage("This cannot be enabled with big frames", 1, 0, 0)
                 self:SetChecked(false)
@@ -355,7 +327,7 @@ function f:CreateGUI()
         ClassBG:SetChecked(addon.db.ClassBG)
         ClassBG:SetPoint("TOPLEFT", 10, -140)
 
-        Transparent = CheckBtn("Transparent name background", nil, Panel.childPanel1, function(self, value)
+        Transparent = CheckBtn("Transparent name background", "When enabled don't forget to disable class background coloring in other addons such as Leatrix", Panel.childPanel1, function(self, value)
             addon.db.transparent = value
             addon.db.ClassBG = false
             ClassBG:SetChecked(false)
@@ -381,9 +353,23 @@ function f:CreateGUI()
             end
         end)
         ThickFrame:SetChecked(addon.db.ThickFrames)
-        ThickFrame:SetPoint("TOPLEFT", 350, -105)
+        ThickFrame:SetPoint("TOPLEFT", 350, -70)
 
-        local Nolvl = CheckBtn("Hide level text on frames", nil, Panel.childPanel1, function(self, value)
+        local AsuriFrame = CheckBtn("Asuri's UI Frames", "Make your frames look clean and modern", Panel.childPanel1, function(self, value)
+            addon.db.AsuriFrame = value
+            addon.db.ThickFrames = false
+            addon.db.ClassBG = false
+            addon.db.transparent = false
+            addon.db.NoLevel = false
+            ThickFrame:SetChecked(addon.db.ThickFrames)
+            ThickFrame:SetChecked(addon.db.ClassBG)
+            ThickFrame:SetChecked(addon.db.transparent)
+            ThickFrame:SetChecked(addon.db.NoLevel)
+        end)
+        AsuriFrame:SetChecked(addon.db.AsuriFrame)
+        AsuriFrame:SetPoint("TOPLEFT", 350, -105)
+
+        local Nolvl = CheckBtn("Hide level text on frames", "Hide the level text on Player/Target/Focus frames and nameplates", Panel.childPanel1, function(self, value)
             addon.db.NoLevel = value
         end)
         Nolvl:SetChecked(addon.db.NoLevel)
@@ -414,6 +400,30 @@ function f:CreateGUI()
             sliderTemplate = "UISliderTemplate"
         end
 
+        local name = "FadePVPICON"
+        local FadePVPICON = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
+        if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+            CreateSliderText(FadePVPICON)
+        else
+            FadePVPICON.text = _G[name .. "Text"]
+            FadePVPICON.textLow = _G[name .. "Low"]
+            FadePVPICON.textHigh = _G[name .. "High"]
+        end
+        FadePVPICON:SetMinMaxValues(0, 1)
+        FadePVPICON:SetPoint("TOPLEFT", 25, -160)
+        FadePVPICON.minValue, FadePVPICON.maxValue = FadePVPICON:GetMinMaxValues()
+        FadePVPICON.textLow:SetText(floor(FadePVPICON.minValue))
+        FadePVPICON.textHigh:SetText(floor(FadePVPICON.maxValue))
+        FadePVPICON:SetValue(addon.db.FadePvPIcon)
+        FadePVPICON.text:SetText("PvP Icon opacity: " .. format("%.2f", FadePVPICON:GetValue(addon.db.FadePvPIcon)))
+        FadePVPICON:SetValueStep(0.05)
+        FadePVPICON:SetObeyStepOnDrag(true);
+        FadePVPICON:SetScript("OnValueChanged", function(_, value)
+            FadePVPICON.text:SetText("PvP Icon opacity: " .. RoundNumbers(addon.db.FadePvPIcon, 0.05))
+            addon.db.FadePvPIcon = value
+            addon.PvPIcon()
+        end)
+
         local name = "BuffColSlider"
         local BuffColSlider = CreateFrame("Slider", name, Panel.childPanel5, sliderTemplate)
         if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
@@ -424,7 +434,7 @@ function f:CreateGUI()
             BuffColSlider.textLow = _G[name .. "Low"]
         end
         BuffColSlider:SetMinMaxValues(0, 1)
-        BuffColSlider:SetPoint("TOPLEFT", 25, -300)
+        BuffColSlider:SetPoint("TOPLEFT", 25, -370)
         if addon.db.Modern or addon.db.modtheme then
             BuffColSlider:Show()
         else
@@ -493,19 +503,11 @@ function f:CreateGUI()
         Modtheme:SetChecked(addon.db.modtheme)
         Modtheme:SetPoint("TOPLEFT", 350, -175)
 
-        local AsuriFrame = CheckBtn("Asuri UI Frames", nil, Panel.childPanel5, function(self, value)
-            addon.db.AsuriFrame = value
-            addon.db.ThickFrames = false
-            addon.db.ClassBG = false
-            addon.db.transparent = false
-            addon.db.NoLevel = false
-            ThickFrame:SetChecked(addon.db.ThickFrames)
-            ThickFrame:SetChecked(addon.db.ClassBG)
-            ThickFrame:SetChecked(addon.db.transparent)
-            ThickFrame:SetChecked(addon.db.NoLevel)
+        local CustomMM = CheckBtn("Custom Minimap", "Changes the appearance of the original minimap", Panel.childPanel5, function(self, value)
+            addon.db.minimapChanges = value
         end)
-        AsuriFrame:SetChecked(addon.db.AsuriFrame)
-        AsuriFrame:SetPoint("TOPLEFT", 350, -210)
+        CustomMM:SetChecked(addon.db.minimapChanges)
+        CustomMM:SetPoint("TOPLEFT", 350, -210)
 
         local name = "FontSizeSlider"
         local FontSizeSlider = CreateFrame("Slider", name, Panel.childPanel1, sliderTemplate)
@@ -627,7 +629,7 @@ function f:CreateGUI()
             ColorValueSlider.textLow = _G[name .. "Low"]
         end
         ColorValueSlider:SetMinMaxValues(0, 1)
-        ColorValueSlider:SetPoint("TOPLEFT", 25, -230)
+        ColorValueSlider:SetPoint("TOPLEFT", 25, -300)
         ColorValueSlider.minValue, ColorValueSlider.maxValue = ColorValueSlider:GetMinMaxValues()
         ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
         ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
@@ -653,7 +655,7 @@ function f:CreateGUI()
                     BuffValueSlider.textHigh = _G[name .. "High"]
                 end
                 BuffValueSlider:SetMinMaxValues(2, 10)
-                BuffValueSlider:SetPoint("TOPLEFT", 25, -160)
+                BuffValueSlider:SetPoint("TOPLEFT", 25, -230)
                 BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
                 BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
                 BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
@@ -703,19 +705,19 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel2, 10, -40, "PvP Tweaks")
 
-        if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+        --if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
             local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value)
                 addon.db.EnemyTicks = value
             end)
             EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
             EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
-        else
-            local EnemyTicksButton = CheckBtn("Enemy Tick Tracker", "Track your target's mana/energy ticks", Panel.childPanel2, function(self, value)
-                addon.db.EnemyTicker = value
-            end)
-            EnemyTicksButton:SetChecked(addon.db.EnemyTicker)
-            EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
-        end
+        --else
+        --    local EnemyTicksButton = CheckBtn("Enemy Tick Tracker", "Track your target's mana/energy ticks", Panel.childPanel2, function(self, value)
+        --        addon.db.EnemyTicker = value
+        --    end)
+        --    EnemyTicksButton:SetChecked(addon.db.EnemyTicker)
+        --    EnemyTicksButton:SetPoint("TOPLEFT", 10, -140)
+        --end
 
         if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
             local PSTrackBtn = CheckBtn("CC Absorb Tracker", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default Blizzard nameplate", Panel.childPanel2, function(self, value)
@@ -805,14 +807,14 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel2, 350, -330, "Rogue Specific")
 
-        local ComboFixButton = CheckBtn("ComboFrame Fix", "This change will allow you to see combo points on mind controlled enemy players", Panel.childPanel2, function(self, value)
+        local ComboFixButton = CheckBtn("ComboFrame Fix", "This change will instantly display combopoints and display them on mind controlled enemy players", Panel.childPanel2, function(self, value)
             addon.db.cfix = value
         end)
         ComboFixButton:SetChecked(addon.db.cfix)
         ComboFixButton:SetPoint("TOPLEFT", 350, -365)
 
         if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-            local EnemyTicksButton = CheckBtn("Personal energy ticker", "Track your mana/energy ticks on the manabar", Panel.childPanel2, function(self, value)
+            local EnemyTicksButton = CheckBtn("Personal energy ticker", "Track your own power ticks on the manabar", Panel.childPanel2, function(self, value)
                 addon.db.EnergyTicker = value
             end)
             EnemyTicksButton:SetChecked(addon.db.EnergyTicker)
@@ -899,7 +901,7 @@ function f:CreateGUI()
                 addon.db.HideAggro = value
             end)
             AggroHighlightButton:SetChecked(addon.db.HideAggro)
-            AggroHighlightButton:SetPoint("TOPLEFT", 10, -320)
+            AggroHighlightButton:SetPoint("TOPLEFT", 10, -355)
         end
 
         local HidePetText = CheckBtn("Hide Pet Health/Mana", "Hides Pet text", Panel.childPanel3, function(self, value)
@@ -912,7 +914,7 @@ function f:CreateGUI()
             end
         end)
         HidePetText:SetChecked(addon.db.HidePetText)
-        HidePetText:SetPoint("TOPLEFT", 10, -355)
+        HidePetText:SetPoint("TOPLEFT", 10, -320)
 
         local HideStanceButton = CheckBtn("Hide StanceBar", "Hides the extra buttons like that show above the actionbars like Cat Form, Stealth and Shadowform", Panel.childPanel3, function(self, value)
             addon.db.Stance = value
@@ -944,7 +946,7 @@ function f:CreateGUI()
         HideRoleButton:SetChecked(addon.db.roleIcon)
         HideRoleButton:SetPoint("TOPLEFT", 10, -145)
 
-        CreateText(Panel.childPanel1, 350, -215, "Player Chain")
+        CreateText(Panel.childPanel1, 350, -215, "Player Elite Frame")
 
         local EliteChain, RareChain, RareElite
         EliteChain = CheckBtn("Gold Elite PlayerFrame", "Show a `Gold Elite` artwork on PlayerFrame", Panel.childPanel1, function(self, value)
