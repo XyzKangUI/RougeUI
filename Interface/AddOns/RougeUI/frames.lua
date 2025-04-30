@@ -459,12 +459,16 @@ local function FrameColour()
     end
 
     if PetPaperDollFrame then
-        local _, b, c, d, e = PetPaperDollFrame:GetRegions()
-        for _, v in pairs({ b, c, d, e }) do
+        local a, b, c, d, e = PetPaperDollFrame:GetRegions()
+        for _, v in pairs({ a, b, c, d, e }) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
+    end
+
+    if PetNameText then
+        PetNameText:SetVertexColor(1, 1, 1)
     end
 
     -- TokenFrame

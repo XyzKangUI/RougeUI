@@ -28,9 +28,6 @@ local energyValues = {}
 local powerTypes = { [0] = true, [3] = true, [1] = true, [6] = true, [2] = true }
 
 local updateUnit = {}
-for i = 1, 20 do
-    updateUnit["nameplate" .. i] = true
-end
 updateUnit["target"] = true
 
 EnemyOOC.Quirks = {
@@ -126,7 +123,11 @@ EnemyOOC.Quirks = {
     [409554] = true, -- Explosive shot
     [460700] = true, -- Rain of Fire
     [11682] = true, -- Hellfire
-    [17402] = true -- Hurricane
+    [17402] = true, -- Hurricane
+    [2855] = true, -- Detect magic
+    [10953] = true, -- Mind soothe
+    [8192] = true, -- Mind soothe
+    [453] = true, -- Mind Soothe
 };
 
 EnemyOOC.Channeling = {
@@ -294,9 +295,10 @@ function EnemyOOC:ResetTimer(guid)
 end
 
 function EnemyOOC:PlateUnit(unit)
-    if not updateUnit[unit] then
+    if not unit or not UnitExists(unit) then
         return
     end
+
     local guid = UnitGUID(unit)
     if not guid then
         return
@@ -307,11 +309,17 @@ function EnemyOOC:PlateUnit(unit)
             self:StartTimer(guid)
             running[guid] = true
         end
-    elseif not UnitAffectingCombat(unit) then
+    else
         self:StopTimer(guid)
         running[guid] = false
+        oocTime[guid] = nil
+        outOfCombatTime[guid] = nil
+        if energyValues[guid] then
+            energyValues[guid].startTick = false
+        end
     end
 end
+
 
 function EnemyOOC:Predict(guid, now)
     for i = 1, #durations do
@@ -323,50 +331,45 @@ function EnemyOOC:Predict(guid, now)
 end
 
 function EnemyOOC.OnUpdate(self, elapsed)
-    local seenGUIDs = {}
-    local unitByGUID = {}
     local now = GetTime()
+    local seenGUIDs = {}
 
     for unit in pairs(updateUnit) do
-        if UnitExists(unit) and powerTypes[PowerType(unit)] then
+        if UnitExists(unit) then
             local guid = UnitGUID(unit)
             if guid and not seenGUIDs[guid] then
                 seenGUIDs[guid] = true
-                unitByGUID[guid] = unit
-                lastSeen[guid] = now
-            end
-        end
-    end
 
-    for guid, unit in pairs(unitByGUID) do
-        if not energyValues[guid] then
-            energyValues[guid] = {
-                last_tick = 0,
-                last_value = 0,
-                startTick = false,
-                validTick = false,
-            }
-        end
+                if not energyValues[guid] then
+                    energyValues[guid] = {
+                        last_tick = 0,
+                        last_value = 0,
+                        startTick = false,
+                        validTick = false,
+                    }
+                end
 
-        energyValues[guid].last_tick = energyValues[guid].last_tick + elapsed
+                energyValues[guid].last_tick = energyValues[guid].last_tick + elapsed
 
-        if energyValues[guid].last_tick >= 2.02 and energyValues[guid].startTick then
-            energyValues[guid].last_tick = 0
-            energyValues[guid].validTick = false
-            EnemyOOC:Predict(guid, now)
-        end
+                if energyValues[guid].last_tick >= 2.02 and energyValues[guid].startTick then
+                    energyValues[guid].last_tick = 0
+                    energyValues[guid].validTick = false
+                    EnemyOOC:Predict(guid, now)
+                end
 
-        if endTime[guid] and endTime[guid] <= now then
-            outOfCombatTime[guid] = endTime[guid] + 5
-            oocTime[guid] = outOfCombatTime[guid] - now
+                if endTime[guid] and endTime[guid] <= now then
+                    outOfCombatTime[guid] = endTime[guid] + 5
+                    oocTime[guid] = outOfCombatTime[guid] - now
 
-            for i = 1, #durations do
-                if expirationTime[i] and expirationTime[i][guid]
-                        and expirationTime[i][guid] >= outOfCombatTime[guid]
-                        and m_abs(outOfCombatTime[guid] - expirationTime[i][guid]) <= durations[1] then
-                    outOfCombatTime[guid] = expirationTime[i][guid]
-                    oocTime[guid] = expirationTime[i][guid] - now
-                    break
+                    for i = 1, #durations do
+                        if expirationTime[i] and expirationTime[i][guid]
+                                and expirationTime[i][guid] >= outOfCombatTime[guid]
+                                and m_abs(outOfCombatTime[guid] - expirationTime[i][guid]) <= durations[1] then
+                            outOfCombatTime[guid] = expirationTime[i][guid]
+                            oocTime[guid] = expirationTime[i][guid] - now
+                            break
+                        end
+                    end
                 end
             end
         end
@@ -493,7 +496,7 @@ function EnemyOOC:COMBAT_LOG_EVENT_UNFILTERED()
 
     -- Pet attacks keep the summoner in combat, while some pet cd's do not (mind blowing logic).
     if isEnemyPet then
-        if (not self.Pets[spellID] and eventType ~= "SWING_DAMAGE" and eventType ~= "SPELL_HEAL") then
+        if spellID ~= 6358 and (not self.Pets[spellID] and eventType ~= "SWING_DAMAGE" and eventType ~= "SPELL_HEAL") then
             return
         end
     end
@@ -674,6 +677,45 @@ function EnemyOOC:UpdateText(unit, guid)
     end
 end
 
+function EnemyOOC:NAME_PLATE_UNIT_ADDED(unit)
+    if UnitExists(unit) and UnitIsEnemy("player", unit) then
+        updateUnit[unit] = true
+    end
+end
+
+function EnemyOOC:NAME_PLATE_UNIT_REMOVED(unit)
+    if updateUnit[unit] then
+        updateUnit[unit] = nil
+    end
+end
+
+function EnemyOOC:UNIT_FLAGS(unit)
+    if not unit or not updateUnit[unit] then
+        return
+    end
+
+    local guid = UnitGUID(unit)
+    if not guid then
+        return
+    end
+
+    if not UnitAffectingCombat(unit) then
+        self:StopTimer(guid)
+        if running[guid] then
+            running[guid] = false
+        end
+        if oocTime[guid] then
+            oocTime[guid] = nil
+        end
+        if outOfCombatTime[guid] then
+            outOfCombatTime[guid] = nil
+        end
+        if energyValues[guid] then
+            energyValues[guid].startTick = false
+        end
+    end
+end
+
 EnemyOOC.event = CreateFrame("Frame")
 EnemyOOC.event:RegisterEvent("ADDON_LOADED")
 EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
@@ -688,6 +730,9 @@ EnemyOOC.event:SetScript("OnEvent", function(self, event, ...)
             EnemyOOC.event:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
             EnemyOOC.event:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
             EnemyOOC.event:RegisterEvent("UNIT_SPELLCAST_FAILED")
+            EnemyOOC.event:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+            EnemyOOC.event:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+            EnemyOOC.event:RegisterEvent("UNIT_FLAGS")
             EnemyOOC.event:SetScript("OnUpdate", EnemyOOC.OnUpdate)
 
             CreateIcon("target", TargetFrame)

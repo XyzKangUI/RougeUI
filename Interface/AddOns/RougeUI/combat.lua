@@ -40,13 +40,14 @@ local function CreateCombatIndicatorForUnit(frame)
 
         frame:RegisterEvent("UNIT_FLAGS")
         frame:HookScript("OnEvent", function(self, event)
-            if events[event] and frame:IsShown() then
-                local unit = SecureButton_GetUnit(self)
+            if events[event] and self:IsShown() then
+                local unit = self.unit
+                if not unit then return end
                 Indicator[self]:SetShown(InCombat(unit))
                 if UnitClassification(unit) ~= "normal" and not asuriFrame then
-                    ciFrame:SetPoint("LEFT", frame, "RIGHT", 0, -5)
+                    ciFrame:SetPoint("LEFT", self, "RIGHT", 0, -5)
                 else
-                    ciFrame:SetPoint("LEFT", frame, "RIGHT", -25, -5)
+                    ciFrame:SetPoint("LEFT", self, "RIGHT", -25, -5)
                 end
             end
         end)

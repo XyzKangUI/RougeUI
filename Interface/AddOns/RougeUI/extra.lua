@@ -136,7 +136,9 @@ end)
 
 manager:HookScript("OnLeave", function(self)
     local focus = GetMouseFoci()[1]
-    if not focus then return end
+    if not focus then
+        return
+    end
     if manager.collapsed and not FindParent(focus, self) then
         self:SetAlpha(0)
     end
@@ -272,7 +274,6 @@ local classificationTexture = {
     },
 }
 
-
 local function FrameTexture(frame, classification)
     local textureName = ""
 
@@ -309,7 +310,6 @@ local function FrameTexture(frame, classification)
     frame:SetTexture(textureName)
 end
 
-
 local function CheckClassification(self, forceNormalTexture)
     local classification = UnitClassification(self.unit)
     local textureName = ""
@@ -318,23 +318,6 @@ local function CheckClassification(self, forceNormalTexture)
 
     if textureName == "" then
         forceNormalTexture = true
-    end
-
-    if RougeUI.db.ClassNames then
-        local _, class = UnitClass(self.unit)
-        local c = RAID_CLASS_COLORS[class]
-        if c and UnitIsPlayer(self.unit) then
-            if isClassicEra and class == "SHAMAN" then
-                self.name:SetVertexColor(0.0, 0.44, 0.87)
-            else
-                self.name:SetVertexColor(c.r, c.g, c.b)
-            end
-            if RougeUI.db.ClassBG and not RougeUI.db.AsuriFrame then
-                self.name:SetFontObject("SystemFont_Outline_Small")
-            end
-        else
-            self.name:SetVertexColor(1, 0.81960791349411, 0, 1)
-        end
     end
 
     if RougeUI.db.NoLevel and not RougeUI.db.AsuriFrame then
@@ -593,21 +576,6 @@ local function PlayerArtThick(self)
         PlayerLevelText:Hide()
     end
 
-    if RougeUI.db.ClassNames and not RougeUI.db.AsuriFrame then
-        local _, class = UnitClass("player")
-        local c = RAID_CLASS_COLORS[class]
-        if c then
-            if isClassicEra and class == "SHAMAN" then
-                self.name:SetVertexColor(0.0, 0.44, 0.87)
-            else
-                self.name:SetVertexColor(c.r, c.g, c.b)
-            end
-            if RougeUI.db.ClassBG then
-                self.name:SetFontObject("SystemFont_Outline_Small")
-            end
-        end
-    end
-
     if RougeUI.db.RareElite then
         classification = "rareelite"
     elseif RougeUI.db.GoldElite then
@@ -670,7 +638,6 @@ local function PlayerArtThick(self)
         self.healthbar:ClearAllPoints()
         self.healthbar:SetPoint("CENTER", self, "CENTER", 50, 7)
         self.healthbar:SetHeight(16)
-
 
         if self.healthbar.LeftText then
             self.healthbar.LeftText:ClearAllPoints()
@@ -920,11 +887,6 @@ e:SetScript("OnEvent", function(self, event, ...)
             self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         end
 
-        if C_AddOnProfiler and C_AddOnProfiler.IsEnabled() and C_CVar then
-            C_CVar.RegisterCVar("addonProfilerEnabled", "1")
-            C_CVar.SetCVar("addonProfilerEnabled", "0")
-        end
-
         if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC and not IsAddOnLoaded("Precognito") then
             for _, v in pairs { PlayerFrameHealthBar, TargetFrameHealthBar, FocusFrameHealthBar } do
                 if v and v.MyHealPredictionBar then
@@ -962,14 +924,18 @@ e:SetScript("OnEvent", function(self, event, ...)
         if RougeUI.db.AsuriFrame then
             local hideToTName, hideFoTName
             hooksecurefunc(TargetFrameToT.name, "SetText", function(self)
-                if hideToTName then return end
+                if hideToTName then
+                    return
+                end
                 hideToTName = true
                 self:SetText("")
                 hideToTName = false
             end)
             if FocusFrameToT then
                 hooksecurefunc(FocusFrameToT.name, "SetText", function(self)
-                    if hideFoTName then return end
+                    if hideFoTName then
+                        return
+                    end
                     hideFoTName = true
                     self:SetText("")
                     hideFoTName = false
@@ -981,7 +947,29 @@ e:SetScript("OnEvent", function(self, event, ...)
             end
         end
 
-        if RougeUI.db.NoLevel or RougeUI.db.ThickFrames or RougeUI.db.AsuriFrame or RougeUI.db.GoldElite or RougeUI.db.RareElite or RougeUI.db.Rare or RougeUI.db.ClassNames then
+        if RougeUI.db.ClassNames then
+            hooksecurefunc("UnitFrame_Update", function(self)
+                if not self.unit or not self.name then return end
+
+                local _, class = UnitClass(self.unit)
+                local c = RAID_CLASS_COLORS[class]
+                if c and UnitIsPlayer(self.unit) then
+                    local txtFont, txtSize, outline = self.name:GetFont()
+                    if outline ~= "OUTLINE" then
+                        self.name:SetFont(txtFont, txtSize, "OUTLINE")
+                    end
+                    if class == "SHAMAN" then
+                        self.name:SetTextColor(0.0, 0.44, 0.87)
+                    else
+                        self.name:SetTextColor(c.r, c.g, c.b)
+                    end
+                else
+                    self.name:SetTextColor(1, 0.81960791349411, 0)
+                end
+            end)
+        end
+
+        if RougeUI.db.NoLevel or RougeUI.db.ThickFrames or RougeUI.db.AsuriFrame or RougeUI.db.GoldElite or RougeUI.db.RareElite or RougeUI.db.Rare then
             hooksecurefunc("PlayerFrame_ToPlayerArt", PlayerArtThick)
         end
 
@@ -1121,7 +1109,7 @@ e:SetScript("OnEvent", function(self, event, ...)
 
         OnLoad()
 
-        if RougeUI.db.ThickFrames or RougeUI.db.AsuriFrame or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3) or RougeUI.db.ClassNames then
+        if RougeUI.db.ThickFrames or RougeUI.db.AsuriFrame or RougeUI.db.NoLevel or (RougeUI.db.Colval < 0.3) then
             hooksecurefunc("TargetFrame_CheckClassification", CheckClassification)
         end
     elseif event == "PLAYER_ENTERING_WORLD" then

@@ -137,30 +137,6 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
         statusFrame.RightText:Hide();
     end
 
-    if unit then
-        if not UnitIsConnected(unit) or UnitIsDeadOrGhost(unit) then
-            textString:SetText("")
-            textString:Show()
-            if statusFrame.LeftText then
-                statusFrame.LeftText:Hide()
-            end
-            if statusFrame.RightText then
-                statusFrame.RightText:Hide()
-            end
-            local name = statusFrame:GetName()
-            if name then
-                if string.find(name, "HealthBar") then
-                    if UnitIsDeadOrGhost(unit) then
-                        textString:SetText(DEAD)
-                    else
-                        textString:SetText(PLAYER_OFFLINE)
-                    end
-                end
-            end
-            return
-        end
-    end
-
     if ((tonumber(valueMax) ~= valueMax or valueMax > 0) and not (statusFrame.pauseUpdates)) then
         statusFrame:Show();
 

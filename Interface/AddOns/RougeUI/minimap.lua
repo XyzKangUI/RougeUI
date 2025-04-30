@@ -2,9 +2,9 @@ local _, RougeUI = ...
 local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
 
 local MM = CreateFrame("Frame")
-MM:RegisterEvent("PLAYER_LOGIN")
-MM:SetScript("OnEvent", function(self, event)
-    if not (IsAddOnLoaded("SexyMap")) and event == "PLAYER_LOGIN" then
+MM:RegisterEvent("ADDON_LOADED")
+MM:SetScript("OnEvent", function(self, event, addon)
+    if not (IsAddOnLoaded("SexyMap")) and addon == "Blizzard_TimeManager" then
         TimeManagerClockButton:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
 
         if not RougeUI.db.minimapChanges then
@@ -22,22 +22,6 @@ MM:SetScript("OnEvent", function(self, event)
         if MinimapNorthTag then
             hooksecurefunc(MinimapNorthTag, "Show", MinimapNorthTag.Hide)
         end
-
-        C_Timer.After(0, function()
-            if LFGMinimapFrameBorder then
-                LFGMinimapFrameBorder:Hide()
-            end
-
-            if LFGMinimapFrame then
-                LFGMinimapFrame:SetAlpha(0)
-                LFGMinimapFrame:HookScript("OnEnter", function(self)
-                    self:SetAlpha(1)
-                end)
-                LFGMinimapFrame:HookScript("OnLeave", function(self)
-                    self:SetAlpha(0)
-                end)
-            end
-        end)
 
         for _, v in pairs({
             --MinimapBorderTop,
@@ -164,6 +148,26 @@ MM:SetScript("OnEvent", function(self, event)
         TimeManagerClockButton:SetAlpha(0)
         TimeManagerClockButton:ClearAllPoints()
         TimeManagerClockButton:SetPoint("RIGHT", MinimapZoneText, "RIGHT", 38, -1)
+    elseif not (IsAddOnLoaded("SexyMap")) and addon == "Blizzard_GroupFinder_VanillaStyle" then
+        if not RougeUI.db.minimapChanges then
+            if LFGMinimapFrameBorder then
+                LFGMinimapFrameBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        else
+            if LFGMinimapFrameBorder then
+                LFGMinimapFrameBorder:Hide()
+            end
+
+            if LFGMinimapFrame then
+                LFGMinimapFrame:SetAlpha(0)
+                LFGMinimapFrame:HookScript("OnEnter", function(self)
+                    self:SetAlpha(1)
+                end)
+                LFGMinimapFrame:HookScript("OnLeave", function(self)
+                    self:SetAlpha(0)
+                end)
+            end
+        end
     end
 end)
 

@@ -48,6 +48,15 @@ local function setFont(textString, size)
     textString:SetFont(fontType, size, "OUTLINE")
 end
 
+local backdrop = {
+    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+    edgeFile = "",
+    tile = true,
+    tileSize = 14,
+    edgeSize = 14,
+    insets = { left = -4, right = -4, top = -4, bottom = -4 },
+}
+
 local function modstyle()
     for _, t in pairs { TargetFrameSpellBar, FocusFrameSpellBar } do
         if t then
@@ -72,14 +81,25 @@ local function modstyle()
     end
 
     local cf = CastingBarFrame
-    cf.Border:SetTexture("Interface\\CastingBar\\UI-CastingBar-Border-Small")
-    cf.Border:SetWidth(cf.Border:GetWidth() + 4)
-    cf.Border:ClearAllPoints()
-    cf.Border:SetPoint("TOP", 0, 26)
-    cf.Flash:SetWidth(cf.Flash:GetWidth() + 4)
-    cf.Flash:ClearAllPoints()
-    cf.Flash:SetPoint("TOP", 0, 26)
-    cf.Flash:SetTexture("Interface\\CastingBar\\UI-CastingBar-Flash-Small")
+    cf.Border:SetTexture("")
+    Mixin(CastingBarFrame, BackdropTemplateMixin)
+    cf:SetBackdrop(backdrop)
+    cf:SetBackdropColor(0.1, 0.1, 0.1, 1)
+    cf.Flash:SetTexture("")
+    cf:SetSize(195, 18)
+    cf.Icon = cf:CreateTexture(nil, "OVERLAY")
+    cf.Icon:SetSize(22, 22)
+    cf.Icon:SetPoint("RIGHT", cf, "LEFT", -5.3, 0)
+
+    local skinEnabled = RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme
+    if not skinEnabled then
+        cf.IconBackdrop = CreateFrame("Frame", nil, cf, "BackdropTemplate")
+        cf.IconBackdrop:SetSize(18, 18)
+        cf.IconBackdrop:SetPoint("CENTER", cf.Icon, "CENTER", 0, 0)
+        cf.IconBackdrop:SetBackdrop(backdrop)
+        cf.IconBackdrop:SetBackdropColor(0.1, 0.1, 0.1, 1)
+        cf.Icon:SetParent(cf.IconBackdrop)
+    end
 
     cf.Spark:SetAlpha(0.7)
     cf.Spark:SetHeight(40)
@@ -116,6 +136,37 @@ local function TimerHook(self, elapsed)
         self.timer:SetText(strformat("%.1f", remainingTime))
         self.update = 0.1
     end
+end
+
+local function CreateAnimation(frame)
+    if not frame then
+        return
+    end
+
+    local ag = frame:CreateAnimationGroup()
+    frame.InterruptShakeAnim = ag
+    ag:SetLooping("NONE")
+    ag:SetToFinalAlpha(false)
+
+    local function AddTranslation(order, offsetX, offsetY, duration, startDelay)
+        local anim = ag:CreateAnimation("Translation")
+        anim:SetOrder(order)
+        anim:SetDuration(duration)
+        anim:SetOffset(offsetX, offsetY)
+        anim:SetSmoothing("NONE")
+        if startDelay then
+            anim:SetStartDelay(startDelay)
+        end
+        return anim
+    end
+
+    AddTranslation(1, 0, 0, 0.1)
+    AddTranslation(2, -1, 1, 0.0, 0.05)
+    AddTranslation(3, 1, -2, 0.0, 0.05)
+    AddTranslation(4, 1, 2, 0.0, 0.05)
+    AddTranslation(5, -1, -1, 0.0, 0.05)
+
+    return ag
 end
 
 local spellDurations = {}
@@ -264,6 +315,7 @@ FR:SetScript("OnEvent", function(self, event, ...)
                 end
             end)
         end
+
         if RougeUI.db.CastTimer then
             modstyle()
 
@@ -288,6 +340,16 @@ FR:SetScript("OnEvent", function(self, event, ...)
                 PurpleKoolaid(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
                     self:SetStatusBarColor(216 / 255, 31 / 255, 42 / 255)
+                end
+            end)
+
+            CreateAnimation(CastingBarFrame)
+
+            CastingBarFrame:HookScript("OnEvent", function(self, event)
+                if (self == CastingBarFrame) and (event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_INTERRUPTED") then
+                    if self.InterruptShakeAnim and not self.InterruptShakeAnim:IsPlaying() then
+                        self.InterruptShakeAnim:Play()
+                    end
                 end
             end)
         end

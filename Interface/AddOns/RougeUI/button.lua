@@ -466,6 +466,15 @@ local function init()
         FocusFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
     end
 
+    if CastingBarFrame.Icon then
+        local cf = CreateFrame("Frame", nil, CastingBarFrame, BackdropTemplateMixin and "BackdropTemplate")
+        addBorder(cf, "OVERLAY")
+        cf:SetAllPoints(CastingBarFrame.Icon)
+        CastingBarFrame.Icon:SetTexCoord(0.03, 0.97, 0.03, 0.97)
+        local zz = (RougeUI.db.Lorti and 23) or (RougeUI.db.modtheme and 25) or 24
+        CastingBarFrame.Icon:SetSize(zz, zz)
+    end
+
     -- TempEnchantFrame
     for i = 1, NUM_TEMP_ENCHANT_FRAMES do
         local bu = _G["TempEnchant" .. i]
