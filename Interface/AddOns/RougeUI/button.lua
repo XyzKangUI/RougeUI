@@ -466,7 +466,7 @@ local function init()
         FocusFrameSpellBar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
     end
 
-    if CastingBarFrame.Icon then
+    if CastingBarFrame.Icon and RougeUI.db.CastTimer then
         local cf = CreateFrame("Frame", nil, CastingBarFrame, BackdropTemplateMixin and "BackdropTemplate")
         addBorder(cf, "OVERLAY")
         cf:SetAllPoints(CastingBarFrame.Icon)
