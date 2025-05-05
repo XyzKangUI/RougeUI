@@ -76,9 +76,12 @@ local function addBorder(button, drawLayer, dbf)
         end
 
         if stealable and customStealable then
-            --stealable:SetAtlas("newplayertutorial-drag-slotblue") -- doesn't exist on 4.4.0 lets add 2mb
-            stealable:SetTexture("Interface\\AddOns\\RougeUI\\textures\\newexp")
-            stealable:SetTexCoord(0.338379, 0.412598, 0.680664, 0.829102)
+            if C_Texture and C_Texture.GetAtlasInfo("newplayertutorial-drag-slotblue") then
+                stealable:SetAtlas("newplayertutorial-drag-slotblue")
+            else
+                stealable:SetTexture("Interface\\AddOns\\RougeUI\\textures\\newexp")
+                stealable:SetTexCoord(0.338379, 0.412598, 0.680664, 0.829102)
+            end
         end
 
         border:SetTexCoord(0, 1, 0, 1)
