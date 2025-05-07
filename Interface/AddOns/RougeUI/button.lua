@@ -300,8 +300,14 @@ local function styleActionButton(bu)
     local nt2 = _G[name .. "NormalTexture2"]
     local bo = _G[name .. "Border"]
     local ho = _G[name .. "HotKey"]
-    bu.SetNormalTexture = function()
-        return
+
+    if bu.SetNormalTexture then
+        hooksecurefunc(bu, "SetNormalTexture", function(self)
+            if self.ClearedTexture then return end
+            self.ClearedTexture = true
+            self:SetNormalTexture("")
+            self.ClearedTexture = false
+        end)
     end
 
     if nt then
@@ -394,6 +400,7 @@ local function init()
     -- Actionbars
     for i = 1, 12 do
         styleActionButton(_G["ActionButton" .. i])
+        styleActionButton(_G["BonusActionButton" .. i])
         styleActionButton(_G["MultiBarRightButton" .. i])
         styleActionButton(_G["MultiBarLeftButton" .. i])
         styleActionButton(_G["MultiBarBottomLeftButton" .. i])
@@ -545,14 +552,6 @@ local function HookAuras()
     end
 end
 
-local function shorten(val)
-    if val >= 1e3 then
-        return string.format("%dk", floor((val / 1e3) + 0.5))
-    else
-        return tostring(val)
-    end
-end
-
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event, ...)
@@ -561,11 +560,6 @@ e3:SetScript("OnEvent", function(self, event, ...)
         if skinEnabled or RougeUI.db.TimerGap or RougeUI.db.OmniCC then
             if RougeUI.db.OmniCC or not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
                 hooksecurefunc("AuraButton_UpdateDuration", TimeFormat)
-            end
-
-            if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-                self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-                self:RegisterEvent("PLAYER_ENTERING_WORLD")
             end
 
             if skinEnabled then

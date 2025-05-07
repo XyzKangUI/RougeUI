@@ -79,24 +79,10 @@ local function FrameColour()
         StanceBarLeft,
         StanceBarMiddle,
         StanceBarRight,
-        GameMenuFrameHeader,
-        GameMenuFrame.BottomEdge,
-        GameMenuFrame.BottomLeftCorner,
-        GameMenuFrame.BottomRightCorner,
-        GameMenuFrame.LeftEdge,
-        GameMenuFrame.RightEdge,
-        GameMenuFrame.TopEdge,
-        GameMenuFrame.TopLeftCorner,
-        GameMenuFrame.TopRightCorner,
         InterfaceOptionsFrameHeader,
-        InterfaceOptionsFrame.BottomEdge,
-        InterfaceOptionsFrame.BottomLeftCorner,
-        InterfaceOptionsFrame.BottomRightCorner,
-        InterfaceOptionsFrame.LeftEdge,
-        InterfaceOptionsFrame.RightEdge,
-        InterfaceOptionsFrame.TopEdge,
-        InterfaceOptionsFrame.TopLeftCorner,
-        InterfaceOptionsFrame.TopRightCorner,
+        InterfaceOptionsFrameTabSpacer,
+        InterfaceOptionsFrameTabSpacer1,
+        InterfaceOptionsFrameTabSpacer2,
         VideoOptionsFrameHeader,
         VideoOptionsFrame.BottomEdge,
         VideoOptionsFrame.BottomLeftCorner,
@@ -217,7 +203,8 @@ local function FrameColour()
         MerchantFrameBottomRightBorder,
         MerchantFrameBottomLeftBorder,
         MerchantFrameButtonBottomBorder,
-        MerchantFrameBg
+        MerchantFrameBg,
+        ShapeshiftBarFrame:GetRegions()
     }) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
@@ -426,12 +413,10 @@ local function FrameColour()
     end
 
     -- Social Frame
-    if FriendsFrame and FriendsFrameInset and WhoFrameListInset then
+    if FriendsFrame then
         local a, b, c, d, e, f, g, _, i, j, k, l, n, o, p, q, r, _, _ = FriendsFrame:GetRegions()
         for _, v in pairs({
-            a, b, c, d, e, f, g, i, j, k, l, n, o, p, q, r,
-            FriendsFrameInset:GetRegions(),
-            WhoFrameListInset:GetRegions()
+            b, c, d, e, g, i, j, k, l, n, o, p, q, r,
         }) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
@@ -564,45 +549,11 @@ local function FrameColour()
         GameTooltip:SetBackdropBorderColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 
-    if GetBuildInfo() == "3.4.3" then
-        -- Blizz lack of quality control
-        MainMenuExpBar:SetSize(1034, 13);
-        MainMenuXPBarTexture0:SetSize(262, 10);
-        MainMenuXPBarTexture1:SetSize(262, 10);
-        MainMenuXPBarTexture2:SetSize(262, 10);
-        MainMenuXPBarTexture3:SetSize(262, 10);
-        MainMenuXPBarTexture0:SetPoint("BOTTOM", -391, 3);
-        MainMenuXPBarTexture1:SetPoint("BOTTOM", -130, 3);
-        MainMenuXPBarTexture2:SetPoint("BOTTOM", 130, 3);
-        MainMenuXPBarTexture3:SetPoint("BOTTOM", 391, 3);
-        MainMenuMaxLevelBar0:SetPoint("CENTER", -391, 4)
-        MainMenuMaxLevelBar0:SetSize(261, 7)
-        MainMenuMaxLevelBar1:SetSize(261, 7)
-        MainMenuMaxLevelBar2:SetSize(261, 7)
-        MainMenuMaxLevelBar3:SetSize(261, 7)
-        MainMenuBarTextureExtender:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-
-        if PVEFrame then
-            for _, region in pairs({ PVEFrame:GetRegions() }) do
-                if region and region:IsObjectType("Texture") then
-                    region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-                end
+    if LFDParentFrame then
+        for _, region in pairs({ LFDParentFrame:GetRegions() }) do
+            if region and region:IsObjectType("Texture") then
+                region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
-            for _, region in pairs({ PVEFrame.shadows:GetRegions() }) do
-                if region and region:IsObjectType("Texture") then
-                    region:SetVertexColor(0, 0, 0)
-                end
-            end
-            for _, region in pairs({ LFDParentFrame:GetRegions() }) do
-                if region and region:IsObjectType("Texture") then
-                    region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-                end
-            end
-            LFDQueueFrameFindGroupButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            LFDQueueFrameFindGroupButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            LFGListFrame.CategorySelection.FindGroupButton.LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            LFGListFrame.CategorySelection.StartGroupButton.RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PVEFramePortrait:SetVertexColor(1, 1, 1)
         end
     end
 
