@@ -92,7 +92,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         end
 
         MiniMapMailFrame:ClearAllPoints()
-        MiniMapMailFrame:SetPoint("TOPLEFT", -25, 5)
+        MiniMapMailFrame:SetPoint("TOPRIGHT", 6.5, -15)
         MiniMapMailIcon:SetTexture("Interface\\AddOns\\RougeUI\\textures\\mailicon")
 
         if MiniMapTracking and MiniMapTrackingButton then
@@ -131,10 +131,14 @@ MM:SetScript("OnEvent", function(self, event, addon)
         end
 
         -- Square minimap
+        local MinimapSize = 175
         Minimap:SetMaskTexture("Interface\\AddOns\\RougeUI\\textures\\rectangle")
         MinimapBorderTop:SetTexture(0)
-        Minimap:SetSize(165, 165)
-        Minimap:SetHitRectInsets(0, 0, 18, 18)
+        Minimap:SetSize(MinimapSize, MinimapSize) -- limit
+        Minimap:SetHitRectInsets(0, 0, 24, 24)
+        local p, r, rp, ofx, ofy = Minimap:GetPoint()
+        Minimap:ClearAllPoints()
+        Minimap:SetPoint(p, r, rp, ofx - 10, ofy)
 
         -- New border
         local bg = CreateFrame("Frame", nil, Minimap, "BackdropTemplate")
@@ -147,7 +151,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         local topbg = CreateFrame("Frame", nil, MinimapCluster, "BackdropTemplate")
         topbg:SetParent(MinimapCluster)
         topbg:SetPoint("TOP", Minimap, "BOTTOM", 0, 21)
-        topbg:SetSize(167, 15)
+        topbg:SetSize(MinimapSize + 2, 15)
         topbg:SetBackdrop({ bgFile = "Interface\\ChatFrame\\CHATFRAMEBACKGROUND", edgeFile = "Interface\\ChatFrame\\CHATFRAMEBACKGROUND", edgeSize = 2 })
         topbg:SetBackdropBorderColor(0.1, 0.1, 0.1, 0.5)
         topbg:SetBackdropColor(0.1, 0.1, 0.1, 0.3)
@@ -163,7 +167,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         TimeManagerClockButton:SetAlpha(0)
         TimeManagerClockButton:ClearAllPoints()
         TimeManagerClockButton:SetWidth(42)
-        TimeManagerClockButton:SetPoint("LEFT", MinimapZoneText, "LEFT", -52, -1)
+        TimeManagerClockButton:SetPoint("LEFT", MinimapZoneText, "LEFT", -52, 0)
 
         -- ZoneText
         MinimapZoneText:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
@@ -171,9 +175,11 @@ MM:SetScript("OnEvent", function(self, event, addon)
             ToggleMinimap()
         end)
         MinimapZoneTextButton:ClearAllPoints()
-        MinimapZoneTextButton:SetPoint("CENTER", topbg, "BOTTOMRIGHT", -60, 7)
+        MinimapZoneTextButton:SetPoint("RIGHT", topbg, "RIGHT", 2, -1)
         MinimapZoneText:SetJustifyH("RIGHT")
         MinimapZoneText:SetWidth(120)
+        MinimapZoneText:ClearAllPoints()
+        MinimapZoneText:SetPoint("RIGHT", topbg, "RIGHT", 0, 0)
 
         -- PVP Button
         MiniMapBattlefieldBorder:Hide()
@@ -192,7 +198,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         -- Reposition LFG Button
         if MiniMapLFGFrame then
             MiniMapLFGFrame:ClearAllPoints()
-            MiniMapLFGFrame:SetPoint("TOPLEFT", MinimapBackdrop, "TOPLEFT", 8, 4)
+            MiniMapLFGFrame:SetPoint("TOPLEFT", Minimap, "TOPLEFT", -14, -6)
             MiniMapLFGFrameBorder:Hide()
         end
 
@@ -202,10 +208,9 @@ MM:SetScript("OnEvent", function(self, event, addon)
             if overflowCheck then return end
             overflowCheck = true
             local p, re, rel, xOff, yOff = self:GetPoint()
-            if p == "TOPRIGHT" and re == MinimapCluster and rel == "TOPLEFT" and xOff == -10 and yOff == -13 then
+            if p == "TOPRIGHT" and re == MinimapCluster and rel == "TOPLEFT" and math.floor(xOff) == -10 and math.ceil(yOff) == -13 then
                 self:ClearAllPoints()
-                self:SetPoint("TOPRIGHT", MinimapCluster, "TOPLEFT", -10, -30)
-            else
+                self:SetPoint(p, re, rel, xOff, -26)
             end
             overflowCheck = false
         end)
@@ -247,6 +252,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         local buttonsPerRow = 6
         local spacing = 32
         local scale = 0.9
+        local allButtons = {}
         local showingButtons = false
 
         local buttonAnchor = CreateFrame("Frame", "RougeMMAnchor", MinimapCluster)
@@ -255,12 +261,9 @@ MM:SetScript("OnEvent", function(self, event, addon)
         buttonAnchor:Hide()
 
         local function ShowMinimapButtons()
-            local buttonNames = LibDBIcon:GetButtonList()
             local row, col = 0, 0
-
-            for i = 1, #buttonNames do
-                local button = LibDBIcon:GetMinimapButton(buttonNames[i])
-                if button then
+            for _, button in ipairs(allButtons) do
+                if button and button:IsObjectType("Button") then
                     button:ClearAllPoints()
                     button:SetPoint("TOPLEFT", buttonAnchor, "TOPLEFT", col * spacing, -row * spacing)
                     button:SetParent(buttonAnchor)
@@ -275,30 +278,67 @@ MM:SetScript("OnEvent", function(self, event, addon)
                 end
             end
             buttonAnchor:Show()
+            showingButtons = true
         end
 
         local function HideMinimapButtons()
-            local buttonNames = LibDBIcon:GetButtonList()
-            for i = 1, #buttonNames do
-                local button = LibDBIcon:GetMinimapButton(buttonNames[i])
-                if button then button:Hide() end
+            for _, button in ipairs(allButtons) do
+                if button and button:IsObjectType("Button") then
+                    button:Hide()
+                end
             end
             buttonAnchor:Hide()
+            showingButtons = false
+        end
+
+        local drawLayerOrder = {
+            BACKGROUND = 1,
+            BORDER = 2,
+            ARTWORK = 3,
+            OVERLAY = 4,
+            HIGHLIGHT = 5
+        }
+
+        local function FindIconAndBorder(button)
+            local textures = {}
+            for _, region in ipairs({ button:GetRegions() }) do
+                if region:IsObjectType("Texture") then
+                    local layer = region:GetDrawLayer()
+                    table.insert(textures, {
+                        texture = region,
+                        layer = drawLayerOrder[layer or ""] or 99
+                    })
+                end
+            end
+
+            table.sort(textures, function(a, b)
+                return a.layer < b.layer
+            end)
+
+            local icon, borderIcon
+            if textures[1] then icon = textures[1].texture end
+            if textures[2] and textures[2].layer > textures[1].layer then
+                borderIcon = textures[2].texture
+            end
+
+            return icon, borderIcon
         end
 
         C_Timer.After(0, function()
-            local buttonNames = LibDBIcon:GetButtonList()
             local redSack = nil
-            for _, name in ipairs(buttonNames) do
-                local button = LibDBIcon:GetMinimapButton(name)
-                if button then
+
+            -- LibDBIcon buttons
+            for name, button in pairs(LibDBIcon.objects or {}) do
+                if button and button:IsObjectType("Button") and button:GetName() and button:GetName():match("^LibDBIcon10_") then
+                    table.insert(allButtons, button)
                     button:Hide()
 
                     local regions = { button:GetRegions() }
-                    local icon = button.icon
+                    local icon = button.icon or regions[3]
                     local borderIcon = regions[2]
 
-                    if name == "BugSack" then
+                    -- Bugsack hook
+                    if name == "BugSack" and BugSack then
                         hooksecurefunc(BugSack, "UpdateDisplay", function()
                             if not buttonAnchor:IsShown() then
                                 if not redSack then
@@ -310,6 +350,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
                                     button:ClearAllPoints()
                                     button:SetParent(Minimap)
                                     button:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", 10, -5)
+                                    button:SetFrameLevel(999)
                                     button:Show()
                                 else
                                     ShowMinimapButtons()
@@ -342,6 +383,54 @@ MM:SetScript("OnEvent", function(self, event, addon)
                     end
                 end
             end
+
+            -- Collect other minimap buttons
+            for _, child in ipairs({ Minimap:GetChildren() }) do
+                if child:IsObjectType("Button")
+                        and not child:IsProtected()
+                        and child:HasScript("OnClick")
+                        and child:GetWidth() <= 35
+                        and child:GetHeight() <= 35
+                        and (not child:GetName() or not child:GetName():match("^LibDBIcon10_"))
+                        and child:IsShown()
+                then
+                    local name = child:GetName() or ""
+                    if not name:find("GameTimeFrame") and not name:find("Zoom") and not name:find("MiniMapTrackingButton") then
+                        table.insert(allButtons, child)
+                        child:Hide()
+
+                        local icon, borderIcon = FindIconAndBorder(child)
+
+                        -- Styling
+                        borderIcon = borderIcon or child:CreateTexture(nil, "OVERLAY", nil, 1)
+
+                        if borderIcon then
+                            borderIcon:SetTexture("Interface\\AddOns\\RougeUI\\textures\\artifactforge")
+                            borderIcon:SetTexCoord(0.216797, 0.324219, 0.826172, 0.879883)
+                            borderIcon:ClearAllPoints()
+                            borderIcon:SetPoint("CENTER", child, "CENTER")
+                            borderIcon:SetSize(28, 28)
+                            borderIcon:SetDrawLayer("OVERLAY", 1)
+                            borderIcon:Show()
+                            borderIcon:SetVertexColor(0.1, 0.1, 0.1, 1.0)
+                        end
+
+                        local bgTex = child:CreateTexture(nil, "BACKGROUND", nil, -8)
+                        bgTex:SetColorTexture(0, 0, 0, 0.7)
+                        bgTex:SetSize(22, 22)
+                        bgTex:SetPoint("CENTER", child, "CENTER")
+
+                        if icon then
+                            icon:ClearAllPoints()
+                            icon:SetPoint("CENTER", child, "CENTER")
+                            icon:SetSize(22, 22)
+                            icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+                        end
+                    end
+                end
+            end
+
+            HideMinimapButtons()
         end)
 
         local toggleTrigger = CreateFrame("Frame", nil, topbg)
@@ -390,7 +479,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
 
         Minimap:HookScript("OnHide", function()
             topbg:ClearAllPoints()
-            topbg:SetPoint("TOP", MinimapCluster, "TOP", 9, -30)
+            topbg:SetPoint("TOP", MinimapCluster, "TOP", 0, -25)
 
             toggleTrigger:ClearAllPoints()
             toggleTrigger:SetPoint("TOPLEFT", topbg, "TOPLEFT", -20, 3)
@@ -431,6 +520,8 @@ MM:SetScript("OnEvent", function(self, event, addon)
             end
         end)
 
+        -- for other addons
+        function GetMinimapShape() return "SQUARE" end
     elseif not (IsAddOnLoaded("SexyMap")) and addon == "Blizzard_GroupFinder_VanillaStyle" then
         if not RougeUI.db.minimapChanges then
             if LFGMinimapFrameBorder then
@@ -449,7 +540,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
 
             -- Move to topleft corner
             frame:ClearAllPoints()
-            frame:SetPoint("TOPLEFT", MinimapBackdrop, "TOPLEFT", 8, 4)
+            frame:SetPoint("TOPLEFT", Minimap, "TOPLEFT", -14, -6)
 
             -- Mouseover hide/show
             frame:HookScript("OnEnter", function(self)

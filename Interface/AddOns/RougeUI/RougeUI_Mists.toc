@@ -1,5 +1,5 @@
-## Interface: 40400, 40401, 40402, 40403
-## Title: |cff009cffRougeUI-Cataclysm|r
+## Interface: 50500
+## Title: |cff009cffRougeUI-Mist|r
 ## Version: 4.22
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
@@ -18,7 +18,6 @@ auras.lua
 retab.lua
 minimap.lua
 button.lua
-energy.lua
 outlines.lua
 snowfallkey.lua
 sappable.lua

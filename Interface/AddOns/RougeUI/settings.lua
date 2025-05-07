@@ -227,7 +227,7 @@ function f:CreateGUI()
 
         CreateText(Panel.childPanel1, 10, -40, "Class colored indicators")
 
-        local ClassPortraitButton = CheckBtn("Enable Class Portraits", "Turn this on to display class portrait on target and focus frame", Panel.childPanel1, function(self, value)
+        local ClassPortraitButton = CheckBtn("Class Portraits", "Turn this on to display class portrait frames", Panel.childPanel1, function(self, value)
             addon.db.Class_Portrait = value
         end)
         ClassPortraitButton:SetChecked(addon.db.Class_Portrait)
@@ -240,7 +240,7 @@ function f:CreateGUI()
         ClassHPButton:SetChecked(addon.db.ClassHP)
         ClassHPButton:SetPoint("TOPLEFT", 10, -75)
 
-        GradientHPButton = CheckBtn("Enable Gradient HealthBar", "This changes the healthBar color from green > yellow > orange > red based on the current percentage", Panel.childPanel4, function(self, value)
+        GradientHPButton = CheckBtn("Enable Smooth Color Gradient on Healthbar", "This changes the healthBar color from green > yellow > orange > red based on the current percentage", Panel.childPanel4, function(self, value)
             addon.db.GradientHP = value
             addon.db.ClassHP = false
             addon.db.unithp = false
@@ -250,7 +250,7 @@ function f:CreateGUI()
         GradientHPButton:SetChecked(addon.db.GradientHP)
         GradientHPButton:SetPoint("TOPLEFT", 10, -110)
 
-        UnitHPButton = CheckBtn("Color HealthBar by Unit's Reaction", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value)
+        UnitHPButton = CheckBtn("Color HealthBar based on Unit Status", "This will change the healthBar color to red (hostile), green (friendly) or yellow (neutral)", Panel.childPanel4, function(self, value)
             addon.db.unithp = value
         end)
         UnitHPButton:SetChecked(addon.db.unithp)
@@ -259,7 +259,7 @@ function f:CreateGUI()
         CreateText(Panel.childPanel1, 10, -210, "StatusText")
 
         local ShortNumericButton, AbbButton
-        ShortNumericButton = CheckBtn("Display HP/Mana Text as '10k'", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value)
+        ShortNumericButton = CheckBtn("Shorten HP/Mana Numbers", "Enabling this will shorten health/mana text values to one decimal", Panel.childPanel1, function(self, value)
             addon.db.ShortNumeric = value
             addon.db.Abbreviate = false
             AbbButton:SetChecked(addon.db.Abbreviate)
@@ -267,7 +267,7 @@ function f:CreateGUI()
         ShortNumericButton:SetChecked(addon.db.ShortNumeric)
         ShortNumericButton:SetPoint("TOPLEFT", 10, -245)
 
-        AbbButton = CheckBtn("Display only CURRENT HP/Mana Text", "This will show the HP/Mana StatusText as CURRENT value instead of CURRENT / MAX", Panel.childPanel1, function(self, value)
+        AbbButton = CheckBtn("Show only CURRENT HP/Mana Text", "This will show the HP/Mana StatusText as CURRENT value instead of CURRENT / MAX", Panel.childPanel1, function(self, value)
             addon.db.Abbreviate = value
             addon.db.ShortNumeric = false
             ShortNumericButton:SetChecked(addon.db.ShortNumeric)
@@ -281,7 +281,7 @@ function f:CreateGUI()
         PartyTextButton:SetChecked(addon.db.PartyText)
         PartyTextButton:SetPoint("TOPLEFT", 10, -315)
 
-        local defaultFontButton = CheckBtn("Retail statusText font", "This changes the WoW font to a retail look", Panel.childPanel1, function(self, value)
+        local defaultFontButton = CheckBtn("Retail's text font", "This changes the WoW font to a retail look", Panel.childPanel1, function(self, value)
             addon.db.defaultFont = value
         end)
         defaultFontButton:SetChecked(addon.db.defaultFont)
@@ -295,8 +295,13 @@ function f:CreateGUI()
         SmoothFrameButton:SetChecked(addon.db.smooth)
         SmoothFrameButton:SetPoint("TOPLEFT", 10, -180)
 
-        local PimpFrameButton = CheckBtn("Purple Manabar", "Pimps your manabar to a purple color", Panel.childPanel4, function(self, value)
+        local ColorPickerButton
+        local PimpFrameButton = CheckBtn("Recolor manabar", "Enables a color pick wheel to change the manabar color", Panel.childPanel4, function(self, value)
             addon.db.pimp = value
+            ColorPickerButton:SetShown(value)
+            if value == true then
+                print("Reload to apply the manabar color change fully.")
+            end
         end)
         PimpFrameButton:SetChecked(addon.db.pimp)
         PimpFrameButton:SetPoint("TOPLEFT", 10, -40)
@@ -375,7 +380,7 @@ function f:CreateGUI()
         Nolvl:SetChecked(addon.db.NoLevel)
         Nolvl:SetPoint("TOPLEFT", 350, -175)
 
-        local ModPlates = CheckBtn("Change Nameplate Style", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
+        local ModPlates = CheckBtn("Custom Nameplates", "This will slightly alter the original nameplate style", Panel.childPanel5, function(self, value)
             addon.db.ModPlates = value
         end)
         ModPlates:SetChecked(addon.db.ModPlates)
@@ -415,11 +420,11 @@ function f:CreateGUI()
         FadePVPICON.textLow:SetText(floor(FadePVPICON.minValue))
         FadePVPICON.textHigh:SetText(floor(FadePVPICON.maxValue))
         FadePVPICON:SetValue(addon.db.FadePvPIcon)
-        FadePVPICON.text:SetText("PvP Icon opacity: " .. format("%.2f", FadePVPICON:GetValue(addon.db.FadePvPIcon)))
+        FadePVPICON.text:SetText("PvP Icon transparency: " .. format("%.2f", FadePVPICON:GetValue(addon.db.FadePvPIcon)))
         FadePVPICON:SetValueStep(0.05)
         FadePVPICON:SetObeyStepOnDrag(true);
         FadePVPICON:SetScript("OnValueChanged", function(_, value)
-            FadePVPICON.text:SetText("PvP Icon opacity: " .. RoundNumbers(addon.db.FadePvPIcon, 0.05))
+            FadePVPICON.text:SetText("PvP Icon transparency: " .. RoundNumbers(addon.db.FadePvPIcon, 0.05))
             addon.db.FadePvPIcon = value
             addon.PvPIcon()
         end)
@@ -524,11 +529,11 @@ function f:CreateGUI()
         FontSizeSlider.textLow:SetText(FontSizeSlider.minValue)
         FontSizeSlider.textHigh:SetText(FontSizeSlider.maxValue)
         FontSizeSlider:SetValue(addon.db.HPFontSize)
-        FontSizeSlider.text:SetText("Health Font Size " .. FontSizeSlider:GetValue(addon.db.HPFontSize))
+        FontSizeSlider.text:SetText("HealthText Size " .. FontSizeSlider:GetValue(addon.db.HPFontSize))
         FontSizeSlider:SetValueStep(1)
         FontSizeSlider:SetObeyStepOnDrag(true);
         FontSizeSlider:SetScript("OnValueChanged", function(self)
-            self.text:SetText("Health Font Size: " .. self:GetValue(addon.db.HPFontSize))
+            self.text:SetText("HealthText Size: " .. self:GetValue(addon.db.HPFontSize))
             addon.db.HPFontSize = self:GetValue()
             addon.RougeUIF:CusFonts()
         end)
@@ -548,11 +553,11 @@ function f:CreateGUI()
         MFontSizeSlider.textLow:SetText(MFontSizeSlider.minValue)
         MFontSizeSlider.textHigh:SetText(MFontSizeSlider.maxValue)
         MFontSizeSlider:SetValue(addon.db.ManaFontSize)
-        MFontSizeSlider.text:SetText("Mana Font Size " .. MFontSizeSlider:GetValue(addon.db.ManaFontSize))
+        MFontSizeSlider.text:SetText("ManaText Size " .. MFontSizeSlider:GetValue(addon.db.ManaFontSize))
         MFontSizeSlider:SetValueStep(1)
         MFontSizeSlider:SetObeyStepOnDrag(true);
         MFontSizeSlider:SetScript("OnValueChanged", function(self)
-            self.text:SetText("Mana Font Size: " .. self:GetValue(addon.db.ManaFontSize))
+            self.text:SetText("ManaText Size: " .. self:GetValue(addon.db.ManaFontSize))
             addon.db.ManaFontSize = self:GetValue()
             addon.RougeUIF:CusFonts()
         end)
@@ -577,13 +582,13 @@ function f:CreateGUI()
         TargetPlayerBuffSizeSlider.textLow:SetText(TargetPlayerBuffSizeSlider.minValue)
         TargetPlayerBuffSizeSlider.textHigh:SetText(TargetPlayerBuffSizeSlider.maxValue)
         TargetPlayerBuffSizeSlider:SetValue(addon.db.SelfSize)
-        TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(addon.db.SelfSize)));
+        TargetPlayerBuffSizeSlider.text:SetText("Auras cast by me: " .. format("%.f", TargetPlayerBuffSizeSlider:GetValue(addon.db.SelfSize)));
         TargetPlayerBuffSizeSlider:SetValueStep(1)
         TargetPlayerBuffSizeSlider:SetObeyStepOnDrag(true);
         TargetPlayerBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.SelfSize ~= value then
                 addon.db.SelfSize = value;
-                TargetPlayerBuffSizeSlider.text:SetText("Personal aura size: " .. RoundNumbers(addon.db.SelfSize, 1))
+                TargetPlayerBuffSizeSlider.text:SetText("Auras cast by me: " .. RoundNumbers(addon.db.SelfSize, 1))
                 addon.RougeUIF:SetCustomBuffSize()
             end
         end)
@@ -609,12 +614,12 @@ function f:CreateGUI()
         TargetBuffSizeSlider.textLow:SetText(floor(TargetBuffSizeSlider.minValue))
         TargetBuffSizeSlider.textHigh:SetText(floor(TargetBuffSizeSlider.maxValue))
         TargetBuffSizeSlider:SetValue(addon.db.OtherBuffSize)
-        TargetBuffSizeSlider.text:SetText("Target Aura Size: " .. format("%.f", TargetBuffSizeSlider:GetValue(addon.db.OtherBuffSize)));
+        TargetBuffSizeSlider.text:SetText("Auras cast by others: " .. format("%.f", TargetBuffSizeSlider:GetValue(addon.db.OtherBuffSize)));
         TargetBuffSizeSlider:SetObeyStepOnDrag(true);
         TargetBuffSizeSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.OtherBuffSize ~= value then
                 addon.db.OtherBuffSize = value;
-                TargetBuffSizeSlider.text:SetText("Target Buff Size: " .. RoundNumbers(addon.db.OtherBuffSize, 1))
+                TargetBuffSizeSlider.text:SetText("Auras cast by others: " .. RoundNumbers(addon.db.OtherBuffSize, 1))
                 addon.RougeUIF:SetCustomBuffSize()
             end
         end)
@@ -634,11 +639,11 @@ function f:CreateGUI()
         ColorValueSlider.textLow:SetText(floor(ColorValueSlider.minValue))
         ColorValueSlider.textHigh:SetText(floor(ColorValueSlider.maxValue))
         ColorValueSlider:SetValue(addon.db.Colval)
-        ColorValueSlider.text:SetText("UI Brightness: " .. format("%.2f", ColorValueSlider:GetValue(addon.db.Colval)))
+        ColorValueSlider.text:SetText("UI Frame Dark-to-Light: " .. format("%.2f", ColorValueSlider:GetValue(addon.db.Colval)))
         ColorValueSlider:SetValueStep(0.05)
         ColorValueSlider:SetObeyStepOnDrag(true);
         ColorValueSlider:SetScript("OnValueChanged", function(_, value)
-            ColorValueSlider.text:SetText("UI Brightness: " .. RoundNumbers(addon.db.Colval, 0.05))
+            ColorValueSlider.text:SetText("UI Frame Dark-to-Light: " .. RoundNumbers(addon.db.Colval, 0.05))
             addon.db.Colval = value
             addon.RougeUIF:ChangeFrameColors()
         end)
@@ -691,12 +696,12 @@ function f:CreateGUI()
         AuraRowSlider.textLow:SetText(floor(AuraRowSlider.minValue))
         AuraRowSlider.textHigh:SetText(floor(AuraRowSlider.maxValue))
         AuraRowSlider:SetValue(addon.db.AuraRow)
-        AuraRowSlider.text:SetText("Aura Row Width Size: " .. format("%.f", AuraRowSlider:GetValue(addon.db.AuraRow)));
+        AuraRowSlider.text:SetText("Auras per row (width size): " .. format("%.f", AuraRowSlider:GetValue(addon.db.AuraRow)));
         AuraRowSlider:SetObeyStepOnDrag(true);
         AuraRowSlider:SetScript("OnValueChanged", function(_, value)
             if addon.db.AuraRow ~= value then
                 addon.db.AuraRow = value;
-                AuraRowSlider.text:SetText("Aura Row Width Size: " .. RoundNumbers(addon.db.AuraRow, 1))
+                AuraRowSlider.text:SetText("Auras per row (width size): " .. RoundNumbers(addon.db.AuraRow, 1))
                 addon.RougeUIF:SetCustomBuffSize()
             end
         end)
@@ -706,7 +711,7 @@ function f:CreateGUI()
         CreateText(Panel.childPanel2, 10, -40, "PvP Tweaks")
 
         --if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local EnemyTicksButton = CheckBtn("Out of Combat Timer", "Track when your target/focus will leave combat (only tracks energy/mana users in arena)", Panel.childPanel2, function(self, value)
+            local EnemyTicksButton = CheckBtn("Enemy Out of Combat Countdown", "Shows how long until the enemy leaves combat.", Panel.childPanel2, function(self, value)
                 addon.db.EnemyTicks = value
             end)
             EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
@@ -720,7 +725,7 @@ function f:CreateGUI()
         --end
 
         if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-            local PSTrackBtn = CheckBtn("CC Absorb Tracker", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default Blizzard nameplate", Panel.childPanel2, function(self, value)
+            local PSTrackBtn = CheckBtn("Crowd control absorb threshold", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default Blizzard nameplate", Panel.childPanel2, function(self, value)
                 addon.db.PSTrack = value
             end)
             PSTrackBtn:SetChecked(addon.db.PSTrack)
@@ -793,7 +798,7 @@ function f:CreateGUI()
         ButtonAnim:SetChecked(addon.db.ButtonAnim)
         ButtonAnim:SetPoint("TOPLEFT", 350, -210)
 
-        local Echo = CheckBtn("WannabeAHK", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
+        local Echo = CheckBtn("Wannabe AutoHotKey", "Doubles your keypresses - Works with Default/Dominos/Bartender4 actionbars", Panel.childPanel2, function(self, value)
             addon.db.KeyEcho = value
         end)
         Echo:SetChecked(addon.db.KeyEcho)
@@ -827,7 +832,7 @@ function f:CreateGUI()
             SliceButton:SetPoint("TOPLEFT", 350, -400)
         end
 
-        local CastTimerButton = CheckBtn("Customized Castbar", "Styles the Target/FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
+        local CastTimerButton = CheckBtn("Custom Castbar", "Styles the Player, Target and FocusFrame castbar and adds a timer", Panel.childPanel5, function(self, value)
             addon.db.CastTimer = value
         end)
         CastTimerButton:SetChecked(addon.db.CastTimer)
@@ -854,7 +859,7 @@ function f:CreateGUI()
         TimerButton:SetChecked(addon.db.TimerGap)
         TimerButton:SetPoint("TOPLEFT", 10, -320)
 
-        local BuffAlphaButton = CheckBtn("Disable BuffFrame fading animation", "Disable the pulsing effect on buffs and debuffs", Panel.childPanel2, function(self, value)
+        local BuffAlphaButton = CheckBtn("Disable fading animation on Buffs and Debuffs", "Disable the pulsing effect on buffs and debuffs", Panel.childPanel2, function(self, value)
             addon.db.BuffAlpha = value
         end)
         BuffAlphaButton:SetChecked(addon.db.BuffAlpha)
@@ -878,19 +883,19 @@ function f:CreateGUI()
 
         --childPanel3
 
-        local HideGlowsButton = CheckBtn("Hide glowing effects on PlayerFrame", "Hides the yellow and red glowing when resting or being attacked on PlayerFrame", Panel.childPanel3, function(self, value)
+        local HideGlowsButton = CheckBtn("Hide glow on player frame", "Hides the yellow and red glowing when resting or being attacked on PlayerFrame", Panel.childPanel3, function(self, value)
             addon.db.HideGlows = value
         end)
         HideGlowsButton:SetChecked(addon.db.HideGlows)
         HideGlowsButton:SetPoint("TOPLEFT", 10, -40)
 
-        local HideIndicatorButton = CheckBtn("Hide Combat Text on Portrait", "Hides the player and pet combat text on portraits", Panel.childPanel3, function(self, value)
+        local HideIndicatorButton = CheckBtn("Hide CombatText spam on portrait", "Hides the player and pet combat text on portraits", Panel.childPanel3, function(self, value)
             addon.db.HideIndicator = value
         end)
         HideIndicatorButton:SetChecked(addon.db.HideIndicator)
         HideIndicatorButton:SetPoint("TOPLEFT", 10, -75)
 
-        local HideTitlesButton = CheckBtn("Hide Group/Raid text", "Hides the Group/Raid text showing on top of frames", Panel.childPanel3, function(self, value)
+        local HideTitlesButton = CheckBtn("Hide Group/Raid text", "Hides the Group/Raid text showing on top of raid frames", Panel.childPanel3, function(self, value)
             addon.db.HideTitles = value
         end)
         HideTitlesButton:SetChecked(addon.db.HideTitles)
@@ -978,6 +983,50 @@ function f:CreateGUI()
         end)
         RareElite:SetChecked(addon.db.RareElite)
         RareElite:SetPoint("TOPLEFT", 350, -320)
+
+        ColorPickerButton = CreateFrame("Button", nil, Panel.childPanel4, "UIPanelButtonTemplate")
+        ColorPickerButton:SetPoint("TOPLEFT", 180, -40)
+        ColorPickerButton:SetSize(140, 25)
+        ColorPickerButton:SetText("Set Manabar Color")
+        if addon.db.pimp then
+            ColorPickerButton:Show()
+        else
+            ColorPickerButton:Hide()
+        end
+
+        ColorPickerButton:SetScript("OnClick", function()
+            local db = addon.db
+            local currentColor = db.ManaBarColor or { r = 0.25, g = 0.5, b = 1 }
+
+            local previous = { r = currentColor.r, g = currentColor.g, b = currentColor.b }
+
+            ColorPickerFrame:SetColorRGB(currentColor.r, currentColor.g, currentColor.b)
+            ColorPickerFrame.hasOpacity = false
+
+            ColorPickerFrame.func = nil
+            ColorPickerFrame.swatchFunc = function()
+                local r, g, b = ColorPickerFrame:GetColorRGB()
+                db.ManaBarColor = { r = r, g = g, b = b }
+
+                local c = db.ManaBarColor
+                if c then
+                    PlayerFrameManaBar:SetStatusBarColor(c.r, c.g, c.b)
+                end
+            end
+
+            ColorPickerFrame.cancelFunc = function()
+                db.ManaBarColor = { r = previous.r, g = previous.g, b = previous.b }
+
+                local c = db.ManaBarColor
+                if c then
+                    PlayerFrameManaBar:SetStatusBarColor(c.r, c.g, c.b)
+                end
+            end
+
+            ColorPickerFrame:Hide()
+            ColorPickerFrame:Show()
+        end)
+
 
     end
 

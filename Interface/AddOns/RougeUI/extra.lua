@@ -228,7 +228,10 @@ local function manabarRecolor(manaBar)
     if not manaBar.lockColor then
         local playerDeadOrGhost = manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")) and not UnitIsFeignDeath("player")
         if not playerDeadOrGhost then
-            manaBar:SetStatusBarColor(0.498, 0, 1.0)
+            local c = RougeUI.db.ManaBarColor
+            if c then
+                manaBar:SetStatusBarColor(c.r, c.g, c.b)
+            end
         end
     end
 end
@@ -862,17 +865,45 @@ local function RangeIndicator(self, checksRange, inRange)
 end
 
 local conflictingAddons = {
-    "BuffSizer",
-    "ClassicAuraDurations",
-    "DarkModeUI",
-    "EasyFrames",
-    "LargerSelfAuras",
-    "RiizUI",
-    "TextureScript",
-    "SUI",
-    "whoaUnitFrames_WotLK",
-    "whoaThickFrames_WotLK",
-    "BetterBlizzFrames",
+    ["BuffSizer"] = true, -- aura override
+    ["ClassicAuraDurations"] = true, -- aura conflict
+    ["Lorti-UI-Classic"] = true, -- new maintainer, no idea about future conflicts
+    ["DarkModeUI"] = true, -- some sort of Lorti
+    ["EasyFrames"] = true, -- multiple overrides
+    ["LargerSelfAuras"] = true, -- aura override
+    ["RiizUI"] = true, -- aura override
+    ["TextureScript"] = true, -- RIP
+    ["SUI"] = true, -- tainty/override
+    ["whoaUnitFrames_WotLK"] = true, -- overrides
+    ["whoaThickFrames_WotLK"] = true, -- overrides
+    ["BetterBlizzFrames"] = true, -- aura override. Use Precognito for absorbs and DebuffFilter for aura customization.
+    ["DarkMode"] = true, -- weird behaviour
+    ["mUI"] = true, -- -- tainty/override
+    ["ResistUI"] = true, -- lots of taints
+    ["Dragonheir"] = true, -- blue shaman taint
+    ["xBlueShaman"] = true, -- blue shaman taint
+    ["whoaBlueShamans"] = true, -- blue shaman taint
+    ["GoodmanUI"] = true,
+    ["TargetDebuffs"] = true, -- aura override
+    ["modui_classic"] = true, -- outdated and broken
+}
+
+local disabledAddonsList = {}
+
+StaticPopupDialogs["INCOMPATIBLE_ADDONS"] = {
+    text = "",
+    button1 = "Reload UI",
+    OnAccept = function()
+        ReloadUI()
+    end,
+    OnShow = function(self)
+        local addonList = table.concat(disabledAddonsList, ", ")
+        self.text:SetText("Incompatible addons detected: " .. addonList .. "\nClick reload or ESC to continue.")
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
 }
 
 local e = CreateFrame("Frame")
@@ -898,9 +929,17 @@ e:SetScript("OnEvent", function(self, event, ...)
             end
         end
 
-        for _, v in ipairs(conflictingAddons) do
-            if IsAddOnLoaded(v) then
-                ChatFrame1:AddMessage("|cff009cffRougeUI:|r disable |cffffff00" .. v .. "|r to avoid bugs.")
+        do
+            for i = 1, C_AddOns.GetNumAddOns() do
+                local name, _, _, _, state = C_AddOns.GetAddOnInfo(i)
+                if conflictingAddons[name] and state ~= "DISABLED" then
+                    C_AddOns.DisableAddOn(i)
+                    table.insert(disabledAddonsList, name)
+                end
+            end
+
+            if #disabledAddonsList > 0 then
+                StaticPopup_Show("INCOMPATIBLE_ADDONS")
             end
         end
 
@@ -949,7 +988,9 @@ e:SetScript("OnEvent", function(self, event, ...)
 
         if RougeUI.db.ClassNames then
             hooksecurefunc("UnitFrame_Update", function(self)
-                if not self.unit or not self.name then return end
+                if not self.unit or not self.name then
+                    return
+                end
 
                 local _, class = UnitClass(self.unit)
                 local c = RAID_CLASS_COLORS[class]

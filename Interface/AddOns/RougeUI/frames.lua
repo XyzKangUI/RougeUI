@@ -341,7 +341,7 @@ local function FrameColour()
         SettingsPanelTitleBg:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 
-        -- TotemFrame
+    -- TotemFrame
     if TotemFrame then
         for i = 1, 4 do
             local _, totem = _G["TotemFrameTotem" .. i]:GetChildren()
@@ -391,9 +391,9 @@ local function FrameColour()
 
     -- Paperdoll
 
-    if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+    if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == 19 then
         if CharacterFrame then
-            for _, v in ipairs({CharacterFrame:GetRegions()}) do
+            for _, v in ipairs({ CharacterFrame:GetRegions() }) do
                 if v:IsObjectType("Texture") then
                     v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
@@ -434,7 +434,7 @@ local function FrameColour()
             CharacterFrameInset.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
 
-        CharacterFramePortrait:SetVertexColor(1,1,1)
+        CharacterFramePortrait:SetVertexColor(1, 1, 1)
     end
 
     if PaperDollFrame then
@@ -444,7 +444,7 @@ local function FrameColour()
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
-        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == 19 then
             a:SetVertexColor(1, 1, 1)
         end
     end
@@ -524,8 +524,8 @@ local function FrameColour()
     -- PvPFrame
 
     if PVPFrame then
-        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
-            for _, v in pairs({PVPFrame:GetRegions()}) do
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == 19 then
+            for _, v in pairs({ PVPFrame:GetRegions() }) do
                 if v:IsObjectType("Texture") then
                     v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
@@ -845,8 +845,8 @@ local function FrameColour()
     end
 
     if CharacterHeadSlotFrame then
-        for _, v in pairs({"Head", "Neck", "Shoulder", "Back", "Chest", "Wrist", "Shirt", "Tabard", "Hands", "Waist",
-                           "Legs", "Feet", "Finger0", "Finger1", "Trinket0", "Trinket1", "MainHand", "SecondaryHand", "Ranged"}) do
+        for _, v in pairs({ "Head", "Neck", "Shoulder", "Back", "Chest", "Wrist", "Shirt", "Tabard", "Hands", "Waist",
+                            "Legs", "Feet", "Finger0", "Finger1", "Trinket0", "Trinket1", "MainHand", "SecondaryHand", "Ranged" }) do
             local slotFrame = _G["Character" .. v .. "SlotFrame"]
             if slotFrame then
                 slotFrame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
@@ -889,11 +889,10 @@ local function NewVariables()
     end
 
     -- SpellBookFrame
-    local build = GetBuildInfo()
     if SpellBookFrame then
         local _, a, b, c, d, e, f, _, _, i, j, k, l, m, n, o, p = SpellBookFrame:GetRegions()
         local vars = {}
-        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == 19 then
             vars = { a, c, d, e, f, i, j, k, l, m, n, o, p }
             if SpellBookFrameInsetInsetBottomBorder then
                 SpellBookFrameInsetInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
@@ -938,7 +937,7 @@ local function NewVariables()
         end
     end
 
-    if not SpellBookFrame.Material and WOW_PROJECT_ID ~= WOW_PROJECT_CATACLYSM_CLASSIC then
+    if not SpellBookFrame.Material and not (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == 19) then
         SpellBookFrame.Material = SpellBookFrame:CreateTexture(nil, "OVERLAY", nil, 7)
         SpellBookFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
         SpellBookFrame.Material:SetWidth(547)
@@ -949,37 +948,50 @@ local function NewVariables()
 
     -- QuestLogFrame
 
-    local _, b, c, d, e, f = QuestLogFrame:GetRegions()
-    for _, v in pairs({ b, c, e }) do
-        if v then
-            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    if WOW_PROJECT_ID == 19 then
+        if QuestLogFrame then
+            local a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, _, s, t, _, v = QuestLogFrame:GetRegions()
+            for _, v in pairs({ a, b, c, d, e, f, g, h, i, j, k, m, n, o, p, q,  t, v }) do
+                if v then
+                    v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
+            end
         end
-        if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
-            b:SetVertexColor(1, 1, 1)
-            d:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            f:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    else
+        local _, b, c, d, e, f = QuestLogFrame:GetRegions()
+        for _, v in pairs({ b, c, e }) do
+            if v then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
+                b:SetVertexColor(1, 1, 1)
+                d:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                f:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
         end
     end
 
-    if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["EnhanceQuestLog"] == "On" then
-        QuestLogFrame.Material = QuestLogFrame:CreateTexture(nil, "OVERLAY", nil, 7)
-        QuestLogFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
-        QuestLogFrame.Material:SetWidth(531)
-        QuestLogFrame.Material:SetHeight(625)
-        QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
-        QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
-    else
-        QuestLogFrame.Material = QuestLogFrame:CreateTexture(nil, "OVERLAY", nil, 7)
-        QuestLogFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
-        QuestLogFrame.Material:SetWidth(531)
-        QuestLogFrame.Material:SetHeight(511)
-        QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
-        QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
+    if WOW_PROJECT_ID ~= 19 then
+        if IsAddOnLoaded("Leatrix_Plus") and LeaPlusDB["EnhanceQuestLog"] == "On" then
+            QuestLogFrame.Material = QuestLogFrame:CreateTexture(nil, "OVERLAY", nil, 7)
+            QuestLogFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
+            QuestLogFrame.Material:SetWidth(531)
+            QuestLogFrame.Material:SetHeight(625)
+            QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
+            QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
+        else
+            QuestLogFrame.Material = QuestLogFrame:CreateTexture(nil, "OVERLAY", nil, 7)
+            QuestLogFrame.Material:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\QuestBG.tga")
+            QuestLogFrame.Material:SetWidth(531)
+            QuestLogFrame.Material:SetHeight(511)
+            QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
+            QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
 
-        if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
-            QuestLogFrame.Material:SetWidth(510)
-            QuestLogFrame.Material:SetHeight(398)
-            QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame)
+            if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
+                QuestLogFrame.Material:SetWidth(510)
+                QuestLogFrame.Material:SetHeight(398)
+                QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame)
+            end
         end
     end
 
@@ -1091,7 +1103,7 @@ local function NewVariables()
     end
 
     if CommunitiesFrame then
-        for _, v in pairs({CommunitiesFrame:GetRegions()}) do
+        for _, v in pairs({ CommunitiesFrame:GetRegions() }) do
             if v:IsObjectType("Texture") then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
@@ -1213,7 +1225,7 @@ local function BlizzFrames(addon)
 
     if addon == "Blizzard_TalentUI" then
         local k, j = 2, 6
-        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == 19 then
             k, j = 1, 25
         end
         local vectors = { PlayerTalentFrame:GetRegions() }
@@ -1223,9 +1235,29 @@ local function BlizzFrames(addon)
             end
         end
 
-        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC then
-            PlayerTalentFrameToggleSummariesButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            PlayerTalentFrameToggleSummariesButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == 19 then
+            if PlayerTalentFrameToggleSummariesButton_LeftSeparator then
+                PlayerTalentFrameToggleSummariesButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PlayerTalentFrameToggleSummariesButton_RightSeparator then
+                PlayerTalentFrameToggleSummariesButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameSpecializationLearnButton_LeftSeparator then
+                PlayerTalentFrameSpecializationLearnButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameSpecializationLearnButton_RightSeparator then
+                PlayerTalentFrameSpecializationLearnButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameTalentsLearnButton_LeftSeparator then
+                PlayerTalentFrameTalentsLearnButton_LeftSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+
+            if PlayerTalentFrameTalentsLearnButton_RightSeparator then
+                PlayerTalentFrameTalentsLearnButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
 
             if PlayerTalentFrameTitleText then
                 PlayerTalentFrameTitleText:SetVertexColor(1, 0.8196079134911, 0)
@@ -1564,6 +1596,9 @@ local function BlizzFrames(addon)
         end
         CollectionsJournalTitleText:SetVertexColor(1, 1, 1)
         CollectionsJournalPortrait:SetVertexColor(1, 1, 1)
+        if CollectionsJournal.portrait then
+            CollectionsJournal.portrait:SetVertexColor(1, 1, 1)
+        end
         if MountJournalInsetBottomBorder then
             MountJournalInsetBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
@@ -1590,10 +1625,26 @@ local function BlizzFrames(addon)
                 MountJournalMountButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
+
+        if WOW_PROJECT_ID == 19 then
+            -- Fix sloppy Beta
+            MountJournal:HookScript("OnShow", function(self)
+                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\MountJournalPortrait")
+            end)
+            ToyBox:HookScript("OnShow", function(self)
+                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\Trade_Archaeology_ChestofTinyGlassAnimals")
+            end)
+            HeirloomsJournal:HookScript("OnShow", function(self)
+                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\inv_misc_enggizmos_19")
+            end)
+            WardrobeCollectionFrame:HookScript("OnShow", function(self)
+                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\inv_chest_cloth_17")
+            end)
+        end
     end
 
     if addon == "Blizzard_Communities" then
-        for _, v in pairs({CommunitiesFrame:GetRegions()}) do
+        for _, v in pairs({ CommunitiesFrame:GetRegions() }) do
             if v:IsObjectType("Texture") then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
@@ -1603,12 +1654,12 @@ local function BlizzFrames(addon)
     end
 
     if addon == "Blizzard_EncounterJournal" then
-        for _, v in pairs({EncounterJournal:GetRegions()}) do
+        for _, v in pairs({ EncounterJournal:GetRegions() }) do
             if v:IsObjectType("Texture") then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
-        for _, v in pairs({EncounterJournalInset.NineSlice:GetRegions()}) do
+        for _, v in pairs({ EncounterJournalInset.NineSlice:GetRegions() }) do
             if v and v:IsObjectType("Texture") then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
@@ -1637,6 +1688,10 @@ local function BlizzFrames(addon)
             EngravingFrame.Border.NineSlice.BottomRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             EngravingFrame.Border.NineSlice.BottomLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
+    end
+
+    if CharacterLevelText then
+        CharacterLevelText:SetVertexColor(1, 1, 1)
     end
 end
 
