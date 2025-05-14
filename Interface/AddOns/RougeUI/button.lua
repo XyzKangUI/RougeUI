@@ -1,6 +1,6 @@
 local _, RougeUI = ...
 local ceil, mod, floor = _G.math.ceil, _G.math.fmod, _G.math.floor
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
+local IsAddOnLoaded = IsAddOnLoaded or C_AddOns and C_AddOns.IsAddOnLoaded
 local dominos = IsAddOnLoaded("Dominos")
 local bartender4 = IsAddOnLoaded("Bartender4")
 
@@ -309,7 +309,7 @@ local function styleActionButton(bu)
             self.ClearedTexture = false
         end)
     end
-
+    
     if nt then
         nt:SetTexture(nil)
         nt:SetAlpha(0)
@@ -552,10 +552,94 @@ local function HookAuras()
     end
 end
 
+local function BuffAnchor()
+    local buff, previousBuff, aboveBuff, index
+    local numBuffs = 0;
+    local numAuraRows = 0;
+    local BUFFS_PER_ROW = RougeUI.db.BuffsRow
+    local slack = BuffFrame.numEnchants;
+    if BuffFrame.numConsolidated and (BuffFrame.numConsolidated > 0) then
+        slack = slack + 1;
+    end
+
+    for i = 1, BUFF_ACTUAL_DISPLAY do
+        buff = _G["BuffButton" .. i];
+        if not buff.consolidated then
+            numBuffs = numBuffs + 1;
+            index = numBuffs + slack;
+
+            buff:ClearAllPoints();
+            if ((index > 1) and (mod(index, BUFFS_PER_ROW) == 1)) then
+                numAuraRows = numAuraRows + 1;
+                if (index == BUFFS_PER_ROW + 1) then
+                    buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING - 3); --xx
+                else
+                    buff:SetPoint("TOPRIGHT", aboveBuff, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING);
+                end
+                aboveBuff = buff;
+            elseif (index == 1) then
+                numAuraRows = 1;
+                buff:SetPoint("TOPRIGHT", BuffFrame, "TOPRIGHT", 0, 0);
+                aboveBuff = buff;
+            else
+                if (numBuffs == 1) then
+                    if (BuffFrame.numEnchants > 0) then
+                        if not RougeUI.db.Lorti and BuffFrame.numEnchants > 2 then
+                            buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", -8, 0);
+                        else
+                            buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", -5, 0);
+                        end
+                        aboveBuff = TemporaryEnchantFrame;
+                    else
+                        buff:SetPoint("TOPRIGHT", ConsolidatedBuffs, "TOPLEFT", -5, 0);
+                    end
+                else
+                    buff:SetPoint("RIGHT", previousBuff, "LEFT", -5, 0); -- spacing
+                end
+            end
+            previousBuff = buff;
+        end
+    end
+end
+
+local function DebuffAnchor(buttonName, index)
+    local numBuffs = BUFF_ACTUAL_DISPLAY + BuffFrame.numEnchants;
+    local BUFFS_PER_ROW = RougeUI.db.BuffsRow
+
+    if BuffFrame.numConsolidated and (BuffFrame.numConsolidated > 0) then
+        numBuffs = numBuffs - BuffFrame.numConsolidated + 1;
+    end
+
+    local rows = ceil(numBuffs / BUFFS_PER_ROW);
+    local buff = _G[buttonName .. index];
+    local offsetY
+
+    buff:ClearAllPoints()
+    -- Position debuffs
+    if ((index > 1) and (mod(index, BUFFS_PER_ROW) == 1)) then
+        -- New row
+        buff:SetPoint("TOP", _G[buttonName .. (index - BUFFS_PER_ROW)], "BOTTOM", 0, -BUFF_ROW_SPACING);
+    elseif (index == 1) then
+        if (rows < 2) then
+            offsetY = 1 * ((2 * BUFF_ROW_SPACING) + 30);
+        else
+            offsetY = rows * (BUFF_ROW_SPACING + 30);
+        end
+        buff:SetPoint("TOPRIGHT", BuffFrame, "BOTTOMRIGHT", 0, -offsetY);
+    else
+        buff:SetPoint("RIGHT", _G[buttonName .. (index - 1)], "LEFT", -6, 0);
+    end
+end
+
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
+        if RougeUI.db.BuffsRow ~= 8 and not IsAddOnLoaded("SimpleAuraFilter") then
+            hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
+            hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
+        end
+
         local skinEnabled = RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme
         if skinEnabled or RougeUI.db.TimerGap or RougeUI.db.OmniCC then
             if RougeUI.db.OmniCC or not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then

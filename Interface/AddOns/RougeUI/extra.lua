@@ -25,19 +25,18 @@ end
 -- Class colored scoreboard
 local function ColorScoreBoard()
     local _, instanceType = IsInInstance()
-    if (instanceType ~= "pvp") then
+    if not (instanceType == "pvp" or instanceType == "arena") then
         return
     end
-    for i = 1, 22 do
-        local ScoreBoard = _G["WorldStateScoreButton" .. i]
+    local index = GetNumBattlefieldScores()
+    for i = 1, index do
+        local ScoreBoard = _G["WorldStateScoreButton" .. i .. "NameText"]
 
-        if ScoreBoard and ScoreBoard.index then
-            local _, _, _, _, _, _, _, _, _, filename = GetBattlefieldScore(ScoreBoard.index)
-            local text = ScoreBoard.name.text:GetText()
-
-            if text and filename then
-                local color = GetClassColorObj(filename)
-                ScoreBoard.name.text:SetText(color:WrapTextInColorCode(text))
+        if ScoreBoard then
+            local name, _, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
+            if name and class then
+                local color = GetClassColorObj(class)
+                ScoreBoard:SetText(color:WrapTextInColorCode(name))
             end
         end
     end
@@ -641,67 +640,6 @@ local function ApplyThickness()
     hooksecurefunc("PlayerFrame_ToVehicleArt", VehicleArtThick)
 end
 
-local function GetActionButton(slot)
-    local name
-
-    local bonusBar = GetBonusBarOffset()
-    local slotID = (1 + (NUM_ACTIONBAR_PAGES + bonusBar - 1) * NUM_ACTIONBAR_BUTTONS)
-    if (bonusBar == 0 and slot <= 12) or (bonusBar > 0 and slot >= slotID and slot < (slotID + 12)) then
-        name = "ACTIONBUTTON" .. (((slot - 1) % 12) + 1)
-    elseif slot <= 36 then
-        name = "MULTIACTIONBAR3BUTTON" .. (slot - 24)
-    elseif slot <= 48 then
-        name = "MULTIACTIONBAR4BUTTON" .. (slot - 36)
-    elseif slot <= 60 then
-        name = "MULTIACTIONBAR2BUTTON" .. (slot - 48)
-    elseif slot <= 72 then
-        name = "MULTIACTIONBAR1BUTTON" .. (slot - 60)
-    elseif IsAddOnLoaded("Bartender4") and slot >= 1 and slot <= 120 then
-        name = "CLICK BT4Button" .. slot .. ":Keybind"
-    elseif IsAddOnLoaded("Dominos") and slot >= 1 and slot <= 120 then
-        name = "CLICK DominosActionButton" .. slot .. ":HOTKEY"
-    elseif slot <= 144 then
-        name = nil
-    elseif slot <= 156 then
-        name = "MULTIACTIONBAR5BUTTON" .. (slot - 144)
-    elseif slot <= 168 then
-        name = "MULTIACTIONBAR6BUTTON" .. (slot - 156)
-    elseif slot <= 180 then
-        name = "MULTIACTIONBAR7BUTTON" .. (slot - 168)
-    elseif slot <= 192 then
-        name = "MULTIACTIONBAR8BUTTON" .. (slot - 180)
-    end
-
-    return name
-end
-
-local function Haxx()
-    local slots = C_ActionBar.FindSpellActionButtons(6774)
-    if slots then
-        for _, slot in ipairs(slots) do
-            local actionButton = GetActionButton(slot)
-            if actionButton then
-                local key = GetBindingKey(actionButton)
-                if string.match(actionButton, "^ACTIONBUTTON%d+$") then
-                    print("RougeUI: For the Slice and Dice hax to work, place your unmodified Slice and Dice spell in any other slot than the (stealth) actionbar.")
-                    return
-                end
-                if key then
-                    local button = CreateFrame("Button", "FSND", nil, "SecureActionButtonTemplate")
-                    button:RegisterForClicks("AnyDown", "AnyUp")
-                    button:SetAttribute("type", "macro")
-                    SecureHandlerWrapScript(button, "OnClick", button, [[ if down then
-                    self:SetAttribute("macrotext","/cast Slice and Dice") else
-                    self:SetAttribute("macrotext","/cast [@focus, exists] Slice and Dice") end]])
-                    SetOverrideBindingClick(button, true, key, "FSND")
-                end
-            end
-        end
-    elseif slots == nil then
-        print("Can't find Slice and Dice on the actionbar or this actionbar is unsupported")
-    end
-end
-
 local IsUsableAction, GetActionCount, IsConsumableAction = IsUsableAction, GetActionCount, IsConsumableAction
 local IsStackableAction, IsActionInRange, RANGE_INDICATOR = IsStackableAction, IsActionInRange, RANGE_INDICATOR
 
@@ -1004,10 +942,6 @@ e:SetScript("OnEvent", function(self, event, ...)
                     self:SetAlpha(1)
                 end
             end)
-        end
-
-        if RougeUI.db.Slice then
-            Haxx()
         end
 
         if RougeUI.db.RangeIndicator and not (IsAddOnLoaded("Bartender4") or IsAddOnLoaded("tullaRange")) then
