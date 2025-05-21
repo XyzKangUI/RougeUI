@@ -79,6 +79,7 @@ local stock = {
     HideGlows = false,
     HideMacro = false,
     ToTDebuffs = false,
+    minimapChanges = true
 }
 
 local f = CreateFrame("Frame")
@@ -654,6 +655,12 @@ function f:CreateGUI()
         end)
         AsuriFrame_CB:SetChecked(addon.db.AsuriFrame)
         tinsert(col2Elements, AsuriFrame_CB)
+
+        local CustomMinimap = CheckBtn("TH_CustomMinimap", "Custom Minimap", nil, panel, function(self, value)
+            addon.db.minimapChanges = value
+        end)
+        tinsert(col2Elements, CustomMinimap)
+        CustomMinimap:SetChecked(addon.db.minimapChanges)
 
         AutoSetPoints(col2Elements, xPos2, startY, spacingY)
     end
