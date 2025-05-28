@@ -230,7 +230,7 @@ local function manabarRecolor(manaBar)
         if not playerDeadOrGhost then
             local c = RougeUI.db.ManaBarColor
             if c then
-                manaBar:SetStatusBarColor(c.r, c.g, c.b)
+                manaBar:SetStatusBarColor(c.r, c.g, c.b, c.a)
             end
         end
     end

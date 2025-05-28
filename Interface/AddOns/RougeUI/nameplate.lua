@@ -142,9 +142,9 @@ local function OnEvent(self, event, ...)
         end
         AddElements(namePlateFrameBase.UnitFrame)
 
-        if RougeUI.db.ModPlates and UnitIsUnit("target", unit) then
-            HighlightTargetPlate()
-        end
+        --if RougeUI.db.ModPlates and UnitIsUnit("target", unit) then
+        --    HighlightTargetPlate()
+        --end
     elseif event == "ADDON_LOADED" and ... == addonName then
         if GetCVar("nameplateShowOnlyNames") == "1" then
             return
@@ -157,26 +157,26 @@ local function OnEvent(self, event, ...)
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
         end
 
-        if RougeUI.db.ModPlates then
-            highlightBorder = CreateFrame("Frame")
-            highlightBorder:SetFrameStrata("HIGH")
-            highlightBorder:Hide()
-
-            local borderTexture = highlightBorder:CreateTexture(nil, "OVERLAY")
-            borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\Nameplate-highlight")
-            borderTexture:SetAllPoints(highlightBorder)
-            borderTexture:SetVertexColor(1, 1, 1)
-
-            --highlightBorder.anim = highlightBorder:CreateAnimationGroup()
-            --local alpha = highlightBorder.anim:CreateAnimation("Alpha")
-            --alpha:SetFromAlpha(0.5)
-            --alpha:SetToAlpha(1)
-            --alpha:SetDuration(0.2)
-            --alpha:SetSmoothing("IN_OUT")
-
-            self:RegisterEvent("PLAYER_TARGET_CHANGED")
-            self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
-        end
+        --if RougeUI.db.ModPlates then
+        --    highlightBorder = CreateFrame("Frame")
+        --    highlightBorder:SetFrameStrata("HIGH")
+        --    highlightBorder:Hide()
+        --
+        --    local borderTexture = highlightBorder:CreateTexture(nil, "OVERLAY")
+        --    borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\Nameplate-highlight")
+        --    borderTexture:SetAllPoints(highlightBorder)
+        --    borderTexture:SetVertexColor(1, 1, 1)
+        --
+        --    --highlightBorder.anim = highlightBorder:CreateAnimationGroup()
+        --    --local alpha = highlightBorder.anim:CreateAnimation("Alpha")
+        --    --alpha:SetFromAlpha(0.5)
+        --    --alpha:SetToAlpha(1)
+        --    --alpha:SetDuration(0.2)
+        --    --alpha:SetSmoothing("IN_OUT")
+        --
+        --    self:RegisterEvent("PLAYER_TARGET_CHANGED")
+        --    self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+        --end
     elseif event == "PLAYER_TARGET_CHANGED" then
         HighlightTargetPlate()
     elseif event == "NAME_PLATE_UNIT_REMOVED" then

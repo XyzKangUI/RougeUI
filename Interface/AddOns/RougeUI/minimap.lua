@@ -395,7 +395,9 @@ MM:SetScript("OnEvent", function(self, event, addon)
                         and child:IsShown()
                 then
                     local name = child:GetName() or ""
-                    if not name:find("GameTimeFrame") and not name:find("Zoom") and not name:find("MiniMapTrackingButton") then
+                    if not name:find("GameTimeFrame") and not name:find("Zoom") and not name:find("MiniMapTrackingButton")
+                    and not name:find("MiniMapBattlefieldFrame" ) and not name:find("LFGMinimapFrame")
+                            and not name:find("MiniMapMailFrame") then
                         table.insert(allButtons, child)
                         child:Hide()
 
