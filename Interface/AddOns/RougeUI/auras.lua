@@ -432,7 +432,9 @@ local function Target_Update(frame)
                 showHighlight = true
             elseif isEnemy and isStealable and not db.HighlightDispellable then
                 showHighlight = true
-            elseif isEnemy and debuffType == "Magic" and class == 5 then -- Cata fix
+            elseif isEnemy and debuffType == "Magic" and class == 5 then -- Cata priest fix
+                showHighlight = true
+            elseif isEnemy and debuffType == "Magic" and IsSpellKnownOrOverridesKnown(110802) then -- MoP Symbiosis
                 showHighlight = true
             end
 

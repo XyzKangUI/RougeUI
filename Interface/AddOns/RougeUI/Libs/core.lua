@@ -34,6 +34,7 @@ local activeFrames = lib.activeFrames
 
 -- For tracking UNIT_AURA info
 local auraID = {}
+local delay = {}
 local timerSet  -- For handling "fake" durations
 
 local f = lib.frame
@@ -103,6 +104,7 @@ local function purgeOldGUIDs()
             nameplateUnitMap[guid] = nil
             buffCache[guid] = nil
             auraID[guid] = nil
+            delay[guid] = nil
             tinsert(toDelete, guid)
         end
     end
@@ -209,8 +211,8 @@ function f:CombatLogHandler()
             return
         end
         C_Timer.After(0.02, function()
-            if auraID[dstGUID] and auraID[dstGUID].delay then
-                auraID[dstGUID].delay = false
+            if delay[dstGUID] then
+                delay[dstGUID] = false
                 return
             end
             SetTimer(dstGUID, spellID, opts and opts.duration)
@@ -287,7 +289,7 @@ function f:UNIT_AURA(_, unit, info)
     if info.updatedAuraInstanceIDs then
         for _, auraInstID in pairs(info.updatedAuraInstanceIDs) do
             if auraID[unitGUID] and auraID[unitGUID][auraInstID] then
-                auraID[unitGUID].delay = true
+                delay[unitGUID] = true
                 local spellID = auraID[unitGUID][auraInstID][1]
                 local smth = auraID[unitGUID][auraInstID][2]
                 local duration = type(smth) == "number" and smth or 0

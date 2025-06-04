@@ -1494,6 +1494,19 @@ local function BlizzFrames(addon)
                 end
             end
         end
+
+        if InspectFrame then
+            local vectors = { InspectFrame:GetRegions() }
+            for i = 1, 20 do
+                if vectors[i] then
+                    vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                end
+            end
+        end
+
+        if InspectLevelText then
+            InspectLevelText:SetTextColor(1, 0.81960791349411, 0, 1)
+        end
     end
 
     -- Macro's
@@ -1624,22 +1637,6 @@ local function BlizzFrames(addon)
             if MountJournalMountButton_RightSeparator then
                 MountJournalMountButton_RightSeparator:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
-        end
-
-        if WOW_PROJECT_ID == 19 then
-            -- Fix sloppy Beta
-            MountJournal:HookScript("OnShow", function(self)
-                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\MountJournalPortrait")
-            end)
-            ToyBox:HookScript("OnShow", function(self)
-                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\Trade_Archaeology_ChestofTinyGlassAnimals")
-            end)
-            HeirloomsJournal:HookScript("OnShow", function(self)
-                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\inv_misc_enggizmos_19")
-            end)
-            WardrobeCollectionFrame:HookScript("OnShow", function(self)
-                CollectionsJournal:SetPortraitToAsset("Interface\\Icons\\inv_chest_cloth_17")
-            end)
         end
     end
 
