@@ -1026,6 +1026,17 @@ local function NewVariables()
         end
     end
 
+    if WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC then
+        for _, v in pairs ({QuestFrame:GetRegions()}) do
+            if v then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+        QuestFrameTitleText:SetTextColor(1, 1, 1)
+        QuestFramePortrait:SetVertexColor(1, 1, 1)
+        QuestFrameDetailPanel.Material:SetSize(520, 580)
+    end
+
     -- Wardrobe
     local _, a, b, c, d, e = DressUpFrame:GetRegions()
     for _, v in pairs({ a, b, c, d, e }) do
@@ -1507,6 +1518,10 @@ local function BlizzFrames(addon)
         if InspectLevelText then
             InspectLevelText:SetTextColor(1, 0.81960791349411, 0, 1)
         end
+
+        if InspectFramePortrait then
+            InspectFramePortrait:SetVertexColor(1, 1, 1)
+        end
     end
 
     -- Macro's
@@ -1688,7 +1703,7 @@ local function BlizzFrames(addon)
     end
 
     if CharacterLevelText then
-        CharacterLevelText:SetVertexColor(1, 1, 1)
+        CharacterLevelText:SetVertexColor(1, 0.81960791349411, 0, 1)
     end
 end
 

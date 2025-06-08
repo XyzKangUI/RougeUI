@@ -6,6 +6,7 @@ local floor, next = math.floor, next
 local mabs = math.abs
 local UnitGUID = UnitGUID
 local smoothframe = CreateFrame("Frame")
+local UnitGetIncomingHeals = UnitGetIncomingHeals or (Precognito and Precognito.UnitGetTotalAbsorbs)
 
 local barstosmooth = {
     PlayerFrameHealthBar = "player",
@@ -38,13 +39,10 @@ local function isCloseEnough(new, target, range)
 end
 
 local function hasAbsorbValue(unit)
-    if Precognito and Precognito.db and (Precognito.db.animHealth or Precognito.db.absorbTrack) and unit then
-        if Precognito.UnitGetTotalAbsorbs(unit) and Precognito.UnitGetTotalAbsorbs(unit) > 0 then
-            return true
-        elseif UnitGetIncomingHeals(unit) and UnitGetIncomingHeals(unit) > 0 then
-            return true
-        end
+    if UnitGetIncomingHeals(unit) and UnitGetIncomingHeals(unit) > 0 then
+        return true
     end
+
     return false
 end
 

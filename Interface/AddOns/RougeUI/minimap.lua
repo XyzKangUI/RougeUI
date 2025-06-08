@@ -1,5 +1,6 @@
 local _, RougeUI = ...
 local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+local GetCVar = C_CVar and C_CVar.GetCVar or GetCVar
 
 local MM = CreateFrame("Frame")
 MM:RegisterEvent("ADDON_LOADED")
@@ -9,7 +10,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
     if not (IsAddOnLoaded("SexyMap") or IsAddOnLoaded("Leatrix_Plus") and (LeaPlusDB["MinimapModder"] == "On")) and addon == "Blizzard_TimeManager" then
         TimeManagerClockButton:GetRegions():SetVertexColor(colVal, colVal, colVal)
 
-        if not RougeUI.db.minimapChanges then
+        if not RougeUI.db.minimapChanges or GetCVar("rotateMinimap") == "1" then
             if MinimapBorderTop then
                 MinimapBorderTop:SetVertexColor(colVal, colVal, colVal)
             end
@@ -182,13 +183,21 @@ MM:SetScript("OnEvent", function(self, event, addon)
         MinimapZoneText:SetPoint("RIGHT", topbg, "RIGHT", 0, 0)
 
         -- PVP Button
-        MiniMapBattlefieldBorder:Hide()
+        local mpIcon = MiniMapBattlefieldIcon
+        if MiniMapBattlefieldBorder then
+            MiniMapBattlefieldBorder:Hide()
+        elseif MiniMapBattlefieldFrameBorder then -- MoP abomination
+            MiniMapBattlefieldFrameBorder:Hide()
+            mpIcon = MiniMapBattlefieldFrameIconTexture
+            MiniMapBattlefieldFrameIcon:SetScript("OnUpdate", nil)
+        end
         MiniMapBattlefieldFrame:ClearAllPoints()
         MiniMapBattlefieldFrame:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMLEFT", -5, 20)
-        if C_Texture.GetAtlasInfo("charactercreate-icon-horde") then
+        if C_Texture.GetAtlasInfo("charactercreate-icon-horde") and mpIcon then
             local atlasTex = (UnitFactionGroup("player") == "Horde" and "charactercreate-icon-horde") or "charactercreate-icon-alliance"
             if atlasTex then
-                hooksecurefunc(MiniMapBattlefieldIcon, "SetTexture", function(self)
+                mpIcon:SetAtlas(atlasTex)
+                hooksecurefunc(mpIcon, "SetTexture", function(self)
                     self:SetAtlas(atlasTex)
                     self:SetSize(40, 40)
                 end)

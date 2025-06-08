@@ -75,7 +75,7 @@ local function addBorder(button, drawLayer, dbf)
             end
         end
 
-        if stealable and customStealable then
+        if stealable and customStealable and not IsAddOnLoaded("DeBuffFilter") then
             if C_Texture and C_Texture.GetAtlasInfo("newplayertutorial-drag-slotblue") then
                 stealable:SetAtlas("newplayertutorial-drag-slotblue")
             else
@@ -675,7 +675,7 @@ local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        if not IsAddOnLoaded("SimpleAuraFilter") then
+        if not IsAddOnLoaded("SimpleAuraFilter") and not IsAddOnLoaded("DeBuffFilter") then
             hooksecurefunc("BuffFrame_UpdateAllBuffAnchors", BuffAnchor)
             hooksecurefunc("DebuffButton_UpdateAnchors", DebuffAnchor)
         end
