@@ -1,7 +1,6 @@
 local Name, addon = ...
 local floor = math.floor
 local format = format
-local CreateFrame, _G = CreateFrame, _G
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 addon.RougeUIF = {}
 local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC

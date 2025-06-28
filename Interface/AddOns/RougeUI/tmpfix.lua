@@ -1,16 +1,22 @@
-local f = CreateFrame("Frame", nil, UIParent, "SecureHandlerMouseUpDownTemplate")
-f:RegisterEvent("ADDON_LOADED")
-f:SetScript("OnEvent", function(self, event, addon)
-    if addon == "RougeUI" then
-        local prev, next = _G["SpellBookPrevPageButton"]:GetName(), _G["SpellBookNextPageButton"]:GetName()
-        if prev then
-            SetOverrideBindingClick(f, true, "MOUSEWHEELUP", prev)
-        end
-        if next then
-            SetOverrideBindingClick(f, true, "MOUSEWHEELDOWN", next)
-        end
-    end
-end)
+local f = CreateFrame("Frame", nil, SpellBookFrame, "SecureHandlerShowHideTemplate")
+f:SetAllPoints(SpellBookFrame)
+f:SetFrameRef("SpellBookNextPageButton", SpellBookNextPageButton)
+f:SetFrameRef("SpellBookPrevPageButton", SpellBookPrevPageButton)
+
+f:Execute([[
+  SpellBookNextPageButton = self:GetFrameRef("SpellBookNextPageButton")
+  SpellBookPrevPageButton = self:GetFrameRef("SpellBookPrevPageButton")
+]])
+
+f:SetAttribute("_onshow", [[
+  self:SetBindingClick(true, "MOUSEWHEELUP", SpellBookPrevPageButton)
+  self:SetBindingClick(true, "MOUSEWHEELDOWN", SpellBookNextPageButton)
+]])
+
+f:SetAttribute("_onhide", [[
+  self:ClearBinding("MOUSEWHEELUP")
+  self:ClearBinding("MOUSEWHEELDOWN")
+]])
 
 if WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC then
     EventUtil.ContinueOnAddOnLoaded("Blizzard_Collections", function()
