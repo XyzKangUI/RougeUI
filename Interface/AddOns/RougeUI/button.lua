@@ -23,6 +23,7 @@ local function addBorder(button, drawLayer, dbf)
     local name = button:GetName() or "nil"
     local icon = _G[name .. "Icon"]
     local border
+    local db = RougeUI.db
 
     if name and name:match("Debuff") then
         button.debuff = true
@@ -46,28 +47,27 @@ local function addBorder(button, drawLayer, dbf)
     local customStealable = false
 
     if button and border then
-        if RougeUI.db.Lorti then
+        if db.Lorti then
             if button.debuff and dbf then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss2")
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\gloss")
-                customStealable = true
             end
-        elseif RougeUI.db.Roug then
+        elseif db.Roug then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\debuff")
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\rouge")
                 customStealable = true
             end
-        elseif RougeUI.db.Modern then
+        elseif db.Modern then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\expdebuff")
             else
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\exp")
                 customStealable = true
             end
-        elseif RougeUI.db.modtheme then
+        elseif db.modtheme then
             if button.debuff then
                 border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\art\\modd")
             else
@@ -75,7 +75,7 @@ local function addBorder(button, drawLayer, dbf)
             end
         end
 
-        if stealable and customStealable and not IsAddOnLoaded("DeBuffFilter") then
+        if stealable and customStealable and not IsAddOnLoaded("DeBuffFilter") and (db.BuffSizer or db.HighlightDispellable) then
             if C_Texture and C_Texture.GetAtlasInfo("newplayertutorial-drag-slotblue") then
                 stealable:SetAtlas("newplayertutorial-drag-slotblue")
             else
@@ -87,18 +87,18 @@ local function addBorder(button, drawLayer, dbf)
         border:SetTexCoord(0, 1, 0, 1)
         border:SetDrawLayer(drawLayer or "BACKGROUND", 5)
         if not button.debuff then
-            border:SetVertexColor(RougeUI.db.BuffVal, RougeUI.db.BuffVal, RougeUI.db.BuffVal)
+            border:SetVertexColor(db.BuffVal, db.BuffVal, db.BuffVal)
         end
         border:ClearAllPoints()
-        if RougeUI.db.Lorti then
+        if db.Lorti then
             border:SetAllPoints(button)
         else
             if button.tempenchant then
                 border:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
                 border:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
-                if RougeUI.db.modtheme then
+                if db.modtheme then
                     border:SetVertexColor(1, 0, 1)
-                elseif RougeUI.db.Modern then
+                elseif db.Modern then
                     border:SetVertexColor(0.7, 0.3, 1)
                 end
             else
@@ -110,8 +110,8 @@ local function addBorder(button, drawLayer, dbf)
     end
 
     -- Lortis shadowy BG
-    if (RougeUI.db.Lorti or RougeUI.db.Roug) then
-        if RougeUI.db.Roug and button.debuff then
+    if (db.Lorti or db.Roug) then
+        if db.Roug and button.debuff then
             return
         end
         local bg = CreateFrame("Frame", nil, button, BackdropTemplateMixin and "BackdropTemplate")

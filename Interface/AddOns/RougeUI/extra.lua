@@ -767,7 +767,7 @@ local function GetActionButton(slot)
 end
 
 local function Haxx()
-    local slots = C_ActionBar.FindSpellActionButtons(6774)
+    local slots = C_ActionBar.FindSpellActionButtons(5171)
     if slots then
         for _, slot in ipairs(slots) do
             local actionButton = GetActionButton(slot)

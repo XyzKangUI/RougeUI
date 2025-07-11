@@ -1,6 +1,6 @@
 ## Interface: 40400, 40401, 40402, 40403
 ## Title: |cff009cffRougeUI-Cataclysm|r
-## Version: 4.26
+## Version: 4.27
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 
