@@ -240,6 +240,7 @@ end
 
 local classificationTexture = {
     ["worldboss"] = {
+        ["og"] = "Interface\\TargetingFrame\\UI-TargetingFrame-Elite",
         ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite",
         ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite",
         ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2",
@@ -249,6 +250,7 @@ local classificationTexture = {
         ["nthick2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Elite2",
     },
     ["rareelite"] = {
+        ["og"] = "Interface\\TargetingFrame\\UI-TargetingFrame-Rare-Elite",
         ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare-Elite",
         ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite",
         ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-RareElite2",
@@ -258,6 +260,7 @@ local classificationTexture = {
         ["nthick2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-RareElite2",
     },
     ["elite"] = {
+        ["og"] = "Interface\\TargetingFrame\\UI-TargetingFrame-Elite",
         ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Elite",
         ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite",
         ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Elite2",
@@ -267,6 +270,7 @@ local classificationTexture = {
         ["nthick2"] = "Interface\\AddOns\\RougeUI\\textures\\nolevel\\NoLevel-Thick-Elite2",
     },
     ["rare"] = {
+        ["og"] = "Interface\\TargetingFrame\\UI-TargetingFrame-Rare",
         ["thin"] = "Interface\\AddOns\\RougeUI\\textures\\target\\UI-TargetingFrame-Rare",
         ["thick"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare",
         ["thick2"] = "Interface\\AddOns\\RougeUI\\textures\\target\\Thick-Rare2",
@@ -295,7 +299,11 @@ local function FrameTexture(frame, classification)
             if RougeUI.db.NoLevel then
                 textureName = (RougeUI.db.Colval >= 0.3) and classificationTexture[classification]["nthin2"] or classificationTexture[classification]["nthin"]
             else
-                textureName = classificationTexture[classification]["thin"]
+                if RougeUI.db.Colval >= 0.3 then
+                    textureName = classificationTexture[classification]["og"]
+                else
+                    textureName = classificationTexture[classification]["thin"]
+                end
             end
         end
         frame:SetVertexColor((RougeUI.db.Colval >= 0.3) and RougeUI.db.Colval or 1, (RougeUI.db.Colval >= 0.3) and RougeUI.db.Colval or 1, (RougeUI.db.Colval >= 0.3) and RougeUI.db.Colval or 1)

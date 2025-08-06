@@ -9,7 +9,7 @@ if lib:GetDataVersion(Type) >= Version then
 end  -- older versions didn't have that function
 
 local Spell = lib.AddAura
-local INFINITY = math.huge
+local INFINITY = 180
 local GHOST = "hide"
 local FAKE = "fake"
 

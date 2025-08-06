@@ -836,13 +836,13 @@ function f:CreateGUI()
     local function ThemeGenerator(dropdown, rootDescription)
         local function IsSelected(value)
             if value == "None" then
-                return not addon.db.Roug and not addon.db.modtheme and not addon.db.Minimalist and not addon.db.Lorti
+                return not addon.db.Roug and not addon.db.modtheme and not addon.db.Modern and not addon.db.Lorti
             elseif value == "Roug" then
                 return addon.db.Roug
             elseif value == "modtheme" then
                 return addon.db.modtheme
-            elseif value == "Minimalist" then
-                return addon.db.Minimalist
+            elseif value == "Modern" then
+                return addon.db.Modern
             elseif value == "Lorti" then
                 return addon.db.Lorti
             end
@@ -851,8 +851,8 @@ function f:CreateGUI()
         local function SetSelected(value)
             addon.db.Roug = (value == "Roug")
             addon.db.modtheme = (value == "modtheme")
-            addon.db.Minimalist = (value == "Minimalist")
-            if value == "modtheme" or value == "Minimalist" then
+            addon.db.Modern = (value == "Modern")
+            if value == "modtheme" or value == "Modern" then
                 BuffColSlider:Show()
             else
                 BuffColSlider:Hide()
@@ -865,7 +865,7 @@ function f:CreateGUI()
                 {"None", "None"},
                 {"RougeUI", "Roug"},
                 {"ModUI", "modtheme"},
-                {"Minimalist", "Minimalist"},
+                {"Minimalist", "Modern"},
                 {"Lorti", "Lorti"}
         )
     end
