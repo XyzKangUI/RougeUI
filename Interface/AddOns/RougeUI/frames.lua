@@ -1122,6 +1122,24 @@ local function NewVariables()
 
         CommunitiesFrame.PortraitOverlay.Portrait:SetTexCoord(0.05, 0.95, 0.05, 0.95)
     end
+
+    if DemonicFuryBarFrame and DemonicFuryBarFrame.bar then
+        DemonicFuryBarFrame.bar:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    end
+
+    for i = 1, 4 do
+        local ember = _G["BurningEmbersBarFrameEmber"..i]
+        if ember and ember.border then
+            ember.border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
+
+    for i = 1, 4 do
+        local monkenergy = _G["MonkHarmonyBarLightEnergy"..i]
+        if monkenergy then
+            monkenergy:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
 end
 
 local function BlizzFrames(addon)

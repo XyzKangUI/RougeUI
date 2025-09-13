@@ -134,7 +134,7 @@ end
 local function CreateText(frame, x, y, text)
     local textstring = frame:CreateFontString(nil, "OVERLAY")
     textstring:SetPoint("TOPLEFT", x, y)
-    textstring:SetFont("Fonts\\MORPHEUS.ttf", 14, "")
+    textstring:SetFont("Fonts\\FRIZQT__.ttf", 14, "")
     textstring:SetText(text)
     textstring:SetVertexColor(0.99, 0.82, 0)
 end

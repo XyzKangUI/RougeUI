@@ -127,6 +127,8 @@ local function true_format(value)
 end
 
 local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
+    if statusFrame and not statusFrame.TextString then return end
+
     local value = statusFrame.finalValue or statusFrame:GetValue();
     local unit = statusFrame.unit
 
