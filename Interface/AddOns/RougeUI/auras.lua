@@ -408,7 +408,7 @@ local function Target_Update(frame)
             local showHighlight = false
             local r, g, b = 1, 1, 1
             local modifier = 1.2
-            if db.Lorti or db.Roug or db.Modern then
+            if db.Roug or db.Modern then
                 r, g, b = 1, 1, 0.75
                 modifier = 2.2
             end
@@ -428,7 +428,9 @@ local function Target_Update(frame)
                         showHighlight = true
                     end
                 end
-            elseif (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and db.HighlightDispellable and isEnemy and debuffType == "Magic" then
+            end
+
+            if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) and db.HighlightDispellable and isEnemy and debuffType == "Magic" then
                 showHighlight = true
             elseif isEnemy and isStealable and not db.HighlightDispellable then
                 showHighlight = true

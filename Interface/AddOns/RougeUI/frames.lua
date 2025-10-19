@@ -137,6 +137,8 @@ local function FrameColour()
         StaticPopup1.TopEdge,
         StaticPopup1.TopLeftCorner,
         StaticPopup1.TopRightCorner,
+        StaticPopup1.BG.Top,
+        StaticPopup1.BG.Bottom,
         StaticPopup2.BottomEdge,
         StaticPopup2.BottomLeftCorner,
         StaticPopup2.BottomRightCorner,
@@ -145,6 +147,8 @@ local function FrameColour()
         StaticPopup2.TopEdge,
         StaticPopup2.TopLeftCorner,
         StaticPopup2.TopRightCorner,
+        StaticPopup2.BG.Top,
+        StaticPopup2.BG.Bottom,
         StaticPopup3.BottomEdge,
         StaticPopup3.BottomLeftCorner,
         StaticPopup3.BottomRightCorner,
@@ -153,6 +157,8 @@ local function FrameColour()
         StaticPopup3.TopEdge,
         StaticPopup3.TopLeftCorner,
         StaticPopup3.TopRightCorner,
+        StaticPopup3.BG.Top,
+        StaticPopup3.BG.Bottom,
         StaticPopup4.BottomEdge,
         StaticPopup4.BottomLeftCorner,
         StaticPopup4.BottomRightCorner,
@@ -161,6 +167,8 @@ local function FrameColour()
         StaticPopup4.TopEdge,
         StaticPopup4.TopLeftCorner,
         StaticPopup4.TopRightCorner,
+        StaticPopup4.BG.Top,
+        StaticPopup4.BG.Bottom,
         DropDownList1MenuBackdrop.BottomEdge,
         DropDownList1MenuBackdrop.BottomLeftCorner,
         DropDownList1MenuBackdrop.BottomRightCorner,
@@ -1023,6 +1031,48 @@ local function NewVariables()
             v.Corner:SetSize(132, 64)
             v.Corner:SetPoint("BOTTOMLEFT", v, 21, 68)
             v.Corner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+    end
+
+    if GossipFrame then
+        if GossipFrameTopBorder then
+            GossipFrameTopBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameTopLeftCorner then
+            GossipFrameTopLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameTopRightCorner then
+            GossipFrameTopRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameBottomBorder then
+            GossipFrameBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameBotLeftCorner then
+            GossipFrameBotLeftCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameBotRightCorner then
+            GossipFrameBotRightCorner:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameRightBorder then
+            GossipFrameRightBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameLeftBorder then
+            GossipFrameLeftBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFramePortraitFrame then
+            GossipFramePortraitFrame:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameBtnCornerRight then
+            GossipFrameBtnCornerRight:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameBtnCornerLeft then
+            GossipFrameBtnCornerLeft:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameButtonBottomBorder then
+            GossipFrameButtonBottomBorder:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+        end
+        if GossipFrameInset.NineSlice.BottomEdge then
+            GossipFrameInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
 
