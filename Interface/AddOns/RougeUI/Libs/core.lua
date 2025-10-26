@@ -9,6 +9,7 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
     return
 end
 
+local addonName = ...
 local MAJOR, MINOR = "LibClassicDurations", 72
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then
@@ -35,6 +36,7 @@ local activeFrames = lib.activeFrames
 -- For tracking UNIT_AURA info
 local auraID = {}
 local delay = {}
+local auraCache = {}
 local timerSet  -- For handling "fake" durations
 
 local f = lib.frame
@@ -105,6 +107,7 @@ local function purgeOldGUIDs()
             buffCache[guid] = nil
             auraID[guid] = nil
             delay[guid] = nil
+            auraCache[guid] = nil
             tinsert(toDelete, guid)
         end
     end
@@ -322,7 +325,9 @@ end
 function f:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellId)
     if spellId == 5384 and unit then
         local guid = UnitGUID(unit)
-        if not guid then return end
+        if not guid then
+            return
+        end
         feigningUnits[guid] = {}
     end
 end
@@ -333,7 +338,9 @@ function f:PLAYER_TARGET_CHANGED()
         local hp = UnitHealth("target")
         if (hp and hp > 0) then
             local guid = UnitGUID("target")
-            if not guid then return end
+            if not guid then
+                return
+            end
             local changed = false
 
             feigningUnits[guid] = nil
@@ -412,28 +419,139 @@ end
 ----------------------------------
 -- UnitAura and Related Functions
 ----------------------------------
-function lib.UnitAuraDirect(unit, index, filter)
-    local unitGUID = UnitGUID(unit)
-    if filter == "HELPFUL" and not UnitCanAssist("player", unit) and not UnitAura(unit, 1, filter) then
-        if unitGUID then
-            RegenerateBuffList(unitGUID)
-            local buffReturns = buffCache[unitGUID] and buffCache[unitGUID][index]
-            if buffReturns then
-                return unpack(buffReturns)
-            end
+local auraScanInterval = 0.1
+local auraLastUpdate = 0
+local auraCache = {}
+local auraBroken = false
+local auraFailCount = 0
+local auraFailThreshold = 15
+local eventUnregistered = false
+local cacheTimestamps = {}
+local cachePurgeInterval = 600
+
+local function UpdateAuraCache(unit)
+    if auraBroken then
+        if C_UnitAuras and C_UnitAuras.GetUnitAuraBySpellID then
+            auraBroken = false
+            auraFailCount = 0
+        else
+            return
+        end
+    end
+
+    local now = GetTime()
+    if now - auraLastUpdate < auraScanInterval then
+        return
+    end
+    auraLastUpdate = now
+
+    if not (C_UnitAuras and C_UnitAuras.GetUnitAuraBySpellID) then
+        auraBroken = true
+        return
+    end
+
+    if not spells or type(spells) ~= "table" then
+        return
+    end
+
+    local guid = UnitGUID(unit)
+    if not guid then
+        return
+    end
+
+    local auraList = {}
+    local count = 1
+    local foundAura = false
+
+    for spellID in pairs(spells) do
+        local aura = C_UnitAuras.GetUnitAuraBySpellID(unit, spellID)
+        if aura and aura.isHelpful and aura.icon and aura.name then
+            foundAura = true
+            auraList[count] = aura
+            count = count + 1
+        end
+    end
+
+    if foundAura then
+        auraCache[guid] = auraList
+        cacheTimestamps[guid] = now
+        auraFailCount = 0
+
+        if not eventUnregistered then
+            eventUnregistered = true
+            lib:UnregisterFrame(addonName)
         end
     else
-        if filter == "HELPFUL" and unitGUID then
-            local name, _, _, dispelType, duration, expirationTime, _, _, _, spellID = UnitAura(unit, index, filter)
-            if name then
-                SetTimer(unitGUID, spellID, duration, expirationTime)
-                if spells[spellID] and dispelType and spells[spellID].buffType and spells[spellID].buffType ~= dispelType then
-                    spells[spellID].buffType = dispelType
-                end
+        if unit and UnitIsPlayer(unit) then
+            auraFailCount = auraFailCount + 1
+            if auraFailCount >= auraFailThreshold then
+                auraBroken = true
             end
         end
-        return UnitAura(unit, index, filter)
     end
+end
+
+local function PurgeAuraCache()
+    local now = GetTime()
+
+    for guid, _ in pairs(auraCache) do
+        local lastSeen = cacheTimestamps[guid] or 0
+        if now - lastSeen > cachePurgeInterval then
+            auraCache[guid] = nil
+            cacheTimestamps[guid] = nil
+        end
+    end
+end
+
+C_Timer.NewTicker(cachePurgeInterval, PurgeAuraCache)
+
+function lib.UnitAuraDirect(unit, index, filter)
+    if filter ~= "HELPFUL" then
+        return
+    end
+
+    local guid = UnitGUID(unit)
+    local isEnemy = UnitIsEnemy("player", unit)
+
+    if not auraBroken and C_UnitAuras and C_UnitAuras.GetUnitAuraBySpellID and isEnemy then
+        UpdateAuraCache(unit)
+        local auraList = auraCache[guid]
+        if auraList and auraList[index] then
+            local aura = auraList[index]
+            return aura.name, aura.icon, aura.applications, aura.dispelName,
+            aura.duration, aura.expirationTime, aura.sourceUnit,
+            aura.isStealable, nil, aura.spellId
+        else
+            return nil
+        end
+    end
+
+    if not guid then
+        return
+    end
+
+    local name, icon, applications, dispelType, duration, expirationTime,
+    source, isStealable, _, spellID = UnitAura(unit, index, "HELPFUL")
+
+    if not name and isEnemy then
+        RegenerateBuffList(guid)
+        local buffReturns = buffCache[guid] and buffCache[guid][index]
+        if buffReturns then
+            return unpack(buffReturns)
+        end
+        return nil
+    end
+
+    if name then
+        SetTimer(guid, spellID, duration, expirationTime)
+        local spellData = spells[spellID]
+        if spellData and dispelType and spellData.buffType and spellData.buffType ~= dispelType then
+            spellData.buffType = dispelType
+        end
+    end
+
+    return name, icon, applications, dispelType, duration,
+    expirationTime, source, isStealable, _, spellID
 end
 
 -- Legacy wrappers (to avoid breaking addons)
