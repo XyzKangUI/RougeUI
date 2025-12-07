@@ -45,9 +45,9 @@ local function CreateCombatIndicatorForUnit(frame)
                 if not unit then return end
                 Indicator[self]:SetShown(InCombat(unit))
                 if UnitClassification(unit) ~= "normal" and not asuriFrame then
-                    ciFrame:SetPoint("LEFT", self, "RIGHT", 0, -5)
+                    ciFrame:SetPoint("LEFT", self, "RIGHT", -15, -5)
                 else
-                    ciFrame:SetPoint("LEFT", self, "RIGHT", -25, -5)
+                    ciFrame:SetPoint("LEFT", self, "RIGHT", -10, -5)
                 end
             end
         end)

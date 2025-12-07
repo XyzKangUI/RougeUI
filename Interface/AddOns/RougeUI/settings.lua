@@ -551,7 +551,7 @@ function f:CreateGUI()
     EnemyTicksButton:SetChecked(addon.db.EnemyTicks)
     AddElement(Panel.childPanel2, EnemyTicksButton, "checkbox", "PvP Tweaks")
 
-    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC or WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC or WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC then
         local PSTrackBtn = CheckBtn("Crowd control absorb threshold", "Track the amount of damage fear/hex/turn evil can take before it breaks. This will display below the default Blizzard nameplate", Panel.childPanel2, function(self, value)
             addon.db.PSTrack = value
         end)
@@ -755,7 +755,7 @@ function f:CreateGUI()
         addon.db.EnergyTicker = value
     end)
     EnergyTickerButton:SetChecked(addon.db.EnergyTicker)
-    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC or WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC then
         AddElement(Panel.childPanel4, EnergyTickerButton, "checkbox")
     end
 
@@ -872,33 +872,6 @@ function f:CreateGUI()
     ThemeDropdown:SetupMenu(ThemeGenerator)
     AddElement(Panel.childPanel1, ThemeDropdown, "dropdown", "Skin")
 
-    -- childPanel7: Auras
-    C_Timer.After(1, function()
-        if not IsAddOnLoaded("SimpleAuraFilter") then
-            local BuffValueSlider = CreateFrame("Slider", "BuffValueSlider", Panel.childPanel7, sliderTemplate)
-            if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-                CreateSliderText(BuffValueSlider)
-            else
-                BuffValueSlider.text = _G["BuffValueSliderText"]
-                BuffValueSlider.textLow = _G["BuffValueSliderLow"]
-                BuffValueSlider.textHigh = _G["BuffValueSliderHigh"]
-            end
-            BuffValueSlider:SetMinMaxValues(2, 10)
-            BuffValueSlider.minValue, BuffValueSlider.maxValue = BuffValueSlider:GetMinMaxValues()
-            BuffValueSlider.textLow:SetText(floor(BuffValueSlider.minValue))
-            BuffValueSlider.textHigh:SetText(floor(BuffValueSlider.maxValue))
-            BuffValueSlider:SetValue(addon.db.BuffsRow)
-            BuffValueSlider.text:SetText("Buffs per row (BuffFrame): " .. format("%.f", BuffValueSlider:GetValue()))
-            BuffValueSlider:SetValueStep(1)
-            BuffValueSlider:SetObeyStepOnDrag(true)
-            BuffValueSlider:SetScript("OnValueChanged", function(_, value)
-                BuffValueSlider.text:SetText("Buffs per row (BuffFrame): " .. RoundNumbers(value, 1))
-                addon.db.BuffsRow = value
-            end)
-            AddElement(Panel.childPanel7, BuffValueSlider, "slider")
-        end
-    end)
-
     local OmniTimers = CheckBtn("OmniCC Buff Timers", "Disable Blizzard's buff timers and use OmniCC instead", Panel.childPanel7, function(self, value)
         if not IsAddOnLoaded("OmniCC") then
             UIErrorsFrame:AddMessage("To enable this option you have to enable OmniCC first", 1, 0, 0)
@@ -911,7 +884,7 @@ function f:CreateGUI()
     OmniTimers:SetChecked(addon.db.OmniCC)
     AddElement(Panel.childPanel7, OmniTimers, "checkbox", "Aura Settings")
 
-    local HighlightDispellable = CheckBtn(WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and "Highlight Dispellable Buffs" or "Highlight important Magic/Enrage buffs", WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and "Highlights enemy magic buffs" or "Instead of showing ALL dispellable buffs, this will only highlight non trash magic and enrage effects", Panel.childPanel7, function(self, value)
+    local HighlightDispellable = CheckBtn(WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and "Highlight Dispellable Buffs" or "Highlight important Magic buffs", WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and "Highlights enemy magic buffs" or "Instead of showing ALL dispellable buffs, this will only highlight non trash magic effects", Panel.childPanel7, function(self, value)
         addon.db.HighlightDispellable = value
         addon.db.BuffSizer = true
     end)

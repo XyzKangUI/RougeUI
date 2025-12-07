@@ -226,23 +226,29 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
 end
 
 local function PartyStatusBarText()
-    for i = 1, 4, 1 do
-        local partyFrame = _G["PartyMemberFrame" .. i]
-        if partyFrame then
-            local name = _G["PartyMemberFrame" .. i .. "Name"]
-            local healthBar = _G["PartyMemberFrame" .. i .. "HealthBar"]
-            local manaBar = _G["PartyMemberFrame" .. i .. "ManaBar"]
+    for pFrame in PartyFrame.PartyMemberFramePool:EnumerateActive() do
+        if pFrame then
+            local name = pFrame.name
+            local healthBar = pFrame.HealthBar
+            local manaBar = pFrame.ManaBar
 
-            local healthText = name:GetParent():CreateFontString("PartyMemberFrame" .. i .. "HealthBarText", "OVERLAY", "TextStatusBarText")
+            local healthText = name:GetParent():CreateFontString(nil, "OVERLAY", "TextStatusBarText")
             healthText:SetPoint("CENTER", 20, 12)
-            SetTextStatusBarText(healthBar, healthText)
+            Mixin(TextStatusBarMixin, healthBar)
+            healthBar:SetBarText(healthText)
 
-            local manaText = name:GetParent():CreateFontString("PartyMemberFrame" .. i .. "ManaBarText", "OVERLAY", "TextStatusBarText")
+            local manaText = name:GetParent():CreateFontString(nil, "OVERLAY", "TextStatusBarText")
             manaText:SetPoint("CENTER", 20, 2)
-            SetTextStatusBarText(manaBar, manaText)
+            Mixin(TextStatusBarMixin, manaBar)
+            manaBar:SetBarText(manaText)
 
             healthBar.TextString:SetFont(FontType, 11, "OUTLINE")
             manaBar.TextString:SetFont(FontType, 11, "OUTLINE")
+
+            if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
+                hooksecurefunc(healthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+                hooksecurefunc(manaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+            end
         end
     end
 end
@@ -252,7 +258,19 @@ PW:RegisterEvent("PLAYER_LOGIN")
 PW:SetScript("OnEvent", function(self, event, unit)
     if event == "PLAYER_LOGIN" then
         if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
-            hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+            hooksecurefunc(PlayerFrameHealthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+            hooksecurefunc(PlayerFrameManaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+
+            hooksecurefunc(TargetFrameHealthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+            hooksecurefunc(TargetFrameManaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+
+            if FocusFrame then
+                hooksecurefunc(FocusFrameHealthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+                hooksecurefunc(FocusFrameManaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+            end
+
+            hooksecurefunc(PetFrameHealthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
+            hooksecurefunc(PetFrameManaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
         end
 
         if RougeUI.db.PartyText then
@@ -260,7 +278,7 @@ PW:SetScript("OnEvent", function(self, event, unit)
         end
 
         isClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-        if isClassic and not IsAddOnLoaded("ModernTargetFrame") then
+        if isClassic and not C_AddOns.IsAddOnLoaded("ModernTargetFrame") then
             CreateStatusText()
             RougeUI.RougeUIF:CusFonts()
         end

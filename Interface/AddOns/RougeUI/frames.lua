@@ -2,69 +2,88 @@ local addonName, RougeUI = ...
 local pairs = _G.pairs
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
 
+local frames = {
+    "PlayerFrameTexture",
+    "PlayerFrameAlternateManaBarBorder",
+    "PlayerFrameAlternateManaBarLeftBorder",
+    "PlayerFrameAlternateManaBarRightBorder",
+    "PlayerFrameAlternatePowerBarBorder",
+    "PlayerFrameAlternatePowerBarLeftBorder",
+    "PlayerFrameAlternatePowerBarRightBorder",
+    "TargetFrameTextureFrameTexture",
+    "TargetFrameToTTextureFrameTexture",
+    "PetFrameTexture",
+    "PartyMemberFrame1Texture",
+    "PartyMemberFrame2Texture",
+    "PartyMemberFrame3Texture",
+    "PartyMemberFrame4Texture",
+    "PartyMemberFrame1PetFrameTexture",
+    "PartyMemberFrame2PetFrameTexture",
+    "PartyMemberFrame3PetFrameTexture",
+    "PartyMemberFrame4PetFrameTexture",
+    "PartyFrame.MemberFrame1.PartyMemberOverlay.Texture",
+    "PartyFrame.MemberFrame2.PartyMemberOverlay.Texture",
+    "PartyFrame.MemberFrame3.PartyMemberOverlay.Texture",
+    "PartyFrame.MemberFrame4.PartyMemberOverlay.Texture",
+    "PartyFrame.MemberFrame1.PetFrame.Texture",
+    "PartyFrame.MemberFrame2.PetFrame.Texture",
+    "PartyFrame.MemberFrame3.PetFrame.Texture",
+    "PartyFrame.MemberFrame4.PetFrame.Texture",
+    "SlidingActionBarTexture0",
+    "SlidingActionBarTexture1",
+    "MainMenuBarTexture0",
+    "MainMenuBarTexture1",
+    "MainMenuBarTexture2",
+    "MainMenuBarTexture3",
+    "MainMenuMaxLevelBar0",
+    "MainMenuMaxLevelBar1",
+    "MainMenuMaxLevelBar2",
+    "MainMenuMaxLevelBar3",
+    "MainMenuXPBarTexture0",
+    "MainMenuXPBarTexture1",
+    "MainMenuXPBarTexture2",
+    "MainMenuXPBarTexture3",
+    "MainMenuXPBarTexture4",
+    "ReputationWatchBar.StatusBar.WatchBarTexture0",
+    "ReputationWatchBar.StatusBar.WatchBarTexture1",
+    "ReputationWatchBar.StatusBar.WatchBarTexture2",
+    "ReputationWatchBar.StatusBar.WatchBarTexture3",
+    "ReputationWatchBar.StatusBar.XPBarTexture0",
+    "ReputationWatchBar.StatusBar.XPBarTexture1",
+    "ReputationWatchBar.StatusBar.XPBarTexture2",
+    "ReputationWatchBar.StatusBar.XPBarTexture3",
+    "MinimapBorder",
+    "MirrorTimer1Border",
+    "MirrorTimer2Border",
+    "MirrorTimer3Border",
+    "MiniMapTrackingBorder",
+    "MiniMapLFGFrameBorder",
+    "MiniMapBattlefieldBorder",
+    "MiniMapMailBorder",
+    "MiniMapBorderTop",
+    "CastingBarFrame.Border",
+    "TargetFrameSpellBar.Border",
+    "Rune1BorderTexture",
+    "Rune2BorderTexture",
+    "Rune3BorderTexture",
+    "Rune4BorderTexture",
+    "Rune5BorderTexture",
+    "Rune6BorderTexture",
+}
+
+local function saferef(path)
+    local obj = _G
+    for key in string.gmatch(path, "[^%.]+") do
+        obj = obj and obj[key]
+    end
+    return obj
+end
+
 local function FrameColour()
-    for _, v in pairs({
-        PlayerFrameTexture,
-        PlayerFrameAlternateManaBarBorder,
-        PlayerFrameAlternateManaBarLeftBorder,
-        PlayerFrameAlternateManaBarRightBorder,
-        PlayerFrameAlternatePowerBarBorder,
-        PlayerFrameAlternatePowerBarLeftBorder,
-        PlayerFrameAlternatePowerBarRightBorder,
-        TargetFrameTextureFrameTexture,
-        TargetFrameToTTextureFrameTexture,
-        PetFrameTexture,
-        PartyMemberFrame1Texture,
-        PartyMemberFrame2Texture,
-        PartyMemberFrame3Texture,
-        PartyMemberFrame4Texture,
-        PartyMemberFrame1PetFrameTexture,
-        PartyMemberFrame2PetFrameTexture,
-        PartyMemberFrame3PetFrameTexture,
-        PartyMemberFrame4PetFrameTexture,
-        SlidingActionBarTexture0,
-        SlidingActionBarTexture1,
-        MainMenuBarTexture0,
-        MainMenuBarTexture1,
-        MainMenuBarTexture2,
-        MainMenuBarTexture3,
-        MainMenuMaxLevelBar0,
-        MainMenuMaxLevelBar1,
-        MainMenuMaxLevelBar2,
-        MainMenuMaxLevelBar3,
-        MainMenuXPBarTexture0,
-        MainMenuXPBarTexture1,
-        MainMenuXPBarTexture2,
-        MainMenuXPBarTexture3,
-        MainMenuXPBarTexture4,
-        ReputationWatchBar.StatusBar.WatchBarTexture0,
-        ReputationWatchBar.StatusBar.WatchBarTexture1,
-        ReputationWatchBar.StatusBar.WatchBarTexture2,
-        ReputationWatchBar.StatusBar.WatchBarTexture3,
-        ReputationWatchBar.StatusBar.XPBarTexture0,
-        ReputationWatchBar.StatusBar.XPBarTexture1,
-        ReputationWatchBar.StatusBar.XPBarTexture2,
-        ReputationWatchBar.StatusBar.XPBarTexture3,
-        MinimapBorder,
-        MirrorTimer1Border,
-        MirrorTimer2Border,
-        MirrorTimer3Border,
-        MiniMapTrackingBorder,
-        MiniMapLFGFrameBorder,
-        MiniMapBattlefieldBorder,
-        MiniMapMailBorder,
-        MiniMapBorderTop,
-        CastingBarFrame.Border,
-        TargetFrameSpellBar.Border,
-        Rune1BorderTexture,
-        Rune2BorderTexture,
-        Rune3BorderTexture,
-        Rune4BorderTexture,
-        Rune5BorderTexture,
-        Rune6BorderTexture,
-    }) do
-        if v then
-            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    for _, name in ipairs(frames) do
+        local f = saferef(name)
+        if f and f.SetVertexColor then
+            f:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
 
@@ -88,15 +107,15 @@ local function FrameColour()
         StanceBarLeft,
         StanceBarMiddle,
         StanceBarRight,
-        GameMenuFrameHeader,
-        GameMenuFrame.BottomEdge,
-        GameMenuFrame.BottomLeftCorner,
-        GameMenuFrame.BottomRightCorner,
-        GameMenuFrame.LeftEdge,
-        GameMenuFrame.RightEdge,
-        GameMenuFrame.TopEdge,
-        GameMenuFrame.TopLeftCorner,
-        GameMenuFrame.TopRightCorner,
+        GameMenuFrame.Header.BG,
+        GameMenuFrame.Border.BottomEdge,
+        GameMenuFrame.Border.BottomLeftCorner,
+        GameMenuFrame.Border.BottomRightCorner,
+        GameMenuFrame.Border.LeftEdge,
+        GameMenuFrame.Border.RightEdge,
+        GameMenuFrame.Border.TopEdge,
+        GameMenuFrame.Border.TopLeftCorner,
+        GameMenuFrame.Border.TopRightCorner,
         AddonListBotLeftCorner,
         AddonListBotRightCorner,
         AddonListBottomBorder,
@@ -294,29 +313,6 @@ local function FrameColour()
         end
     end
 
-    -- Main MainMenu
-    local gmbutton = {
-        GameMenuButtonHelp = { GameMenuButtonHelp.Left, GameMenuButtonHelp.Middle, GameMenuButtonHelp.Right },
-        GameMenuButtonStore = { GameMenuButtonStore.Left, GameMenuButtonStore.Middle, GameMenuButtonStore.Right },
-        GameMenuButtonOptions = { GameMenuButtonOptions.Left, GameMenuButtonOptions.Middle, GameMenuButtonOptions.Right },
-        GameMenuButtonMacros = { GameMenuButtonMacros.Left, GameMenuButtonMacros.Middle, GameMenuButtonMacros.Right },
-        GameMenuButtonAddons = { GameMenuButtonAddons.Left, GameMenuButtonAddons.Middle, GameMenuButtonAddons.Right },
-        GameMenuButtonLogout = { GameMenuButtonLogout.Left, GameMenuButtonLogout.Middle, GameMenuButtonLogout.Right },
-        GameMenuButtonQuit = { GameMenuButtonQuit.Left, GameMenuButtonQuit.Middle, GameMenuButtonQuit.Right },
-        GameMenuButtonContinue = { GameMenuButtonContinue.Left, GameMenuButtonContinue.Middle, GameMenuButtonContinue.Right },
-        GameMenuButtonRatings = { GameMenuButtonRatings.Left, GameMenuButtonRatings.Middle, GameMenuButtonRatings.Right }
-    }
-
-    for _, v in pairs(gmbutton) do
-        for _, j in pairs(v) do
-            j:SetDesaturation(1 - RougeUI.db.Colval)
-            j:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            if RougeUI.db.Colval < 0.8 then
-                j:SetDesaturated(true)
-            end
-        end
-    end
-
     -- SettingsPanel
     if SettingsPanel then
         for _, v in pairs({
@@ -362,7 +358,7 @@ local function FrameColour()
     -- BankFrame
     if BankFrame then
         local a, b, c, d, e = BankFrame:GetRegions()
-        for _, v in pairs({ a, b, c, d, e }) do
+        for _, v in pairs({ a, b, }) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
@@ -551,8 +547,8 @@ local function FrameColour()
                 PVPFrameInset.NineSlice.BottomEdge:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         else
-            local _, _, c, d, e, f, g, h = PVPFrame:GetRegions()
-            for _, v in pairs({ c, d, e, f, g, h }) do
+            local a, b, c, d, e, f, g, h = PVPFrame:GetRegions()
+            for _, v in pairs({ a, b, c, d, e, f, g, h }) do
                 if v then
                     v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
@@ -737,7 +733,7 @@ local function FrameColour()
         MerchantFramePortrait
     }) do
         if v then
-            v:SetVertexColor(1, 1, 1)
+            v:SetVertexColor(1, 0.8196079134911, 0)
         end
     end
 
@@ -833,6 +829,14 @@ local function FrameColour()
 
     if CompactRaidFrameContainerBorderFrame then
         for _, region in pairs({ CompactRaidFrameContainerBorderFrame:GetRegions() }) do
+            if region and region:IsObjectType("Texture") then
+                region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+    end
+
+    if CompactPartyFrameBorderFrame then
+        for _, region in pairs({ CompactPartyFrameBorderFrame:GetRegions() }) do
             if region and region:IsObjectType("Texture") then
                 region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
@@ -971,11 +975,14 @@ local function NewVariables()
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
-            if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
+            if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) or WOW_PROJECT_ID == 5 then
                 b:SetVertexColor(1, 1, 1)
                 d:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 f:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
+        end
+        if QuestLogTitleText then
+            QuestLogTitleText:SetVertexColor(1, 0.8196079134911, 0)
         end
     end
 
@@ -995,7 +1002,7 @@ local function NewVariables()
             QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame, -10, 0)
             QuestLogFrame.Material:SetVertexColor(.9, .9, .9)
 
-            if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
+            if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) or WOW_PROJECT_ID == 5 then
                 QuestLogFrame.Material:SetWidth(510)
                 QuestLogFrame.Material:SetHeight(398)
                 QuestLogFrame.Material:SetPoint("TOPLEFT", QuestLogDetailScrollFrame)
@@ -1076,15 +1083,21 @@ local function NewVariables()
         end
     end
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC then
+    if WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC or WOW_PROJECT_ID == 5 then
         for _, v in pairs ({QuestFrame:GetRegions()}) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
-        QuestFrameTitleText:SetTextColor(1, 1, 1)
+        QuestFrameTitleBg:SetVertexColor(1, 1 ,1)
+        QuestFrameTitleText:SetVertexColor(1, 0.8196079134911, 0)
+        QuestFrameNpcNameText:SetVertexColor(1, 0.8196079134911, 0)
         QuestFramePortrait:SetVertexColor(1, 1, 1)
-        QuestFrameDetailPanel.Material:SetSize(520, 580)
+        if WOW_PROJECT_ID == 5 then
+            QuestFrameDetailPanel.Material:SetSize(520, 520)
+        else
+            QuestFrameDetailPanel.Material:SetSize(520, 580)
+        end
     end
 
     -- Wardrobe
@@ -1096,7 +1109,7 @@ local function NewVariables()
     end
 
     if DressUpFrameTitleText then
-        DressUpFrameTitleText:SetVertexColor(1, 1, 1)
+        DressUpFrameTitleText:SetVertexColor(1, 0.8196079134911, 0)
     end
 
     -- Readycheck
@@ -1311,6 +1324,9 @@ local function BlizzFrames(addon)
         for i = k, j do
             if vectors[i] then
                 vectors[i]:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+            if PlayerTalentFrameTitleText then
+                PlayerTalentFrameTitleText:SetVertexColor(1, 0.8196079134911, 0)
             end
         end
 

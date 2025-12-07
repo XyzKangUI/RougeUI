@@ -17,7 +17,7 @@ local function NameToArenaNumber(plate)
             plate.name:SetText(i)
             plate.name:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
             plate.name:ClearAllPoints()
-            plate.name:SetPoint("BOTTOM", plate.healthBar.border, "TOP", 0, 2)
+            plate.name:SetPoint("BOTTOM", plate.HealthBarsContainer.border, "TOP", 0, 2)
             break
         else
             if RougeUI.db.ModPlates and not RougeUI.db.AsuriFrame then
@@ -43,21 +43,21 @@ local function AddElements(plate)
     end
 
     if RougeUI.db.NoLevel or RougeUI.db.AsuriFrame then
-        local border = plate.healthBar.border:GetRegions()
+        local border = plate.HealthBarsContainer.border:GetRegions()
         if border then
             border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")
         end
         if plate.LevelFrame then
             plate.LevelFrame:Hide()
         end
-        if plate.healthBar then
-            plate.healthBar:ClearAllPoints()
-            plate.healthBar:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 4, 4)
-            plate.healthBar:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -4, 4)
+        if plate.HealthBarsContainer then
+            plate.HealthBarsContainer:ClearAllPoints()
+            plate.HealthBarsContainer:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 4, 4)
+            plate.HealthBarsContainer:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -4, 4)
         end
-        if plate.CastBar then
-            plate.CastBar:ClearAllPoints()
-            plate.CastBar:SetPoint("TOP", plate.healthBar, "BOTTOM", 8, -9)
+        if plate.castBar then
+            plate.castBar:ClearAllPoints()
+            plate.castBar:SetPoint("TOP", plate.healthBar, "BOTTOM", 8, -9)
         end
     else
         if plate.LevelFrame.levelText then
@@ -65,14 +65,14 @@ local function AddElements(plate)
         end
     end
 
-    for _, v in pairs({ plate.healthBar.border:GetRegions() }) do
+    for _, v in pairs({ plate.HealthBarsContainer.border:GetRegions() }) do
         if v then
             v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
 
-    if plate.CastBar and plate.CastBar.Border then
-        plate.CastBar.Border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    if plate.castBar and plate.castBar.Border then
+        plate.castBar.Border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
     end
 end
 

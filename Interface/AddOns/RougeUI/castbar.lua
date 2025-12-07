@@ -80,9 +80,9 @@ local function modstyle()
         end
     end
 
-    local cf = CastingBarFrame
+    local cf = PlayerCastingBarFrame
     cf.Border:SetTexture("")
-    Mixin(CastingBarFrame, BackdropTemplateMixin)
+    Mixin(PlayerCastingBarFrame, BackdropTemplateMixin)
     cf:SetBackdrop(backdrop)
     cf:SetBackdropColor(0.1, 0.1, 0.1, 1)
     cf.Flash:SetTexture("")
@@ -335,7 +335,7 @@ FR:SetScript("OnEvent", function(self, event, ...)
                 end
             end
 
-            CastingBarFrame:HookScript("OnUpdate", function(self, elapsed)
+            PlayerCastingBarFrame:HookScript("OnUpdate", function(self, elapsed)
                 TimerHook(self, elapsed)
                 PurpleKoolaid(self)
                 if self.Text and (self.Text:GetText() == INTERRUPTED or self.Text:GetText() == FAILED) then
@@ -343,10 +343,10 @@ FR:SetScript("OnEvent", function(self, event, ...)
                 end
             end)
 
-            CreateAnimation(CastingBarFrame)
+            CreateAnimation(PlayerCastingBarFrame)
 
-            CastingBarFrame:HookScript("OnEvent", function(self, event)
-                if (self == CastingBarFrame) and (event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_INTERRUPTED") then
+            PlayerCastingBarFrame:HookScript("OnEvent", function(self, event)
+                if (self == PlayerCastingBarFrame) and (event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_INTERRUPTED") then
                     if self.InterruptShakeAnim and not self.InterruptShakeAnim:IsPlaying() then
                         self.InterruptShakeAnim:Play()
                     end

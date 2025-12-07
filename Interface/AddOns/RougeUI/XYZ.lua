@@ -1,7 +1,8 @@
 local _, RougeUI = ...
-local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 local bartender = IsAddOnLoaded("Bartender4")
 local dominos = IsAddOnLoaded("Dominos")
+local elvUI = IsAddOnLoaded("ElvUI")
 local frame = CreateFrame("Frame")
 local wahkFrames = {}
 
@@ -12,6 +13,9 @@ local buttonNames = {
     ["MULTIACTIONBAR3BUTTON"] = "MultiBarRightButton",
     ["MULTIACTIONBAR4BUTTON"] = "MultiBarLeftButton",
     ["CLICK BT4Button"] = "BT4Button",
+    ["MULTIACTIONBAR5BUTTON"] = "MultiBar5Button",
+    ["MULTIACTIONBAR6BUTTON"] = "MultiBar6Button",
+    ["MULTIACTIONBAR7BUTTON"] = "MultiBar7Button",
     ["CLICK DominosActionButton"] = "DominosActionButton",
 }
 
@@ -21,8 +25,8 @@ local function ConvertActionButtonName(name)
     -- remove ":Keybind"
     name = name:gsub(":Keybind$", "")
 
-    if dominos then
-        if string.match(name, "Dominos") then
+    if dominos or elvUI then
+        if string.match(name, "Dominos") or string.match(name, "ElvUI") then
             name = name:gsub(":LeftButton", "")
             name = name:gsub(":HOTKEY", "")
         end
@@ -51,12 +55,21 @@ local function WAHK(button, ok)
         clickButton = ("CLICK %s:LeftButton"):format(button)
     elseif button:match("DominosActionButton") then
         clickButton = ("CLICK %s:HOTKEY"):format(button)
-    else
-        id = tonumber(button:match("(%d+)"))
-        local actionButtonType = btn.buttonType
-        local buttonType = actionButtonType and (actionButtonType .. id) or ("ACTIONBUTTON%d"):format(id)
-        clickButton = buttonType or ("CLICK " .. button .. ":LeftButton")
     end
+
+    id = tonumber(button:match("(%d+)"))
+
+    if button:match("MultiBar5") then
+        id = tonumber(button:match("MultiBar5Button(%d+)"))
+    elseif button:match("MultiBar6") then
+        id = tonumber(button:match("MultiBar6Button(%d+)"))
+    elseif button:match("MultiBar7") then
+        id = tonumber(button:match("MultiBar7Button(%d+)"))
+    end
+
+    local actionButtonType = btn.buttonType
+    local buttonType = actionButtonType and (actionButtonType .. id) or ("ACTIONBUTTON%d"):format(id)
+    clickButton = buttonType or ("CLICK " .. button .. ":LeftButton")
 
     local key, key2 = GetBindingKey(clickButton)
     if not key and not key2 then
@@ -91,7 +104,10 @@ local function WAHK(button, ok)
 
             wahk:RegisterForClicks("AnyDown", "AnyUp")
             wahk:SetAttribute("type", "click")
+            wahk:SetAttribute("pressAndHoldAction", "1")
+            wahk:SetAttribute("typerelease", "click")
             wahk:SetAttribute("clickbutton", _G[button])
+
 
             SetOverrideBindingClick(wahk, true, v, wahk:GetName())
 
@@ -118,14 +134,14 @@ local function WAHK(button, ok)
                     local obtn = _G["OverrideActionBarButton" .. id]
                     if obtn then
                         obtn:SetButtonState("NORMAL")
-                        if RougeUI.db.wahksfk then
+                        if RougeUI.db.ButtonAnim then
                             RougeUI.Animate(obtn)
                         end
                     end
                 else
                     if btn then
                         btn:SetButtonState("NORMAL")
-                        if RougeUI.db.wahksfk then
+                        if RougeUI.db.ButtonAnim then
                             RougeUI.Animate(btn)
                         end
                     end
@@ -156,6 +172,9 @@ local function UpdateBinds()
         WAHK("MultiBarBottomLeftButton" .. i)
         WAHK("MultiBarRightButton" .. i)
         WAHK("MultiBarLeftButton" .. i)
+        WAHK("MultiBar6Button" .. i)
+        WAHK("MultiBar5Button" .. i)
+        WAHK("MultiBar7Button" .. i)
     end
 
     if bartender or dominos then

@@ -56,7 +56,7 @@ function RougeUI.Animate(self)
     end
 
     local func = true
-    if wahk and not RougeUI.db.wahksfk then
+    if wahk then
         func = (self:GetButtonState() == "PUSHED")
     end
 
@@ -87,7 +87,7 @@ local function HookedDefaultBars()
             RougeUI.Animate(button)
         end
     end)
-    hooksecurefunc("PetActionButtonDown", function(id)
+    hooksecurefunc(PetActionBar, "PetActionButtonDown", function(id)
         local button = _G["PetActionButton" .. id]
         if button then
             RougeUI.Animate(button)

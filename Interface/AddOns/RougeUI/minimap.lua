@@ -1,6 +1,7 @@
 local _, RougeUI = ...
 local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
 local GetCVar = C_CVar and C_CVar.GetCVar or GetCVar
+local MinimapBorderTop = MinimapBorderTop or MinimapCluster.BorderTop
 
 local MM = CreateFrame("Frame")
 MM:RegisterEvent("ADDON_LOADED")
@@ -34,6 +35,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
             MinimapNorthTag,
             MiniMapMailBorder,
             MinimapBorder,
+            GameTimeFrame, -- tbc
         }) do
             if v then
                 v:Hide()
@@ -210,19 +212,6 @@ MM:SetScript("OnEvent", function(self, event, addon)
             MiniMapLFGFrame:SetPoint("TOPLEFT", Minimap, "TOPLEFT", -14, -6)
             MiniMapLFGFrameBorder:Hide()
         end
-
-
-        local overflowCheck = false
-        hooksecurefunc(BuffFrame, "SetPoint", function(self)
-            if overflowCheck then return end
-            overflowCheck = true
-            local p, re, rel, xOff, yOff = self:GetPoint()
-            if p == "TOPRIGHT" and re == MinimapCluster and rel == "TOPLEFT" and math.floor(xOff) == -10 and math.ceil(yOff) == -13 then
-                self:ClearAllPoints()
-                self:SetPoint(p, re, rel, xOff, -26)
-            end
-            overflowCheck = false
-        end)
 
         -- Disable cluster clicks
         MinimapCluster:EnableMouse(false)
