@@ -322,7 +322,7 @@ EnemyOOC.Refreshes = {
 local function CreateIcon(unit, frame)
     if not EnemyOOC.U[unit] then
         EnemyOOC.U[unit] = CreateFrame("Frame", nil, frame)
-        EnemyOOC.U[unit]:SetPoint("CENTER", frame, "RIGHT", -6, -10)
+        EnemyOOC.U[unit]:SetPoint("CENTER", frame, "RIGHT", 4, -12)
         EnemyOOC.U[unit]:SetSize(100, 100)
         EnemyOOC.U[unit]:SetScale(1.4)
         EnemyOOC.U[unit].text = EnemyOOC.U[unit]:CreateFontString(nil, "OVERLAY", "GameFontWhite")
@@ -331,7 +331,7 @@ local function CreateIcon(unit, frame)
         EnemyOOC.U[unit].texture = EnemyOOC.U[unit]:CreateTexture(nil, "BACKGROUND")
         EnemyOOC.U[unit].texture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\CombatSwords2.blp")
         EnemyOOC.U[unit].texture:SetSize(45, 45)
-        EnemyOOC.U[unit].texture:SetPoint("LEFT", frame, "RIGHT", -18, -3)
+        EnemyOOC.U[unit].texture:SetPoint("LEFT", frame, "RIGHT", -7, -5)
         EnemyOOC.U[unit]:Hide()
     end
 end
@@ -743,8 +743,7 @@ function EnemyOOC:UpdateText(unit)
     for i = 1, 5, 1 do
         if UnitIsUnit(unit, "arena" .. i) and (oocTime["arena" .. i] ~= nil) then
             EnemyOOC.U[unit].text:SetText(string.format("%.1f", oocTime["arena" .. i] >= 0 and oocTime["arena" .. i] or 0))
-            if (oocTime["arena" .. i] > 0 and oocTime["arena" .. i] < 4) and not (UnitDetailedThreatSituation("player", "arenapet" .. i) or
-                    UnitDetailedThreatSituation("party" .. i, "arenapet" .. i)) and energyValues["arena" .. i].startTick then
+            if (oocTime["arena" .. i] > 0 and oocTime["arena" .. i] < 4) and energyValues["arena" .. i].startTick then
                 EnemyOOC.U[unit].text:SetAlpha(1)
                 if indicator then
                     EnemyOOC.U[unit].texture:SetAlpha(1)

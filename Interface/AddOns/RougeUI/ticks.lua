@@ -1,8 +1,7 @@
 local addonName, RougeUI = ...
-local pairs, GetManaRegen, m_abs = _G.pairs, _G.GetManaRegen, math.abs
-local UnitExists, UnitIsUnit, UnitIsEnemy = _G.UnitExists, _G.UnitIsUnit, _G.UnitIsEnemy
-local UnitPower, UnitIsPlayer = _G.UnitPower, _G.UnitIsPlayer
-local PlayerFrameManaBar, TargetFrameManaBar = _G.PlayerFrameManaBar, _G.TargetFrameManaBar
+local GetManaRegen = _G.GetManaRegen
+local UnitPower = _G.UnitPower
+local PlayerFrameManaBar = _G.PlayerFrameManaBar
 local eventRegistered = { ["SPELL_PERIODIC_ENERGIZE"] = true, ["SPELL_ENERGIZE"] = true, ["SPELL_CAST_SUCCESS"] = true }
 local energyValues = {}
 local possibleFSR
@@ -48,38 +47,27 @@ local function SetEnergyValue(self, value, tickRate)
 end
 
 local function OnUpdate(self, elapsed)
-    for unit in pairs(energyValues) do
-        if UnitExists(unit) and (UnitIsEnemy("player", unit) or unit == "player") and UnitIsPlayer(unit) then
+    local data = energyValues["player"]
 
-            energyValues[unit].last_tick = energyValues[unit].last_tick + elapsed
+    if data then
+        data.last_tick = data.last_tick + elapsed
 
-            if (energyValues[unit].last_tick >= energyValues[unit].tickRate) and energyValues[unit].startTick then
-                energyValues[unit].last_tick = 0
-                energyValues[unit].validTick = false
-                if unit == "player" and energyValues["player"].tickRate ~= 2.02 then
-                    energyValues["player"].tickRate = 2.02
-                    possibleFSR = false
-                end
-                if UnitIsUnit(unit, "target") and not (unit == "player" or unit == "target") then
-                    energyValues.target.last_tick = energyValues[unit].last_tick
-                    energyValues.target.startTick = energyValues[unit].startTick
-                end
-            end
-
-            if unit == "player" then
-                SetEnergyValue(PlayerFrameManaBar, energyValues["player"].last_tick, energyValues["player"].tickRate)
-            elseif (unit ~= "player") then
-                if not UnitExists("playertarget") or UnitIsUnit(unit, "target") then
-                    energyValues.target.last_tick = energyValues[unit].last_tick
-                    energyValues.target.startTick = energyValues[unit].startTick
-                end
-                SetEnergyValue(TargetFrameManaBar, energyValues[unit].last_tick)
+        if (data.last_tick >= data.tickRate) and data.startTick then
+            data.last_tick = 0
+            data.validTick = false
+            if data.tickRate ~= 2.02 then
+                data.tickRate = 2.02
+                possibleFSR = false
             end
         end
+
+        SetEnergyValue(PlayerFrameManaBar, data.last_tick, data.tickRate)
     end
 end
 
 local function UpdateEnergy(unit, powerType)
+    if unit ~= "player" then return end
+    
     if not energyValues[unit] or not (powerType == "ENERGY" or powerType == "RAGE" or powerType == "MANA") then
         return
     end
@@ -91,7 +79,6 @@ local function UpdateEnergy(unit, powerType)
     local externalTick = energyValues[guid] and energyValues[guid].externalTick or 0
     local gain = energyValues[guid] and energyValues[guid].externalGain or 0
 
-    -- Energized Ticks (sometimes doesn't work as expected)
     if ((now - externalTick) <= 0.1) and energyInc == gain then
         energyValues[unit].last_value = energy
         return
@@ -114,7 +101,6 @@ local function UpdateEnergy(unit, powerType)
     elseif powerType == "MANA" then
         increment = (energy > energyValues[unit].last_value)
 
-        -- Ignore these ticks (hope it ain't disruptive)
         local percentageGain = math.floor((energyInc / UnitPowerMax(unit)) * 100)
         if percentageGain == 10 or percentageGain == 6 or ignoreTicks[energyInc] or AuraUtil.FindAuraByName(GetSpellInfo(30823), "player") then
             increment = false
@@ -139,10 +125,9 @@ local function UpdateEnergy(unit, powerType)
         energyValues[unit].validTick = true
         energyValues[unit].last_tick = 0
         energyValues[unit].tickRate = 2.02
-        if unit == "player" and (PlayerFrameManaBar.energy.spark:GetAlpha() < 1) then
+        
+        if PlayerFrameManaBar.energy.spark:GetAlpha() < 1 then
             PlayerFrameManaBar.energy.spark:SetAlpha(1)
-        elseif UnitIsUnit("target", unit) and (unit ~= "player") and (TargetFrameManaBar.energy.spark:GetAlpha() < 1) then
-            TargetFrameManaBar.energy.spark:SetAlpha(1)
         end
     end
 end
@@ -154,29 +139,26 @@ local function RealTick()
         return
     end
 
-    local isDestEnemy = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
     local isDestPlayer = CombatLog_Object_IsA(destFlags, COMBATLOG_FILTER_ME)
     local isSourcePlayer = CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_ME)
 
-    if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE") and (isDestEnemy or (isDestPlayer and isSourcePlayer)) then
-        if energyValues[destGUID] == nil then
-            energyValues[destGUID] = {}
+    if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE") and isDestPlayer then
+        local playerGUID = UnitGUID("player")
+        if destGUID == playerGUID then
+             if energyValues[playerGUID] == nil then
+                energyValues[playerGUID] = {}
+            end
+            energyValues[playerGUID].externalTick = GetTime()
+            energyValues[playerGUID].externalGain = amount
         end
-
-        energyValues[destGUID].externalTick = GetTime()
-        energyValues[destGUID].externalGain = amount
         return
     end
 
     if eventType == "SPELL_CAST_SUCCESS" and isSourcePlayer and spellID == 13750 then
-        energyValues["player"].last_tick = 0
+        if energyValues["player"] then
+            energyValues["player"].last_tick = 0
+        end
         return
-    end
-end
-
-local function delay()
-    if energyValues.target.startTick and UnitIsPlayer("target") and UnitIsEnemy("player", "target") then
-        TargetFrameManaBar.energy.spark:SetAlpha(1)
     end
 end
 
@@ -184,7 +166,7 @@ local e = CreateFrame("Frame")
 e:RegisterEvent("ADDON_LOADED")
 e:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" and ... == addonName then
-        if RougeUI.db.EnergyTicker or RougeUI.db.EnemyTicker then
+        if RougeUI.db.EnergyTicker then
             local _, class = UnitClass("player")
             if UnitPowerType("player") ~= 0 and class ~= "DRUID" then
                 if self:IsEventRegistered("UNIT_SPELLCAST_SUCCEEDED") then
@@ -194,38 +176,14 @@ e:SetScript("OnEvent", function(self, event, ...)
                 self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
             end
 
-            if RougeUI.db.EnergyTicker then
-                AddEnergy(PlayerFrameManaBar)
-                energyValues["player"] = {
-                    last_tick = 0,
-                    last_value = 0,
-                    startTick = false,
-                    validTick = false,
-                    tickRate = 2.02,
-                }
-            end
-            if RougeUI.db.EnemyTicker then
-                AddEnergy(TargetFrameManaBar)
-                energyValues["target"] = {
-                    last_tick = 0,
-                    last_value = 0,
-                    startTick = false,
-                    validTick = false,
-                    tickRate = 2.02,
-                }
-
-                for i = 1, 10 do
-                    energyValues["nameplate" .. i] = {
-                        last_tick = 0,
-                        last_value = 0,
-                        startTick = false,
-                        validTick = false,
-                        tickRate = 2.02,
-                    }
-                end
-
-                self:RegisterEvent("PLAYER_TARGET_CHANGED")
-            end
+            AddEnergy(PlayerFrameManaBar)
+            energyValues["player"] = {
+                last_tick = 0,
+                last_value = 0,
+                startTick = false,
+                validTick = false,
+                tickRate = 2.02,
+            }
 
             self:RegisterEvent("UNIT_POWER_UPDATE")
             self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -233,38 +191,24 @@ e:SetScript("OnEvent", function(self, event, ...)
             self:SetScript("OnUpdate", OnUpdate)
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
-        for unit in pairs(energyValues) do
-            if unit ~= "player" then
-                energyValues[unit] = {
-                    last_tick = 0,
-                    last_value = 0,
-                    startTick = false,
-                    validTick = false,
-                    tickRate = 2.02,
-                }
-            end
+        if energyValues["player"] then
+            energyValues["player"].last_tick = 0
+            energyValues["player"].last_value = 0
+            energyValues["player"].startTick = false
+            energyValues["player"].validTick = false
+            energyValues["player"].tickRate = 2.02
         end
     elseif event == "UNIT_POWER_UPDATE" then
         local unit = ...
-        if energyValues[unit] and ((UnitIsEnemy("player", unit) and UnitIsPlayer(unit)) or unit == "player") then
-            UpdateEnergy(...)
+        if unit == "player" then
+            UpdateEnergy(unit, ...)
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         RealTick()
-    elseif event == "PLAYER_TARGET_CHANGED" then
-        if not TargetFrameManaBar.energy.spark then
-            return
-        end
-        if not UnitIsPlayer("target") or not UnitIsEnemy("player", "target") or not energyValues.target.startTick then
-            TargetFrameManaBar.energy.spark:SetAlpha(0)
-            C_Timer.After(0.1, delay)
-        else
-            TargetFrameManaBar.energy.spark:SetAlpha(1)
-        end
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local _, _, spellId = ...
 
-        if not possibleFSR then
+        if not possibleFSR or not energyValues["player"] then
             return
         end
 
@@ -274,7 +218,7 @@ e:SetScript("OnEvent", function(self, event, ...)
             local channelTime = channeling and ((endTime - startTime) / 1000) or 0
             local rate = (6.06 - (now - (now - energyValues["player"].last_tick)) % 2.02)
             energyValues["player"].tickRate = rate >= 5 and rate or rate + 2.02
-            -- TODO: More research on how channeling vs rate interacts
+            
             if channeling and channelTime > rate then
                 energyValues["player"].tickRate = energyValues["player"].tickRate + 2.02
             end

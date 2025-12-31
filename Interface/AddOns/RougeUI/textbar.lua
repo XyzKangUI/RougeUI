@@ -129,26 +129,26 @@ end
 local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
     if statusFrame and not statusFrame.TextString then return end
 
-    local value = statusFrame.finalValue or statusFrame:GetValue();
+    value = statusFrame.finalValue or value or statusFrame:GetValue()
     local unit = statusFrame.unit
 
     if (statusFrame.LeftText and statusFrame.RightText) then
         statusFrame.LeftText:SetText("");
         statusFrame.RightText:SetText("");
-        statusFrame.LeftText:Hide();
-        statusFrame.RightText:Hide();
+        statusFrame.LeftText:SetAlpha(0); 
+        statusFrame.RightText:SetAlpha(0);
     end
 
     if ((tonumber(valueMax) ~= valueMax or valueMax > 0) and not (statusFrame.pauseUpdates)) then
-        statusFrame:Show();
+        statusFrame:SetAlpha(1);
 
         if ((statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable) or statusFrame.forceShow) then
-            textString:Show();
+            textString:SetAlpha(1);
         elseif (statusFrame.lockShow > 0 and (not statusFrame.forceHideText)) then
-            textString:Show();
+            textString:SetAlpha(1);
         else
             textString:SetText("");
-            textString:Hide();
+            textString:SetAlpha(0);
             return ;
         end
 
@@ -167,20 +167,20 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
             if (value == 0 and statusFrame.zeroText) then
                 textString:SetText(statusFrame.zeroText);
                 statusFrame.isZero = 1;
-                textString:Show();
+                textString:SetAlpha(1);
             elseif (textDisplay == "BOTH" and not showPercentage) then
                 if (statusFrame.LeftText and statusFrame.RightText) then
                     if (not statusFrame.powerToken or statusFrame.powerToken == "MANA") then
                         statusFrame.LeftText:SetText(mceil((value / valueMax) * 100) .. "%");
-                        statusFrame.LeftText:Show();
+                        statusFrame.LeftText:SetAlpha(1);
                     end
                     if RougeUI.db.ShortNumeric then
                         statusFrame.RightText:SetText(true_format(valueDisplay));
                     else
                         statusFrame.RightText:SetText(valueDisplay);
                     end
-                    statusFrame.RightText:Show();
-                    textString:Hide();
+                    statusFrame.RightText:SetAlpha(1);
+                    textString:SetAlpha(0);
                 else
                     valueDisplay = "(" .. mceil((value / valueMax) * 100) .. "%) " .. valueDisplay .. " / " .. valueMaxDisplay;
                 end
@@ -196,7 +196,7 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
         elseif (value == 0 and statusFrame.zeroText) then
             textString:SetText(statusFrame.zeroText);
             statusFrame.isZero = 1;
-            textString:Show();
+            textString:SetAlpha(1);
             return ;
         else
             statusFrame.isZero = nil;
@@ -215,10 +215,10 @@ local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textStr
             end
         end
     else
-        textString:Hide();
+        textString:SetAlpha(0);
         textString:SetText("");
         if (not statusFrame.alwaysShow) then
-            statusFrame:Hide();
+            statusFrame:SetAlpha(0);
         else
             statusFrame:SetValue(0);
         end

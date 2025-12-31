@@ -43,7 +43,7 @@ local function CreateCombatIndicatorForUnit(frame)
             if events[event] and self:IsShown() then
                 local unit = self.unit
                 if not unit then return end
-                Indicator[self]:SetShown(InCombat(unit))
+                Indicator[self]:SetShown(UnitAffectingCombat(unit))
                 if UnitClassification(unit) ~= "normal" and not asuriFrame then
                     ciFrame:SetPoint("LEFT", self, "RIGHT", -15, -5)
                 else

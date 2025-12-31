@@ -7,6 +7,7 @@ local IsAddOnLoaded = IsAddOnLoaded or C_AddOns and C_AddOns.IsAddOnLoaded
 local AURA_OFFSET_Y = 1
 local fontName, skinEnabled
 local xPosOffset = 21
+local dbfLoaded
 
 local defaultList = {
     [16188] = true, -- Nature's Swiftness
@@ -265,57 +266,72 @@ local function ShouldAuraBeLarge(caster)
     end
 end
 
+local function SkinAuraFrame(frame, frameName)
+    if not frame or frame.skin or not skinEnabled then return end
+
+    RougeUI.addBorder(frame)
+    local icon = _G[frameName .. "Icon"]
+        
+    if RougeUI.db.modtheme then
+        icon:SetTexCoord(.03, .97, .03, .97)
+        icon:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -2)
+        icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
+        frame.border:SetAllPoints(frame)
+    else
+        icon:SetTexCoord(.1, .9, .1, .9)
+    end
+        
+    frame.skin = true
+end
+
 local function UpdateAuras(self)
+    local selfName = self:GetName()
+
+    if dbfLoaded then
+        for i = 1, MAX_TARGET_BUFFS do
+            local frameName = selfName .. "Buff" .. i
+            local frame = _G[frameName]
+            if frame then
+                SkinAuraFrame(frame, frameName)
+            end
+        end
+        for i = 1, MAX_TARGET_DEBUFFS do
+            local frameName = selfName .. "Debuff" .. i
+            local frame = _G[frameName]
+            if frame then
+                SkinAuraFrame(frame, frameName)
+            end
+        end
+        return 
+    end
+
     local db = RougeUI.db
-    local frame, frameName;
-    local frameIcon, frameCount, frameCooldown;
-    local playerIsTarget = UnitIsUnit("player", self.unit);
-    local selfName = self:GetName();
-    local canAssist = UnitCanAssist("player", self.unit);
+    local frame, frameName
+    local frameIcon, frameCount, frameCooldown
+    local playerIsTarget = UnitIsUnit("player", self.unit)
+    local canAssist = UnitCanAssist("player", self.unit)
     local _, _, class = UnitClass("player")
     local fontName
 
-    local numBuffs = 0;
-    local buffIndex = 1;
+    local numBuffs = 0
+    local buffIndex = 1
+
     AuraUtil.ForEachAura(self.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Helpful), MAX_TARGET_BUFFS, function(...)
-        local buffName, icon, count, debuffType, duration, expirationTime, caster, canStealOrPurge, _, spellId, _, _, casterIsPlayer, nameplateShowAll = ...;
+        local buffName, icon, count, debuffType, duration, expirationTime, caster, canStealOrPurge, _, spellId, _, _, casterIsPlayer, nameplateShowAll = ...
         if (buffName) then
-            frameName = selfName .. "Buff" .. (buffIndex);
-            frame = _G[frameName];
+            frameName = selfName .. "Buff" .. (buffIndex)
+            frame = _G[frameName]
             if (not frame) then
                 if (not icon) then
-                    return false;
+                    return false
                 else
-                    frame = CreateFrame("Button", frameName, self, "TargetBuffFrameTemplate");
-                    frame.unit = self.unit;
+                    frame = CreateFrame("Button", frameName, self, "TargetBuffFrameTemplate")
+                    frame.unit = self.unit
                 end
             end
+            
             if (icon and (not self.maxBuffs or buffIndex <= self.maxBuffs)) then
-                -- if isClassic
-                --frame:SetID(buffIndex);
-                --
-                ---- set the icon
-                --frameIcon = _G[frameName .. "Icon"];
-                --frameIcon:SetTexture(icon);
-                --
-                ---- Handle cooldowns
-                --frameCooldown = _G[frameName .. "Cooldown"];
-                --CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
-                --frameCooldown:SetDrawEdge(false)
-
-                if not frame.skin and skinEnabled then
-                    RougeUI.addBorder(frame)
-                    local icon = _G[frameName .. "Icon"]
-                    if RougeUI.db.modtheme then
-                        icon:SetTexCoord(.03, .97, .03, .97)
-                        icon:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -2)
-                        icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
-                        frame.border:SetAllPoints(frame)
-                    else
-                        icon:SetTexCoord(.1, .9, .1, .9)
-                    end
-                    frame.skin = true
-                end
+                SkinAuraFrame(frame, frameName)
 
                 local showHighlight = false
                 local r, g, b = 1, 1, 1
@@ -325,7 +341,7 @@ local function UpdateAuras(self)
                     modifier = 2.2
                 end
 
-                if db.HighlightDispellable then --and (WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC)
+                if db.HighlightDispellable then 
                     if not canAssist then
                         if Whitelist[buffName] and canStealOrPurge then
                             showHighlight = true
@@ -355,14 +371,13 @@ local function UpdateAuras(self)
                     frameStealable:Hide()
                 end
 
-                -- set the count
-                frameCount = _G[frameName .. "Count"];
+                frameCount = _G[frameName .. "Count"]
                 if frameCount then
                     if (count > 1 and self.showAuraCount) then
-                        frameCount:SetText(count);
-                        frameCount:Show();
+                        frameCount:SetText(count)
+                        frameCount:Show()
                     else
-                        frameCount:Hide();
+                        frameCount:Hide()
                     end
                     if not fontName then
                         fontName = frameCount:GetFont()
@@ -370,89 +385,48 @@ local function UpdateAuras(self)
                     frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
                 end
 
-                -- set the buff to be big if the buff is cast by the player or his pet
-                buffIndex = buffIndex + 1;
-                numBuffs = numBuffs + 1;
-                largeBuffList[numBuffs] = ShouldAuraBeLarge(caster);
-
-               -- frame:ClearAllPoints();
-               -- frame:Show();
-            -- else
-              --  frame:Hide();
+                buffIndex = buffIndex + 1
+                numBuffs = numBuffs + 1
+                largeBuffList[numBuffs] = ShouldAuraBeLarge(caster)
             end
         else
-            return false;
+            return false
         end
-
-        return numBuffs >= MAX_TARGET_BUFFS;
-    end);
+        return numBuffs >= MAX_TARGET_BUFFS
+    end)
 
     for i = buffIndex, MAX_TARGET_BUFFS do
-        local buffFrame = _G[selfName .. "Buff" .. i];
+        local buffFrame = _G[selfName .. "Buff" .. i]
         if (buffFrame) then
-            buffFrame:Hide();
+            buffFrame:Hide()
         else
-            break ;
+            break
         end
     end
 
-    local color;
-    local frameBorder;
-
-    local numDebuffs = 0;
-    local debuffIndex = 1;
-    local maxDebuffs = self.maxDebuffs or MAX_TARGET_DEBUFFS;
+    local numDebuffs = 0
+    local debuffIndex = 1
+    local maxDebuffs = self.maxDebuffs or MAX_TARGET_DEBUFFS
 
     AuraUtil.ForEachAura(self.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Harmful, AuraUtil.AuraFilters.IncludeNameplateOnly), maxDebuffs, function(...)
-        local debuffName, icon, count, debuffType, duration, expirationTime, caster, _, _, _, _, _, casterIsPlayer, nameplateShowAll = ...;
+        local debuffName, icon, count, debuffType, duration, expirationTime, caster, _, _, _, _, _, casterIsPlayer, nameplateShowAll = ...
         if (debuffName) then
             if (self:ShouldShowDebuffs(self.unit, caster, nameplateShowAll, casterIsPlayer)) then
-                frameName = selfName .. "Debuff" .. debuffIndex;
-                frame = _G[frameName];
+                frameName = selfName .. "Debuff" .. debuffIndex
+                frame = _G[frameName]
+                
                 if (icon) then
-
-                    if not frame.skin and skinEnabled then
-                        RougeUI.addBorder(frame)
-                        local icon = _G[frameName .. "Icon"]
-                        if RougeUI.db.modtheme then
-                            icon:SetTexCoord(.03, .97, .03, .97)
-                            icon:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -2)
-                            icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
-                            frame.border:SetAllPoints(frame)
-                        else
-                            icon:SetTexCoord(.1, .9, .1, .9)
-                        end
-                        frame.skin = true
-                    end
-
-                    --local guid = caster and UnitGUID(caster) or nil
-                    --if spellId == 88611 and RougeUI.bombExpireTime and guid then
-                    --    duration = RougeUI.bombExpireTime[guid] and 6 or 0
-                    --    expirationTime = RougeUI.bombExpireTime[guid] or 0
-                    --    local frameCooldown = _G[frameName .. "Cooldown"]
-                    --    CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true)
-                    --end
-                    --
-                    --if (not frame) then
-                    --    frame = CreateFrame("Button", frameName, self, "TargetDebuffFrameTemplate");
-                    --    frame.unit = self.unit;
-                    --end
-                    --frame:SetID(debuffIndex);
-
-                    -- set the icon
-                    --frameIcon = _G[frameName .. "Icon"];
-                    --frameIcon:SetTexture(icon);
+                    SkinAuraFrame(frame, frameName)
 
                     local largeSize = ShouldAuraBeLarge(caster)
 
-                    -- set the count
-                    frameCount = _G[frameName .. "Count"];
+                    frameCount = _G[frameName .. "Count"]
                     if frameCount then
                         if (count > 1 and self.showAuraCount) then
-                            frameCount:SetText(count);
-                            frameCount:Show();
+                            frameCount:SetText(count)
+                            frameCount:Show()
                         else
-                            frameCount:Hide();
+                            frameCount:Hide()
                         end
                         if not fontName then
                             fontName = frameCount:GetFont()
@@ -461,54 +435,47 @@ local function UpdateAuras(self)
                         frameCount:SetFont(fontName, buffSize / 1.75, "OUTLINE, THICKOUTLINE, MONOCHROME")
                     end
 
-                    -- set the debuff to be big if the buff is cast by the player or his pet
-                    debuffIndex = debuffIndex + 1;
-                    numDebuffs = numDebuffs + 1;
-                    largeDebuffList[numDebuffs] = ShouldAuraBeLarge(caster);
-
-                   -- frame:ClearAllPoints();
-                   -- frame:Show();
+                    debuffIndex = debuffIndex + 1
+                    numDebuffs = numDebuffs + 1
+                    largeDebuffList[numDebuffs] = ShouldAuraBeLarge(caster)
                 end
             end
         else
-            return false;
+            return false
         end
-
-        return numDebuffs >= maxDebuffs;
-    end);
+        return numDebuffs >= maxDebuffs
+    end)
 
     for i = debuffIndex, MAX_TARGET_DEBUFFS do
-        local debuffFrame = _G[selfName .. "Debuff" .. i];
+        local debuffFrame = _G[selfName .. "Debuff" .. i]
         if (debuffFrame) then
-            debuffFrame:Hide();
+            debuffFrame:Hide()
         else
-            break ;
+            break
         end
     end
 
-    self.auraRows = 0;
+    self.auraRows = 0
     self.largestAura = 0
 
-    local mirrorAurasVertically = false;
+    local mirrorAurasVertically = false
     if (self.buffsOnTop) then
-        mirrorAurasVertically = true;
+        mirrorAurasVertically = true
     end
 
-    self.spellbarAnchor = nil;
-    local maxRowWidth;
-    -- update buff positions
+    self.spellbarAnchor = nil
+    
     local maxRowWidth = db.AuraRow
     local xOffset = db.Roug and 5 or 3
 
     if UnitIsEnemy("player", self.unit) then
-        UpdateAuraPositions(self, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically);
-        UpdateAuraPositions(self, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically);
+        UpdateAuraPositions(self, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
+        UpdateAuraPositions(self, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
     else
-        UpdateAuraPositions(self, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically);
-        UpdateAuraPositions(self, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically);
+        UpdateAuraPositions(self, selfName .. "Buff", numBuffs, numDebuffs, largeBuffList, New_TargetFrame_UpdateBuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
+        UpdateAuraPositions(self, selfName .. "Debuff", numDebuffs, numBuffs, largeDebuffList, New_TargetFrame_UpdateDebuffAnchor, maxRowWidth, xOffset, mirrorAurasVertically)
     end
 
-    -- update the spell bar position
     if self.spellbar ~= nil then
         self.spellbar:AdjustPosition()
     end
@@ -526,11 +493,13 @@ function RougeUI.RougeUIF:SetCustomBuffSize()
 end
 
 function RougeUI.RougeUIF:HookAuras()
-    if not IsAddOnLoaded("DeBuffFilter") then
-        hooksecurefunc(TargetFrame, "UpdateAuras", UpdateAuras)
-        if FocusFrame then
-            hooksecurefunc(FocusFrame, "UpdateAuras", UpdateAuras)
-        end
+    if IsAddOnLoaded("DeBuffFilter") then
+        dbfLoaded = true
+    end
+    
+    hooksecurefunc(TargetFrame, "UpdateAuras", UpdateAuras)
+    if FocusFrame then 
+        hooksecurefunc(FocusFrame, "UpdateAuras", UpdateAuras)
     end
 end
 

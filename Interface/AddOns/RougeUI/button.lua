@@ -100,7 +100,7 @@ local function addBorder(button, drawLayer, dbf)
         else
             if isTempEnchant then
                 border:SetPoint("TOPLEFT", rp, "TOPLEFT", 0, 0)
-                border:SetPoint("BOTTOMRIGHT", rp, "BOTTOMRIGHT", 0, 9)
+                border:SetPoint("BOTTOMRIGHT", rp, "BOTTOMRIGHT", 0, 0)
                 if db.modtheme then
                     border:SetVertexColor(1, 0, 1)
                 elseif db.Modern then
@@ -416,11 +416,6 @@ local function styleActionButton(bu)
 
     if bu.SlotBackground then
         bu.SlotBackground:SetAlpha(0)
-    end
-
-    -- tmp fix cause blizz
-    if bu.Border then
-        bu.Border:AddMaskTexture(bu.IconMask)
     end
 
     addBorder(bu, "BACKGROUND")

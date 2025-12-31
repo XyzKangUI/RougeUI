@@ -930,8 +930,6 @@ e:SetScript("OnEvent", function(self, event, ...)
             self:RegisterEvent("PLAYER_ENTERING_WORLD")
         end
 
-        ComboFrame:SetPoint("TOPRIGHT", TargetFrame, "TOPRIGHT", -25.5, -13) -- temp fix
-
         if RougeUI.db.SQFix then
             self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         end
