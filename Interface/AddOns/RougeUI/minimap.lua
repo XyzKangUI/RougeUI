@@ -152,7 +152,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         bg:SetBackdropColor(0.1, 0.1, 0.1)
 
         local topbg = CreateFrame("Frame", nil, MinimapCluster, "BackdropTemplate")
-        topbg:SetParent(MinimapCluster)
+        topbg:SetParent(Minimap)
         topbg:SetPoint("TOP", Minimap, "BOTTOM", 0, 21)
         topbg:SetSize(MinimapSize + 2, 15)
         topbg:SetBackdrop({ bgFile = "Interface\\ChatFrame\\CHATFRAMEBACKGROUND", edgeFile = "Interface\\ChatFrame\\CHATFRAMEBACKGROUND", edgeSize = 2 })
@@ -242,7 +242,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         end
 
         -- Re-anchor all buttons
-        local LibDBIcon = LibStub("LibDBIcon-1.0")
+        local LibDBIcon = LibStub and LibStub("LibDBIcon-1.0", true)
         if not LibDBIcon or IsAddOnLoaded("HidingBar") or IsAddOnLoaded("MBB") or IsAddOnLoaded("MinimapButtonButton") then
             return
         end

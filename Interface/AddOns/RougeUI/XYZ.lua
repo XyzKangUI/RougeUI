@@ -1,199 +1,199 @@
 local _, RougeUI = ...
-local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
-local bartender = IsAddOnLoaded("Bartender4")
-local dominos = IsAddOnLoaded("Dominos")
-local elvUI = IsAddOnLoaded("ElvUI")
-local frame = CreateFrame("Frame")
-local wahkFrames = {}
+local wahkHeader = CreateFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
+local binderFrame = CreateFrame("Frame")
+local wahkButtons = {}
+local boundKeys = {}
+local bartender = C_AddOns.IsAddOnLoaded("Bartender4")
+local pendingUpdate
 
-local buttonNames = {
-    ["ACTIONBUTTON"] = "ActionButton",
-    ["MULTIACTIONBAR1BUTTON"] = "MultiBarBottomLeftButton",
-    ["MULTIACTIONBAR2BUTTON"] = "MultiBarBottomRightButton",
-    ["MULTIACTIONBAR3BUTTON"] = "MultiBarRightButton",
-    ["MULTIACTIONBAR4BUTTON"] = "MultiBarLeftButton",
-    ["CLICK BT4Button"] = "BT4Button",
-    ["MULTIACTIONBAR5BUTTON"] = "MultiBar5Button",
-    ["MULTIACTIONBAR6BUTTON"] = "MultiBar6Button",
-    ["MULTIACTIONBAR7BUTTON"] = "MultiBar7Button",
-    ["CLICK DominosActionButton"] = "DominosActionButton",
+local defaultButtons = {
+    ACTIONBUTTON = "ActionButton",
+    MULTIACTIONBAR1BUTTON = "MultiBarBottomLeftButton",
+    MULTIACTIONBAR2BUTTON = "MultiBarBottomRightButton",
+    MULTIACTIONBAR3BUTTON = "MultiBarRightButton",
+    MULTIACTIONBAR4BUTTON = "MultiBarLeftButton",
+    MULTIACTIONBAR5BUTTON = "MultiBar5Button",
+    MULTIACTIONBAR6BUTTON = "MultiBar6Button",
+    MULTIACTIONBAR7BUTTON = "MultiBar7Button",
 }
 
-local function ConvertActionButtonName(name)
-    -- remove "CLICK "
-    name = name:gsub("^CLICK ", "")
-    -- remove ":Keybind"
-    name = name:gsub(":Keybind$", "")
+local function GetAllBindings()
+    local realBtn = {}
+    local cachedKey = {}
 
-    if dominos or elvUI then
-        if string.match(name, "Dominos") or string.match(name, "ElvUI") then
-            name = name:gsub(":LeftButton", "")
-            name = name:gsub(":HOTKEY", "")
-        end
-    end
+    for i = 1, GetNumBindings() do
+        local _, _, key1, key2 = GetBinding(i)
 
-    local button, buttonNumber = name:match("^(.-)(%d+)$")
-    if button and tonumber(buttonNumber) and buttonNames[button] then
-        name = buttonNames[button] .. buttonNumber
-    end
+        if key1 and not cachedKey[key1] then
+            cachedKey[key1] = true
+            local command = C_KeyBindings.GetBindingByKey(key1)
 
-    return name
-end
+            if command then
+                local btnName = command
 
-local function WAHK(button, ok)
-    if not button then
-        return
-    end
+                if command:match("^CLICK") then
+                    btnName = command:match("CLICK (.-):") or command:match("CLICK (.-)$")
+                end
 
-    local btn = _G[button]
-    if not btn then
-        return
-    end
+                if btnName then
+                    local cleanBtn = btnName:match("^(.*%d)")
 
-    local clickButton, id
-    if button:match("BT4Button") then
-        clickButton = ("CLICK %s:LeftButton"):format(button)
-    elseif button:match("DominosActionButton") then
-        clickButton = ("CLICK %s:HOTKEY"):format(button)
-    end
+                    if cleanBtn then
+                        local base, id = cleanBtn:match("^(.-)(%d+)$")
+                        if base and id then
+                            local blizzBtn = defaultButtons[base:upper()]
+                            if blizzBtn then
+                                cleanBtn = blizzBtn .. id
+                            end
+                        end
 
-    id = tonumber(button:match("(%d+)"))
-
-    if button:match("MultiBar5") then
-        id = tonumber(button:match("MultiBar5Button(%d+)"))
-    elseif button:match("MultiBar6") then
-        id = tonumber(button:match("MultiBar6Button(%d+)"))
-    elseif button:match("MultiBar7") then
-        id = tonumber(button:match("MultiBar7Button(%d+)"))
-    end
-
-    local actionButtonType = btn.buttonType
-    local buttonType = actionButtonType and (actionButtonType .. id) or ("ACTIONBUTTON%d"):format(id)
-    clickButton = buttonType or ("CLICK " .. button .. ":LeftButton")
-
-    local key, key2 = GetBindingKey(clickButton)
-    if not key and not key2 then
-        return
-    end
-
-    local cacheKeys = {}
-    if key then
-        cacheKeys[key] = key
-    end
-    if key2 then
-        cacheKeys[key2] = key2
-    end
-
-    for v in pairs(cacheKeys) do
-        local action = GetBindingAction(v, true)
-        if action and action ~= "" then
-            btn = _G[ConvertActionButtonName(action)]
-        end
-
-        if btn then
-            local btnName = btn:GetName()
-            local clk = tostring(btnName)
-
-            if not id then
-                id = tonumber(button:match("(%d+)"))
+                        realBtn[cleanBtn] = realBtn[cleanBtn] or {}
+                        table.insert(realBtn[cleanBtn], key1)
+                    end
+                end
             end
+        end
 
-            local wahkName = "WAHK" .. v .. button
-            local wahk = _G[wahkName] or CreateFrame("Button", wahkName, nil, "SecureActionButtonTemplate")
-            wahkFrames[wahkName] = true
+        if key2 and not cachedKey[key2] then
+            cachedKey[key2] = true
+            local command = C_KeyBindings.GetBindingByKey(key2)
 
-            wahk:RegisterForClicks("AnyDown", "AnyUp")
-            wahk:SetAttribute("type", "click")
-            wahk:SetAttribute("pressAndHoldAction", "1")
-            wahk:SetAttribute("typerelease", "click")
-            wahk:SetAttribute("clickbutton", _G[button])
+            if command then
+                local btnName = command
+                
+                if command:match("^CLICK") then
+                    btnName = command:match("CLICK (.-):") or command:match("CLICK (.-)$")
+                end
 
+                if btnName then
+                    local cleanBtn = btnName:match("^(.*%d)")
 
-            SetOverrideBindingClick(wahk, true, v, wahk:GetName())
-
-            wahk:SetScript("OnMouseDown", function()
-                if OverrideActionBar and OverrideActionBar:IsShown() and id then
-                    local obtn = _G["OverrideActionBarButton" .. id]
-                    if obtn then
-                        obtn:SetButtonState("PUSHED")
-                        if RougeUI.db.ButtonAnim then
-                            RougeUI.Animate(obtn)
+                    if cleanBtn then
+                        local base, id = cleanBtn:match("^(.-)(%d+)$")
+                        if base and id then
+                            local blizzBtn = defaultButtons[base:upper()]
+                            if blizzBtn then
+                                cleanBtn = blizzBtn .. id
+                            end
                         end
-                    end
-                else
-                    if btn then
-                        btn:SetButtonState("PUSHED")
-                        if RougeUI.db.ButtonAnim then
-                            RougeUI.Animate(btn)
-                        end
+
+                        realBtn[cleanBtn] = realBtn[cleanBtn] or {}
+                        table.insert(realBtn[cleanBtn], key2)
                     end
                 end
-            end)
-            wahk:SetScript("OnMouseUp", function()
-                if OverrideActionBar and OverrideActionBar:IsShown() and id then
-                    local obtn = _G["OverrideActionBarButton" .. id]
-                    if obtn then
-                        obtn:SetButtonState("NORMAL")
-                        if RougeUI.db.ButtonAnim then
-                            RougeUI.Animate(obtn)
-                        end
-                    end
-                else
-                    if btn then
-                        btn:SetButtonState("NORMAL")
-                        if RougeUI.db.ButtonAnim then
-                            RougeUI.Animate(btn)
-                        end
-                    end
-                end
-            end)
+            end
         end
     end
+
+    return realBtn
 end
 
-local function UpdateBinds()
-    if InCombatLockdown() then
-        frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+local function addWAHK(buttonName, btn)
+    local wahkBtn = wahkButtons[buttonName]
+    if wahkBtn then
+        return wahkBtn
+    end
+
+    wahkBtn = CreateFrame("Button", "WAHK_" .. buttonName, nil, "SecureActionButtonTemplate")
+
+    if bartender then
+        btn:SetAttribute("pressAndHoldAction", true)
+        btn:SetAttribute("typerelease", btn._state_type)
+
+        if not btn.wahkHook then
+            btn.wahkHook = true
+            local attributeChange = [[
+                if name == "pressandholdaction" then
+                    if self:GetAttribute("pressAndHoldAction") ~= true then
+                        self:SetAttribute("pressAndHoldAction", true)
+                        local type = self:GetAttribute("type") or "action"
+                        self:SetAttribute("typerelease", type)
+                    end
+                end
+            ]]
+            SecureHandlerWrapScript(btn, "OnAttributeChanged", wahkHeader, attributeChange)
+        end
+    end
+
+    wahkBtn:RegisterForClicks("AnyDown", "AnyUp")
+    wahkBtn:SetAttribute("type", "click")
+    wahkBtn:SetAttribute("typerelease", "click")
+    wahkBtn:SetAttribute("pressAndHoldAction", true)
+    wahkBtn:SetAttribute("clickbutton", btn)
+
+    wahkBtn:SetScript("OnMouseDown", function()
+        if btn:IsVisible() then
+            btn:SetButtonState("PUSHED")
+            if RougeUI.db.ButtonAnim then
+                RougeUI.Animate(btn)
+            end
+        end
+    end)
+
+    wahkBtn:SetScript("OnMouseUp", function()
+        if btn:IsVisible() then
+            btn:SetButtonState("NORMAL")
+            if RougeUI.db.ButtonAnim and RougeUI.db.wahksfk then
+                RougeUI.Animate(btn)
+            end
+        end
+    end)
+
+    wahkButtons[buttonName] = wahkBtn
+    return wahkBtn
+end
+
+local function WAHK(buttonName, keys)
+    local btn = _G[buttonName]
+    if not btn or not keys then
         return
     end
 
-    for name in pairs(wahkFrames) do
-        local wahk = _G[name]
-        if wahk then
-            ClearOverrideBindings(wahk)
-            SecureHandlerUnwrapScript(wahk, "OnClick")
-        end
-    end
-    wipe(wahkFrames)
+    local wahk = addWAHK(buttonName, btn)
 
-    for i = 1, 12 do
-        WAHK("ActionButton" .. i, true)
-        WAHK("MultiBarBottomRightButton" .. i)
-        WAHK("MultiBarBottomLeftButton" .. i)
-        WAHK("MultiBarRightButton" .. i)
-        WAHK("MultiBarLeftButton" .. i)
-        WAHK("MultiBar6Button" .. i)
-        WAHK("MultiBar5Button" .. i)
-        WAHK("MultiBar7Button" .. i)
-    end
-
-    if bartender or dominos then
-        for i = 1, 180 do
-            local btnName = bartender and "BT4Button" or "DominosActionButton"
-            WAHK(btnName .. i)
+    for _, key in ipairs(keys) do
+        if not boundKeys[key] then
+            SetOverrideBindingClick(binderFrame, true, key, wahk:GetName(), "LeftButton")
+            boundKeys[key] = true
         end
     end
 end
 
-frame:RegisterEvent("PLAYER_LOGIN")
-frame:SetScript("OnEvent", function(self, event, ...)
+local function updateBinds()
+    if InCombatLockdown() then
+        wahkHeader:RegisterEvent("PLAYER_REGEN_ENABLED")
+        return
+    end
+
+    ClearOverrideBindings(binderFrame)
+    wipe(boundKeys)
+
+    local binds = GetAllBindings()
+    for btn, key in pairs(binds) do
+        WAHK(btn, key)
+    end
+end
+
+local function scheduledUpdate()
+    if pendingUpdate then
+        return
+    end
+    pendingUpdate = true
+    C_Timer.After(0.5, function()
+        pendingUpdate = nil
+        updateBinds()
+    end)
+end
+
+wahkHeader:RegisterEvent("PLAYER_LOGIN")
+wahkHeader:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" and RougeUI.db.KeyEcho then
         self:RegisterEvent("UPDATE_BINDINGS")
-        C_Timer.After(1, UpdateBinds)
+        scheduledUpdate()
     elseif event == "PLAYER_REGEN_ENABLED" then
         self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-        C_Timer.After(1, UpdateBinds)
+        scheduledUpdate()
     elseif event == "UPDATE_BINDINGS" then
-        C_Timer.After(1, UpdateBinds)
+        scheduledUpdate()
     end
 end)

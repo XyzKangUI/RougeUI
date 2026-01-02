@@ -1,14 +1,12 @@
 local _, RougeUI = ...
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
-local bt4 = IsAddOnLoaded("Bartender4")
-local dm = IsAddOnLoaded("Dominos")
 local CreateFrame = CreateFrame
-local GetActionButtonForID = GetActionButtonForID
 local wahk = false
 
 local function CreateAnim(self)
-    local frame = CreateFrame("Frame")
+    local frame = CreateFrame("Frame", nil, self)
     frame:SetFrameStrata("TOOLTIP")
+    frame:SetAllPoints(self)
 
     local texture = frame:CreateTexture()
     texture:SetTexture("Interface\\Cooldown\\star4")
@@ -32,15 +30,13 @@ local function CreateAnim(self)
 
     local scale2 = animation:CreateAnimation("Scale")
     scale2:SetScale(0, 0)
-    scale2:SetDuration(.3)
+    scale2:SetDuration(0.3)
     scale2:SetOrder(2)
 
     local rotation = animation:CreateAnimation("Rotation")
     rotation:SetDegrees(90)
-    rotation:SetDuration(.3)
+    rotation:SetDuration(0.3)
     rotation:SetOrder(2)
-
-    frame:SetAllPoints(self)
 
     self.sfk = animation
     self.snowfall = frame
@@ -56,7 +52,7 @@ function RougeUI.Animate(self)
     end
 
     local func = true
-    if wahk then
+    if wahk and not RougeUI.db.wahksfk then
         func = (self:GetButtonState() == "PUSHED")
     end
 
@@ -66,84 +62,97 @@ function RougeUI.Animate(self)
     end
 end
 
-local function AnimateClick(button)
-    if button and not button.hooked then
-        button.AnimateThis = RougeUI.Animate
-        button:HookScript("OnClick", button.AnimateThis)
-        button.hooked = true
+local function onKeyDown(self, state)
+    if state == "PUSHED" then
+        RougeUI.Animate(self)
     end
 end
 
-local function HookedDefaultBars()
-    hooksecurefunc("ActionButtonDown", function(id)
-        local button = GetActionButtonForID(id)
-        if button then
-            RougeUI.Animate(button)
-        end
-    end)
-    hooksecurefunc("MultiActionButtonDown", function(name, id)
-        local button = _G[name .. "Button" .. id]
-        if button then
-            RougeUI.Animate(button)
-        end
-    end)
-    hooksecurefunc(PetActionBar, "PetActionButtonDown", function(id)
-        local button = _G["PetActionButton" .. id]
-        if button then
-            RougeUI.Animate(button)
-        end
-    end)
+local function hookButton(buttonName)
+    local button = _G[buttonName]
+    if not button then
+        return
+    end
+
+    if not button.sfkhooked then
+        button:HookScript("OnMouseDown", RougeUI.Animate)
+        hooksecurefunc(button, "SetButtonState", onKeyDown)
+        button.sfkhooked = true
+    end
+end
+
+local function hookBartender()
+    for i = 1, 180 do
+        hookButton("BT4Button" .. i)
+        hookButton("BT4PetButton" .. i)
+    end
+end
+
+local function hookDominos()
+    for i = 1, 168 do
+        hookButton("DominosActionButton" .. i)
+    end
 
     for i = 1, 12 do
-        AnimateClick(_G["ActionButton" .. i])
-        AnimateClick(_G["MultiBarBottomLeftButton" .. i])
-        AnimateClick(_G["MultiBarBottomRightButton" .. i])
-        AnimateClick(_G["MultiBarRightButton" .. i])
-        AnimateClick(_G["MultiBarLeftButton" .. i])
+        hookButton("MultiBarRightActionButton" .. i)
+        hookButton("MultiBarLeftActionButton" .. i)
+        hookButton("MultiBarBottomLeftActionButton" .. i)
+        hookButton("MultiBarBottomRightActionButton" .. i)
+        hookButton("MultiBar5ActionButton" .. i)
+        hookButton("MultiBar6ActionButton" .. i)
+        hookButton("MultiBar7ActionButton" .. i)
+    end
+end
+
+local function hookBlizzard()
+    for i = 1, 12 do
+        hookButton("ActionButton" .. i)
+        hookButton("MultiBarBottomLeftButton" .. i)
+        hookButton("MultiBarBottomRightButton" .. i)
+        hookButton("MultiBarRightButton" .. i)
+        hookButton("MultiBarLeftButton" .. i)
+        hookButton("MultiBar5Button" .. i)
+        hookButton("MultiBar6Button" .. i)
+        hookButton("MultiBar7Button" .. i)
     end
 
     for i = 1, 10 do
-        AnimateClick(_G["PetActionButton" .. i])
+        hookButton("PetActionButton" .. i)
     end
-
     for i = 1, 6 do
-        AnimateClick(_G["OverrideActionBarButton" .. i])
+        hookButton("OverrideActionBarButton" .. i)
     end
 end
 
-local function AnimateBartender()
-    for i = 1, 120 do
-        AnimateClick(_G["BT4Button" .. i])
-        AnimateClick(_G["BT4PetButton" .. i])
-    end
-    --    for i = 1, 6 do
-    --        AnimateClick(_G["OverrideActionBarButton" .. i])
-    --    end
-end
-
-local function AnimateDominos()
-    for i = 1, 168 do
-        AnimateClick(_G["DominosActionButton" .. i])
-    end
-end
-
-local CF = CreateFrame("Frame")
-CF:RegisterEvent("PLAYER_LOGIN")
-CF:SetScript("OnEvent", function(self, event, ...)
-    if RougeUI.db.ButtonAnim and not (bt4 and dm) then
+local function hookButtons()
+    C_Timer.After(0, function()
+        if not RougeUI.db.ButtonAnim then
+            return
+        end
 
         if RougeUI.db.KeyEcho then
             wahk = true
             return
         end
 
-        if bt4 then
-            AnimateBartender()
-        elseif dm then
-            HookedDefaultBars()
-            AnimateDominos()
-        else
-            HookedDefaultBars()
+        local bt4, dm = false, false
+
+        if IsAddOnLoaded("Bartender4") then
+            bt4 = true
+        elseif IsAddOnLoaded("Dominos") then
+            dm = true
         end
-    end
-end)
+
+        if bt4 then
+            hookBartender()
+        elseif dm then
+            hookDominos()
+        else
+            hookBlizzard()
+        end
+    end)
+end
+
+local CF = CreateFrame("Frame")
+CF:RegisterEvent("PLAYER_LOGIN")
+CF:SetScript("OnEvent", hookButtons)

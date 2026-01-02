@@ -39,6 +39,8 @@ local function isCloseEnough(new, target, range)
 end
 
 local function hasAbsorbValue(unit)
+    if not unit then return false end
+
     if UnitGetIncomingHeals(unit) and UnitGetIncomingHeals(unit) > 0 then
         return true
     end

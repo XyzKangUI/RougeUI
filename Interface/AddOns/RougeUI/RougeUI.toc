@@ -1,6 +1,6 @@
 ## Interface: 40400, 40401, 40402
 ## Title: |cff009cffRougeUI|r
-## Version: 4.36
+## Version: 4.37
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 

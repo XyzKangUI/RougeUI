@@ -36,7 +36,7 @@ local function addBorder(button, drawLayer, dbf)
 
     local rp = (isBuff or isDebuff or isTempEnchant) and button.Icon or button
 
-    if icon then
+    if icon and icon.SetDrawLayer then
         icon:SetDrawLayer("BACKGROUND", -8)
     end
 
@@ -242,7 +242,7 @@ local function TimeFormat(button)
 end
 
 local function SkinBuffs(bu)
-    if not bu or (bu and bu.styled) then
+    if not bu then
         return
     end
 
@@ -257,88 +257,72 @@ local function SkinBuffs(bu)
 
     if icon then
         if debuffFrame and not RougeUI.db.Lorti then
-            icon:SetTexCoord(0.06, 0.94, 0.06, 0.94)
+            if icon.SetTexCoord then
+                icon:SetTexCoord(0.06, 0.94, 0.06, 0.94)
+            end
             if RougeUI.db.modtheme then
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, 1)
                 icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 2)
             end
         else
             if RougeUI.db.Lorti then
-                icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+                if icon.SetTexCoord then
+                    icon:SetTexCoord(0.02, 0.98, 0.02, 0.98)
+                end
                 icon:ClearAllPoints()
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 1, -1)
                 icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -1, 1)
-                icon:SetDrawLayer("BACKGROUND", -8)
+                if icon.SetDrawLayer then
+                    icon:SetDrawLayer("BACKGROUND", -8)
+                end
             elseif RougeUI.db.modtheme then
-                icon:SetTexCoord(0.04, 0.96, 0.04, 0.96)
+                if icon.SetTexCoord then
+                    icon:SetTexCoord(0.04, 0.96, 0.04, 0.96)
+                end
                 icon:ClearAllPoints()
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 2, -2)
                 icon:SetPoint("BOTTOMRIGHT", bu, "BOTTOMRIGHT", -2, 9)
             else
-                icon:SetTexCoord(0.03, 0.97, 0.03, 0.97)
+                if icon.SetTexCoord then
+                    icon:SetTexCoord(0.03, 0.97, 0.03, 0.97)
+                end
             end
         end
     end
 
-    bu:ClearNormalTexture()
+    if bu.ClearNormalTexture then
+        bu:ClearNormalTexture()
+    end
 
     if RougeUI.db.Lorti then
         bu:SetSize(28, 28)
-        bu.Icon:SetSize(28, 28)
-        bu.Duration:SetFont(STANDARD_TEXT_FONT, 11, "OUTLINE")
-        bu.Duration:ClearAllPoints()
-        bu.Duration:SetPoint("BOTTOM", bu.Icon, 1, 0)
-    else
-        bu.Duration:SetFont(STANDARD_TEXT_FONT, 9.5, "OUTLINE")
-        bu.Duration:SetShadowOffset(0, 0)
-        local point, relativeTo, relativePoint, xOfs, yOfs = bu.Duration:GetPoint()
-        local yOffset, xOffset
-        local parent = bu:GetParent()
-        if not parent.isHorizontal then
-            yOffset = yOfs
-            xOffset = parent.addIconsToRight and 7 or -5
-        else
-            yOffset = parent.addIconsToTop and 7 or -5
-            xOffset = xOfs
+        if bu.Icon then
+            bu.Icon:SetSize(28, 28)
         end
-        bu.Duration:ClearAllPoints()
-        bu.Duration:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset)
-    end
 
-    if not bu.hookedDuration and debuffFrame and bu.Duration then
-        bu.hookedDuration = true
-        if RougeUI.db.Lorti then
-            hooksecurefunc(bu.Duration, "SetPoint", function(self)
-                if self.moved then
-                    return
-                end
-                self.moved = true
-                local _, rt = self:GetPoint()
-                self:ClearAllPoints()
-                self:SetPoint("TOP", rt, "BOTTOM", 0, 11)
-                self.moved = false
-            end)
-        else
-            hooksecurefunc(bu.Duration, "SetPoint", function(self)
-                if self.moved then
-                    return
-                end
-                self.moved = true
-                local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-                local yOffset, xOffset
-                local parent = self:GetParent()
-                local grandparent = parent and parent:GetParent()
-                if grandparent and not grandparent.isHorizontal then
-                    yOffset = yOfs
-                    xOffset = (grandparent and grandparent.addIconsToRight) and 7 or -5
-                else
-                    yOffset = (grandparent and grandparent.addIconsToTop) and 7 or -5
-                    xOffset = xOfs
-                end
-                self:ClearAllPoints()
-                self:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset)
-                self.moved = false
-            end)
+        if bu.Duration then
+            if bu.Duration.SetFont then
+                bu.Duration:SetFont(STANDARD_TEXT_FONT, 11, "OUTLINE")
+            end
+            bu.Duration:ClearAllPoints()
+            bu.Duration:SetPoint("BOTTOM", bu.Icon, 1, 0)
+        end
+    else
+        if bu.Duration then
+            bu.Duration:SetFont(STANDARD_TEXT_FONT, 9.5, "OUTLINE")
+            bu.Duration:SetShadowOffset(0, 0)
+            local point, relativeTo, relativePoint, xOfs, yOfs = bu.Duration:GetPoint()
+            local yOffset, xOffset
+            local parent = bu:GetParent()
+            if not parent.isHorizontal then
+                yOffset = yOfs
+                xOffset = parent.addIconsToRight and 7 or -5
+            else
+                yOffset = parent.addIconsToTop and 7 or -5
+                xOffset = xOfs
+            end
+            bu.Duration:ClearAllPoints()
+            bu.Duration:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset)
         end
     end
 
@@ -349,9 +333,10 @@ local function SkinBuffs(bu)
         bu.Count:SetPoint("TOPRIGHT", bu.Icon, 1, 0)
     end
 
-    addBorder(bu, "BACKGROUND", true)
-
-    bu.styled = true
+    if not bu.styled then
+        bu.styled = true
+        addBorder(bu, "BACKGROUND", true)
+    end
 end
 
 local function styleActionButton(bu)
@@ -477,6 +462,9 @@ local function init()
             styleActionButton(_G["MultiBarLeftButton" .. i])
             styleActionButton(_G["MultiBarBottomLeftButton" .. i])
             styleActionButton(_G["MultiBarBottomRightButton" .. i])
+            styleActionButton(_G["MultiBar5Button" .. i])
+            styleActionButton(_G["MultiBar6Button" .. i])
+            styleActionButton(_G["MultiBar7Button" .. i])
         end
 
         for i = 1, NUM_PET_ACTION_SLOTS do
@@ -494,11 +482,24 @@ local function init()
                     styleActionButton(btn)
                 end
             end
+            for i = 1, 12 do
+                styleActionButton(_G["ActionButton" .. i])
+                styleActionButton(_G["MultiBarRightActionButton" .. i])
+                styleActionButton(_G["MultiBarLeftActionButton" .. i])
+                styleActionButton(_G["MultiBarBottomLeftActionButton" .. i])
+                styleActionButton(_G["MultiBarBottomRightActionButton" .. i])
+                styleActionButton(_G["MultiBar5ActionButton" .. i])
+                styleActionButton(_G["MultiBar6ActionButton" .. i])
+                styleActionButton(_G["MultiBar7ActionButton" .. i])
+            end
         end
 
         if bartender4 then
             for i = 1, 120 do
                 styleActionButton(_G["BT4Button" .. i])
+            end
+            for i = 1, 10 do
+                styleActionButton(_G["BT4PetButton" .. i])
             end
             if GetNumShapeshiftForms() ~= 0 then
                 for i = 1, GetNumShapeshiftForms() do
@@ -587,81 +588,56 @@ local function shorten(val)
     end
 end
 
+local function UpdateAuraFrames(self)
+    local auras = self.auraFrames or {}
+    local skinEnabled = RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme
+
+    for _, button in ipairs(auras) do
+        if button and button:IsShown() and not button.isAuraAnchor then
+
+            if skinEnabled then
+                SkinBuffs(button)
+            end
+
+            if RougeUI.db.Roug then
+                BtnGlow(button)
+            end
+
+            if (skinEnabled or RougeUI.db.TimerGap or RougeUI.db.OmniCC) and not button.hookedDuration then
+                if RougeUI.db.OmniCC or not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
+                    if button.SetFormattedText then
+                        hooksecurefunc(button, "UpdateDuration", TimeFormat)
+                    end
+                end
+                button.hookedDuration = true
+            end
+
+            if RougeUI.db.OmniCC and button.buttonInfo and button.buttonInfo.index then
+                local filter = (self == BuffFrame) and "HELPFUL" or "HARMFUL"
+                OmniTimers(button, button.buttonInfo.index, filter)
+            end
+        end
+    end
+end
+
 local e3 = CreateFrame("Frame")
 e3:RegisterEvent("PLAYER_LOGIN")
 e3:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         local skinEnabled = RougeUI.db.Lorti or RougeUI.db.Roug or RougeUI.db.Modern or RougeUI.db.modtheme
-        if skinEnabled or RougeUI.db.TimerGap or RougeUI.db.OmniCC then
-            if RougeUI.db.OmniCC or not (IsAddOnLoaded("SeriousBuffTimers") or IsAddOnLoaded("BuffTimers")) then
-                for _, buffs in ipairs(BuffFrame.auraFrames) do
-                    if buffs.SetFormattedText then
-                        hooksecurefunc(buffs, "UpdateDuration", TimeFormat)
-                    end
-                end
 
-                for _, debuffs in ipairs(DebuffFrame.auraFrames) do
-                    if debuffs.SetFormattedText then
-                        hooksecurefunc(debuffs, "UpdateDuration", TimeFormat)
-                    end
-                end
-            end
-
-            if skinEnabled then
-                init()
-                HookAuras()
-            end
-
-            if skinEnabled or RougeUI.db.OmniCC then
-                for index, aura in ipairs({ BuffFrame.AuraContainer:GetChildren() }) do
-                    if aura and aura.Icon then
-                        hooksecurefunc(aura, "Update", function(self)
-                            if not self.styled and skinEnabled then
-                                SkinBuffs(self)
-                            end
-
-                            if RougeUI.db.OmniCC then
-                                OmniTimers(self, self.buttonInfo.index, "HELPFUL")
-                            end
-                        end)
-                    end
-                end
-
-                for index, aura in ipairs({ DebuffFrame.AuraContainer:GetChildren() }) do
-                    if aura and aura.Icon then
-                        hooksecurefunc(aura, "Update", function(self)
-                            if not self.styled and skinEnabled then
-                                SkinBuffs(self)
-                            end
-                            if self and RougeUI.db.Roug then
-                                BtnGlow(self)
-                            end
-
-                            if RougeUI.db.OmniCC then
-                                OmniTimers(self, self.buttonInfo.index, "HARMFUL")
-                            end
-                        end)
-                    end
-                end
-            end
-
+        if skinEnabled then
+            init()
+            HookAuras()
         end
-        --elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        --    local _, event, _, sourceGUID, _, _, _, _, _, _, _, spellId = CombatLogGetCurrentEventInfo()
-        --
-        --    if (event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED") and spellId == 76577 then
-        --        if RougeUI.bombExpireTime == nil then
-        --            RougeUI.bombExpireTime = {}
-        --        end
-        --
-        --        local now = GetTime()
-        --        if (RougeUI.bombExpireTime[sourceGUID] and now >= RougeUI.bombExpireTime[sourceGUID]) or event == "SPELL_CAST_SUCCESS" then
-        --            RougeUI.bombExpireTime[sourceGUID] = now + 6
-        --        elseif not RougeUI.bombExpireTime[sourceGUID] then
-        --            RougeUI.bombExpireTime[sourceGUID] = now + 6
-        --        end
-        --    end
-    elseif event == "PLAYER_ENTERING_WORLD" then
-        RougeUI.bombExpireTime = {}
+
+        if skinEnabled or RougeUI.db.TimerGap or RougeUI.db.OmniCC then
+            if BuffFrame then
+                hooksecurefunc(BuffFrame, "UpdateAuraButtons", UpdateAuraFrames)
+            end
+            if DebuffFrame then
+                hooksecurefunc(DebuffFrame, "UpdateAuraButtons", UpdateAuraFrames)
+            end
+        end
     end
 end)

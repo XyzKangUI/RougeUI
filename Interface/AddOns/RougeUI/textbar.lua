@@ -1,9 +1,11 @@
-local _, RougeUI = ...
+local addonName, RougeUI = ...
 local FontType = STANDARD_TEXT_FONT
 local mfloor, tonumber, mceil = math.floor, tonumber, math.ceil
 local GetCVar, UnitIsDeadOrGhost, UnitExists = GetCVar, UnitIsDeadOrGhost, UnitExists
 local UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax = UnitPower, UnitPowerMax, UnitHealth, UnitHealthMax
 local isClassic = false
+local isTBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+local MiniHealth = false
 
 local function round(value)
     return mfloor(value + 0.5)
@@ -126,104 +128,118 @@ local function true_format(value)
     end
 end
 
-local function New_TextStatusBar_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
-    if statusFrame and not statusFrame.TextString then return end
 
-    value = statusFrame.finalValue or value or statusFrame:GetValue()
-    local unit = statusFrame.unit
+local function New_TextStatusBar_UpdateTextStringWithValues(self, textString, value, valueMin, valueMax)
+    if not self.TextString then return end
 
-    if (statusFrame.LeftText and statusFrame.RightText) then
-        statusFrame.LeftText:SetText("");
-        statusFrame.RightText:SetText("");
-        statusFrame.LeftText:SetAlpha(0); 
-        statusFrame.RightText:SetAlpha(0);
+    if self.LeftText and self.RightText then
+        self.LeftText:SetText("");
+        self.RightText:SetText("");
+        self.LeftText:Hide();
+        self.RightText:Hide();
     end
 
-    if ((tonumber(valueMax) ~= valueMax or valueMax > 0) and not (statusFrame.pauseUpdates)) then
-        statusFrame:SetAlpha(1);
-
-        if ((statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable) or statusFrame.forceShow) then
-            textString:SetAlpha(1);
-        elseif (statusFrame.lockShow > 0 and (not statusFrame.forceHideText)) then
-            textString:SetAlpha(1);
-        else
-            textString:SetText("");
-            textString:SetAlpha(0);
-            return ;
+    if ( ( tonumber(valueMax) ~= valueMax or valueMax > 0 ) and not ( self.pauseUpdates ) ) then
+        if self.finalValue then
+            value = self.finalValue
         end
 
-        local valueDisplay = value;
-        local valueMaxDisplay = valueMax;
+        if ( (self.cvar and GetCVar(self.cvar) == "1" and self.textLockable) or self.forceShow ) then
+            textString:Show();
+        elseif ( self.lockShow > 0 and (not self.forceHideText) ) then
+            textString:Show();
+        else
+            textString:SetText("");
+            textString:Hide();
+            return;
+        end
 
-        local textDisplay = GetCVar("statusTextDisplay");
-        local showPercentage = statusFrame.showPercentage
+        if ( value == 0 and self.zeroText ) then
+            textString:SetText(self.zeroText);
+            textString:Show()
+            return;
+        end
 
-        if isClassic then
-            if not UnitIsPlayer(statusFrame.unit) and statusFrame.showPercentage then
+        local showPercentage = self.showPercentage
+
+        if MiniHealth then
+            local realHealth = MiniHealthNumbersApi.v1:GetHealth(self.unit)
+            if UnitIsPlayer(self.unit) and realHealth ~= nil and not self.powerType then
+                value = realHealth
                 showPercentage = false
             end
         end
-        if (value and valueMax > 0 and ((textDisplay ~= "NUMERIC" and textDisplay ~= "NONE") or showPercentage) and not statusFrame.showNumeric) then
-            if (value == 0 and statusFrame.zeroText) then
-                textString:SetText(statusFrame.zeroText);
-                statusFrame.isZero = 1;
-                textString:SetAlpha(1);
-            elseif (textDisplay == "BOTH" and not showPercentage) then
-                if (statusFrame.LeftText and statusFrame.RightText) then
-                    if (not statusFrame.powerToken or statusFrame.powerToken == "MANA") then
-                        statusFrame.LeftText:SetText(mceil((value / valueMax) * 100) .. "%");
-                        statusFrame.LeftText:SetAlpha(1);
-                    end
-                    if RougeUI.db.ShortNumeric then
-                        statusFrame.RightText:SetText(true_format(valueDisplay));
+
+        local valueDisplay = value;
+        local valueMaxDisplay = valueMax
+
+        if RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate then
+            valueDisplay = true_format(value)
+            valueMaxDisplay = true_format(valueMax)
+        end
+
+        local shouldUsePrefix = self.prefix and (self.alwaysPrefix or not (self.cvar and GetCVar(self.cvar) == "1" and self.textLockable) );
+        local displayMode = GetCVar("statusTextDisplay");
+
+        if (isTBC or isClassic) and showPercentage and not UnitIsPlayer(self.unit) then
+            showPercentage = false
+        end
+
+        if self.showNumeric then
+            displayMode = STATUS_TEXT_DISPLAY_MODE.NUMERIC;
+        elseif showPercentage then
+            displayMode = STATUS_TEXT_DISPLAY_MODE.PERCENT;
+        end
+
+        if ( self.disablePercentages and displayMode == STATUS_TEXT_DISPLAY_MODE.PERCENT ) then
+            displayMode = STATUS_TEXT_DISPLAY_MODE.NUMERIC;
+        end
+
+        if ( valueMax <= 0 or displayMode == STATUS_TEXT_DISPLAY_MODE.NUMERIC or displayMode == STATUS_TEXT_DISPLAY_MODE.NONE) then
+            if ( shouldUsePrefix ) then
+                textString:SetText(self.prefix.." "..valueDisplay.." / "..valueMaxDisplay);
+            else
+                if RougeUI.db.Abbreviate or RougeUI.db.ShortNumeric then
+                    if (value > 1e7) then
+                        textString:SetFormattedText("%s || %.0f%%", valueDisplay, 100 * value / valueMax);
                     else
-                        statusFrame.RightText:SetText(valueDisplay);
+                        textString:SetText(valueDisplay);
                     end
-                    statusFrame.RightText:SetAlpha(1);
-                    textString:SetAlpha(0);
+                else
+                    textString:SetText(valueDisplay.." / "..valueMaxDisplay);
+                end
+            end
+        elseif ( displayMode == STATUS_TEXT_DISPLAY_MODE.BOTH ) then
+            if ( self.LeftText and self.RightText ) then
+                if ( not self.disablePercentages and (not self.powerToken or self.powerToken == "MANA") ) then
+                    self.LeftText:SetText(mceil((value / valueMax) * 100) .. "%");
+                    self.LeftText:Show()
+                end
+                self.RightText:SetText(valueDisplay);
+                self.RightText:Show();
+                textString:Hide();
+            else
+                if RougeUI.db.Abbreviate or RougeUI.db.ShortNumeric then
+                    valueDisplay = "(" .. mceil((value / valueMax) * 100) .. "%) " .. valueDisplay;
                 else
                     valueDisplay = "(" .. mceil((value / valueMax) * 100) .. "%) " .. valueDisplay .. " / " .. valueMaxDisplay;
                 end
                 textString:SetText(valueDisplay);
-            else
-                valueDisplay = mceil((value / valueMax) * 100) .. "%";
-                if (statusFrame.prefix and (statusFrame.alwaysPrefix or not (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable))) then
-                    textString:SetText(statusFrame.prefix .. " " .. valueDisplay);
-                else
-                    textString:SetText(valueDisplay);
-                end
             end
-        elseif (value == 0 and statusFrame.zeroText) then
-            textString:SetText(statusFrame.zeroText);
-            statusFrame.isZero = 1;
-            textString:SetAlpha(1);
-            return ;
-        else
-            statusFrame.isZero = nil;
-            if (statusFrame.prefix and (statusFrame.alwaysPrefix or not (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable))) then
-                textString:SetText(statusFrame.prefix .. " " .. valueDisplay .. " / " .. valueMaxDisplay);
+        elseif ( displayMode == STATUS_TEXT_DISPLAY_MODE.PERCENT ) then
+            local percentVal = math.ceil((value / valueMax) * 100) .. "%";
+            if ( shouldUsePrefix ) then
+                textString:SetText(self.prefix .. " " .. percentVal);
             else
-                if RougeUI.db.Abbreviate or RougeUI.db.ShortNumeric then
-                    if (value > 1e7) then
-                        textString:SetFormattedText("%s || %.0f%%", true_format(value), 100 * value / valueMax);
-                    else
-                        textString:SetText(true_format(value))
-                    end
-                else
-                    textString:SetText(valueDisplay .. " / " .. valueMaxDisplay);
-                end
+                textString:SetText(percentVal);
             end
         end
     else
-        textString:SetAlpha(0);
-        textString:SetText("");
-        if (not statusFrame.alwaysShow) then
-            statusFrame:SetAlpha(0);
-        else
-            statusFrame:SetValue(0);
-        end
+        textString:Hide()
+        textString:SetText("")
     end
 end
+
 
 local function PartyStatusBarText()
     for pFrame in PartyFrame.PartyMemberFramePool:EnumerateActive() do
@@ -257,7 +273,7 @@ local PW = CreateFrame("Frame")
 PW:RegisterEvent("PLAYER_LOGIN")
 PW:SetScript("OnEvent", function(self, event, unit)
     if event == "PLAYER_LOGIN" then
-        if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
+      -- if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
             hooksecurefunc(PlayerFrameHealthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
             hooksecurefunc(PlayerFrameManaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
 
@@ -271,7 +287,7 @@ PW:SetScript("OnEvent", function(self, event, unit)
 
             hooksecurefunc(PetFrameHealthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
             hooksecurefunc(PetFrameManaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
-        end
+     --   end
 
         if RougeUI.db.PartyText then
             PartyStatusBarText()
@@ -281,6 +297,11 @@ PW:SetScript("OnEvent", function(self, event, unit)
         if isClassic and not C_AddOns.IsAddOnLoaded("ModernTargetFrame") then
             CreateStatusText()
             RougeUI.RougeUIF:CusFonts()
+        end
+        
+        if C_AddOns.IsAddOnLoaded("MiniHealthNumbers") and MiniHealthNumbersApi.v1.GetHealth then
+            MiniHealthNumbersApi.v1:PassiveMode(addonName)
+            MiniHealth = true
         end
     end
 end)

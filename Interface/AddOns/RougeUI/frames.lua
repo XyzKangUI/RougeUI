@@ -313,6 +313,15 @@ local function FrameColour()
         end
     end
 
+    if MainStatusTrackingBarContainer then
+        for i = 1, 4 do
+            local mstTexture = MainStatusTrackingBarContainer["MainMenuBarFrameTexture"..i]
+            if mstTexture then
+                mstTexture:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
+        end
+    end
+
     -- SettingsPanel
     if SettingsPanel then
         for _, v in pairs({

@@ -1,6 +1,6 @@
 ## Interface: 20505, 20506
 ## Title: |cff009cffRougeUI-TBC
-## Version: 4.36
+## Version: 4.38
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 ## IconTexture: Interface\AddOns\RougeUI\textures\addonicon

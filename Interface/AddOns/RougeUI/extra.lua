@@ -358,7 +358,7 @@ local function CheckClassification(self, forceNormalTexture)
         self.name:SetShadowOffset(0, 0)
 
         self.healthbar:ClearAllPoints()
-        self.healthbar:SetPoint("CENTER", self, "CENTER", -30, 12)
+        self.healthbar:SetPoint("CENTER", self, "CENTER", -33, 12)
         self.healthbar:SetHeight(27)
         if self.healthbar.LeftText then
             self.healthbar.LeftText:ClearAllPoints()
@@ -378,7 +378,7 @@ local function CheckClassification(self, forceNormalTexture)
         end
 
         self.manabar:ClearAllPoints()
-        self.manabar:SetPoint("CENTER", self, "CENTER", -30, -9)
+        self.manabar:SetPoint("CENTER", self, "CENTER", -33, -10)
 
         if self.manabar.LeftText then
             self.manabar.LeftText:ClearAllPoints()
@@ -425,7 +425,7 @@ local function CheckClassification(self, forceNormalTexture)
         self.name:SetShadowOffset(1, -1)
 
         self.healthbar:ClearAllPoints()
-        self.healthbar:SetPoint("CENTER", self, "CENTER", -30, 4)
+        self.healthbar:SetPoint("CENTER", self, "CENTER", -33, 4)
         self.healthbar:SetHeight(16)
         if self.healthbar.LeftText then
             self.healthbar.LeftText:ClearAllPoints()
@@ -445,7 +445,7 @@ local function CheckClassification(self, forceNormalTexture)
         end
 
         self.manabar:ClearAllPoints()
-        self.manabar:SetPoint("CENTER", self, "CENTER", -30, -10)
+        self.manabar:SetPoint("CENTER", self, "CENTER", -33, -10)
 
         if self.manabar.LeftText then
             self.manabar.LeftText:ClearAllPoints()
@@ -627,7 +627,7 @@ local function PlayerArtThick(self)
         self.name:SetFontObject("SystemFont_Outline_Small")
         self.name:SetShadowOffset(0, 0)
         self.healthbar:ClearAllPoints()
-        self.healthbar:SetPoint("CENTER", self, "CENTER", 30, 11)
+        self.healthbar:SetPoint("CENTER", self, "CENTER", 33, 11)
         self.healthbar:SetHeight(27)
         if self.healthbar.LeftText then
             self.healthbar.LeftText:ClearAllPoints()
@@ -639,8 +639,7 @@ local function PlayerArtThick(self)
         end
         self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
         self.ManaBar:ClearAllPoints()
-        self.ManaBar:SetPoint("CENTER", self, "CENTER", 30, -7)
-        self.ManaBar:SetHeight(13)
+        self.ManaBar:SetPoint("CENTER", self, "CENTER", 33, -10)
         if self.ManaBar.LeftText then
             self.ManaBar.LeftText:ClearAllPoints()
             self.ManaBar.LeftText:SetPoint("LEFT", self.ManaBar, "LEFT", 7, 0)
@@ -655,7 +654,7 @@ local function PlayerArtThick(self)
         PlayerFrameBackground:SetSize(119, 29)
         PlayerFrameBackground:SetPoint("TOPLEFT", 87, -38)
         self.healthbar:ClearAllPoints()
-        self.healthbar:SetPoint("CENTER", self, "CENTER", 30, 4) -- -20, -3
+        self.healthbar:SetPoint("CENTER", self, "CENTER", 33, 4) -- -20, -3
         self.healthbar:SetHeight(16)
 
         if self.healthbar.LeftText then
@@ -668,8 +667,7 @@ local function PlayerArtThick(self)
         end
         self.healthbar.TextString:SetPoint("CENTER", self.healthbar, "CENTER", 0, 0)
         self.manabar:ClearAllPoints()
-        self.manabar:SetPoint("CENTER", self, "CENTER", 30, -11)
-        self.manabar:SetHeight(13)
+        self.manabar:SetPoint("CENTER", self, "CENTER", 33, -10)
         if self.manabar.LeftText then
             self.manabar.LeftText:ClearAllPoints()
             self.manabar.LeftText:SetPoint("LEFT", self.manabar, "LEFT", 7, -1)
@@ -893,7 +891,6 @@ local conflictingAddons = {
     ["whoaUnitFrames_WotLK"] = true, -- overrides
     ["whoaThickFrames_WotLK"] = true, -- overrides
     ["BetterBlizzFrames"] = true, -- aura override. Use Precognito for absorbs and DebuffFilter for aura customization.
-    ["DarkMode"] = true, -- weird behaviour
     ["mUI"] = true, -- -- tainty/override
     ["ResistUI"] = true, -- lots of taints
     ["Dragonheir"] = true, -- blue shaman taint

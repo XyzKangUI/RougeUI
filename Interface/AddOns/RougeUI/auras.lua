@@ -278,7 +278,7 @@ local function SkinAuraFrame(frame, frameName)
         icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
         frame.border:SetAllPoints(frame)
     else
-        icon:SetTexCoord(.1, .9, .1, .9)
+        icon:SetTexCoord(.03, .97, .03, .97)
     end
         
     frame.skin = true
