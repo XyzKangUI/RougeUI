@@ -906,7 +906,7 @@ StaticPopupDialogs["INCOMPATIBLE_ADDONS"] = {
     end,
     OnShow = function(self)
         local addonList = table.concat(disabledAddonsList, ", ")
-        self.text:SetText("Incompatible addons detected: " .. addonList .. "\nClick reload or ESC to continue.")
+        self.Text:SetText("Incompatible addons detected: " .. addonList .. "\nClick reload or ESC to continue.")
     end,
     timeout = 0,
     whileDead = true,

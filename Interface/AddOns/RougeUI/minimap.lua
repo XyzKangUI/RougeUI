@@ -253,7 +253,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
         end
 
         -- Re-anchor all buttons
-        local LibDBIcon = LibStub("LibDBIcon-1.0")
+        local LibDBIcon = LibStub("LibDBIcon-1.0", true)
         if not LibDBIcon or IsAddOnLoaded("HidingBar") or IsAddOnLoaded("MBB") or IsAddOnLoaded("MinimapButtonButton") then
             return
         end
