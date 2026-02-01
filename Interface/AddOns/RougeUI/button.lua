@@ -26,9 +26,9 @@ local function addBorder(button, drawLayer, dbf)
     local db = RougeUI.db
     local isBuff, isDebuff, isTempEnchant
 
-    if button.auraType == "Buff" then
+    if button.auraType == "Buff" or (name and name:match("Buff")) then
         isBuff = true
-    elseif button.auraType == "Debuff" then
+    elseif button.auraType == "Debuff" or (name and name:match("Debuff")) then
         isDebuff = true
     elseif button.auraType == "TempEnchant" then
         isTempEnchant = true
@@ -41,7 +41,7 @@ local function addBorder(button, drawLayer, dbf)
     end
 
     if isDebuff then
-        border = button.DebuffBorder
+        border = button.DebuffBorder or _G[name .. "Border"] or nil
     elseif isTempEnchant then
         border = button.TempEnchantBorder
     else

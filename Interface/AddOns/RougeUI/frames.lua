@@ -1,6 +1,7 @@
 local addonName, RougeUI = ...
 local pairs = _G.pairs
 local IsAddOnLoaded = IsAddOnLoaded or C_AddOns.IsAddOnLoaded
+local hooked
 
 local frames = {
     "PlayerFrameTexture",
@@ -313,9 +314,37 @@ local function FrameColour()
         end
     end
 
+    if not hooked then
+        hooked = true
+        GameMenuFrame:HookScript("OnShow", function()
+            if not RougeUI.db or not RougeUI.db.Colval then
+                return
+            end
+            for _, child in pairs({ GameMenuFrame:GetChildren() }) do
+                if child then
+                    local left = child.Left
+                    local middle = child.Middle or child.Center
+                    local right = child.Right
+                    if left and left.SetVertexColor then
+                        left:SetDesaturated(true)
+                        left:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    end
+                    if middle and middle.SetVertexColor then
+                        middle:SetDesaturated(true)
+                        middle:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    end
+                    if right and right.SetVertexColor then
+                        right:SetDesaturated(true)
+                        right:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    end
+                end
+            end
+        end)
+    end
+
     if MainStatusTrackingBarContainer then
         for i = 1, 4 do
-            local mstTexture = MainStatusTrackingBarContainer["MainMenuBarFrameTexture"..i]
+            local mstTexture = MainStatusTrackingBarContainer["MainMenuBarFrameTexture" .. i]
             if mstTexture then
                 mstTexture:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
@@ -972,7 +1001,7 @@ local function NewVariables()
     if WOW_PROJECT_ID == 19 then
         if QuestLogFrame then
             local a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, _, s, t, _, v = QuestLogFrame:GetRegions()
-            for _, v in pairs({ a, b, c, d, e, f, g, h, i, j, k, m, n, o, p, q,  t, v }) do
+            for _, v in pairs({ a, b, c, d, e, f, g, h, i, j, k, m, n, o, p, q, t, v }) do
                 if v then
                     v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
                 end
@@ -1093,12 +1122,12 @@ local function NewVariables()
     end
 
     if WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC or WOW_PROJECT_ID == 5 then
-        for _, v in pairs ({QuestFrame:GetRegions()}) do
+        for _, v in pairs({ QuestFrame:GetRegions() }) do
             if v then
                 v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
             end
         end
-        QuestFrameTitleBg:SetVertexColor(1, 1 ,1)
+        QuestFrameTitleBg:SetVertexColor(1, 1, 1)
         QuestFrameTitleText:SetVertexColor(1, 0.8196079134911, 0)
         QuestFrameNpcNameText:SetVertexColor(1, 0.8196079134911, 0)
         QuestFramePortrait:SetVertexColor(1, 1, 1)
@@ -1200,14 +1229,14 @@ local function NewVariables()
     end
 
     for i = 1, 4 do
-        local ember = _G["BurningEmbersBarFrameEmber"..i]
+        local ember = _G["BurningEmbersBarFrameEmber" .. i]
         if ember and ember.border then
             ember.border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
     end
 
     for i = 1, 4 do
-        local monkenergy = _G["MonkHarmonyBarLightEnergy"..i]
+        local monkenergy = _G["MonkHarmonyBarLightEnergy" .. i]
         if monkenergy then
             monkenergy:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
         end
