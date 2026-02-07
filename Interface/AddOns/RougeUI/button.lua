@@ -44,8 +44,15 @@ local function addBorder(button, drawLayer, dbf)
         border = button.DebuffBorder or _G[name .. "Border"] or nil
     elseif isTempEnchant then
         border = button.TempEnchantBorder
+        if button.newBorder then
+            button.newBorder:Hide()
+        end
     else
-        border = button:CreateTexture(nil, drawLayer or "BACKGROUND")
+        border = button.newBorder or button:CreateTexture(nil, drawLayer or "BACKGROUND")
+        button.newBorder = border
+        if button.TempEnchantBorder then
+            button.TempEnchantBorder:Hide()
+        end
     end
 
     local stealable = _G[name .. "Stealable"]
@@ -119,7 +126,7 @@ local function addBorder(button, drawLayer, dbf)
         if db.Roug and isDebuff then
             return
         end
-        local bg = CreateFrame("Frame", nil, button, BackdropTemplateMixin and "BackdropTemplate")
+        local bg = button.bg or CreateFrame("Frame", nil, button, BackdropTemplateMixin and "BackdropTemplate")
         local yOffset = (db.Roug and button.Symbol) and -3 or 4
         bg:SetPoint("TOPLEFT", rp, "TOPLEFT", -4, 4)
         bg:SetPoint("BOTTOMRIGHT", rp, "BOTTOMRIGHT", 4, -4)
@@ -245,6 +252,13 @@ local function SkinBuffs(bu)
     if not bu then
         return
     end
+    
+    if bu.auraType then
+        if bu.lastAuraType ~= bu.auraType then
+            bu.styled = false
+            bu.lastAuraType = bu.auraType
+        end
+    end
 
     local buffFrame, debuffFrame
     local icon = bu.Icon
@@ -267,7 +281,7 @@ local function SkinBuffs(bu)
         else
             if RougeUI.db.Lorti then
                 if icon.SetTexCoord then
-                    icon:SetTexCoord(0.02, 0.98, 0.02, 0.98)
+                    icon:SetTexCoord(0, 1, 0, 1)
                 end
                 icon:ClearAllPoints()
                 icon:SetPoint("TOPLEFT", bu, "TOPLEFT", 1, -1)
@@ -336,6 +350,7 @@ local function SkinBuffs(bu)
     if not bu.styled then
         bu.styled = true
         addBorder(bu, "BACKGROUND", true)
+        bu.border:Show()
     end
 end
 
