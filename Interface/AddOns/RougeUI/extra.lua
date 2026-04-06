@@ -930,6 +930,10 @@ e:SetScript("OnEvent", function(self, event, ...)
         if RougeUI.db.SQFix then
             self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         end
+        
+        if ComboFrame then
+            ComboFrame:SetParent(TargetFrame)
+        end
 
         if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC and not IsAddOnLoaded("Precognito") then
             for _, v in pairs { PlayerFrameHealthBar, TargetFrameHealthBar, FocusFrameHealthBar } do
