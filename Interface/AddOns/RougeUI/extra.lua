@@ -933,6 +933,7 @@ e:SetScript("OnEvent", function(self, event, ...)
         
         if ComboFrame then
             ComboFrame:SetParent(TargetFrame)
+            ComboFrame:SetFrameLevel(TargetFrame:GetFrameLevel() + 5)
         end
 
         if WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC and not IsAddOnLoaded("Precognito") then
