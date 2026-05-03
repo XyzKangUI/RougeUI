@@ -1,184 +1,230 @@
 local _, RougeUI = ...
-local bartender = IsAddOnLoaded("Bartender4")
-local dominos = IsAddOnLoaded("Dominos")
-local tonumber, strmatch = tonumber, string.match
-local frame = CreateFrame("Frame")
+local wahkButtons = {}
+local boundKeys = {}
+local pendingUpdate
 
-local buttonNames = {
-    ["ACTIONBUTTON"] = "ActionButton",
-    ["MULTIACTIONBAR1BUTTON"] = "MultiBarBottomLeftButton",
-    ["MULTIACTIONBAR2BUTTON"] = "MultiBarBottomRightButton",
-    ["MULTIACTIONBAR3BUTTON"] = "MultiBarRightButton",
-    ["MULTIACTIONBAR4BUTTON"] = "MultiBarLeftButton",
-    ["CLICK BT4Button"] = "BT4Button",
-    ["CLICK DominosActionButton"] = "DominosActionButton",
+local binderFrame = CreateFrame("Frame", nil, nil, "SecureHandlerStateTemplate")
+
+local SECURE_APPLY_BINDINGS = [[
+	local state = self:GetAttribute("wahk_override_state") or "normal"
+	local count = self:GetAttribute("wahk_count") or 0
+
+	self:ClearBindings()
+
+	for i = 1, count do
+		local key = self:GetAttribute("wahk_key" .. i)
+		local normal = self:GetAttribute("wahk_normal" .. i)
+		local vehicle = self:GetAttribute("wahk_vehicle" .. i)
+		local bonus = self:GetAttribute("wahk_bonus" .. i)
+
+		if vehicle == "" then vehicle = nil end
+		if bonus == "" then bonus = nil end
+
+		local target = normal
+
+		if state == "vehicle" and vehicle then
+			target = vehicle
+		elseif state == "bonus" and bonus then
+			target = bonus
+		end
+
+		if key and target then
+			self:SetBindingClick(true, key, target, "LeftButton")
+		end
+	end
+]]
+
+local SECURE_ONSTATE_OVERRIDEBUTTON = [[
+	self:SetAttribute("wahk_override_state", newstate)
+]] .. SECURE_APPLY_BINDINGS
+
+local defaultButtons = {
+	ACTIONBUTTON = "ActionButton",
+	MULTIACTIONBAR1BUTTON = "MultiBarBottomLeftButton",
+	MULTIACTIONBAR2BUTTON = "MultiBarBottomRightButton",
+	MULTIACTIONBAR3BUTTON = "MultiBarRightButton",
+	MULTIACTIONBAR4BUTTON = "MultiBarLeftButton",
 }
 
-local function ConvertActionButtonName(name)
-    -- remove "CLICK "
-    name = name:gsub("^CLICK ", "")
+local function BuildAllBindings()
+	local result = {}
+	local seenKeys = {}
 
-    -- remove ":Keybind"
-    name = name:gsub(":Keybind$", "")
+	local function ScanKey(key)
+		if key and key ~= "" then seenKeys[key] = true end
+	end
 
-    if dominos then
-        if strmatch(name, "Dominos") then
-            name = name:gsub(":LeftButton", "")
-            name = name:gsub(":HOTKEY", "")
-        end
-    end
+	local function ScanCommand(command)
+		local key1, key2 = GetBindingKey(command)
+		ScanKey(key1)
+		ScanKey(key2)
+	end
 
-    local button, buttonNumber = name:match("^(.-)(%d+)$")
-    if button and tonumber(buttonNumber) and buttonNames[button] then
-        name = buttonNames[button] .. buttonNumber
-    end
+	for i = 1, GetNumBindings() do
+		local command, key1, key2 = GetBinding(i)
+		ScanKey(key1)
+		ScanKey(key2)
+	end
 
-    return name
+	for i = 1, 120 do
+		ScanCommand("CLICK BT4Button"..i..":LeftButton")
+		ScanCommand("CLICK DominosActionButton"..i..":HOTKEY")
+		ScanCommand("CLICK DominosActionButton"..i..":LeftButton")
+	end
+
+	for key in pairs(seenKeys) do
+		local action = GetBindingAction(key, true)		
+		if action and action ~= "" then
+			local btnName
+			
+			if action:match("^CLICK ") then
+				btnName = action:match("^CLICK ([^:]+)")
+			else
+				local base, id = action:match("^(.-)(%d+)$")
+				if base and id then
+					local blizzBtn = defaultButtons[base:upper()]
+					if blizzBtn then
+						btnName = blizzBtn .. id
+					end
+				end
+			end
+
+			if btnName then
+				result[btnName] = result[btnName] or {}
+				table.insert(result[btnName], key)
+			end
+		end
+	end
+
+	return result
 end
 
-local function WAHK(button, ok)
-    if not button then
-        return
-    end
+local function addWAHK(buttonName, btn)
+    local wahkBtn = wahkButtons[buttonName]
+    if wahkBtn then return wahkBtn end
 
-    local btn = _G[button]
-    if not btn then
-        return
-    end
+    wahkBtn = CreateFrame("Button", "WAHK_" .. buttonName, nil, "SecureActionButtonTemplate")
+    wahkBtn:RegisterForClicks("AnyUp", "AnyDown")
+    wahkBtn:SetAttribute("type", "click")
+    wahkBtn:SetAttribute("clickbutton", btn)
 
-    local clickButton, id
-    if button:match("BT4Button") then
-        clickButton = ("CLICK %s:LeftButton"):format(button)
-    elseif button:match("DominosActionButton") then
-        clickButton = ("CLICK %s:HOTKEY"):format(button)
-    else
-        id = tonumber(button:match("(%d+)"))
-        local actionButtonType = btn.buttonType
-        local buttonType = actionButtonType and (actionButtonType .. id) or ("ACTIONBUTTON%d"):format(id)
-        clickButton = buttonType or ("CLICK " .. button .. ":LeftButton")
-    end
-
-    local key, key2 = GetBindingKey(clickButton)
-    if not key and not key2 then
-        return
-    end
-
-    local cacheKeys = {}
-    if key then
-        cacheKeys[key] = key
-    end
-    if key2 then
-        cacheKeys[key2] = key2
-    end
-
-    for v in pairs(cacheKeys) do
-        local action = GetBindingAction(v, true)
-
-        if action and (action ~= "") then
-            btn = _G[ConvertActionButtonName(action)]
-        end
-
-        if btn then
-            local btnName = btn:GetName()
-            local clk = tostring(btnName)
-
-            if not id then
-                id = tonumber(button:match("(%d+)"))
+    wahkBtn:SetScript("OnMouseDown", function()
+        if btn:IsVisible() then
+            btn:SetButtonState("PUSHED")
+            if RougeUI and RougeUI.db and RougeUI.db.ButtonAnim then
+                RougeUI.Animate(btn)
             end
-
-            local wahk = CreateFrame("Button", "WAHK" .. button, nil, "SecureActionButtonTemplate")
-            wahk:RegisterForClicks("AnyDown", "AnyUp")
-            wahk:SetAttribute("type", "macro")
-
-            local onclick
-            if ok then
-                onclick = string.format([[ local id = tonumber(self:GetName():match("(%d+)")) if down then self:SetAttribute("macrotext", "/click [vehicleui] VehicleMenuBarActionButton" .. id .. "; [bonusbar:1/2/3] BonusActionButton" .. id .. "; ActionButton" .. id) else self:SetAttribute("macrotext", "/click [vehicleui] VehicleMenuBarActionButton" .. id .. "; [bonusbar:1/2/3] BonusActionButton" .. id .. "; ActionButton" .. id) end]], id, id, id)
-            else
-                onclick = ([[ if down then self:SetAttribute("macrotext", "/click clk") else self:SetAttribute("macrotext", "/click clk") end]]):gsub("clk", clk), nil
-            end
-
-            ClearOverrideBindings(wahk)
-            SecureHandlerWrapScript(wahk, "OnClick", wahk, onclick)
-            SetOverrideBindingClick(wahk, true, v, wahk:GetName())
-
-            wahk:SetScript("OnMouseDown", function()
-                if OverrideActionBar and OverrideActionBar:IsShown() and id then
-                    local obtn = _G["OverrideActionBarButton" .. id]
-                    if obtn then
-                        obtn:SetButtonState("PUSHED")
-                        if RougeUI.db.ButtonAnim then
-                            RougeUI.Animate(obtn)
-                        end
-                    end
-                else
-                    if btn then
-                        btn:SetButtonState("PUSHED")
-                        if RougeUI.db.ButtonAnim then
-                            RougeUI.Animate(btn)
-                        end
-                    end
-                end
-            end)
-            wahk:SetScript("OnMouseUp", function()
-                if OverrideActionBar and OverrideActionBar:IsShown() and id then
-                    local obtn = _G["OverrideActionBarButton" .. id]
-                    if obtn then
-                        obtn:SetButtonState("NORMAL")
-                        if RougeUI.db.wahksfk then
-                            RougeUI.Animate(obtn)
-                        end
-                    end
-                else
-                    if btn then
-                        btn:SetButtonState("NORMAL")
-                        if RougeUI.db.wahksfk then
-                            RougeUI.Animate(btn)
-                        end
-                    end
-                end
-            end)
         end
-    end
+    end)
+
+    wahkBtn:SetScript("OnMouseUp", function()
+        if btn:IsVisible() then
+            btn:SetButtonState("NORMAL")
+            if RougeUI and RougeUI.db and RougeUI.db.ButtonAnim and RougeUI.db.wahksfk then
+                RougeUI.Animate(btn)
+            end
+        end
+    end)
+    
+    wahkBtn:SetScript("PostClick", function()
+        if btn:IsVisible() then
+            btn:SetButtonState("NORMAL")
+        end
+    end)
+
+    wahkButtons[buttonName] = wahkBtn
+    return wahkBtn
 end
 
-local function UpdateBinds()
+local function updateBinds()
     if InCombatLockdown() then
-        frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+        binderFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
         return
     end
 
-    for i = 1, 12 do
-        WAHK("ActionButton" .. i, true)
-        WAHK("MultiBarBottomRightButton" .. i)
-        WAHK("MultiBarBottomLeftButton" .. i)
-        WAHK("MultiBarRightButton" .. i)
-        WAHK("MultiBarLeftButton" .. i)
-    end
+    ClearOverrideBindings(binderFrame)
+    UnregisterStateDriver(binderFrame, "overridebutton")
 
-    if bartender or dominos then
-        for i = 1, 180 do
-            if bartender then
-                WAHK("BT4Button" .. i)
-            else
-                WAHK("DominosActionButton" .. i)
+    binderFrame:SetAttribute("_onstate-overridebutton", nil)
+    binderFrame:SetAttribute("wahk_override_state", "normal")
+    binderFrame:SetAttribute("wahk_count", 0)
+
+    wipe(boundKeys)
+
+    local binds = BuildAllBindings()
+    local bindingIndex = 0
+
+    for btnName, keys in pairs(binds) do
+        local btn = _G[btnName]
+        
+        if btn and keys and #keys > 0 then
+            local normalWahk = addWAHK(btnName, btn)
+            local vehicleWahkName = ""
+            local bonusWahkName = ""
+
+            local actionBtnNum = tonumber(btnName:match("^ActionButton(%d+)$"))
+
+            if actionBtnNum then
+                local vehicleBtn = _G["VehicleMenuBarActionButton" .. actionBtnNum]
+                if vehicleBtn then
+                    local vehicleWahk = addWAHK(btnName .. "_vehicle", vehicleBtn)
+                    vehicleWahkName = vehicleWahk:GetName()
+                end
+
+                local bonusBtn = _G["BonusActionButton" .. actionBtnNum]
+                if bonusBtn then
+                    local bonusWahk = addWAHK(btnName .. "_bonus", bonusBtn)
+                    bonusWahkName = bonusWahk:GetName()
+                end
+            end
+
+            for _, key in ipairs(keys) do
+                if not boundKeys[key] then
+                    bindingIndex = bindingIndex + 1
+                    binderFrame:SetAttribute("wahk_key" .. bindingIndex, key)
+                    binderFrame:SetAttribute("wahk_normal" .. bindingIndex, normalWahk:GetName())
+                    binderFrame:SetAttribute("wahk_vehicle" .. bindingIndex, vehicleWahkName)
+                    binderFrame:SetAttribute("wahk_bonus" .. bindingIndex, bonusWahkName)
+                    boundKeys[key] = true
+                end
             end
         end
     end
+
+    binderFrame:SetAttribute("wahk_count", bindingIndex)
+
+    if bindingIndex > 0 then
+        binderFrame:SetAttribute("_onstate-overridebutton", SECURE_ONSTATE_OVERRIDEBUTTON)
+        RegisterStateDriver(binderFrame, "overridebutton", "[vehicleui] vehicle; [bonusbar:1/2/3/4/5] bonus; normal")
+        binderFrame:Execute(SECURE_APPLY_BINDINGS)
+    end
 end
 
-frame:RegisterEvent("UPDATE_BINDINGS")
-frame:RegisterEvent("PLAYER_LOGIN")
-frame:SetScript("OnEvent", function(self, event, ...)
-    if not RougeUI.db.KeyEcho then
-        -- stop copying, use the addon.
-        self:UnregisterAllEvents()
-        self:SetScript("OnEvent", nil)
-        return
-    end
+local timerFrame = CreateFrame("Frame")
+local updateTimer = 0
+local function scheduledUpdate()
+    if pendingUpdate then return end
+    pendingUpdate = true
+    updateTimer = 0.5
+    timerFrame:SetScript("OnUpdate", function(self, elapsed)
+        updateTimer = updateTimer - elapsed
+        if updateTimer <= 0 then
+            self:SetScript("OnUpdate", nil)
+            pendingUpdate = nil
+            updateBinds()
+        end
+    end)
+end
 
-    if event == "PLAYER_REGEN_ENABLED" then
+binderFrame:RegisterEvent("PLAYER_LOGIN")
+binderFrame:SetScript("OnEvent", function(self, event)
+    if event == "PLAYER_LOGIN" and RougeUI and RougeUI.db and RougeUI.db.KeyEcho then
+        self:RegisterEvent("UPDATE_BINDINGS")
+        scheduledUpdate()
+    elseif event == "PLAYER_REGEN_ENABLED" then
         self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        scheduledUpdate()
+    elseif event ~= "PLAYER_LOGIN" then
+        scheduledUpdate()
     end
-
-    C_Timer.After(1, UpdateBinds)
 end)

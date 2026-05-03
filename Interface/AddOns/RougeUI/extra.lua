@@ -49,7 +49,6 @@ local function PvPIcon()
     for i, v in pairs({
         PlayerPVPIcon,
         TargetFrameTextureFramePVPIcon,
-        TargetFrameTextureFramePVPIcon,
         PartyMemberFrame1PVPIcon,
         PartyMemberFrame2PVPIcon,
         PartyMemberFrame3PVPIcon,
@@ -675,13 +674,16 @@ local function Usable(button)
     end
 end
 
-local function RangeIndicator(self, checksRange, inRange)
-    local valid = IsActionInRange(self.action);
-    checksRange = (valid ~= nil)
-    inRange = checksRange and valid;
-    local icon = _G[self:GetName() .. "Icon"]
+local function RangeIndicator(self)
+    local action = self.action
+    if not action then return end
 
-    if checksRange and inRange ~= 1 then
+    local icon = _G[self:GetName() .. "Icon"]
+    if not icon then return end
+
+    local inRange = IsActionInRange(action)
+
+    if inRange == 0 or inRange == false then
         icon:SetVertexColor(1.0, 0.35, 0.35, 0.75)
         icon:SetDesaturated(1)
     else
