@@ -1,10 +1,43 @@
 local _, RougeUI = ...
 local wahkHeader = CreateFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
-local binderFrame = CreateFrame("Frame")
 local wahkButtons = {}
 local boundKeys = {}
 local bartender = C_AddOns.IsAddOnLoaded("Bartender4")
 local pendingUpdate
+local binderFrame = CreateFrame("Frame", nil, nil, "SecureHandlerStateTemplate")
+
+local SECURE_APPLY_BINDINGS = [[
+	local state = self:GetAttribute("wahk_override_state") or "normal"
+	local useOverride = state == "override"
+	local count = self:GetAttribute("wahk_count") or 0
+
+	self:ClearBindings()
+
+	for i = 1, count do
+		local key = self:GetAttribute("wahk_key" .. i)
+		local normal = self:GetAttribute("wahk_normal" .. i)
+		local override = self:GetAttribute("wahk_override" .. i)
+
+		if override == "" then
+			override = nil
+		end
+
+		local btn = normal
+
+		if useOverride and override then
+			btn = override
+		end
+
+		if key and btn then
+			self:SetBindingClick(true, key, btn, "LeftButton")
+		end
+	end
+]]
+
+local SECURE_ONSTATE_OVERRIDEBUTTON = [[
+	self:SetAttribute("wahk_override_state", newstate)
+]] .. SECURE_APPLY_BINDINGS
+
 
 local defaultButtons = {
     ACTIONBUTTON = "ActionButton",
@@ -88,7 +121,7 @@ local function GetAllBindings()
     return realBtn
 end
 
-local function addWAHK(buttonName, btn)
+local function addWAHK(buttonName, btn, isOverride)
     local wahkBtn = wahkButtons[buttonName]
     if wahkBtn then
         return wahkBtn
@@ -117,8 +150,10 @@ local function addWAHK(buttonName, btn)
 
     wahkBtn:RegisterForClicks("AnyDown", "AnyUp")
     wahkBtn:SetAttribute("type", "click")
-    wahkBtn:SetAttribute("typerelease", "click")
-    wahkBtn:SetAttribute("pressAndHoldAction", true)
+    if not isOverride then
+        wahkBtn:SetAttribute("typerelease", "click")
+        wahkBtn:SetAttribute("pressAndHoldAction", true)
+    end
     wahkBtn:SetAttribute("clickbutton", btn)
 
     wahkBtn:SetScript("OnMouseDown", function()
@@ -138,25 +173,15 @@ local function addWAHK(buttonName, btn)
             end
         end
     end)
+    
+    wahkBtn:SetScript("PostClick", function()
+        if btn:IsVisible() then
+            btn:SetButtonState("NORMAL")
+        end
+    end)
 
     wahkButtons[buttonName] = wahkBtn
     return wahkBtn
-end
-
-local function WAHK(buttonName, keys)
-    local btn = _G[buttonName]
-    if not btn or not keys then
-        return
-    end
-
-    local wahk = addWAHK(buttonName, btn)
-
-    for _, key in ipairs(keys) do
-        if not boundKeys[key] then
-            SetOverrideBindingClick(binderFrame, true, key, wahk:GetName(), "LeftButton")
-            boundKeys[key] = true
-        end
-    end
 end
 
 local function updateBinds()
@@ -166,11 +191,51 @@ local function updateBinds()
     end
 
     ClearOverrideBindings(binderFrame)
+    UnregisterStateDriver(binderFrame, "overridebutton")
+
+    binderFrame:SetAttribute("_onstate-overridebutton", nil)
+    binderFrame:SetAttribute("wahk_override_state", "normal")
+    binderFrame:SetAttribute("wahk_count", 0)
+
     wipe(boundKeys)
 
     local binds = GetAllBindings()
-    for btn, key in pairs(binds) do
-        WAHK(btn, key)
+    local bindingIndex = 0
+
+    for btnName, keys in pairs(binds) do
+        local btn = _G[btnName]
+        
+        if btn and keys and #keys > 0 then
+            local normalWahk = addWAHK(btnName, btn)
+            local overrideWahkName = ""
+
+            local actionBtnNum = tonumber(btnName:match("^ActionButton(%d+)$"))
+            local overrideBtn = actionBtnNum and _G["OverrideActionBarButton" .. actionBtnNum]
+
+            if actionBtnNum and actionBtnNum <= 6 and overrideBtn then
+                local overrideWahk = addWAHK(btnName .. "_override", overrideBtn, true)
+                overrideWahkName = overrideWahk:GetName()
+            end
+
+            for _, key in ipairs(keys) do
+                if not boundKeys[key] then
+                    bindingIndex = bindingIndex + 1
+
+                    binderFrame:SetAttribute("wahk_key" .. bindingIndex, key)
+                    binderFrame:SetAttribute("wahk_normal" .. bindingIndex, normalWahk:GetName())
+                    binderFrame:SetAttribute("wahk_override" .. bindingIndex, overrideWahkName)
+                    boundKeys[key] = true
+                end
+            end
+        end
+    end
+
+    binderFrame:SetAttribute("wahk_count", bindingIndex)
+
+    if bindingIndex > 0 then
+        binderFrame:SetAttribute("_onstate-overridebutton", SECURE_ONSTATE_OVERRIDEBUTTON)
+        RegisterStateDriver(binderFrame, "overridebutton", "[overridebar] override; [vehicleui] override; normal")
+        binderFrame:Execute(SECURE_APPLY_BINDINGS)
     end
 end
 

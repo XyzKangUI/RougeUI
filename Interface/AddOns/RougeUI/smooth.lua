@@ -143,7 +143,7 @@ smoothframe:SetScript("OnEvent", function(self, event, addon)
             if statusbar then
                 SmoothBar(statusbar)
                 statusbar:HookScript("OnHide", function(self)
-                    self.guid, self.max_ = nil, nil
+                    self.guid, self._max = nil, nil
                 end)
                 statusbar.unit = unit ~= "" and unit or nil
             end

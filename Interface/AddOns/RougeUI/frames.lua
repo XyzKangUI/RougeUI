@@ -386,9 +386,15 @@ local function FrameColour()
     -- TotemFrame
     if TotemFrame then
         for i = 1, 4 do
-            local _, totem = _G["TotemFrameTotem" .. i]:GetChildren()
-            if totem then
-                totem:GetRegions():SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            local totemParent = _G["TotemFrameTotem" .. i]
+            if totemParent then
+                local _, totem = totemParent:GetChildren()
+                if totem then
+                    local region = totem:GetRegions()
+                    if region and region.SetVertexColor then
+                        region:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+                    end
+                end
             end
         end
     end

@@ -1,6 +1,6 @@
-## Interface: 50500, 50501, 50502
+## Interface: 50504
 ## Title: |cff009cffRougeUI-MoP|r
-## Version: 4.32
+## Version: 4.42
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
 

@@ -60,14 +60,16 @@ local function AddElements(plate)
             plate.castBar:SetPoint("TOP", plate.healthBar, "BOTTOM", 8, -9)
         end
     else
-        if plate.LevelFrame.levelText then
+        if plate.LevelFrame and plate.LevelFrame.levelText then
             plate.LevelFrame.levelText:SetFont(STANDARD_TEXT_FONT, 8)
         end
     end
 
-    for _, v in pairs({ plate.HealthBarsContainer.border:GetRegions() }) do
-        if v then
-            v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    if plate.HealthBarsContainer and plate.HealthBarsContainer.border then
+        for _, v in pairs({ plate.HealthBarsContainer.border:GetRegions() }) do
+            if v then
+                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+            end
         end
     end
 
@@ -83,7 +85,7 @@ local function NiceOne(self)
     end
 end
 
-if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC and Nameplate_CastBar_AdjustPosition then
     hooksecurefunc("Nameplate_CastBar_AdjustPosition", NiceOne)
 end
 
@@ -153,7 +155,7 @@ local function OnEvent(self, event, ...)
         self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
         ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
-        if RougeUI.db.ArenaNumbers then
+        if RougeUI.db.ArenaNumbers and CompactUnitFrame_UpdateName then
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
         end
 

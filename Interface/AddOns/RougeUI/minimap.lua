@@ -394,7 +394,7 @@ MM:SetScript("OnEvent", function(self, event, addon)
                 then
                     local name = child:GetName() or ""
                     if not name:find("GameTimeFrame") and not name:find("Zoom") and not name:find("MiniMapTrackingButton")
-                    and not name:find("MiniMapBattlefieldFrame" ) and not name:find("LFGMinimapFrame")
+                            and not name:find("MiniMapBattlefieldFrame" ) and not name:find("LFGMinimapFrame")
                             and not name:find("MiniMapMailFrame") then
                         table.insert(allButtons, child)
                         child:Hide()
@@ -489,9 +489,11 @@ MM:SetScript("OnEvent", function(self, event, addon)
             end)
         end)
 
-        -- Ping snitch
         local pingTicker
-        Minimap:RegisterEvent("MINIMAP_PING")
+        local isValid = C_EventUtils and C_EventUtils.IsEventValid("MINIMAP_PING")
+        if isValid then
+            Minimap:RegisterEvent("MINIMAP_PING")
+        end
         Minimap:HookScript("OnEvent", function(self, event, unit)
             if event == "MINIMAP_PING" and unit ~= "player" then
                 local name = UnitName(unit)
