@@ -240,31 +240,49 @@ local function New_TextStatusBar_UpdateTextStringWithValues(self, textString, va
     end
 end
 
-
+local barText = {}
 local function PartyStatusBarText()
     for pFrame in PartyFrame.PartyMemberFramePool:EnumerateActive() do
-        if pFrame then
-            local name = pFrame.name
-            local healthBar = pFrame.HealthBar
-            local manaBar = pFrame.ManaBar
+        if pFrame and not barText[pFrame] then
+            local healthbar = pFrame.healthbar
+            local manabar = pFrame.manabar
 
-            local healthText = name:GetParent():CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+            local healthText = healthbar:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+            healthText:SetFont(FontType, 11, "OUTLINE")
             healthText:SetPoint("CENTER", 20, 12)
-            Mixin(TextStatusBarMixin, healthBar)
-            healthBar:SetBarText(healthText)
 
-            local manaText = name:GetParent():CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+            local manaText = manabar:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+            manaText:SetFont(FontType, 11, "OUTLINE")
             manaText:SetPoint("CENTER", 20, 2)
-            Mixin(TextStatusBarMixin, manaBar)
-            manaBar:SetBarText(manaText)
 
-            healthBar.TextString:SetFont(FontType, 11, "OUTLINE")
-            manaBar.TextString:SetFont(FontType, 11, "OUTLINE")
+            barText[pFrame] = {
+                health = healthText,
+                mana = manaText,
+                lastHP = nil,
+                lastMana = nil,
+            }
 
-            if (RougeUI.db.smooth or RougeUI.db.ShortNumeric or RougeUI.db.Abbreviate) then
-                hooksecurefunc(healthBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
-                hooksecurefunc(manaBar, "UpdateTextStringWithValues", New_TextStatusBar_UpdateTextStringWithValues)
-            end
+            hooksecurefunc(pFrame, "UpdateMemberHealth", function(self)
+                local t = barText[self]
+                if not t then return end
+
+                local hp = self.healthbar.finalValue or self.healthbar:GetValue()
+                local mana = self.manabar.finalValue or self.manabar:GetValue()
+                local powertype = UnitPowerType(self.unit)
+
+                if hp ~= t.lastHP then
+                    t.lastHP = hp
+                    t.health:SetText(true_format(hp))
+                end
+
+                if powertype ~= 0 then
+                    t.mana:SetText("")
+                    t.lastMana = -1
+                elseif mana ~= t.lastMana then
+                    t.lastMana = mana
+                    t.mana:SetText(true_format(mana))
+                end
+            end)
         end
     end
 end

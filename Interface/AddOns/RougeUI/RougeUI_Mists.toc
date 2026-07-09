@@ -1,10 +1,8 @@
-## Interface: 50504
+## Interface: 50504, 50505
 ## Title: |cff009cffRougeUI-MoP|r
 ## Version: 4.42
 ## SavedVariablesPerCharacter: RougeUI
 ## DefaultState: enabled
-
-Libs\LibStub\LibStub.lua
 
 settings.lua
 frames.lua
@@ -23,4 +21,3 @@ snowfallkey.lua
 sappable.lua
 combofix.lua
 XYZ.lua
-tmpfix.lua

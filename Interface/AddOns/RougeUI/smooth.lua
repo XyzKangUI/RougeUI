@@ -35,11 +35,11 @@ local function lerp(startValue, endValue, amount)
 end
 
 local function isCloseEnough(new, target, range)
-    return range > 0.0 and mabs((new - target) / range) <= 0.001
+    return range and range > 0.0 and mabs((new - target) / range) <= 0.001 or false
 end
 
 local function hasAbsorbValue(unit)
-    if not unit then return false end
+    if not unit or not UnitGetIncomingHeals then return false end
 
     if UnitGetIncomingHeals(unit) and UnitGetIncomingHeals(unit) > 0 then
         return true
@@ -86,7 +86,7 @@ local function SetSmoothedValue(self, value)
         return
     end
 
-    smoothing[self] = clamp(value, self._max)
+    smoothing[self] = self._max and clamp(value, self._max) or value
 
     if not smoothframe:GetScript("OnUpdate") then
         smoothframe:SetScript("OnUpdate", AnimationTick)

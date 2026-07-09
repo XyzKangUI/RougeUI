@@ -174,8 +174,8 @@ local function addWAHK(buttonName, btn, isOverride)
         end
     end)
     
-    wahkBtn:SetScript("PostClick", function()
-        if btn:IsVisible() then
+    wahkBtn:SetScript("PostClick", function(self, button, down)
+        if btn:IsVisible() and not down then
             btn:SetButtonState("NORMAL")
         end
     end)

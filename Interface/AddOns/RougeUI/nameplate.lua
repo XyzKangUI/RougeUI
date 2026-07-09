@@ -1,14 +1,19 @@
 local addonName, RougeUI = ...
-local str_split, select = string.split, select
+local str_split = string.split
 local UnitGUID, U = UnitGUID, UnitIsUnit
+local UnitExists, UnitIsUnit = UnitExists, UnitIsUnit
 local IsActiveBattlefieldArena, STANDARD_TEXT_FONT = IsActiveBattlefieldArena, STANDARD_TEXT_FONT
 local WOW_PROJECT_ID, WOW_PROJECT_CLASSIC = WOW_PROJECT_ID, WOW_PROJECT_CLASSIC
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local ClassicEra = false
-local currentPlate, highlightBorder = nil, nil
+
+local function GetHealthBar(plate)
+    return plate.healthBar or (plate.HealthBarsContainer and plate.HealthBarsContainer.healthBar)
+end
 
 local function NameToArenaNumber(plate)
-    if plate:IsForbidden() or not plate.unit:find("nameplate") or not IsActiveBattlefieldArena() then
+    if not plate or plate:IsForbidden() or not plate.unit or not plate.unit:find("nameplate")
+            or not IsActiveBattlefieldArena() or not plate.name then
         return
     end
 
@@ -17,7 +22,8 @@ local function NameToArenaNumber(plate)
             plate.name:SetText(i)
             plate.name:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
             plate.name:ClearAllPoints()
-            plate.name:SetPoint("BOTTOM", plate.HealthBarsContainer.border, "TOP", 0, 2)
+            local hb = GetHealthBar(plate)
+            plate.name:SetPoint("BOTTOM", hb or plate, "TOP", 0, 2)
             break
         else
             if RougeUI.db.ModPlates and not RougeUI.db.AsuriFrame then
@@ -29,13 +35,37 @@ local function NameToArenaNumber(plate)
     end
 end
 
-local function AddElements(plate)
-    if not plate or not plate:IsShown() then
+local function customCastbar(castBar)
+    if not castBar or castBar:IsForbidden() then
+        return
+    end
+    if castBar.Text then
+        castBar.Text:SetFont(STANDARD_TEXT_FONT, 8)
+        castBar.Text:Show()
+    end
+    if castBar.Border then
+        castBar.Border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    end
+end
+
+local function StylePlate(plate)
+    if not plate or plate:IsForbidden() then
         return
     end
 
-    if (RougeUI.db.ModPlates and not RougeUI.db.AsuriFrame) then
-        if not IsActiveBattlefieldArena() then
+    local hb = GetHealthBar(plate)
+    if not hb then return end
+    local bgTexture = hb.bgTexture
+
+    if hb and not hb.RougeHealthBG then
+        local bg = hb:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints(hb)
+        bg:SetColorTexture(0.2, 0.2, 0.2, 0.85)
+        hb.RougeHealthBG = bg
+    end
+
+    if RougeUI.db.ModPlates and not RougeUI.db.AsuriFrame then
+        if not IsActiveBattlefieldArena() and plate.name then
             plate.name:SetFont(STANDARD_TEXT_FONT, 8)
             plate.name:ClearAllPoints()
             plate.name:SetPoint("CENTER", plate, "CENTER", 0, 5)
@@ -43,9 +73,8 @@ local function AddElements(plate)
     end
 
     if RougeUI.db.NoLevel or RougeUI.db.AsuriFrame then
-        local border = plate.HealthBarsContainer.border:GetRegions()
-        if border then
-            border:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")
+        if bgTexture then
+            bgTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\nolevel\\Nameplate-Border-nolevel")
         end
         if plate.LevelFrame then
             plate.LevelFrame:Hide()
@@ -54,10 +83,18 @@ local function AddElements(plate)
             plate.HealthBarsContainer:ClearAllPoints()
             plate.HealthBarsContainer:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 4, 4)
             plate.HealthBarsContainer:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -4, 4)
+
+            if bgTexture then
+                local bw, bh = bgTexture:GetSize()
+                hb:ClearAllPoints()
+                hb:SetPoint("CENTER", plate.HealthBarsContainer, "CENTER", 0, 0)
+                if bw and bw > 1 then hb:SetWidth(bw - 8) end
+                if bh and bh > 1 then hb:SetHeight(bh - 4) end
+            end
         end
-        if plate.castBar then
-            plate.castBar:ClearAllPoints()
-            plate.castBar:SetPoint("TOP", plate.healthBar, "BOTTOM", 8, -9)
+        if plate.CastBarsContainer then
+            plate.CastBarsContainer:ClearAllPoints()
+            plate.CastBarsContainer:SetPoint("TOP", hb, "BOTTOM", 8, -9)
         end
     else
         if plate.LevelFrame and plate.LevelFrame.levelText then
@@ -65,31 +102,38 @@ local function AddElements(plate)
         end
     end
 
-    if plate.HealthBarsContainer and plate.HealthBarsContainer.border then
-        for _, v in pairs({ plate.HealthBarsContainer.border:GetRegions() }) do
-            if v then
-                v:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
-            end
+    if bgTexture then
+        bgTexture:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    end
+end
+
+local function AddElements(plate)
+    if not plate or not plate:IsShown() then
+        return
+    end
+
+    if not plate.RougeHooked then
+        if plate.UpdateAnchors then
+            hooksecurefunc(plate, "UpdateAnchors", StylePlate)
         end
+        local cb = plate.CastBarsContainer and plate.CastBarsContainer.castBar
+        if cb then
+            if cb.ApplyStyleAndAnchoring then
+                hooksecurefunc(cb, "ApplyStyleAndAnchoring", customCastbar)
+            end
+            cb:HookScript("OnShow", customCastbar)
+        end
+        plate.RougeHooked = true
     end
 
-    if plate.castBar and plate.castBar.Border then
-        plate.castBar.Border:SetVertexColor(RougeUI.db.Colval, RougeUI.db.Colval, RougeUI.db.Colval)
+    StylePlate(plate)
+
+    local cb = plate.CastBarsContainer and plate.CastBarsContainer.castBar
+    if cb then
+        customCastbar(cb)
     end
 end
 
-local function NiceOne(self)
-    if self and self.Text and not self:IsForbidden() then
-        self.Text:SetFont(STANDARD_TEXT_FONT, 8)
-        self.Text:Show()
-    end
-end
-
-if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC and Nameplate_CastBar_AdjustPosition then
-    hooksecurefunc("Nameplate_CastBar_AdjustPosition", NiceOne)
-end
-
--- Modification of Knall's genius pet script. Ty <3
 local function HidePlates(plate, unit)
     if plate:IsForbidden() then
         return
@@ -110,27 +154,6 @@ local function HidePlates(plate, unit)
     end
 end
 
-local function HighlightTargetPlate()
-    highlightBorder:Hide()
-    currentPlate = nil
-
-    local plate = UnitExists("target") and C_NamePlate.GetNamePlateForUnit("target")
-    if plate and plate:IsShown() and currentPlate ~= plate then
-        if UnitIsUnit("target", plate.namePlateUnitToken or "") then
-            highlightBorder:SetParent(plate)
-            highlightBorder:SetAllPoints(plate)
-            highlightBorder:SetFrameLevel(plate:GetFrameLevel() + 1)
-            highlightBorder:SetAlpha(0.9)
-            highlightBorder:Show()
-            currentPlate = plate
-            --if highlightBorder.anim then
-            --    highlightBorder.anim:Stop()
-            --    highlightBorder.anim:Play()
-            --end
-        end
-    end
-end
-
 local function OnEvent(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...
@@ -143,48 +166,12 @@ local function OnEvent(self, event, ...)
             HidePlates(namePlateFrameBase, unit)
         end
         AddElements(namePlateFrameBase.UnitFrame)
-
-        --if RougeUI.db.ModPlates and UnitIsUnit("target", unit) then
-        --    HighlightTargetPlate()
-        --end
     elseif event == "ADDON_LOADED" and ... == addonName then
-        if GetCVar("nameplateShowOnlyNames") == "1" then
-            return
-        end
-
         self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
         ClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
         if RougeUI.db.ArenaNumbers and CompactUnitFrame_UpdateName then
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
-        end
-
-        --if RougeUI.db.ModPlates then
-        --    highlightBorder = CreateFrame("Frame")
-        --    highlightBorder:SetFrameStrata("HIGH")
-        --    highlightBorder:Hide()
-        --
-        --    local borderTexture = highlightBorder:CreateTexture(nil, "OVERLAY")
-        --    borderTexture:SetTexture("Interface\\AddOns\\RougeUI\\textures\\Nameplate-highlight")
-        --    borderTexture:SetAllPoints(highlightBorder)
-        --    borderTexture:SetVertexColor(1, 1, 1)
-        --
-        --    --highlightBorder.anim = highlightBorder:CreateAnimationGroup()
-        --    --local alpha = highlightBorder.anim:CreateAnimation("Alpha")
-        --    --alpha:SetFromAlpha(0.5)
-        --    --alpha:SetToAlpha(1)
-        --    --alpha:SetDuration(0.2)
-        --    --alpha:SetSmoothing("IN_OUT")
-        --
-        --    self:RegisterEvent("PLAYER_TARGET_CHANGED")
-        --    self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
-        --end
-    elseif event == "PLAYER_TARGET_CHANGED" then
-        HighlightTargetPlate()
-    elseif event == "NAME_PLATE_UNIT_REMOVED" then
-        if RougeUI.db.ModPlates and currentPlate and currentPlate.unit == ... then
-            highlightBorder:Hide()
-            currentPlate = nil
         end
     end
 end

@@ -627,7 +627,7 @@ local function UpdateAuraFrames(self)
                 button.hookedDuration = true
             end
 
-            if RougeUI.db.OmniCC and button.buttonInfo and button.buttonInfo.index then
+	    if RougeUI.db.OmniCC and button.buttonInfo and button.buttonInfo.index and button.auraType ~= "TempEnchant" then
                 local filter = (self == BuffFrame) and "HELPFUL" or "HARMFUL"
                 OmniTimers(button, button.buttonInfo.index, filter)
             end
