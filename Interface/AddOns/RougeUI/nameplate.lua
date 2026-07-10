@@ -173,6 +173,16 @@ local function OnEvent(self, event, ...)
         if RougeUI.db.ArenaNumbers and CompactUnitFrame_UpdateName then
             hooksecurefunc("CompactUnitFrame_UpdateName", NameToArenaNumber)
         end
+        
+        if (RougeUI.db.NoLevel or RougeUI.db.AsuriFrame) and CompactUnitFrame_UpdateLevel then
+            hooksecurefunc("CompactUnitFrame_UpdateLevel", function(frame)
+                if frame and not frame:IsForbidden() and frame.unit and frame.unit:find("nameplate") then
+                    if frame.LevelFrame then
+                        frame.LevelFrame:Hide()
+                    end
+                end
+             end)
+         end
     end
 end
 
