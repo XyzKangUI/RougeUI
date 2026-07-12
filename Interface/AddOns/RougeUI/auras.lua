@@ -522,5 +522,19 @@ FF:SetScript("OnEvent", function(self, fireEvent)
 
             RougeUI.RougeUIF:HookAuras()
         end
+        
+        local dbfBorderColor = {
+            Magic   = {0.20, 0.60, 1.00},
+            Curse   = {0.60, 0.00, 1.00},
+            Disease = {0.60, 0.40, 0.00},
+            Poison  = {0.00, 0.60, 0.00},
+            None    = {0.80, 0.00, 0.00}
+           }
+           
+        hooksecurefunc(AuraUtil, "SetAuraBorderColor", function(dbfBorder, dispelType)
+            if not dbfBorder then return end
+            local c = dbfBorderColor[dispelType or "None"] or dbfBorderColor.None
+            dbfBorder:SetVertexColor(c[1], c[2], c[3])
+        end)
     end
 end)

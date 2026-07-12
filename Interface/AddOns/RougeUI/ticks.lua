@@ -84,16 +84,20 @@ local function UpdateEnergy(unit, powerType)
     local increment
 
     if powerType == "ENERGY" then
-        increment = (energyInc == 20 or energyInc == 21 or energyInc == 40 or energyInc == 41)
-
+        local residual = energyInc - (ev.externalGain or 0)
+        increment = residual > 0
+        ev.externalGain = 0
+        
     elseif powerType == "RAGE" and not UnitAffectingCombat("player") then
         increment = (energyInc == -1 or energyInc == -2 or energyInc == -3)
 
     elseif powerType == "MANA" then
-        increment = energyInc > 0
+        local residual = energyInc - (ev.externalGain or 0)
+        increment = residual > 0
+        ev.externalGain = 0
 
-        local percentageGain = math.floor((energyInc / UnitPowerMax("player")) * 100)
-        if percentageGain == 10 or percentageGain == 6 or ignoreTicks[energyInc] then
+        local percentageGain = math.floor((residual / UnitPowerMax("player")) * 100)
+        if percentageGain == 10 or percentageGain == 6 or ignoreTicks[residual] then
             increment = false
         end
 
@@ -131,8 +135,7 @@ local function RealTick()
 
     if (eventType == "SPELL_PERIODIC_ENERGIZE" or eventType == "SPELL_ENERGIZE")
         and isDestPlayer and isSourcePlayer then
-        energyValues.player.externalTick = GetTime()
-        energyValues.player.externalGain = amount
+        energyValues.player.externalGain = (energyValues.player.externalGain or 0) + amount
         return
     end
 
@@ -164,7 +167,6 @@ e:SetScript("OnEvent", function(self, event, ...)
 
         self:RegisterEvent("UNIT_POWER_UPDATE")
         self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        self:RegisterEvent("PLAYER_ENTERING_WORLD")
         self:SetScript("OnUpdate", OnUpdate)
 
     elseif event == "UNIT_POWER_UPDATE" then

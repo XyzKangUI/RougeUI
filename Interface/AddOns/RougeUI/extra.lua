@@ -108,6 +108,8 @@ end
 
 -- Remove server name from raid frames
 hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
+    if frame:IsForbidden() then return end
+    
     local _, instanceType = IsInInstance()
     local name = frame.name
     local xName = GetUnitName(frame.unit, true)
@@ -1069,21 +1071,26 @@ e:SetScript("OnEvent", function(self, event, ...)
         if RougeUI.db.HideAggro then
             if CompactUnitFrame_UpdateAggroHighlight then
                 hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(self)
+                    if self:IsForbidden() then return end
+                    if self.unit and string.match(self.unit, "^nameplate") then return end
+                    
                     if self.aggroHighlight and (self.aggroHighlight:GetAlpha() > 0) then
                         self.aggroHighlight:SetAlpha(0)
-                        return
                     end
                 end)
             end
         end
-        if RougeUI.db.roleIcon then
+         if RougeUI.db.roleIcon then
             hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
+                if frame:IsForbidden() then return end
+                if frame.unit and string.match(frame.unit, "^nameplate") then return end
+                
                 if not frame.roleIcon then
                     return
                 end
 
                 if frame.roleIcon:IsShown() and (frame.roleIcon:GetAlpha() > 0) then
-                    frame.roleIcon:SetAlpha(0);
+                    frame.roleIcon:SetAlpha(0)
                 end
             end)
         end
